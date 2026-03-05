@@ -1,0 +1,154 @@
+'use client';
+
+import { useState } from 'react';
+import { X, Plus } from 'lucide-react';
+import type { PlanDay, PlanExercise } from '@/lib/types';
+import AddPlanExerciseModal from './AddPlanExerciseModal';
+
+interface Props {
+  day: PlanDay;
+  onChange: (day: PlanDay) => void;
+  onRemove: () => void;
+}
+
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
+const inputClass =
+  'w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
+
+function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void }) {
+  const detail =
+    ex.type === 'reps' ? `${ex.sets}×${ex.reps}` : `${ex.sets}×${ex.duration}s`;
+
+  return (
+    <div className="flex items-center gap-2 bg-[#111827] border border-[#374151] rounded-xl px-3 py-2.5">
+      <div className="flex-1 min-w-0">
+        <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+        <p className="text-[#F97316] text-xs mt-0.5">{detail}</p>
+        {ex.scalingNote && (
+          <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>
+        )}
+      </div>
+      <button
+        onClick={onRemove}
+        aria-label={`Remove ${ex.name}`}
+        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer flex-shrink-0"
+      >
+        <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
+      </button>
+    </div>
+  );
+}
+
+export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleWeekday = (wd: number) => {
+    const wds = day.weekdays.includes(wd)
+      ? day.weekdays.filter((d) => d !== wd)
+      : [...day.weekdays, wd].sort();
+    onChange({ ...day, weekdays: wds });
+  };
+
+  const handleAddExercise = (ex: Omit<PlanExercise, 'id'>) => {
+    const newEx: PlanExercise = { ...ex, id: crypto.randomUUID() };
+    if (ex.role === 'core') {
+      onChange({ ...day, coreExercises: [...day.coreExercises, newEx] });
+    } else {
+      onChange({ ...day, optionalExercises: [...day.optionalExercises, newEx] });
+    }
+    setIsModalOpen(false);
+  };
+
+  const removeExercise = (role: 'core' | 'optional', id: string) => {
+    if (role === 'core') {
+      onChange({ ...day, coreExercises: day.coreExercises.filter((e) => e.id !== id) });
+    } else {
+      onChange({ ...day, optionalExercises: day.optionalExercises.filter((e) => e.id !== id) });
+    }
+  };
+
+  return (
+    <div className="bg-[#1F2937] border border-[#374151] rounded-2xl p-4 space-y-4">
+      {/* Day name + remove */}
+      <div className="flex items-center gap-3">
+        <input
+          type="text"
+          value={day.name}
+          onChange={(e) => onChange({ ...day, name: e.target.value })}
+          placeholder="Day name (e.g. Day A)"
+          className="flex-1 bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]"
+        />
+        <button
+          onClick={onRemove}
+          aria-label="Remove day"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer hover:bg-red-900/40 transition-colors"
+        >
+          <X className="w-4 h-4 text-[#9CA3AF]" />
+        </button>
+      </div>
+
+      {/* Weekday selector */}
+      <div>
+        <p className={labelClass}>Scheduled Days</p>
+        <div className="flex gap-1.5 flex-wrap">
+          {WEEKDAYS.map((name, idx) => (
+            <button
+              key={idx}
+              onClick={() => toggleWeekday(idx)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
+                day.weekdays.includes(idx)
+                  ? 'bg-[#F97316] text-white'
+                  : 'bg-[#374151] text-[#9CA3AF]'
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Core exercises */}
+      <div>
+        <p className={labelClass}>Core Exercises</p>
+        <div className="space-y-2">
+          {day.coreExercises.map((ex) => (
+            <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
+          ))}
+          {day.coreExercises.length === 0 && (
+            <p className="text-[#6B7280] text-sm">No core exercises yet</p>
+          )}
+        </div>
+      </div>
+
+      {/* Optional exercises */}
+      <div>
+        <p className={labelClass}>Optional Exercises</p>
+        <div className="space-y-2">
+          {day.optionalExercises.map((ex) => (
+            <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('optional', ex.id)} />
+          ))}
+          {day.optionalExercises.length === 0 && (
+            <p className="text-[#6B7280] text-sm">No optional exercises</p>
+          )}
+        </div>
+      </div>
+
+      {/* Add exercise button */}
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="flex items-center gap-2 text-[#F97316] text-sm font-semibold cursor-pointer"
+      >
+        <Plus className="w-4 h-4" />
+        Add Exercise
+      </button>
+
+      <AddPlanExerciseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={handleAddExercise}
+      />
+    </div>
+  );
+}

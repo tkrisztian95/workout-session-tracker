@@ -1,7 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
-import type { Exercise } from '@/app/page';
+import type { Exercise } from '@/lib/types';
 
 interface Props {
   exercise: Exercise;
@@ -16,9 +16,12 @@ export default function ExerciseCard({ exercise, onRemove }: Props) {
 
   return (
     <div className="flex items-center justify-between rounded-2xl bg-[#1F2937] border border-[#374151] px-4 py-4 gap-3">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-[#F9FAFB] font-semibold text-base leading-tight truncate">{exercise.name}</p>
         <p className="text-[#F97316] text-sm mt-1 font-medium">{detail}</p>
+        {exercise.scalingNote && (
+          <p className="text-[#6B7280] text-xs mt-1.5 leading-snug">{exercise.scalingNote}</p>
+        )}
       </div>
       <button
         onClick={onRemove}
