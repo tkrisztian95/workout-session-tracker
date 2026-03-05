@@ -43,6 +43,14 @@ function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void 
 
 export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(day.weekdays.length > 0);
+
+  const toggleSchedule = () => {
+    if (showSchedule) {
+      onChange({ ...day, weekdays: [] });
+    }
+    setShowSchedule((prev) => !prev);
+  };
 
   const toggleWeekday = (wd: number) => {
     const wds = day.weekdays.includes(wd)
@@ -89,24 +97,46 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         </button>
       </div>
 
-      {/* Weekday selector */}
+      {/* Schedule toggle + weekday selector */}
       <div>
-        <p className={labelClass}>Scheduled Days</p>
-        <div className="flex gap-1.5 flex-wrap">
-          {WEEKDAYS.map((name, idx) => (
-            <button
-              key={idx}
-              onClick={() => toggleWeekday(idx)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
-                day.weekdays.includes(idx)
-                  ? 'bg-[#F97316] text-white'
-                  : 'bg-[#374151] text-[#9CA3AF]'
-              }`}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={toggleSchedule}
+          className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none"
+        >
+          <span
+            className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+              showSchedule
+                ? 'bg-[#F97316] border-[#F97316]'
+                : 'bg-transparent border-[#6B7280]'
+            }`}
+          >
+            {showSchedule && (
+              <svg viewBox="0 0 10 8" className="w-2.5 h-2.5 text-white fill-current">
+                <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </span>
+          <span className={showSchedule ? 'text-[#F9FAFB]' : 'text-[#6B7280]'}>
+            Schedule specific days
+          </span>
+        </button>
+        {showSchedule && (
+          <div className="flex gap-1.5 flex-wrap mt-3">
+            {WEEKDAYS.map((name, idx) => (
+              <button
+                key={idx}
+                onClick={() => toggleWeekday(idx)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
+                  day.weekdays.includes(idx)
+                    ? 'bg-[#F97316] text-white'
+                    : 'bg-[#374151] text-[#9CA3AF]'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Core exercises */}
