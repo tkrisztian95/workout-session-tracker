@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Dumbbell, ChevronRight, Check } from 'lucide-react';
 import ExerciseCard from '@/components/ExerciseCard';
 import AddExerciseModal from '@/components/AddExerciseModal';
@@ -37,11 +38,15 @@ function formatDate(): string {
 // ─── Sub-views ───────────────────────────────────────────────────────────────
 
 function StartScreen({
+  hasPlans,
   onFollowPlan,
   onFreeSession,
+  onCreatePlan,
 }: {
+  hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
+  onCreatePlan: () => void;
 }) {
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
@@ -56,23 +61,47 @@ function StartScreen({
       </div>
 
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
-        <button
-          onClick={onFollowPlan}
-          className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          Follow a Plan
-          <ChevronRight className="w-6 h-6" />
-        </button>
+        {hasPlans ? (
+          <>
+            <button
+              onClick={onFollowPlan}
+              className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            >
+              Follow a Plan
+              <ChevronRight className="w-6 h-6" />
+            </button>
 
-        <button
-          onClick={onFreeSession}
-          className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          Free Session
-          <ChevronRight className="w-6 h-6" />
-        </button>
+            <button
+              onClick={onFreeSession}
+              className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            >
+              Free Session
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={onFreeSession}
+              className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            >
+              Start Free Session
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            <button
+              onClick={onCreatePlan}
+              className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            >
+              Create a plan
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        )}
       </div>
 
       <BottomNav active="home" />
@@ -469,8 +498,10 @@ function SessionView({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>('start');
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
+  const [plansLoaded, setPlansLoaded] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [activeSession, setActive] = useState<ActiveSession | null>(null);
@@ -483,6 +514,7 @@ export default function HomePage() {
       setStep('session');
     }
     setPlans(getPlans());
+    setPlansLoaded(true);
   }, []);
 
   const startFreeSession = () => {
@@ -610,13 +642,19 @@ export default function HomePage() {
     );
   }
 
+  if (!plansLoaded) {
+    return <main className="min-h-screen bg-[#111827]" />;
+  }
+
   return (
     <StartScreen
+      hasPlans={plans.length > 0}
       onFollowPlan={() => {
         setPlans(getPlans()); // refresh
         setStep('pick-plan');
       }}
       onFreeSession={startFreeSession}
+      onCreatePlan={() => router.push('/plans/new')}
     />
   );
 }
