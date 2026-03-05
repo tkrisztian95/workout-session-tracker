@@ -12,7 +12,9 @@ import {
   clearActiveSession,
   getPlans,
   saveSession,
+  getUserName,
 } from '@/lib/storage';
+import UserNameModal from '@/components/UserNameModal';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan } from '@/lib/types';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
@@ -42,16 +44,26 @@ function StartScreen({
   onFollowPlan,
   onFreeSession,
   onCreatePlan,
+  greeting,
 }: {
   hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
   onCreatePlan: () => void;
+  greeting?: string;
 }) {
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">{formatDate()}</p>
+        {greeting && (
+          <p
+            className="text-[#F97316] text-lg font-semibold mt-1"
+            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+          >
+            {greeting}
+          </p>
+        )}
         <h1
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
@@ -505,8 +517,11 @@ export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [activeSession, setActive] = useState<ActiveSession | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [nameLoaded, setNameLoaded] = useState(false);
 
-  // Restore active session and load plans on mount
+  // Restore active session, load plans, and read user name on mount
   useEffect(() => {
     const stored = getActiveSession();
     if (stored) {
@@ -515,7 +530,15 @@ export default function HomePage() {
     }
     setPlans(getPlans());
     setPlansLoaded(true);
+    const name = getUserName();
+    setUserName(name);
+    setNameLoaded(true);
   }, []);
+
+  const handleNameComplete = (name: string) => {
+    setUserName(name);
+    setIsFirstVisit(true);
+  };
 
   const startFreeSession = () => {
     const session: ActiveSession = {
@@ -642,9 +665,15 @@ export default function HomePage() {
     );
   }
 
-  if (!plansLoaded) {
+  if (!plansLoaded || !nameLoaded) {
     return <main className="min-h-screen bg-[#111827]" />;
   }
+
+  if (!userName) {
+    return <UserNameModal onComplete={handleNameComplete} />;
+  }
+
+  const greeting = isFirstVisit ? `Welcome, ${userName}!` : `Welcome back, ${userName}!`;
 
   return (
     <StartScreen
@@ -655,6 +684,7 @@ export default function HomePage() {
       }}
       onFreeSession={startFreeSession}
       onCreatePlan={() => router.push('/plans/new')}
+      greeting={greeting}
     />
   );
 }
