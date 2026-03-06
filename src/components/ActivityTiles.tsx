@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -11,52 +12,30 @@ function toISODate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function tileColor(count: number): string {
-  if (count === 0) return '#1F2937';
-  if (count === 1) return '#7C3AED';
-  if (count === 2) return '#C05621'; // dimmed orange
-  return '#F97316';
-}
+const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function ActivityTiles({ sessionsByDate }: Props) {
   const router = useRouter();
+  const todayRef = useRef<HTMLButtonElement>(null);
 
-  // Build 16-week grid (112 days) ending today, Sunday-anchored columns
+  useEffect(() => {
+    todayRef.current?.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+  }, []);
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Find the Saturday that is >= today (end of current week)
-  const dayOfWeek = today.getDay(); // 0=Sun, 6=Sat
-  const daysUntilSat = (6 - dayOfWeek + 7) % 7;
-  const endDate = new Date(today);
-  endDate.setDate(today.getDate() + daysUntilSat);
-
-  // Start date is 111 days before end date (112 total)
-  const startDate = new Date(endDate);
-  startDate.setDate(endDate.getDate() - 111);
-
-  // Build array of 112 days
+  // Last 10 days ending today
   const days: Date[] = [];
-  for (let i = 0; i < 112; i++) {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
+  for (let i = 9; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
     days.push(d);
   }
 
-  // Group into 16 columns (weeks), each column = 7 days Sun→Sat
-  const weeks: Date[][] = [];
-  for (let w = 0; w < 16; w++) {
-    weeks.push(days.slice(w * 7, w * 7 + 7));
-  }
-
-  const handleTileTap = (date: Date) => {
-    const todayMs = new Date();
-    todayMs.setHours(0, 0, 0, 0);
-    if (date > todayMs) return; // future date — no-op
-
-    const iso = toISODate(date);
+  const handleTileTap = (iso: string) => {
     const sessions = sessionsByDate[iso] ?? [];
-    if (sessions.length === 0) return; // rest day — no-op
+    if (sessions.length === 0) return;
     if (sessions.length === 1) {
       router.push(`/history/${sessions[0]}`);
     } else {
@@ -65,34 +44,76 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
   };
 
   return (
-    <div className="overflow-x-auto pb-1">
-      <div className="flex gap-1" style={{ width: 'max-content' }}>
-        {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-1">
-            {week.map((day) => {
-              const todayMs = new Date();
-              todayMs.setHours(0, 0, 0, 0);
-              const isFuture = day > todayMs;
-              const iso = toISODate(day);
-              const count = (sessionsByDate[iso] ?? []).length;
-              const color = isFuture ? '#1F2937' : tileColor(count);
-              const isClickable = !isFuture && count > 0;
+    <div
+      className="overflow-x-auto -mx-1 [&::-webkit-scrollbar]:hidden"
+      style={{ scrollbarWidth: 'none' }}
+    >
+      <div className="flex gap-1.5 px-1 py-1" style={{ width: 'max-content' }}>
+        {days.map((day) => {
+          const iso = toISODate(day);
+          const isToday = day.getTime() === today.getTime();
+          const count = (sessionsByDate[iso] ?? []).length;
+          const hasWorkout = count > 0;
 
-              return (
-                <button
-                  key={iso}
-                  onClick={() => handleTileTap(day)}
-                  disabled={!isClickable}
-                  title={iso}
-                  style={{ backgroundColor: color }}
-                  className={`w-4 h-4 rounded-sm transition-opacity duration-150 ${
-                    isClickable ? 'cursor-pointer active:opacity-70' : 'cursor-default'
-                  }`}
-                />
-              );
-            })}
-          </div>
-        ))}
+          return (
+            <button
+              key={iso}
+              ref={isToday ? todayRef : null}
+              onClick={() => handleTileTap(iso)}
+              disabled={!hasWorkout}
+              aria-label={`${iso}${hasWorkout ? `, ${count} workout${count > 1 ? 's' : ''}` : ''}`}
+              className={[
+                'flex flex-col items-center gap-1 w-[52px] py-3 rounded-2xl transition-all duration-150',
+                hasWorkout ? 'cursor-pointer active:scale-95' : 'cursor-default',
+                isToday && hasWorkout
+                  ? 'bg-[#F97316]'
+                  : isToday
+                    ? 'bg-[#1F2937] ring-2 ring-[#F97316]/60'
+                    : hasWorkout
+                      ? 'bg-[#1F2937] ring-1 ring-[#7C3AED]/50'
+                      : 'bg-[#1F2937]',
+              ].join(' ')}
+            >
+              <span
+                className={[
+                  'text-[10px] font-bold tracking-widest uppercase',
+                  isToday && hasWorkout
+                    ? 'text-white/80'
+                    : isToday
+                      ? 'text-[#F97316]'
+                      : 'text-[#6B7280]',
+                ].join(' ')}
+              >
+                {DAY_ABBR[day.getDay()]}
+              </span>
+              <span
+                className={[
+                  'text-2xl font-bold leading-none',
+                  isToday && hasWorkout
+                    ? 'text-white'
+                    : hasWorkout || isToday
+                      ? 'text-[#F9FAFB]'
+                      : 'text-[#374151]',
+                ].join(' ')}
+                style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+              >
+                {day.getDate()}
+              </span>
+              {hasWorkout ? (
+                <span
+                  className={[
+                    'text-[10px] font-bold',
+                    isToday && hasWorkout ? 'text-white/70' : 'text-[#F97316]',
+                  ].join(' ')}
+                >
+                  {count > 1 ? `×${count}` : '●'}
+                </span>
+              ) : (
+                <span className="text-[10px] text-transparent select-none">·</span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

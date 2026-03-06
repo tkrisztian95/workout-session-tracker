@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Clock } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
+import ActivityTiles from '@/components/ActivityTiles';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 
@@ -32,6 +33,14 @@ export default function HistoryPage() {
     return Object.fromEntries(plans.map((p) => [p.id, p]));
   });
 
+  const sessionsByDate = sessions.reduce<Record<string, string[]>>((acc, s) => {
+    if (!s.completedAt) return acc;
+    const date = s.completedAt.slice(0, 10);
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(s.id);
+    return acc;
+  }, {});
+
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
@@ -42,6 +51,10 @@ export default function HistoryPage() {
         >
           History
         </h1>
+      </div>
+
+      <div className="px-6 pb-4">
+        <ActivityTiles sessionsByDate={sessionsByDate} />
       </div>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
@@ -75,7 +88,9 @@ export default function HistoryPage() {
                     {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''} · {mins} min
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#4B5563] flex-shrink-0" />
+                <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
+                  <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+                </span>
               </Link>
             );
           })

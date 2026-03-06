@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Check, Minus } from 'lucide-react';
+import { Check, ChevronLeft, Minus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
@@ -59,8 +59,15 @@ export default function SessionDetailPage() {
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       {/* Header */}
       <div className="px-6 pt-14 pb-6">
-        <Link href="/history" className="text-[#6B7280] text-sm mb-5 inline-block cursor-pointer">
-          ← History
+        <Link
+          href="/history"
+          className="flex items-center gap-2 w-fit mb-2"
+          aria-label="Back to History"
+        >
+          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
+            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+          </span>
+          <span className="text-sm font-medium text-[#9CA3AF]">History</span>
         </Link>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mt-3">
           {formatFullDate(session.completedAt)}

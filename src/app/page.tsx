@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Dumbbell, ChevronRight, Check } from 'lucide-react';
+import { Plus, Dumbbell, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import ExerciseCard from '@/components/ExerciseCard';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import SessionTimer from '@/components/SessionTimer';
 import SessionCompleteOverlay from '@/components/SessionCompleteOverlay';
 import BottomNav from '@/components/BottomNav';
-import ActivityTiles from '@/components/ActivityTiles';
 import {
   getActiveSession,
   setActiveSession,
@@ -49,14 +48,12 @@ function StartScreen({
   onFreeSession,
   onCreatePlan,
   greeting,
-  sessionsByDate,
 }: {
   hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
   onCreatePlan: () => void;
   greeting?: string;
-  sessionsByDate: Record<string, string[]>;
 }) {
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
@@ -80,10 +77,6 @@ function StartScreen({
         </h1>
       </div>
 
-      <div className="px-6 pb-4">
-        <ActivityTiles sessionsByDate={sessionsByDate} />
-      </div>
-
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
         {hasPlans ? (
           <>
@@ -93,7 +86,9 @@ function StartScreen({
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
               Follow a Plan
-              <ChevronRight className="w-6 h-6" />
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <ChevronRight className="w-5 h-5" />
+              </span>
             </button>
 
             <button
@@ -102,7 +97,9 @@ function StartScreen({
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
               Free Session
-              <ChevronRight className="w-6 h-6" />
+              <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
+                <ChevronRight className="w-5 h-5" />
+              </span>
             </button>
           </>
         ) : (
@@ -113,7 +110,9 @@ function StartScreen({
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
               Start Free Session
-              <ChevronRight className="w-6 h-6" />
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <ChevronRight className="w-5 h-5" />
+              </span>
             </button>
 
             <button
@@ -122,7 +121,9 @@ function StartScreen({
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
               Create a plan
-              <ChevronRight className="w-6 h-6" />
+              <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
+                <ChevronRight className="w-5 h-5" />
+              </span>
             </button>
           </>
         )}
@@ -145,8 +146,15 @@ function PlanPickerScreen({
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
-        <button onClick={onBack} className="text-[#6B7280] text-sm mb-5 cursor-pointer">
-          ← Back
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 cursor-pointer mb-2"
+          aria-label="Go back"
+        >
+          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
+            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+          </span>
+          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
         </button>
         <h1
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
@@ -175,7 +183,9 @@ function PlanPickerScreen({
                   {plan.days.length} day{plan.days.length !== 1 ? 's' : ''}
                 </p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#4B5563] flex-shrink-0" />
+              <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
+                <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+              </span>
             </button>
           ))
         )}
@@ -218,8 +228,15 @@ function DayPickerScreen({
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
-        <button onClick={onBack} className="text-[#6B7280] text-sm mb-5 cursor-pointer">
-          ← Back
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 cursor-pointer mb-2"
+          aria-label="Go back"
+        >
+          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
+            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+          </span>
+          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
         </button>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
           {plan.name}
@@ -272,7 +289,9 @@ function DayPickerScreen({
                   </p>
                 )}
               </div>
-              <ChevronRight className="w-5 h-5 text-[#4B5563] flex-shrink-0" />
+              <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
+                <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+              </span>
             </button>
           );
         })}
@@ -308,8 +327,15 @@ function OptionalPickerScreen({
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-32">
       <div className="px-6 pt-14 pb-6">
-        <button onClick={onBack} className="text-[#6B7280] text-sm mb-5 cursor-pointer">
-          ← Back
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 cursor-pointer mb-2"
+          aria-label="Go back"
+        >
+          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
+            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+          </span>
+          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
         </button>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
           {plan.name} · {day.name}
@@ -625,13 +651,6 @@ export default function HomePage() {
   const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
 
-  const sessionsByDate = sessions.reduce<Record<string, string[]>>((acc, s) => {
-    if (!s.completedAt) return acc;
-    const date = s.completedAt.slice(0, 10);
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(s.id);
-    return acc;
-  }, {});
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [userName, setUserName] = useState<string | null>(() => getUserName());
@@ -785,7 +804,6 @@ export default function HomePage() {
       onFreeSession={startFreeSession}
       onCreatePlan={() => router.push('/plans/new')}
       greeting={greeting}
-      sessionsByDate={sessionsByDate}
     />
   );
 }

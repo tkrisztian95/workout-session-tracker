@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Dumbbell, ChevronRight } from 'lucide-react';
 import { getPlans } from '@/lib/storage';
@@ -8,11 +8,7 @@ import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 
 export default function PlansPage() {
-  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
-
-  useEffect(() => {
-    setPlans(getPlans());
-  }, []);
+  const [plans] = useState<WorkoutPlan[]>(() => getPlans());
 
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-24">
@@ -39,7 +35,9 @@ export default function PlansPage() {
               <Dumbbell className="w-9 h-9 text-[#374151]" />
             </div>
             <p className="text-[#9CA3AF] text-base font-medium">No plans yet</p>
-            <p className="text-[#6B7280] text-sm mt-1">Tap the button below to create your first plan</p>
+            <p className="text-[#6B7280] text-sm mt-1">
+              Tap the button below to create your first plan
+            </p>
           </div>
         ) : (
           plans.map((plan) => (
@@ -54,7 +52,9 @@ export default function PlansPage() {
                   {plan.days.length} training day{plan.days.length !== 1 ? 's' : ''}
                 </p>
               </div>
-              <ChevronRight className="w-5 h-5 text-[#4B5563] flex-shrink-0" />
+              <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
+                <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+              </span>
             </Link>
           ))
         )}
