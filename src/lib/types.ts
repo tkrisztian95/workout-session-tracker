@@ -40,6 +40,7 @@ export interface WorkoutPlan {
   sharedExercises: PlanExercise[];
   createdAt: string; // ISO date string
   updatedAt: string;
+  status?: 'active' | 'completed';
 }
 
 // ─── Session data models ──────────────────────────────────────────────────────

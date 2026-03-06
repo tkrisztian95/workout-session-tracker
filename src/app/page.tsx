@@ -648,7 +648,9 @@ export default function HomePage() {
   const router = useRouter();
   const [activeSession, setActive] = useState<ActiveSession | null>(() => getActiveSession());
   const [step, setStep] = useState<Step>(() => (getActiveSession() ? 'session' : 'start'));
-  const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
+  const [plans, setPlans] = useState<WorkoutPlan[]>(() =>
+    getPlans().filter((p) => (p.status ?? 'active') === 'active'),
+  );
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
 
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
@@ -798,7 +800,7 @@ export default function HomePage() {
     <StartScreen
       hasPlans={plans.length > 0}
       onFollowPlan={() => {
-        setPlans(getPlans()); // refresh
+        setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active')); // refresh, active only
         setStep('pick-plan');
       }}
       onFreeSession={startFreeSession}
