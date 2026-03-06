@@ -1,21 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Dumbbell, ChevronRight, Check } from 'lucide-react';
 import ExerciseCard from '@/components/ExerciseCard';
 import AddExerciseModal from '@/components/AddExerciseModal';
+import SessionTimer from '@/components/SessionTimer';
+import SessionCompleteOverlay from '@/components/SessionCompleteOverlay';
 import BottomNav from '@/components/BottomNav';
 import {
   getActiveSession,
   setActiveSession,
   clearActiveSession,
   getPlans,
+  getSessions,
   saveSession,
   getUserName,
 } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
-import type { ActiveSession, Exercise, PlanDay, WorkoutPlan } from '@/lib/types';
+import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
 
@@ -55,7 +58,9 @@ function StartScreen({
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">{formatDate()}</p>
+        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">
+          {formatDate()}
+        </p>
         {greeting && (
           <p
             className="text-[#F97316] text-lg font-semibold mt-1"
@@ -174,16 +179,34 @@ function PlanPickerScreen({
   );
 }
 
+function getNextDayIndex(plan: WorkoutPlan, sessions: WorkoutSession[]): number {
+  const planSessions = sessions
+    .filter((s) => s.planId === plan.id && s.planDayId)
+    .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+  if (planSessions.length === 0) return 0;
+  const lastDayIndex = plan.days.findIndex((d) => d.id === planSessions[0].planDayId);
+  if (lastDayIndex === -1) return 0;
+  return (lastDayIndex + 1) % plan.days.length;
+}
+
 function DayPickerScreen({
   plan,
+  sessions,
   onSelect,
   onBack,
 }: {
   plan: WorkoutPlan;
+  sessions: WorkoutSession[];
   onSelect: (day: PlanDay) => void;
   onBack: () => void;
 }) {
   const today = todayWeekday();
+  const nextDayIndex = getNextDayIndex(plan, sessions);
+  const nextDayRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    nextDayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
@@ -203,25 +226,32 @@ function DayPickerScreen({
       </div>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
-        {plan.days.map((day) => {
+        {plan.days.map((day, index) => {
           const isSuggested = day.weekdays.includes(today);
+          const isNext = index === nextDayIndex;
           const coreCount = day.coreExercises.length;
           const optionalCount = day.optionalExercises.length;
           return (
             <button
               key={day.id}
+              ref={isNext ? nextDayRef : null}
               onClick={() => onSelect(day)}
               className={`w-full flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 ${
-                isSuggested
-                  ? 'bg-[#F97316]/10 border-[#F97316]/40'
-                  : 'bg-[#1F2937] border-[#374151]'
+                isNext ? 'bg-[#F97316]/10 border-[#F97316]/40' : 'bg-[#1F2937] border-[#374151]'
               }`}
             >
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <p className="text-[#F9FAFB] font-semibold text-base">{day.name || 'Unnamed Day'}</p>
-                  {isSuggested && (
+                  <p className="text-[#F9FAFB] font-semibold text-base">
+                    {day.name || 'Unnamed Day'}
+                  </p>
+                  {isNext && (
                     <span className="text-[#F97316] text-xs font-semibold bg-[#F97316]/10 px-2 py-0.5 rounded-full">
+                      Next
+                    </span>
+                  )}
+                  {isSuggested && !isNext && (
+                    <span className="text-[#6B7280] text-xs bg-[#1F2937] border border-[#374151] px-2 py-0.5 rounded-full">
                       Today
                     </span>
                   )}
@@ -307,7 +337,9 @@ function OptionalPickerScreen({
                   <div>
                     <p className="text-[#F9FAFB] text-sm font-medium">{ex.name}</p>
                     <p className="text-[#F97316] text-xs">
-                      {ex.type === 'reps' ? `${ex.sets}×${ex.reps}` : `${ex.sets}×${ex.duration}s`}
+                      {ex.type === 'sets-reps'
+                        ? `${ex.sets}×${ex.reps}`
+                        : `${ex.sets}×${ex.duration}s`}
                     </p>
                   </div>
                 </div>
@@ -343,7 +375,9 @@ function OptionalPickerScreen({
                     <div>
                       <p className="text-[#F9FAFB] text-sm font-medium">{ex.name}</p>
                       <p className="text-[#6B7280] text-xs">
-                        {ex.type === 'reps' ? `${ex.sets}×${ex.reps}` : `${ex.sets}×${ex.duration}s`}
+                        {ex.type === 'sets-reps'
+                          ? `${ex.sets}×${ex.reps}`
+                          : `${ex.sets}×${ex.duration}s`}
                       </p>
                     </div>
                   </button>
@@ -382,6 +416,7 @@ function SessionView({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
 
   const handleAdd = (exercise: Omit<Exercise, 'id'>) => {
     const updated: ActiveSession = {
@@ -392,19 +427,39 @@ function SessionView({
     setIsModalOpen(false);
   };
 
-  const handleRemove = (id: string) => {
+  const handleComplete = (id: string) => {
     const updated: ActiveSession = {
       ...session,
-      exercises: session.exercises.filter((e) => e.id !== id),
+      exercises: session.exercises.map((e) =>
+        e.id === id ? { ...e, completed: !e.completed } : e,
+      ),
     };
     onUpdate(updated);
   };
+
+  const handleDismiss = (id: string) => {
+    const updated: ActiveSession = {
+      ...session,
+      exercises: session.exercises.map((e) => (e.id === id ? { ...e, dismissed: true } : e)),
+    };
+    onUpdate(updated);
+  };
+
+  const remaining = session.exercises.filter((e) => !e.completed && !e.dismissed);
+  const completed = session.exercises.filter((e) => e.completed && !e.dismissed);
+  const dismissed = session.exercises.filter((e) => e.dismissed);
+  const totalCount = session.exercises.length;
 
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       {/* Header */}
       <div className="px-6 pt-14 pb-6">
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">{formatDate()}</p>
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">
+            {formatDate()}
+          </p>
+          <SessionTimer startedAt={session.startedAt} />
+        </div>
         <h1
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
@@ -414,16 +469,16 @@ function SessionView({
         {session.planName && (
           <p className="text-[#F97316] text-sm mt-1 font-medium">{session.planName}</p>
         )}
-        {session.exercises.length > 0 && (
+        {totalCount > 0 && (
           <p className="text-[#6B7280] text-sm mt-2">
-            {session.exercises.length} exercise{session.exercises.length !== 1 ? 's' : ''}
+            {remaining.length} remaining · {completed.length} done
           </p>
         )}
       </div>
 
       {/* Exercise list */}
       <div className="flex-1 px-6 pb-52 space-y-3 overflow-y-auto">
-        {session.exercises.length === 0 ? (
+        {totalCount === 0 ? (
           <div className="flex flex-col items-center justify-center pt-24 text-center select-none">
             <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
               <Dumbbell className="w-9 h-9 text-[#374151]" />
@@ -432,13 +487,48 @@ function SessionView({
             <p className="text-[#6B7280] text-sm mt-1">Tap the button below to add one</p>
           </div>
         ) : (
-          session.exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              onRemove={() => handleRemove(exercise.id)}
-            />
-          ))
+          <>
+            {remaining.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                onComplete={() => handleComplete(exercise.id)}
+                onDismiss={() => handleDismiss(exercise.id)}
+              />
+            ))}
+
+            {completed.length > 0 && (
+              <>
+                <p className="text-[#6B7280] text-xs font-medium uppercase tracking-wide pt-2">
+                  Completed
+                </p>
+                {completed.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    onComplete={() => handleComplete(exercise.id)}
+                    onDismiss={() => handleDismiss(exercise.id)}
+                  />
+                ))}
+              </>
+            )}
+
+            {dismissed.length > 0 && (
+              <>
+                <p className="text-[#4B5563] text-xs font-medium uppercase tracking-wide pt-2">
+                  Skipped
+                </p>
+                {dismissed.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    onComplete={() => handleComplete(exercise.id)}
+                    onDismiss={() => handleDismiss(exercise.id)}
+                  />
+                ))}
+              </>
+            )}
+          </>
         )}
       </div>
 
@@ -460,7 +550,7 @@ function SessionView({
             Discard
           </button>
           <button
-            onClick={onFinish}
+            onClick={() => setShowCompleteOverlay(true)}
             className="flex-[2] bg-[#F97316] text-white font-bold text-base py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
@@ -474,6 +564,18 @@ function SessionView({
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAdd}
       />
+
+      {/* Session complete overlay */}
+      {showCompleteOverlay && (
+        <SessionCompleteOverlay
+          exercises={session.exercises}
+          startedAt={session.startedAt}
+          onDismiss={() => {
+            setShowCompleteOverlay(false);
+            onFinish();
+          }}
+        />
+      )}
 
       {/* Discard confirmation */}
       {showDiscardConfirm && (
@@ -511,29 +613,14 @@ function SessionView({
 
 export default function HomePage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>('start');
-  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
-  const [plansLoaded, setPlansLoaded] = useState(false);
+  const [activeSession, setActive] = useState<ActiveSession | null>(() => getActiveSession());
+  const [step, setStep] = useState<Step>(() => (getActiveSession() ? 'session' : 'start'));
+  const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
+  const [sessions] = useState<WorkoutSession[]>(() => getSessions());
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
-  const [activeSession, setActive] = useState<ActiveSession | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(() => getUserName());
   const [isFirstVisit, setIsFirstVisit] = useState(false);
-  const [nameLoaded, setNameLoaded] = useState(false);
-
-  // Restore active session, load plans, and read user name on mount
-  useEffect(() => {
-    const stored = getActiveSession();
-    if (stored) {
-      setActive(stored);
-      setStep('session');
-    }
-    setPlans(getPlans());
-    setPlansLoaded(true);
-    const name = getUserName();
-    setUserName(name);
-    setNameLoaded(true);
-  }, []);
 
   const handleNameComplete = (name: string) => {
     setUserName(name);
@@ -553,7 +640,14 @@ export default function HomePage() {
 
   const startPlanSession = (selectedOptionalIds: Set<string>) => {
     if (!selectedPlan || !selectedDay) return;
-    const coreExercises: Exercise[] = selectedDay.coreExercises.map((ex) => ({
+    const toExercise = (ex: {
+      name: string;
+      type: Exercise['type'];
+      sets?: number;
+      reps?: number;
+      duration?: number;
+      scalingNote?: string;
+    }): Exercise => ({
       id: crypto.randomUUID(),
       name: ex.name,
       type: ex.type,
@@ -561,22 +655,16 @@ export default function HomePage() {
       reps: ex.reps,
       duration: ex.duration,
       scalingNote: ex.scalingNote,
-    }));
+    });
+    const sharedExercises: Exercise[] = (selectedPlan.sharedExercises ?? []).map(toExercise);
+    const coreExercises: Exercise[] = selectedDay.coreExercises.map(toExercise);
     const optionalExercises: Exercise[] = selectedDay.optionalExercises
       .filter((ex) => selectedOptionalIds.has(ex.id))
-      .map((ex) => ({
-        id: crypto.randomUUID(),
-        name: ex.name,
-        type: ex.type,
-        sets: ex.sets,
-        reps: ex.reps,
-        duration: ex.duration,
-        scalingNote: ex.scalingNote,
-      }));
+      .map(toExercise);
     const session: ActiveSession = {
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
-      exercises: [...coreExercises, ...optionalExercises],
+      exercises: [...sharedExercises, ...coreExercises, ...optionalExercises],
       planId: selectedPlan.id,
       planDayId: selectedDay.id,
       planName: selectedPlan.name,
@@ -645,6 +733,7 @@ export default function HomePage() {
     return (
       <DayPickerScreen
         plan={selectedPlan}
+        sessions={sessions}
         onSelect={(day) => {
           setSelectedDay(day);
           setStep('pick-optionals');
@@ -663,10 +752,6 @@ export default function HomePage() {
         onBack={() => setStep('pick-day')}
       />
     );
-  }
-
-  if (!plansLoaded || !nameLoaded) {
-    return <main className="min-h-screen bg-[#111827]" />;
   }
 
   if (!userName) {
