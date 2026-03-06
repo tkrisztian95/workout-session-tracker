@@ -8,6 +8,7 @@ import AddExerciseModal from '@/components/AddExerciseModal';
 import SessionTimer from '@/components/SessionTimer';
 import SessionCompleteOverlay from '@/components/SessionCompleteOverlay';
 import BottomNav from '@/components/BottomNav';
+import ActivityTiles from '@/components/ActivityTiles';
 import {
   getActiveSession,
   setActiveSession,
@@ -48,12 +49,14 @@ function StartScreen({
   onFreeSession,
   onCreatePlan,
   greeting,
+  sessionsByDate,
 }: {
   hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
   onCreatePlan: () => void;
   greeting?: string;
+  sessionsByDate: Record<string, string[]>;
 }) {
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
@@ -75,6 +78,10 @@ function StartScreen({
         >
           Start Workout
         </h1>
+      </div>
+
+      <div className="px-6 pb-4">
+        <ActivityTiles sessionsByDate={sessionsByDate} />
       </div>
 
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
@@ -617,6 +624,14 @@ export default function HomePage() {
   const [step, setStep] = useState<Step>(() => (getActiveSession() ? 'session' : 'start'));
   const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
+
+  const sessionsByDate = sessions.reduce<Record<string, string[]>>((acc, s) => {
+    if (!s.completedAt) return acc;
+    const date = s.completedAt.slice(0, 10);
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(s.id);
+    return acc;
+  }, {});
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [userName, setUserName] = useState<string | null>(() => getUserName());
@@ -770,6 +785,7 @@ export default function HomePage() {
       onFreeSession={startFreeSession}
       onCreatePlan={() => router.push('/plans/new')}
       greeting={greeting}
+      sessionsByDate={sessionsByDate}
     />
   );
 }

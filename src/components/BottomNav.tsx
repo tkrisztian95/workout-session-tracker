@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, ClipboardList } from 'lucide-react';
+import { Home, ClipboardList, Clock } from 'lucide-react';
 
 interface Props {
-  active: 'home' | 'plans';
+  active: 'home' | 'plans' | 'history';
 }
 
 export default function BottomNav({ active }: Props) {
@@ -28,6 +28,15 @@ export default function BottomNav({ active }: Props) {
         >
           <ClipboardList className="w-5 h-5" />
           <span className="text-xs font-medium">Plans</span>
+        </Link>
+        <Link
+          href="/history"
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${
+            active === 'history' ? 'text-[#F97316]' : 'text-[#4B5563]'
+          }`}
+        >
+          <Clock className="w-5 h-5" />
+          <span className="text-xs font-medium">History</span>
         </Link>
       </div>
     </nav>
