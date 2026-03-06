@@ -7,6 +7,7 @@ import BottomNav from '@/components/BottomNav';
 import ActivityTiles from '@/components/ActivityTiles';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
+import { useTranslations } from '@/lib/locale-context';
 
 function formatSessionDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -22,6 +23,7 @@ function durationMinutes(startedAt: string, completedAt: string): number {
 }
 
 export default function HistoryPage() {
+  const t = useTranslations();
   const [sessions] = useState<WorkoutSession[]>(() =>
     getSessions()
       .filter((s) => s.completedAt)
@@ -44,12 +46,14 @@ export default function HistoryPage() {
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">Activity</p>
+        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">
+          {t.history_activity_label}
+        </p>
         <h1
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          History
+          {t.history_title}
         </h1>
       </div>
 
@@ -63,15 +67,15 @@ export default function HistoryPage() {
             <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
               <Clock className="w-9 h-9 text-[#374151]" />
             </div>
-            <p className="text-[#9CA3AF] text-base font-medium">No sessions yet</p>
-            <p className="text-[#6B7280] text-sm mt-1">Complete a workout to see it here</p>
+            <p className="text-[#9CA3AF] text-base font-medium">{t.history_no_sessions_title}</p>
+            <p className="text-[#6B7280] text-sm mt-1">{t.history_no_sessions_subtitle}</p>
           </div>
         ) : (
           sessions.map((session) => {
             const planName = session.planId ? planMap[session.planId]?.name : undefined;
             const exerciseCount = session.exercises.length;
             const mins = durationMinutes(session.startedAt, session.completedAt);
-            const label = planName ?? 'Free Session';
+            const label = planName ?? t.free_session;
 
             return (
               <Link
@@ -85,7 +89,8 @@ export default function HistoryPage() {
                     {formatSessionDate(session.completedAt)}
                   </p>
                   <p className="text-[#4B5563] text-xs mt-1">
-                    {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''} · {mins} min
+                    {exerciseCount} {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular}{' '}
+                    · {mins} {t.min_label}
                   </p>
                 </div>
                 <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">

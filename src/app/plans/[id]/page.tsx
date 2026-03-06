@@ -7,6 +7,7 @@ import { getPlans, savePlan, deletePlan } from '@/lib/storage';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
+import { useTranslations } from '@/lib/locale-context';
 
 const inputClass =
   'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
@@ -29,6 +30,7 @@ function sharedExerciseDetail(ex: PlanExercise): string {
 }
 
 export default function PlanDetailPage() {
+  const t = useTranslations();
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [plan] = useState<WorkoutPlan | null>(
@@ -47,7 +49,7 @@ export default function PlanDetailPage() {
 
   const handleSave = () => {
     if (!name.trim()) {
-      setError('Plan name is required');
+      setError(t.plan_name_required);
       return;
     }
     if (!plan) return;
@@ -88,7 +90,7 @@ export default function PlanDetailPage() {
   if (!plan) {
     return (
       <main className="min-h-screen bg-[#111827] flex items-center justify-center max-w-md mx-auto">
-        <p className="text-[#6B7280]">Plan not found.</p>
+        <p className="text-[#6B7280]">{t.plan_not_found}</p>
       </main>
     );
   }
@@ -102,7 +104,7 @@ export default function PlanDetailPage() {
             className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
-            Edit Plan
+            {t.edit_plan_title}
           </h1>
           <button
             onClick={() => setShowDeleteConfirm(true)}
@@ -121,7 +123,7 @@ export default function PlanDetailPage() {
             htmlFor="edit-plan-name"
             className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
           >
-            Plan Name
+            {t.plan_name_label}
           </label>
           <input
             id="edit-plan-name"
@@ -131,7 +133,7 @@ export default function PlanDetailPage() {
               setName(e.target.value);
               setError('');
             }}
-            placeholder="e.g. Strength A/B"
+            placeholder={t.plan_name_placeholder}
             className={inputClass}
           />
           {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
@@ -140,11 +142,9 @@ export default function PlanDetailPage() {
         {/* Shared exercises */}
         <div>
           <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-1">
-            Shared Exercises
+            {t.shared_exercises_label}
           </p>
-          <p className="text-[#6B7280] text-xs mb-3">
-            Added to every session from this plan (e.g. warmups).
-          </p>
+          <p className="text-[#6B7280] text-xs mb-3">{t.shared_exercises_subtitle}</p>
           <div className="space-y-2">
             {sharedExercises.map((ex) => (
               <div
@@ -168,7 +168,7 @@ export default function PlanDetailPage() {
               </div>
             ))}
             {sharedExercises.length === 0 && (
-              <p className="text-[#6B7280] text-sm">No shared exercises yet</p>
+              <p className="text-[#6B7280] text-sm">{t.no_shared_exercises}</p>
             )}
           </div>
           <button
@@ -176,14 +176,14 @@ export default function PlanDetailPage() {
             className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-3 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Add Shared Exercise
+            {t.add_shared_exercise}
           </button>
         </div>
 
         {/* Training days */}
         <div>
           <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-3">
-            Training Days
+            {t.training_days_label}
           </p>
           <div className="space-y-4">
             {days.map((day, i) => (
@@ -200,7 +200,7 @@ export default function PlanDetailPage() {
             className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-4 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Add Training Day
+            {t.add_training_day}
           </button>
         </div>
       </div>
@@ -212,14 +212,14 @@ export default function PlanDetailPage() {
             onClick={() => router.back()}
             className="flex-1 py-4 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer active:scale-[0.98] transition-transform duration-150"
           >
-            Discard
+            {t.discard}
           </button>
           <button
             onClick={handleSave}
             className="flex-[2] bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
-            Save Changes
+            {t.save_changes}
           </button>
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function PlanDetailPage() {
               className="text-[#F9FAFB] text-2xl font-bold mb-2"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Delete Plan?
+              {t.delete_plan_title}
             </h3>
             <p className="text-[#9CA3AF] text-sm mb-6">
               &ldquo;{plan.name}&rdquo; will be permanently deleted. This cannot be undone.
@@ -242,13 +242,13 @@ export default function PlanDetailPage() {
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer"
               >
-                Cancel
+                {t.cancel}
               </button>
               <button
                 onClick={handleDelete}
                 className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-semibold cursor-pointer active:scale-[0.98] transition-transform"
               >
-                Delete
+                {t.delete}
               </button>
             </div>
           </div>

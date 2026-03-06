@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import { savePlan } from '@/lib/storage';
 import type { PlanDay, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
+import { useTranslations } from '@/lib/locale-context';
 
 const inputClass =
   'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
@@ -21,6 +22,7 @@ function newDay(): PlanDay {
 }
 
 export default function NewPlanPage() {
+  const t = useTranslations();
   const router = useRouter();
   const [name, setName] = useState('');
   const [days, setDays] = useState<PlanDay[]>([newDay()]);
@@ -28,7 +30,7 @@ export default function NewPlanPage() {
 
   const handleSave = () => {
     if (!name.trim()) {
-      setError('Plan name is required');
+      setError(t.plan_name_required);
       return;
     }
     const now = new Date().toISOString();
@@ -60,7 +62,7 @@ export default function NewPlanPage() {
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          New Plan
+          {t.new_plan}
         </h1>
       </div>
 
@@ -71,7 +73,7 @@ export default function NewPlanPage() {
             htmlFor="plan-name"
             className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
           >
-            Plan Name
+            {t.plan_name_label}
           </label>
           <input
             id="plan-name"
@@ -81,7 +83,7 @@ export default function NewPlanPage() {
               setName(e.target.value);
               setError('');
             }}
-            placeholder="e.g. Strength A/B"
+            placeholder={t.plan_name_placeholder}
             autoComplete="off"
             className={inputClass}
           />
@@ -91,7 +93,7 @@ export default function NewPlanPage() {
         {/* Training days */}
         <div>
           <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-3">
-            Training Days
+            {t.training_days_label}
           </p>
           <div className="space-y-4">
             {days.map((day, i) => (
@@ -108,7 +110,7 @@ export default function NewPlanPage() {
             className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-4 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Add Training Day
+            {t.add_training_day}
           </button>
         </div>
       </div>
@@ -120,14 +122,14 @@ export default function NewPlanPage() {
             onClick={() => router.back()}
             className="flex-1 py-4 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer active:scale-[0.98] transition-transform duration-150"
           >
-            Discard
+            {t.discard}
           </button>
           <button
             onClick={handleSave}
             className="flex-[2] bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-transform duration-150 disabled:opacity-40"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
-            Save Plan
+            {t.save_plan}
           </button>
         </div>
       </div>

@@ -1,10 +1,12 @@
 import type { WorkoutPlan, ActiveSession, WorkoutSession, Exercise, PlanExercise } from './types';
+import type { Locale } from './i18n';
 
 const KEYS = {
   plans: 'wst_plans',
   sessions: 'wst_sessions',
   activeSession: 'wst_active_session',
   userName: 'wst_user_name',
+  locale: 'wst_locale',
 } as const;
 
 // ─── Migration ────────────────────────────────────────────────────────────────
@@ -126,6 +128,19 @@ export function getUserName(): string | null {
 
 export function saveUserName(name: string): void {
   localStorage.setItem(KEYS.userName, name);
+}
+
+// ─── Locale ───────────────────────────────────────────────────────────────────
+
+export function getLocale(): Locale | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.locale);
+  if (stored === 'en' || stored === 'hu' || stored === 'de') return stored;
+  return null;
+}
+
+export function saveLocale(locale: Locale): void {
+  localStorage.setItem(KEYS.locale, locale);
 }
 
 export function saveSession(session: WorkoutSession): void {
