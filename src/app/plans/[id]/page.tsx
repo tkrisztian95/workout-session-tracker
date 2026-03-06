@@ -8,6 +8,7 @@ import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import { useTranslations } from '@/lib/locale-context';
+import CategoryBadge from '@/components/CategoryBadge';
 
 const inputClass =
   'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
@@ -152,12 +153,10 @@ export default function PlanDetailPage() {
                 className="flex items-center gap-2 bg-[#1F2937] border border-[#374151] rounded-xl px-3 py-2.5"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
-                  {ex.category && (
-                    <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#374151] text-[#9CA3AF]">
-                      {ex.category}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+                    {ex.category && <CategoryBadge category={ex.category} />}
+                  </div>
                   <p className="text-[#F97316] text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
                   {ex.scalingNote && (
                     <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>

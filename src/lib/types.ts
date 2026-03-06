@@ -8,6 +8,7 @@ export interface Exercise {
   reps?: number; // present for sets-reps
   duration?: number; // seconds; present for sets-duration and duration
   scalingNote?: string;
+  category?: string;
   completed?: boolean; // in-session tracking
   dismissed?: boolean; // in-session tracking
 }

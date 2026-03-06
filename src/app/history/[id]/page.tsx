@@ -8,6 +8,7 @@ import BottomNav from '@/components/BottomNav';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
+import CategoryBadge from '@/components/CategoryBadge';
 
 function formatFullDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -114,11 +115,14 @@ export default function SessionDetailPage() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className={`font-medium text-sm ${exercise.completed ? 'text-[#F9FAFB]' : 'text-[#9CA3AF]'}`}
-                  >
-                    {exercise.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p
+                      className={`font-medium text-sm ${exercise.completed ? 'text-[#F9FAFB]' : 'text-[#9CA3AF]'}`}
+                    >
+                      {exercise.name}
+                    </p>
+                    {exercise.category && <CategoryBadge category={exercise.category} />}
+                  </div>
                   <p className="text-[#6B7280] text-xs mt-0.5">{exerciseDetail(exercise)}</p>
                 </div>
               </div>
@@ -138,7 +142,10 @@ export default function SessionDetailPage() {
                       <Minus className="w-3 h-3 text-[#4B5563]" strokeWidth={2} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[#6B7280] font-medium text-sm">{exercise.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[#6B7280] font-medium text-sm">{exercise.name}</p>
+                        {exercise.category && <CategoryBadge category={exercise.category} />}
+                      </div>
                       <p className="text-[#4B5563] text-xs mt-0.5">{exerciseDetail(exercise)}</p>
                     </div>
                   </div>
