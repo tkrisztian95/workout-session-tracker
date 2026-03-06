@@ -153,6 +153,11 @@ export default function PlanDetailPage() {
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+                  {ex.category && (
+                    <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#374151] text-[#9CA3AF]">
+                      {ex.category}
+                    </span>
+                  )}
                   <p className="text-[#F97316] text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
                   {ex.scalingNote && (
                     <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>

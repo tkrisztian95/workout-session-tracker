@@ -70,6 +70,8 @@
   "exercise_reps_label": "Wdh.",
   "exercise_duration_label": "Sekunden",
   "exercise_category_prefix": "Kategorie:",
+  "exercise_category_label": "Kategorie (optional)",
+  "exercise_category_none": "Keine",
   "exercise_role_label": "Rolle",
   "exercise_scaling_note_label": "Skalierungsnotiz",
   "exercise_scaling_note_optional": "(optional)",
