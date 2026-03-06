@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import type { PlanExercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   isOpen: boolean;
@@ -19,13 +20,13 @@ const inputClass =
 
 const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
 
-const TYPE_LABELS: Record<PlanExercise['type'], string> = {
-  'sets-reps': 'Sets & Reps',
-  'sets-duration': 'Sets & Duration',
-  duration: 'Duration',
-};
-
 export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole = true }: Props) {
+  const t = useTranslations();
+  const typeLabels: Record<PlanExercise['type'], string> = {
+    'sets-reps': t.exercise_type_sets_reps,
+    'sets-duration': t.exercise_type_sets_duration,
+    duration: t.exercise_type_duration,
+  };
   const [name, setName] = useState('');
   const [type, setType] = useState<PlanExercise['type']>('sets-reps');
   const [sets, setSets] = useState('3');
@@ -90,11 +91,11 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             className="text-[#F9FAFB] text-2xl font-bold tracking-tight"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
-            Add Exercise
+            {t.add_exercise_title}
           </h2>
           <button
             onClick={handleClose}
-            aria-label="Close"
+            aria-label={t.close}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer hover:bg-[#4B5563] transition-colors duration-150"
           >
             <X className="w-4 h-4 text-[#9CA3AF]" />
@@ -105,7 +106,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
           {/* Name */}
           <div className="relative">
             <label htmlFor="plan-exercise-name" className={labelClass}>
-              Exercise Name
+              {t.exercise_name_label}
             </label>
             <input
               id="plan-exercise-name"
@@ -116,7 +117,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
                 setSelectedCategory(null);
               }}
               onBlur={() => setTimeout(clearSuggestions, 150)}
-              placeholder="e.g. Bench Press"
+              placeholder={t.exercise_name_placeholder}
               autoComplete="off"
               className={inputClass}
             />
@@ -131,7 +132,8 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             />
             {selectedCategory && (
               <p className="mt-1.5 text-xs text-[#6B7280]">
-                Category: <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
+                {t.exercise_category_prefix}{' '}
+                <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
               </p>
             )}
           </div>
@@ -139,7 +141,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
           {/* Role toggle */}
           {showRole && (
             <div>
-              <p className={labelClass}>Role</p>
+              <p className={labelClass}>{t.exercise_role_label}</p>
               <div className="flex rounded-xl border border-[#374151] overflow-hidden">
                 {(['core', 'optional'] as const).map((r) => (
                   <button
@@ -160,19 +162,19 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
 
           {/* Type toggle */}
           <div>
-            <p className={labelClass}>Type</p>
+            <p className={labelClass}>{t.exercise_type_label}</p>
             <div className="flex rounded-xl border border-[#374151] overflow-hidden">
-              {(['sets-reps', 'sets-duration', 'duration'] as const).map((t) => (
+              {(['sets-reps', 'sets-duration', 'duration'] as const).map((typ) => (
                 <button
-                  key={t}
-                  onClick={() => setType(t)}
+                  key={typ}
+                  onClick={() => setType(typ)}
                   className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
-                    type === t
+                    type === typ
                       ? 'bg-[#F97316] text-white'
                       : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
                   }`}
                 >
-                  {TYPE_LABELS[t]}
+                  {typeLabels[typ]}
                 </button>
               ))}
             </div>
@@ -183,7 +185,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             {type !== 'duration' && (
               <div className="flex-1">
                 <label htmlFor="plan-sets" className={labelClass}>
-                  Sets
+                  {t.exercise_sets_label}
                 </label>
                 <input
                   id="plan-sets"
@@ -199,7 +201,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             {type === 'sets-reps' && (
               <div className="flex-1">
                 <label htmlFor="plan-reps" className={labelClass}>
-                  Reps
+                  {t.exercise_reps_label}
                 </label>
                 <input
                   id="plan-reps"
@@ -215,7 +217,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             {type !== 'sets-reps' && (
               <div className="flex-1">
                 <label htmlFor="plan-duration" className={labelClass}>
-                  Seconds
+                  {t.exercise_duration_label}
                 </label>
                 <input
                   id="plan-duration"
@@ -233,14 +235,15 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
           {/* Scaling note */}
           <div>
             <label htmlFor="scaling-note" className={labelClass}>
-              Scaling Note <span className="normal-case text-[#6B7280]">(optional)</span>
+              {t.exercise_scaling_note_label}{' '}
+              <span className="normal-case text-[#6B7280]">{t.exercise_scaling_note_optional}</span>
             </label>
             <input
               id="scaling-note"
               type="text"
               value={scalingNote}
               onChange={(e) => setScalingNote(e.target.value)}
-              placeholder="e.g. Add 2.5 kg when all reps complete"
+              placeholder={t.exercise_scaling_note_placeholder}
               className={inputClass}
             />
           </div>
@@ -250,7 +253,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             disabled={!name.trim()}
             className="w-full bg-[#F97316] text-white font-semibold text-base py-4 rounded-2xl cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-transform duration-150 mt-1"
           >
-            Add Exercise
+            {t.add_exercise_title}
           </button>
         </div>
       </div>

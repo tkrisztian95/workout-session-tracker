@@ -1,6 +1,7 @@
 'use client';
 
 import type { WgerExercise } from '@/lib/wgerClient';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   suggestions: WgerExercise[];
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ExerciseSuggestionList({ suggestions, loading, onSelect }: Props) {
+  const t = useTranslations();
   const showLoading = loading && suggestions.length === 0;
   const showList = suggestions.length > 0;
 
@@ -20,7 +22,9 @@ export default function ExerciseSuggestionList({ suggestions, loading, onSelect 
       style={{ touchAction: 'pan-y' }}
     >
       {showLoading && (
-        <li className="px-4 py-3 text-[#6B7280] text-sm animate-pulse">Loading suggestions…</li>
+        <li className="px-4 py-3 text-[#6B7280] text-sm animate-pulse">
+          {t.exercise_suggestions_loading}
+        </li>
       )}
       {showList &&
         suggestions.map((ex, i) => (

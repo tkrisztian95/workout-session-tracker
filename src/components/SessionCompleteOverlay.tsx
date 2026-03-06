@@ -3,6 +3,7 @@
 import { Dumbbell, Timer, Trophy } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import { calcSessionStats, formatDuration } from '@/lib/sessionUtils';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   exercises: Exercise[];
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss }: Props) {
+  const t = useTranslations();
   const stats = calcSessionStats(exercises, startedAt);
 
   return (
@@ -52,10 +54,10 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
           className="session-complete-title text-[#F9FAFB] text-5xl font-bold leading-tight tracking-tight mb-2"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Session Complete!
+          {t.session_complete_title}
         </h1>
         <p className="session-complete-title text-[#6B7280] text-base mb-8">
-          Great work. Here&apos;s what you accomplished.
+          {t.session_complete_subtitle}
         </p>
 
         {/* Stats */}
@@ -68,7 +70,7 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
             >
               {stats.completedExercises}
             </span>
-            <span className="text-[#6B7280] text-xs">exercises</span>
+            <span className="text-[#6B7280] text-xs">{t.session_complete_exercises}</span>
           </div>
 
           <div className="bg-[#1F2937] border border-[#374151] rounded-2xl px-3 py-4 flex flex-col items-center gap-1">
@@ -81,7 +83,7 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
             >
               {stats.completedSets}
             </span>
-            <span className="text-[#6B7280] text-xs">sets</span>
+            <span className="text-[#6B7280] text-xs">{t.session_complete_sets}</span>
           </div>
 
           <div className="bg-[#1F2937] border border-[#374151] rounded-2xl px-3 py-4 flex flex-col items-center gap-1">
@@ -92,14 +94,12 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
             >
               {formatDuration(stats.elapsedSeconds)}
             </span>
-            <span className="text-[#6B7280] text-xs">duration</span>
+            <span className="text-[#6B7280] text-xs">{t.session_complete_duration}</span>
           </div>
         </div>
 
         {/* CTA */}
-        <p className="session-complete-cta text-[#4B5563] text-sm">
-          Tap anywhere to save your session
-        </p>
+        <p className="session-complete-cta text-[#4B5563] text-sm">{t.session_complete_cta}</p>
       </div>
     </div>
   );

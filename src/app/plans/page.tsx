@@ -6,8 +6,10 @@ import { Plus, Dumbbell, ChevronRight, ChevronDown, CheckCircle, RotateCcw } fro
 import { getPlans, togglePlanStatus } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
+import { useTranslations } from '@/lib/locale-context';
 
 export default function PlansPage() {
+  const t = useTranslations();
   const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
   const [completedOpen, setCompletedOpen] = useState(false);
 
@@ -27,11 +29,12 @@ export default function PlansPage() {
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          My Plans
+          {t.plans_title}
         </h1>
         {activePlans.length > 0 && (
           <p className="text-[#6B7280] text-sm mt-3">
-            {activePlans.length} active plan{activePlans.length !== 1 ? 's' : ''}
+            {activePlans.length}{' '}
+            {activePlans.length !== 1 ? t.plans_active_plans : t.plans_active_plan}
           </p>
         )}
       </div>
@@ -43,15 +46,13 @@ export default function PlansPage() {
             <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
               <Dumbbell className="w-9 h-9 text-[#374151]" />
             </div>
-            <p className="text-[#9CA3AF] text-base font-medium">No plans yet</p>
-            <p className="text-[#6B7280] text-sm mt-1">
-              Tap the button below to create your first plan
-            </p>
+            <p className="text-[#9CA3AF] text-base font-medium">{t.plans_no_plans_title}</p>
+            <p className="text-[#6B7280] text-sm mt-1">{t.plans_no_plans_subtitle}</p>
           </div>
         ) : (
           <>
             {activePlans.length === 0 && (
-              <p className="text-[#6B7280] text-sm py-2">No active plans</p>
+              <p className="text-[#6B7280] text-sm py-2">{t.plans_no_active}</p>
             )}
             {activePlans.map((plan) => (
               <PlanCard
@@ -69,7 +70,7 @@ export default function PlansPage() {
                   className="flex items-center gap-2 w-full text-left py-2 cursor-pointer"
                 >
                   <span className="text-[#6B7280] text-xs font-medium uppercase tracking-wide">
-                    Completed ({completedPlans.length})
+                    {t.plan_completed_count.replace('{n}', String(completedPlans.length))}
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-[#6B7280] transition-transform duration-200 ${completedOpen ? 'rotate-180' : ''}`}
@@ -100,7 +101,7 @@ export default function PlansPage() {
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
           <Plus className="w-5 h-5" strokeWidth={2.5} />
-          New Plan
+          {t.new_plan}
         </Link>
       </div>
 
@@ -110,6 +111,7 @@ export default function PlansPage() {
 }
 
 function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus: () => void }) {
+  const t = useTranslations();
   const isCompleted = plan.status === 'completed';
 
   return (
@@ -128,8 +130,10 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
           {plan.name}
         </p>
         <p className="text-[#6B7280] text-sm mt-0.5">
-          {plan.days.length} training day{plan.days.length !== 1 ? 's' : ''}
-          {isCompleted && <span className="ml-2 text-[#4B5563] text-xs">· Completed</span>}
+          {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
+          {isCompleted && (
+            <span className="ml-2 text-[#4B5563] text-xs">· {t.plan_completed_label}</span>
+          )}
         </p>
       </Link>
       <div className="flex items-center gap-2 flex-shrink-0">

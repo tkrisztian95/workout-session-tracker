@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import type { PlanDay, PlanExercise } from '@/lib/types';
 import AddPlanExerciseModal from './AddPlanExerciseModal';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   day: PlanDay;
@@ -11,11 +12,7 @@ interface Props {
   onRemove: () => void;
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
-const inputClass =
-  'w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
 
 function planExerciseDetail(ex: PlanExercise): string {
   if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
@@ -48,6 +45,7 @@ function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void 
 }
 
 export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
+  const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSchedule, setShowSchedule] = useState(day.weekdays.length > 0);
 
@@ -91,7 +89,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
           type="text"
           value={day.name}
           onChange={(e) => onChange({ ...day, name: e.target.value })}
-          placeholder="Day name (e.g. Day A)"
+          placeholder={t.plan_day_name_placeholder}
           className="flex-1 bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]"
         />
         <button
@@ -128,12 +126,12 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
             )}
           </span>
           <span className={showSchedule ? 'text-[#F9FAFB]' : 'text-[#6B7280]'}>
-            Schedule specific days
+            {t.plan_day_schedule}
           </span>
         </button>
         {showSchedule && (
           <div className="flex gap-1.5 flex-wrap mt-3">
-            {WEEKDAYS.map((name, idx) => (
+            {t.weekday_abbr.map((label, idx) => (
               <button
                 key={idx}
                 onClick={() => toggleWeekday(idx)}
@@ -143,7 +141,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
                     : 'bg-[#374151] text-[#9CA3AF]'
                 }`}
               >
-                {name}
+                {label}
               </button>
             ))}
           </div>
@@ -152,26 +150,26 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
 
       {/* Core exercises */}
       <div>
-        <p className={labelClass}>Core Exercises</p>
+        <p className={labelClass}>{t.plan_day_core_exercises}</p>
         <div className="space-y-2">
           {day.coreExercises.map((ex) => (
             <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
           ))}
           {day.coreExercises.length === 0 && (
-            <p className="text-[#6B7280] text-sm">No core exercises yet</p>
+            <p className="text-[#6B7280] text-sm">{t.plan_day_no_core}</p>
           )}
         </div>
       </div>
 
       {/* Optional exercises */}
       <div>
-        <p className={labelClass}>Optional Exercises</p>
+        <p className={labelClass}>{t.plan_day_optional_exercises}</p>
         <div className="space-y-2">
           {day.optionalExercises.map((ex) => (
             <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('optional', ex.id)} />
           ))}
           {day.optionalExercises.length === 0 && (
-            <p className="text-[#6B7280] text-sm">No optional exercises</p>
+            <p className="text-[#6B7280] text-sm">{t.plan_day_no_optional}</p>
           )}
         </div>
       </div>
@@ -182,7 +180,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         className="flex items-center gap-2 text-[#F97316] text-sm font-semibold cursor-pointer"
       >
         <Plus className="w-4 h-4" />
-        Add Exercise
+        {t.plan_day_add_exercise}
       </button>
 
       <AddPlanExerciseModal

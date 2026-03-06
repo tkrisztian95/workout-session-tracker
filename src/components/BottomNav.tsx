@@ -2,12 +2,15 @@
 
 import Link from 'next/link';
 import { Home, ClipboardList, Clock } from 'lucide-react';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   active: 'home' | 'plans' | 'history';
 }
 
 export default function BottomNav({ active }: Props) {
+  const t = useTranslations();
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-30">
       <div className="bg-[#1F2937] border-t border-[#374151] flex">
@@ -18,7 +21,7 @@ export default function BottomNav({ active }: Props) {
           }`}
         >
           <Home className="w-5 h-5" />
-          <span className="text-xs font-medium">Home</span>
+          <span className="text-xs font-medium">{t.nav_home}</span>
         </Link>
         <Link
           href="/plans"
@@ -27,7 +30,7 @@ export default function BottomNav({ active }: Props) {
           }`}
         >
           <ClipboardList className="w-5 h-5" />
-          <span className="text-xs font-medium">Plans</span>
+          <span className="text-xs font-medium">{t.nav_plans}</span>
         </Link>
         <Link
           href="/history"
@@ -36,7 +39,7 @@ export default function BottomNav({ active }: Props) {
           }`}
         >
           <Clock className="w-5 h-5" />
-          <span className="text-xs font-medium">History</span>
+          <span className="text-xs font-medium">{t.nav_history}</span>
         </Link>
       </div>
     </nav>

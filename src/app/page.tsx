@@ -18,13 +18,12 @@ import {
   getUserName,
 } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
+import { useTranslations } from '@/lib/locale-context';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
 
 type Step = 'start' | 'pick-plan' | 'pick-day' | 'pick-optionals' | 'session';
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +54,7 @@ function StartScreen({
   onCreatePlan: () => void;
   greeting?: string;
 }) {
+  const t = useTranslations();
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
@@ -73,7 +73,7 @@ function StartScreen({
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Start Workout
+          {t.home_title}
         </h1>
       </div>
 
@@ -85,7 +85,7 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Follow a Plan
+              {t.home_follow_plan}
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -96,7 +96,7 @@ function StartScreen({
               className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Free Session
+              {t.home_free_session}
               <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -109,7 +109,7 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Start Free Session
+              {t.home_start_free_session}
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -120,7 +120,7 @@ function StartScreen({
               className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Create a plan
+              {t.home_create_plan}
               <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -143,6 +143,7 @@ function PlanPickerScreen({
   onSelect: (plan: WorkoutPlan) => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
   return (
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
       <div className="px-6 pt-14 pb-6">
@@ -154,21 +155,21 @@ function PlanPickerScreen({
           <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
             <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
+          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
         </button>
         <h1
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Choose Plan
+          {t.choose_plan_title}
         </h1>
       </div>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
         {plans.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-24 text-center">
-            <p className="text-[#9CA3AF] text-base font-medium">No plans yet</p>
-            <p className="text-[#6B7280] text-sm mt-1">Go to Plans to create one first</p>
+            <p className="text-[#9CA3AF] text-base font-medium">{t.no_plans_title}</p>
+            <p className="text-[#6B7280] text-sm mt-1">{t.no_plans_go_to_plans}</p>
           </div>
         ) : (
           plans.map((plan) => (
@@ -217,6 +218,7 @@ function DayPickerScreen({
   onSelect: (day: PlanDay) => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
   const today = todayWeekday();
   const nextDayIndex = getNextDayIndex(plan, sessions);
   const nextDayRef = useRef<HTMLButtonElement | null>(null);
@@ -236,7 +238,7 @@ function DayPickerScreen({
           <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
             <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
+          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
         </button>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
           {plan.name}
@@ -245,7 +247,7 @@ function DayPickerScreen({
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Choose Day
+          {t.choose_day_title}
         </h1>
       </div>
 
@@ -267,16 +269,16 @@ function DayPickerScreen({
               <div className="text-left">
                 <div className="flex items-center gap-2">
                   <p className="text-[#F9FAFB] font-semibold text-base">
-                    {day.name || 'Unnamed Day'}
+                    {day.name || t.free_session}
                   </p>
                   {isNext && (
                     <span className="text-[#F97316] text-xs font-semibold bg-[#F97316]/10 px-2 py-0.5 rounded-full">
-                      Next
+                      {t.next_badge}
                     </span>
                   )}
                   {isSuggested && !isNext && (
                     <span className="text-[#6B7280] text-xs bg-[#1F2937] border border-[#374151] px-2 py-0.5 rounded-full">
-                      Today
+                      {t.today_badge}
                     </span>
                   )}
                 </div>
@@ -285,7 +287,7 @@ function DayPickerScreen({
                 </p>
                 {day.weekdays.length > 0 && (
                   <p className="text-[#4B5563] text-xs mt-1">
-                    {day.weekdays.map((w) => WEEKDAYS[w]).join(', ')}
+                    {day.weekdays.map((w) => t.weekday_abbr[w]).join(', ')}
                   </p>
                 )}
               </div>
@@ -313,6 +315,7 @@ function OptionalPickerScreen({
   onStart: (selectedOptionalIds: Set<string>) => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const toggle = (id: string) => {
@@ -335,7 +338,7 @@ function OptionalPickerScreen({
           <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
             <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">Back</span>
+          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
         </button>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
           {plan.name} · {day.name}
@@ -344,11 +347,9 @@ function OptionalPickerScreen({
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Optional Exercises
+          {t.optional_exercises_title}
         </h1>
-        <p className="text-[#6B7280] text-sm mt-2">
-          Core exercises are pre-selected. Add optional ones below.
-        </p>
+        <p className="text-[#6B7280] text-sm mt-2">{t.optional_exercises_subtitle}</p>
       </div>
 
       <div className="flex-1 px-6 space-y-4 overflow-y-auto pb-4">
@@ -356,7 +357,7 @@ function OptionalPickerScreen({
         {day.coreExercises.length > 0 && (
           <div>
             <p className="text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
-              Core (always included)
+              {t.core_always_included}
             </p>
             <div className="space-y-2">
               {day.coreExercises.map((ex) => (
@@ -385,7 +386,7 @@ function OptionalPickerScreen({
         {day.optionalExercises.length > 0 ? (
           <div>
             <p className="text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
-              Optional
+              {t.optional_label}
             </p>
             <div className="space-y-2">
               {day.optionalExercises.map((ex) => {
@@ -419,7 +420,7 @@ function OptionalPickerScreen({
             </div>
           </div>
         ) : (
-          <p className="text-[#6B7280] text-sm">No optional exercises in this day.</p>
+          <p className="text-[#6B7280] text-sm">{t.no_optional_in_day}</p>
         )}
       </div>
 
@@ -429,7 +430,7 @@ function OptionalPickerScreen({
           className="w-full bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          Start Session
+          {t.start_session}
         </button>
       </div>
     </main>
@@ -447,6 +448,7 @@ function SessionView({
   onFinish: () => void;
   onDiscard: () => void;
 }) {
+  const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
@@ -497,14 +499,16 @@ function SessionView({
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          {session.planDayName ?? 'Free Session'}
+          {session.planDayName ?? t.free_session}
         </h1>
         {session.planName && (
           <p className="text-[#F97316] text-sm mt-1 font-medium">{session.planName}</p>
         )}
         {totalCount > 0 && (
           <p className="text-[#6B7280] text-sm mt-2">
-            {remaining.length} remaining · {completed.length} done
+            {t.session_progress
+              .replace('{remaining}', String(remaining.length))
+              .replace('{done}', String(completed.length))}
           </p>
         )}
       </div>
@@ -516,8 +520,8 @@ function SessionView({
             <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
               <Dumbbell className="w-9 h-9 text-[#374151]" />
             </div>
-            <p className="text-[#9CA3AF] text-base font-medium">No exercises yet</p>
-            <p className="text-[#6B7280] text-sm mt-1">Tap the button below to add one</p>
+            <p className="text-[#9CA3AF] text-base font-medium">{t.no_exercises_title}</p>
+            <p className="text-[#6B7280] text-sm mt-1">{t.no_exercises_subtitle}</p>
           </div>
         ) : (
           <>
@@ -533,7 +537,7 @@ function SessionView({
             {completed.length > 0 && (
               <>
                 <p className="text-[#6B7280] text-xs font-medium uppercase tracking-wide pt-2">
-                  Completed
+                  {t.completed_section}
                 </p>
                 {completed.map((exercise) => (
                   <ExerciseCard
@@ -549,7 +553,7 @@ function SessionView({
             {dismissed.length > 0 && (
               <>
                 <p className="text-[#4B5563] text-xs font-medium uppercase tracking-wide pt-2">
-                  Skipped
+                  {t.skipped_section}
                 </p>
                 {dismissed.map((exercise) => (
                   <ExerciseCard
@@ -573,21 +577,21 @@ function SessionView({
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
-          Add Exercise
+          {t.add_exercise_button}
         </button>
         <div className="flex gap-2">
           <button
             onClick={() => setShowDiscardConfirm(true)}
             className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold text-sm cursor-pointer"
           >
-            Discard
+            {t.discard}
           </button>
           <button
             onClick={() => setShowCompleteOverlay(true)}
             className="flex-[2] bg-[#F97316] text-white font-bold text-base py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
             style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
           >
-            Finish Session
+            {t.finish_session}
           </button>
         </div>
       </div>
@@ -618,21 +622,21 @@ function SessionView({
               className="text-[#F9FAFB] text-2xl font-bold mb-2"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              Discard Session?
+              {t.discard_session_title}
             </h3>
-            <p className="text-[#9CA3AF] text-sm mb-6">This session will not be saved.</p>
+            <p className="text-[#9CA3AF] text-sm mb-6">{t.discard_session_subtitle}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDiscardConfirm(false)}
                 className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer"
               >
-                Keep Going
+                {t.keep_going}
               </button>
               <button
                 onClick={onDiscard}
                 className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-semibold cursor-pointer active:scale-[0.98] transition-transform"
               >
-                Discard
+                {t.discard}
               </button>
             </div>
           </div>
@@ -646,6 +650,7 @@ function SessionView({
 
 export default function HomePage() {
   const router = useRouter();
+  const t = useTranslations();
   const [activeSession, setActive] = useState<ActiveSession | null>(() => getActiveSession());
   const [step, setStep] = useState<Step>(() => (getActiveSession() ? 'session' : 'start'));
   const [plans, setPlans] = useState<WorkoutPlan[]>(() =>
@@ -794,7 +799,9 @@ export default function HomePage() {
     return <UserNameModal onComplete={handleNameComplete} />;
   }
 
-  const greeting = isFirstVisit ? `Welcome, ${userName}!` : `Welcome back, ${userName}!`;
+  const greeting = isFirstVisit
+    ? t.greeting_first.replace('{name}', userName)
+    : t.greeting_returning.replace('{name}', userName);
 
   return (
     <StartScreen

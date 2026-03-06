@@ -7,6 +7,7 @@ import { Check, ChevronLeft, Minus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
+import { useTranslations } from '@/lib/locale-context';
 
 function formatFullDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -29,6 +30,7 @@ function exerciseDetail(exercise: WorkoutSession['exercises'][number]): string {
 }
 
 export default function SessionDetailPage() {
+  const t = useTranslations();
   const { id } = useParams<{ id: string }>();
 
   const [session] = useState<WorkoutSession | null>(() => {
@@ -67,7 +69,7 @@ export default function SessionDetailPage() {
           <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
             <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">History</span>
+          <span className="text-sm font-medium text-[#9CA3AF]">{t.history_title}</span>
         </Link>
         <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mt-3">
           {formatFullDate(session.completedAt)}
@@ -76,7 +78,7 @@ export default function SessionDetailPage() {
           className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
-          {dayName ?? planName ?? 'Free Session'}
+          {dayName ?? planName ?? t.free_session}
         </h1>
         {planName && dayName && (
           <p className="text-[#F97316] text-sm mt-1 font-medium">{planName}</p>
@@ -85,15 +87,16 @@ export default function SessionDetailPage() {
           <p className="text-[#F97316] text-sm mt-1 font-medium">{planName}</p>
         )}
         <p className="text-[#6B7280] text-sm mt-2">
-          {session.exercises.length} exercise{session.exercises.length !== 1 ? 's' : ''} · {mins}{' '}
-          min
+          {session.exercises.length}{' '}
+          {session.exercises.length !== 1 ? t.exercise_plural : t.exercise_singular} · {mins}{' '}
+          {t.min_label}
         </p>
       </div>
 
       {/* Exercise list */}
       <div className="flex-1 px-6 pb-6 space-y-3 overflow-y-auto">
         {session.exercises.length === 0 ? (
-          <p className="text-[#6B7280] text-sm">No exercises recorded.</p>
+          <p className="text-[#6B7280] text-sm">{t.no_exercises_recorded}</p>
         ) : (
           <>
             {[...completed, ...remaining].map((exercise) => (
@@ -124,7 +127,7 @@ export default function SessionDetailPage() {
             {skipped.length > 0 && (
               <>
                 <p className="text-[#4B5563] text-xs font-medium uppercase tracking-wide pt-2">
-                  Skipped
+                  {t.skipped_section}
                 </p>
                 {skipped.map((exercise) => (
                   <div
