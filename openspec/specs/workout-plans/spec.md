@@ -167,7 +167,7 @@ The system SHALL allow users to delete a workout plan.
 
 ### Requirement: Exercise name input in add-exercise modals
 
-The exercise name input in `AddPlanExerciseModal` and `AddExerciseModal` SHALL support autocomplete suggestions sourced from the wger exercise catalog. Users SHALL still be able to type and submit any free-text name. The stored exercise name SHALL remain a plain string; no category or wger metadata is persisted.
+The exercise name input in `AddPlanExerciseModal` and `AddExerciseModal` SHALL support autocomplete suggestions sourced from the wger exercise catalog. Users SHALL still be able to type and submit any free-text name. The stored exercise name SHALL remain a plain string. When a suggestion is selected, its category SHALL be persisted with the exercise. A manual category selector SHALL be available as a fallback for custom names or when the suggestion had no category.
 
 #### Scenario: Suggestions appear on input
 
@@ -177,12 +177,12 @@ The exercise name input in `AddPlanExerciseModal` and `AddExerciseModal` SHALL s
 #### Scenario: Submit with suggestion selected
 
 - **WHEN** the user selects a suggestion and taps "Add Exercise"
-- **THEN** the exercise is saved with the suggestion's name as a plain string
+- **THEN** the exercise is saved with the suggestion's name and its category (if the suggestion had one)
 
-#### Scenario: Submit with free-text name
+#### Scenario: Submit with free-text name and manual category
 
-- **WHEN** the user types a custom name and taps "Add Exercise" without selecting a suggestion
-- **THEN** the exercise is saved with the typed name as a plain string
+- **WHEN** the user types a custom name, optionally picks a category from the manual selector, and taps "Add Exercise"
+- **THEN** the exercise is saved with the typed name and the chosen category (or no category if none selected)
 
 #### Scenario: Dropdown does not block submit
 
