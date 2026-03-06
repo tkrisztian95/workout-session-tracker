@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import type { PlanExercise } from '@/lib/types';
+import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
+import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 
 interface Props {
   isOpen: boolean;
@@ -31,6 +33,9 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
   const [duration, setDuration] = useState('60');
   const [role, setRole] = useState<PlanExercise['role']>('core');
   const [scalingNote, setScalingNote] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
 
   const reset = () => {
     setName('');
@@ -40,6 +45,8 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
     setDuration('60');
     setRole('core');
     setScalingNote('');
+    setSelectedCategory(null);
+    clearSuggestions();
   };
 
   const handleSubmit = () => {
@@ -96,7 +103,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
 
         <div className="space-y-5">
           {/* Name */}
-          <div>
+          <div className="relative">
             <label htmlFor="plan-exercise-name" className={labelClass}>
               Exercise Name
             </label>
@@ -104,11 +111,29 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
               id="plan-exercise-name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setSelectedCategory(null);
+              }}
+              onBlur={() => setTimeout(clearSuggestions, 150)}
               placeholder="e.g. Bench Press"
               autoComplete="off"
               className={inputClass}
             />
+            <ExerciseSuggestionList
+              suggestions={suggestions}
+              loading={loading}
+              onSelect={(n, cat) => {
+                setName(n);
+                setSelectedCategory(cat);
+                clearSuggestions();
+              }}
+            />
+            {selectedCategory && (
+              <p className="mt-1.5 text-xs text-[#6B7280]">
+                Category: <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
+              </p>
+            )}
           </div>
 
           {/* Role toggle */}
