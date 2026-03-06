@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { savePlan } from '@/lib/storage';
 import type { PlanDay, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
@@ -56,13 +56,6 @@ export default function NewPlanPage() {
     <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-32">
       {/* Header */}
       <div className="px-6 pt-14 pb-6">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-[#6B7280] text-sm mb-5 cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
         <h1
           className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
@@ -120,15 +113,23 @@ export default function NewPlanPage() {
         </div>
       </div>
 
-      {/* Save button */}
+      {/* Bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 pt-6 bg-gradient-to-t from-[#111827] via-[#111827]/90 to-transparent">
-        <button
-          onClick={handleSave}
-          className="w-full bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-transform duration-150 disabled:opacity-40"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          Save Plan
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.back()}
+            className="flex-1 py-4 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer active:scale-[0.98] transition-transform duration-150"
+          >
+            Discard
+          </button>
+          <button
+            onClick={handleSave}
+            className="flex-[2] bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-transform duration-150 disabled:opacity-40"
+            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+          >
+            Save Plan
+          </button>
+        </div>
       </div>
     </main>
   );
