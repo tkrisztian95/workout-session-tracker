@@ -6,6 +6,7 @@ import type { Exercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import { useTranslations } from '@/lib/locale-context';
+import { WGER_CATEGORIES } from '@/lib/wgerClient';
 
 interface Props {
   isOpen: boolean;
@@ -31,6 +32,8 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const [reps, setReps] = useState('10');
   const [duration, setDuration] = useState('60');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  // TODO: Exercise type does not yet have a category field; manualCategory is captured but not persisted.
+  const [manualCategory, setManualCategory] = useState('');
 
   const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
 
@@ -50,6 +53,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
     setReps('10');
     setDuration('60');
     setSelectedCategory(null);
+    setManualCategory('');
     clearSuggestions();
   };
 
@@ -114,14 +118,34 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
               onSelect={(n, cat) => {
                 setName(n);
                 setSelectedCategory(cat);
+                setManualCategory('');
                 clearSuggestions();
               }}
             />
-            {selectedCategory && (
+            {selectedCategory ? (
               <p className="mt-1.5 text-xs text-[#6B7280]">
                 {t.exercise_category_prefix}{' '}
                 <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
               </p>
+            ) : (
+              <div className="mt-2">
+                <label htmlFor="exercise-category" className={labelClass}>
+                  {t.exercise_category_label}
+                </label>
+                <select
+                  id="exercise-category"
+                  value={manualCategory}
+                  onChange={(e) => setManualCategory(e.target.value)}
+                  className="w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] transition-shadow duration-150"
+                >
+                  <option value="">{t.exercise_category_none}</option>
+                  {WGER_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
           </div>
 

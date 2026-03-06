@@ -23,6 +23,7 @@ export interface PlanExercise {
   duration?: number;
   role: 'core' | 'optional';
   scalingNote?: string;
+  category?: string;
 }
 
 export interface PlanDay {

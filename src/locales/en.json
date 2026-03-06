@@ -70,6 +70,8 @@
   "exercise_reps_label": "Reps",
   "exercise_duration_label": "Seconds",
   "exercise_category_prefix": "Category:",
+  "exercise_category_label": "Category (optional)",
+  "exercise_category_none": "None",
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
   "exercise_scaling_note_optional": "(optional)",

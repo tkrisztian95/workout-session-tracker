@@ -6,6 +6,7 @@ import type { PlanExercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import { useTranslations } from '@/lib/locale-context';
+import { WGER_CATEGORIES } from '@/lib/wgerClient';
 
 interface Props {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
   const [role, setRole] = useState<PlanExercise['role']>('core');
   const [scalingNote, setScalingNote] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [manualCategory, setManualCategory] = useState('');
 
   const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
 
@@ -47,6 +49,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
     setRole('core');
     setScalingNote('');
     setSelectedCategory(null);
+    setManualCategory('');
     clearSuggestions();
   };
 
@@ -61,6 +64,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
       duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
       role: showRole ? role : 'core',
       scalingNote: scalingNote.trim() || undefined,
+      category: (selectedCategory ?? manualCategory) || undefined,
     });
     reset();
   };
@@ -127,14 +131,34 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
               onSelect={(n, cat) => {
                 setName(n);
                 setSelectedCategory(cat);
+                setManualCategory('');
                 clearSuggestions();
               }}
             />
-            {selectedCategory && (
+            {selectedCategory ? (
               <p className="mt-1.5 text-xs text-[#6B7280]">
                 {t.exercise_category_prefix}{' '}
                 <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
               </p>
+            ) : (
+              <div className="mt-2">
+                <label htmlFor="plan-exercise-category" className={labelClass}>
+                  {t.exercise_category_label}
+                </label>
+                <select
+                  id="plan-exercise-category"
+                  value={manualCategory}
+                  onChange={(e) => setManualCategory(e.target.value)}
+                  className="w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] transition-shadow duration-150"
+                >
+                  <option value="">{t.exercise_category_none}</option>
+                  {WGER_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
           </div>
 

@@ -1,3 +1,14 @@
+export const WGER_CATEGORIES = [
+  'Arms',
+  'Legs',
+  'Abs',
+  'Chest',
+  'Back',
+  'Shoulders',
+  'Calves',
+  'Cardio',
+] as const;
+
 export interface WgerExercise {
   name: string;
   category: string;
