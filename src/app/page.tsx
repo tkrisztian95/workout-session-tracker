@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Dumbbell, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Plus, Dumbbell, ChevronLeft, ChevronRight, Check, ClipboardList } from 'lucide-react';
 import ExerciseCard from '@/components/ExerciseCard';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import SessionTimer from '@/components/SessionTimer';
@@ -103,7 +103,9 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              <span className="flex items-center gap-2">📋 {t.home_follow_plan}</span>
+              <span className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5" /> {t.home_follow_plan}
+              </span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
