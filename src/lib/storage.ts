@@ -66,6 +66,15 @@ export function deletePlan(id: string): void {
   localStorage.setItem(KEYS.plans, JSON.stringify(plans));
 }
 
+export function togglePlanStatus(id: string): void {
+  const plans = getPlans();
+  const index = plans.findIndex((p) => p.id === id);
+  if (index === -1) return;
+  const current = plans[index].status ?? 'active';
+  plans[index] = { ...plans[index], status: current === 'active' ? 'completed' : 'active' };
+  localStorage.setItem(KEYS.plans, JSON.stringify(plans));
+}
+
 // ─── Active session ───────────────────────────────────────────────────────────
 
 export function getActiveSession(): ActiveSession | null {
