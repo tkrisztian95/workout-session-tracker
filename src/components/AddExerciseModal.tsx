@@ -15,9 +15,15 @@ const inputClass =
 
 const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
 
+const TYPE_LABELS: Record<Exercise['type'], string> = {
+  'sets-reps': 'Sets & Reps',
+  'sets-duration': 'Sets & Duration',
+  duration: 'Duration',
+};
+
 export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const [name, setName] = useState('');
-  const [type, setType] = useState<Exercise['type']>('reps');
+  const [type, setType] = useState<Exercise['type']>('sets-reps');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('10');
   const [duration, setDuration] = useState('60');
@@ -28,12 +34,12 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
     onAdd({
       name: trimmed,
       type,
-      sets: Math.max(1, Number(sets) || 1),
-      reps: type === 'reps' ? Math.max(1, Number(reps) || 10) : undefined,
-      duration: type === 'duration' ? Math.max(1, Number(duration) || 60) : undefined,
+      sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
+      reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
+      duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
     });
     setName('');
-    setType('reps');
+    setType('sets-reps');
     setSets('3');
     setReps('10');
     setDuration('60');
@@ -96,15 +102,17 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
           <div>
             <p className={labelClass}>Type</p>
             <div className="flex rounded-xl border border-[#374151] overflow-hidden">
-              {(['reps', 'duration'] as const).map((t) => (
+              {(['sets-reps', 'sets-duration', 'duration'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 ${
-                    type === t ? 'bg-[#F97316] text-white' : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
+                  className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                    type === t
+                      ? 'bg-[#F97316] text-white'
+                      : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
                   }`}
                 >
-                  {t === 'reps' ? 'Sets & Reps' : 'Duration'}
+                  {TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
@@ -112,53 +120,54 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
 
           {/* Sets + Reps/Duration */}
           <div className="flex gap-3">
-            <div className="flex-1">
-              <label htmlFor="sets" className={labelClass}>
-                Sets
-              </label>
-              <input
-                id="sets"
-                type="number"
-                inputMode="numeric"
-                value={sets}
-                onChange={(e) => setSets(e.target.value)}
-                min={1}
-                className={inputClass}
-              />
-            </div>
-            <div className="flex-1">
-              {type === 'reps' ? (
-                <>
-                  <label htmlFor="reps" className={labelClass}>
-                    Reps
-                  </label>
-                  <input
-                    id="reps"
-                    type="number"
-                    inputMode="numeric"
-                    value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    min={1}
-                    className={inputClass}
-                  />
-                </>
-              ) : (
-                <>
-                  <label htmlFor="duration" className={labelClass}>
-                    Seconds
-                  </label>
-                  <input
-                    id="duration"
-                    type="number"
-                    inputMode="numeric"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    min={1}
-                    className={inputClass}
-                  />
-                </>
-              )}
-            </div>
+            {type !== 'duration' && (
+              <div className="flex-1">
+                <label htmlFor="sets" className={labelClass}>
+                  Sets
+                </label>
+                <input
+                  id="sets"
+                  type="number"
+                  inputMode="numeric"
+                  value={sets}
+                  onChange={(e) => setSets(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
+            {type === 'sets-reps' && (
+              <div className="flex-1">
+                <label htmlFor="reps" className={labelClass}>
+                  Reps
+                </label>
+                <input
+                  id="reps"
+                  type="number"
+                  inputMode="numeric"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
+            {type !== 'sets-reps' && (
+              <div className="flex-1">
+                <label htmlFor="duration" className={labelClass}>
+                  Seconds
+                </label>
+                <input
+                  id="duration"
+                  type="number"
+                  inputMode="numeric"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
           </div>
 
           {/* Submit */}
