@@ -62,6 +62,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
               onClick={() => handleTileTap(iso)}
               disabled={!hasWorkout}
               aria-label={`${iso}${hasWorkout ? `, ${count} workout${count > 1 ? 's' : ''}` : ''}`}
+              style={!isToday && hasWorkout ? { backgroundColor: '#16a34a' } : undefined}
               className={[
                 'flex flex-col items-center gap-1 w-[52px] py-3 rounded-2xl transition-all duration-150',
                 hasWorkout ? 'cursor-pointer active:scale-95' : 'cursor-default',
@@ -69,9 +70,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                   ? 'bg-[#F97316]'
                   : isToday
                     ? 'bg-[#1F2937] ring-2 ring-[#F97316]/60'
-                    : hasWorkout
-                      ? 'bg-[#1F2937] ring-1 ring-[#7C3AED]/50'
-                      : 'bg-[#1F2937]',
+                    : 'bg-[#1F2937]',
               ].join(' ')}
             >
               <span
@@ -81,7 +80,9 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                     ? 'text-white/80'
                     : isToday
                       ? 'text-[#F97316]'
-                      : 'text-[#6B7280]',
+                      : hasWorkout
+                        ? 'text-white/80'
+                        : 'text-[#6B7280]',
                 ].join(' ')}
               >
                 {t.weekday_abbr[day.getDay()]}
@@ -100,12 +101,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                 {day.getDate()}
               </span>
               {hasWorkout ? (
-                <span
-                  className={[
-                    'text-[10px] font-bold',
-                    isToday && hasWorkout ? 'text-white/70' : 'text-[#F97316]',
-                  ].join(' ')}
-                >
+                <span className={['text-[10px] font-bold', 'text-white/70'].join(' ')}>
                   {count > 1 ? `×${count}` : '●'}
                 </span>
               ) : (
