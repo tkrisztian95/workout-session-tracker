@@ -17,9 +17,15 @@ const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-
 const inputClass =
   'w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
 
+function planExerciseDetail(ex: PlanExercise): string {
+  if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
+  if (ex.type === 'sets-duration') return `${ex.sets}×${ex.duration}s`;
+  const d = ex.duration ?? 0;
+  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+}
+
 function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void }) {
-  const detail =
-    ex.type === 'reps' ? `${ex.sets}×${ex.reps}` : `${ex.sets}×${ex.duration}s`;
+  const detail = planExerciseDetail(ex);
 
   return (
     <div className="flex items-center gap-2 bg-[#111827] border border-[#374151] rounded-xl px-3 py-2.5">
@@ -105,14 +111,19 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         >
           <span
             className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-              showSchedule
-                ? 'bg-[#F97316] border-[#F97316]'
-                : 'bg-transparent border-[#6B7280]'
+              showSchedule ? 'bg-[#F97316] border-[#F97316]' : 'bg-transparent border-[#6B7280]'
             }`}
           >
             {showSchedule && (
               <svg viewBox="0 0 10 8" className="w-2.5 h-2.5 text-white fill-current">
-                <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M1 4l3 3 5-6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             )}
           </span>

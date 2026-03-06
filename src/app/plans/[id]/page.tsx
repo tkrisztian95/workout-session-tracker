@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
 import { getPlans, savePlan, deletePlan } from '@/lib/storage';
-import type { PlanDay, WorkoutPlan } from '@/lib/types';
+import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
+import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 
 const inputClass =
   'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
@@ -20,23 +21,29 @@ function newDay(): PlanDay {
   };
 }
 
+function sharedExerciseDetail(ex: PlanExercise): string {
+  if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
+  if (ex.type === 'sets-duration') return `${ex.sets}×${ex.duration}s`;
+  const d = ex.duration ?? 0;
+  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+}
+
 export default function PlanDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const [plan, setPlan] = useState<WorkoutPlan | null>(null);
-  const [name, setName] = useState('');
-  const [days, setDays] = useState<PlanDay[]>([]);
+  const [plan] = useState<WorkoutPlan | null>(
+    () => getPlans().find((p) => p.id === params.id) ?? null,
+  );
+  const [name, setName] = useState(() => getPlans().find((p) => p.id === params.id)?.name ?? '');
+  const [days, setDays] = useState<PlanDay[]>(
+    () => getPlans().find((p) => p.id === params.id)?.days ?? [],
+  );
+  const [sharedExercises, setSharedExercises] = useState<PlanExercise[]>(
+    () => getPlans().find((p) => p.id === params.id)?.sharedExercises ?? [],
+  );
+  const [isSharedModalOpen, setIsSharedModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const found = getPlans().find((p) => p.id === params.id) ?? null;
-    if (found) {
-      setPlan(found);
-      setName(found.name);
-      setDays(found.days);
-    }
-  }, [params.id]);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -48,6 +55,7 @@ export default function PlanDetailPage() {
       ...plan,
       name: name.trim(),
       days,
+      sharedExercises,
       updatedAt: new Date().toISOString(),
     };
     savePlan(updated);
@@ -66,6 +74,15 @@ export default function PlanDetailPage() {
 
   const removeDay = (index: number) => {
     setDays((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddShared = (ex: Omit<PlanExercise, 'id'>) => {
+    setSharedExercises((prev) => [...prev, { ...ex, id: crypto.randomUUID() }]);
+    setIsSharedModalOpen(false);
+  };
+
+  const removeShared = (id: string) => {
+    setSharedExercises((prev) => prev.filter((e) => e.id !== id));
   };
 
   if (!plan) {
@@ -107,18 +124,67 @@ export default function PlanDetailPage() {
       <div className="px-6 space-y-6">
         {/* Plan name */}
         <div>
-          <label htmlFor="edit-plan-name" className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
+          <label
+            htmlFor="edit-plan-name"
+            className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
+          >
             Plan Name
           </label>
           <input
             id="edit-plan-name"
             type="text"
             value={name}
-            onChange={(e) => { setName(e.target.value); setError(''); }}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError('');
+            }}
             placeholder="e.g. Strength A/B"
             className={inputClass}
           />
           {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+        </div>
+
+        {/* Shared exercises */}
+        <div>
+          <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-1">
+            Shared Exercises
+          </p>
+          <p className="text-[#6B7280] text-xs mb-3">
+            Added to every session from this plan (e.g. warmups).
+          </p>
+          <div className="space-y-2">
+            {sharedExercises.map((ex) => (
+              <div
+                key={ex.id}
+                className="flex items-center gap-2 bg-[#1F2937] border border-[#374151] rounded-xl px-3 py-2.5"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+                  <p className="text-[#F97316] text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
+                  {ex.scalingNote && (
+                    <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => removeShared(ex.id)}
+                  aria-label={`Remove ${ex.name}`}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer flex-shrink-0"
+                >
+                  <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                </button>
+              </div>
+            ))}
+            {sharedExercises.length === 0 && (
+              <p className="text-[#6B7280] text-sm">No shared exercises yet</p>
+            )}
+          </div>
+          <button
+            onClick={() => setIsSharedModalOpen(true)}
+            className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-3 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Add Shared Exercise
+          </button>
         </div>
 
         {/* Training days */}
@@ -187,6 +253,13 @@ export default function PlanDetailPage() {
           </div>
         </div>
       )}
+
+      <AddPlanExerciseModal
+        isOpen={isSharedModalOpen}
+        onClose={() => setIsSharedModalOpen(false)}
+        onAdd={handleAddShared}
+        showRole={false}
+      />
     </main>
   );
 }

@@ -3,11 +3,13 @@
 export interface Exercise {
   id: string;
   name: string;
-  type: 'reps' | 'duration';
-  sets: number;
-  reps?: number;       // set when type === 'reps'
-  duration?: number;   // seconds, set when type === 'duration'
-  scalingNote?: string; // shown when exercise originated from a plan
+  type: 'sets-reps' | 'sets-duration' | 'duration';
+  sets?: number; // present for sets-reps / sets-duration; absent for duration
+  reps?: number; // present for sets-reps
+  duration?: number; // seconds; present for sets-duration and duration
+  scalingNote?: string;
+  completed?: boolean; // in-session tracking
+  dismissed?: boolean; // in-session tracking
 }
 
 // ─── Plan data models ─────────────────────────────────────────────────────────
@@ -15,8 +17,8 @@ export interface Exercise {
 export interface PlanExercise {
   id: string;
   name: string;
-  type: 'reps' | 'duration';
-  sets: number;
+  type: 'sets-reps' | 'sets-duration' | 'duration';
+  sets?: number;
   reps?: number;
   duration?: number;
   role: 'core' | 'optional';
@@ -35,6 +37,7 @@ export interface WorkoutPlan {
   id: string;
   name: string;
   days: PlanDay[];
+  sharedExercises: PlanExercise[];
   createdAt: string; // ISO date string
   updatedAt: string;
 }

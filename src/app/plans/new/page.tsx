@@ -36,6 +36,7 @@ export default function NewPlanPage() {
       id: crypto.randomUUID(),
       name: name.trim(),
       days,
+      sharedExercises: [],
       createdAt: now,
       updatedAt: now,
     };
@@ -73,14 +74,20 @@ export default function NewPlanPage() {
       <div className="px-6 space-y-6">
         {/* Plan name */}
         <div>
-          <label htmlFor="plan-name" className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
+          <label
+            htmlFor="plan-name"
+            className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
+          >
             Plan Name
           </label>
           <input
             id="plan-name"
             type="text"
             value={name}
-            onChange={(e) => { setName(e.target.value); setError(''); }}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError('');
+            }}
             placeholder="e.g. Strength A/B"
             autoComplete="off"
             className={inputClass}

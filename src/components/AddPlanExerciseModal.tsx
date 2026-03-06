@@ -8,6 +8,8 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (exercise: Omit<PlanExercise, 'id'>) => void;
+  /** When false, hides the role selector and defaults role to 'core' (for shared exercises). Default true. */
+  showRole?: boolean;
 }
 
 const inputClass =
@@ -15,9 +17,15 @@ const inputClass =
 
 const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
 
-export default function AddPlanExerciseModal({ isOpen, onClose, onAdd }: Props) {
+const TYPE_LABELS: Record<PlanExercise['type'], string> = {
+  'sets-reps': 'Sets & Reps',
+  'sets-duration': 'Sets & Duration',
+  duration: 'Duration',
+};
+
+export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole = true }: Props) {
   const [name, setName] = useState('');
-  const [type, setType] = useState<PlanExercise['type']>('reps');
+  const [type, setType] = useState<PlanExercise['type']>('sets-reps');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('10');
   const [duration, setDuration] = useState('60');
@@ -26,7 +34,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd }: Props) 
 
   const reset = () => {
     setName('');
-    setType('reps');
+    setType('sets-reps');
     setSets('3');
     setReps('10');
     setDuration('60');
@@ -40,10 +48,10 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd }: Props) 
     onAdd({
       name: trimmed,
       type,
-      sets: Math.max(1, Number(sets) || 1),
-      reps: type === 'reps' ? Math.max(1, Number(reps) || 10) : undefined,
-      duration: type === 'duration' ? Math.max(1, Number(duration) || 60) : undefined,
-      role,
+      sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
+      reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
+      duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
+      role: showRole ? role : 'core',
       scalingNote: scalingNote.trim() || undefined,
     });
     reset();
@@ -104,36 +112,42 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd }: Props) 
           </div>
 
           {/* Role toggle */}
-          <div>
-            <p className={labelClass}>Role</p>
-            <div className="flex rounded-xl border border-[#374151] overflow-hidden">
-              {(['core', 'optional'] as const).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 capitalize ${
-                    role === r ? 'bg-[#F97316] text-white' : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
-                  }`}
-                >
-                  {r}
-                </button>
-              ))}
+          {showRole && (
+            <div>
+              <p className={labelClass}>Role</p>
+              <div className="flex rounded-xl border border-[#374151] overflow-hidden">
+                {(['core', 'optional'] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRole(r)}
+                    className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 capitalize ${
+                      role === r
+                        ? 'bg-[#F97316] text-white'
+                        : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Type toggle */}
           <div>
             <p className={labelClass}>Type</p>
             <div className="flex rounded-xl border border-[#374151] overflow-hidden">
-              {(['reps', 'duration'] as const).map((t) => (
+              {(['sets-reps', 'sets-duration', 'duration'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 ${
-                    type === t ? 'bg-[#F97316] text-white' : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
+                  className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                    type === t
+                      ? 'bg-[#F97316] text-white'
+                      : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
                   }`}
                 >
-                  {t === 'reps' ? 'Sets & Reps' : 'Duration'}
+                  {TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
@@ -141,49 +155,54 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd }: Props) 
 
           {/* Sets + Reps/Duration */}
           <div className="flex gap-3">
-            <div className="flex-1">
-              <label htmlFor="plan-sets" className={labelClass}>
-                Sets
-              </label>
-              <input
-                id="plan-sets"
-                type="number"
-                inputMode="numeric"
-                value={sets}
-                onChange={(e) => setSets(e.target.value)}
-                min={1}
-                className={inputClass}
-              />
-            </div>
-            <div className="flex-1">
-              {type === 'reps' ? (
-                <>
-                  <label htmlFor="plan-reps" className={labelClass}>Reps</label>
-                  <input
-                    id="plan-reps"
-                    type="number"
-                    inputMode="numeric"
-                    value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    min={1}
-                    className={inputClass}
-                  />
-                </>
-              ) : (
-                <>
-                  <label htmlFor="plan-duration" className={labelClass}>Seconds</label>
-                  <input
-                    id="plan-duration"
-                    type="number"
-                    inputMode="numeric"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    min={1}
-                    className={inputClass}
-                  />
-                </>
-              )}
-            </div>
+            {type !== 'duration' && (
+              <div className="flex-1">
+                <label htmlFor="plan-sets" className={labelClass}>
+                  Sets
+                </label>
+                <input
+                  id="plan-sets"
+                  type="number"
+                  inputMode="numeric"
+                  value={sets}
+                  onChange={(e) => setSets(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
+            {type === 'sets-reps' && (
+              <div className="flex-1">
+                <label htmlFor="plan-reps" className={labelClass}>
+                  Reps
+                </label>
+                <input
+                  id="plan-reps"
+                  type="number"
+                  inputMode="numeric"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
+            {type !== 'sets-reps' && (
+              <div className="flex-1">
+                <label htmlFor="plan-duration" className={labelClass}>
+                  Seconds
+                </label>
+                <input
+                  id="plan-duration"
+                  type="number"
+                  inputMode="numeric"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  min={1}
+                  className={inputClass}
+                />
+              </div>
+            )}
           </div>
 
           {/* Scaling note */}
