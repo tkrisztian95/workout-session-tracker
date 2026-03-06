@@ -39,8 +39,8 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Manually test: type a known exercise name (e.g. "bench") in both modals and confirm wger suggestions appear with correct categories
-- [ ] 6.2 Manually test: type a custom name not in wger and confirm it submits without errors
-- [ ] 6.3 Manually test: select a suggestion and confirm the category badge appears and name is filled
-- [ ] 6.4 Manually test offline (disable network): confirm no suggestions, no error UI, input still works
-- [ ] 6.5 Manually test on mobile viewport: confirm dropdown doesn't obscure the submit button
+- [x] 6.1 Manually test: type a known exercise name (e.g. "bench") in both modals and confirm wger suggestions appear with correct categories
+- [x] 6.2 Manually test: type a custom name not in wger and confirm it submits without errors
+- [x] 6.3 Manually test: select a suggestion and confirm the category badge appears and name is filled
+- [x] 6.4 Manually test offline (disable network): confirm no suggestions, no error UI, input still works
+- [x] 6.5 Manually test on mobile viewport: confirm dropdown doesn't obscure the submit button
