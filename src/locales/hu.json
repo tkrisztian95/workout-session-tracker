@@ -72,6 +72,16 @@
   "exercise_category_prefix": "Kategória:",
   "exercise_category_label": "Kategória (opcionális)",
   "exercise_category_none": "Nincs",
+  "category_labels": {
+    "Arms": "Karok",
+    "Legs": "Lábak",
+    "Abs": "Has",
+    "Chest": "Mell",
+    "Back": "Hát",
+    "Shoulders": "Vállak",
+    "Calves": "Lábikra",
+    "Cardio": "Kardió"
+  },
   "exercise_role_label": "Szerep",
   "exercise_scaling_note_label": "Megjegyzés",
   "exercise_scaling_note_optional": "(opcionális)",
@@ -110,6 +120,11 @@
   "delete_plan_title": "Töröljük a tervet?",
   "plan_not_found": "A terv nem található.",
   "edit_plan_title": "Terv szerkesztése",
+
+  "last_workout_label": "Utolsó edzés",
+  "last_session_today": "Ma",
+  "last_session_yesterday": "Tegnap",
+  "last_session_days_ago": "{n} napja",
 
   "history_activity_label": "Aktivitás",
   "history_title": "Előzmények",

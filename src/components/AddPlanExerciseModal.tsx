@@ -154,7 +154,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
                   <option value="">{t.exercise_category_none}</option>
                   {WGER_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {t.category_labels[cat] ?? cat}
                     </option>
                   ))}
                 </select>

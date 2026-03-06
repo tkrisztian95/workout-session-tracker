@@ -72,6 +72,16 @@
   "exercise_category_prefix": "Category:",
   "exercise_category_label": "Category (optional)",
   "exercise_category_none": "None",
+  "category_labels": {
+    "Arms": "Arms",
+    "Legs": "Legs",
+    "Abs": "Abs",
+    "Chest": "Chest",
+    "Back": "Back",
+    "Shoulders": "Shoulders",
+    "Calves": "Calves",
+    "Cardio": "Cardio"
+  },
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
   "exercise_scaling_note_optional": "(optional)",
@@ -110,6 +120,11 @@
   "delete_plan_title": "Delete Plan?",
   "plan_not_found": "Plan not found.",
   "edit_plan_title": "Edit Plan",
+
+  "last_workout_label": "Last workout",
+  "last_session_today": "Today",
+  "last_session_yesterday": "Yesterday",
+  "last_session_days_ago": "{n} days ago",
 
   "history_activity_label": "Activity",
   "history_title": "History",

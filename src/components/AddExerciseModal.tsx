@@ -30,7 +30,8 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const [type, setType] = useState<Exercise['type']>('sets-reps');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('10');
-  const [duration, setDuration] = useState('60');
+  const [durationMins, setDurationMins] = useState('1');
+  const [durationSecs, setDurationSecs] = useState('0');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [manualCategory, setManualCategory] = useState('');
 
@@ -44,14 +45,18 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
       type,
       sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
       reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
-      duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
+      duration:
+        type !== 'sets-reps'
+          ? Math.max(1, Number(durationMins) * 60 + Number(durationSecs))
+          : undefined,
       category: (selectedCategory ?? manualCategory) || undefined,
     });
     setName('');
     setType('sets-reps');
     setSets('3');
     setReps('10');
-    setDuration('60');
+    setDurationMins('1');
+    setDurationSecs('0');
     setSelectedCategory(null);
     setManualCategory('');
     clearSuggestions();
@@ -141,7 +146,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
                   <option value="">{t.exercise_category_none}</option>
                   {WGER_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
-                      {cat}
+                      {t.category_labels[cat] ?? cat}
                     </option>
                   ))}
                 </select>
@@ -204,20 +209,37 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
               </div>
             )}
             {type !== 'sets-reps' && (
-              <div className="flex-1">
-                <label htmlFor="duration" className={labelClass}>
-                  {t.exercise_duration_label}
-                </label>
-                <input
-                  id="duration"
-                  type="number"
-                  inputMode="numeric"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  min={1}
-                  className={inputClass}
-                />
-              </div>
+              <>
+                <div className="flex-1">
+                  <label htmlFor="duration-mins" className={labelClass}>
+                    {t.min_label}
+                  </label>
+                  <input
+                    id="duration-mins"
+                    type="number"
+                    inputMode="numeric"
+                    value={durationMins}
+                    onChange={(e) => setDurationMins(e.target.value)}
+                    min={0}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="duration-secs" className={labelClass}>
+                    {t.exercise_duration_label}
+                  </label>
+                  <input
+                    id="duration-secs"
+                    type="number"
+                    inputMode="numeric"
+                    value={durationSecs}
+                    onChange={(e) => setDurationSecs(e.target.value)}
+                    min={0}
+                    max={59}
+                    className={inputClass}
+                  />
+                </div>
+              </>
             )}
           </div>
 

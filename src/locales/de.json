@@ -72,6 +72,16 @@
   "exercise_category_prefix": "Kategorie:",
   "exercise_category_label": "Kategorie (optional)",
   "exercise_category_none": "Keine",
+  "category_labels": {
+    "Arms": "Arme",
+    "Legs": "Beine",
+    "Abs": "Bauch",
+    "Chest": "Brust",
+    "Back": "Rücken",
+    "Shoulders": "Schultern",
+    "Calves": "Waden",
+    "Cardio": "Ausdauer"
+  },
   "exercise_role_label": "Rolle",
   "exercise_scaling_note_label": "Skalierungsnotiz",
   "exercise_scaling_note_optional": "(optional)",
@@ -110,6 +120,11 @@
   "delete_plan_title": "Plan löschen?",
   "plan_not_found": "Plan nicht gefunden.",
   "edit_plan_title": "Plan bearbeiten",
+
+  "last_workout_label": "Letztes Training",
+  "last_session_today": "Heute",
+  "last_session_yesterday": "Gestern",
+  "last_session_days_ago": "Vor {n} Tagen",
 
   "history_activity_label": "Aktivität",
   "history_title": "Verlauf",
