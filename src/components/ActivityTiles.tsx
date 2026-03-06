@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
   /** Maps ISO date string (YYYY-MM-DD) to list of session IDs for that day */
@@ -12,10 +13,9 @@ function toISODate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-const DAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 export default function ActivityTiles({ sessionsByDate }: Props) {
   const router = useRouter();
+  const t = useTranslations();
   const todayRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                       : 'text-[#6B7280]',
                 ].join(' ')}
               >
-                {DAY_ABBR[day.getDay()]}
+                {t.weekday_abbr[day.getDay()]}
               </span>
               <span
                 className={[

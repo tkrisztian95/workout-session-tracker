@@ -39,6 +39,14 @@ function formatDate(): string {
   });
 }
 
+function calendarDaysAgo(dateStr: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const date = new Date(dateStr);
+  date.setHours(0, 0, 0, 0);
+  return Math.round((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 // ─── Sub-views ───────────────────────────────────────────────────────────────
 
 function StartScreen({
@@ -47,12 +55,14 @@ function StartScreen({
   onFreeSession,
   onCreatePlan,
   greeting,
+  lastSessionInfo,
 }: {
   hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
   onCreatePlan: () => void;
   greeting?: string;
+  lastSessionInfo: { relativeLabel: string; sessionName: string } | null;
 }) {
   const t = useTranslations();
   return (
@@ -69,15 +79,23 @@ function StartScreen({
             {greeting}
           </p>
         )}
+        {lastSessionInfo && (
+          <p className="text-[#6B7280] text-sm mt-1.5">
+            <span className="text-[#4B5563]">{t.last_workout_label}: </span>
+            <span className="text-[#9CA3AF]">{lastSessionInfo.relativeLabel}</span>
+            <span className="mx-1.5 text-[#374151]">·</span>
+            <span className="text-[#9CA3AF]">{lastSessionInfo.sessionName}</span>
+          </p>
+        )}
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center px-6 gap-4">
         <h1
-          className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
+          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight mb-2"
           style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
         >
           {t.home_title}
         </h1>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center px-6 gap-4">
         {hasPlans ? (
           <>
             <button
@@ -96,7 +114,9 @@ function StartScreen({
               className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              <span className="flex items-center gap-2">⚡ {t.home_free_session}</span>
+              <span className="flex items-center gap-2">
+                <Dumbbell className="w-5 h-5" /> {t.home_free_session}
+              </span>
               <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -109,7 +129,9 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              <span className="flex items-center gap-2">⚡ {t.home_start_free_session}</span>
+              <span className="flex items-center gap-2">
+                <Dumbbell className="w-5 h-5" /> {t.home_start_free_session}
+              </span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -805,6 +827,35 @@ export default function HomePage() {
     ? t.greeting_first.replace('{name}', userName)
     : t.greeting_returning.replace('{name}', userName);
 
+  const lastSession =
+    sessions.length > 0
+      ? [...sessions].sort((a, b) => b.completedAt.localeCompare(a.completedAt))[0]
+      : null;
+
+  const lastSessionInfo = (() => {
+    if (!lastSession) return null;
+    const dayDiff = calendarDaysAgo(lastSession.completedAt);
+    const relativeLabel =
+      dayDiff === 0
+        ? t.last_session_today
+        : dayDiff === 1
+          ? t.last_session_yesterday
+          : t.last_session_days_ago.replace('{n}', String(dayDiff));
+    let sessionName = t.free_session;
+    if (lastSession.planId) {
+      const allPlans = getPlans();
+      const plan = allPlans.find((p) => p.id === lastSession.planId);
+      if (plan) {
+        sessionName = plan.name;
+        if (lastSession.planDayId) {
+          const day = plan.days.find((d) => d.id === lastSession.planDayId);
+          if (day?.name) sessionName = `${plan.name} · ${day.name}`;
+        }
+      }
+    }
+    return { relativeLabel, sessionName };
+  })();
+
   return (
     <StartScreen
       hasPlans={plans.length > 0}
@@ -815,6 +866,7 @@ export default function HomePage() {
       onFreeSession={startFreeSession}
       onCreatePlan={() => router.push('/plans/new')}
       greeting={greeting}
+      lastSessionInfo={lastSessionInfo}
     />
   );
 }
