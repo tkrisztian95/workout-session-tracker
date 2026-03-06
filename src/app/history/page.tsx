@@ -62,7 +62,7 @@ export default function HistoryPage() {
         <ActivityTiles sessionsByDate={sessionsByDate} />
       </div>
 
-      <div className="flex-1 px-6 space-y-3 overflow-y-auto">
+      <div className="flex-1 px-6 overflow-y-auto">
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-24 text-center">
             <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
@@ -72,46 +72,66 @@ export default function HistoryPage() {
             <p className="text-[#6B7280] text-sm mt-1">{t.history_no_sessions_subtitle}</p>
           </div>
         ) : (
-          sessions.map((session) => {
-            const planName = session.planId ? planMap[session.planId]?.name : undefined;
-            const exerciseCount = session.exercises.length;
-            const mins = durationMinutes(session.startedAt, session.completedAt);
-            const label = planName ?? t.free_session;
-            const categories = [
-              ...new Set(
-                session.exercises.map((e) => e.category).filter((c): c is string => Boolean(c)),
-              ),
-            ];
-
-            return (
-              <Link
-                key={session.id}
-                href={`/history/${session.id}`}
-                className="flex items-center justify-between rounded-2xl bg-[#1F2937] border border-[#374151] px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150"
-              >
-                <div className="text-left min-w-0">
-                  <p className="text-[#F9FAFB] font-semibold text-base truncate">{label}</p>
-                  <p className="text-[#6B7280] text-sm mt-0.5">
-                    {formatSessionDate(session.completedAt)}
-                  </p>
-                  <p className="text-[#4B5563] text-xs mt-1">
-                    {exerciseCount} {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular}{' '}
-                    · {mins} {t.min_label}
-                  </p>
-                  {categories.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {categories.map((cat) => (
-                        <CategoryBadge key={cat} category={cat} />
-                      ))}
-                    </div>
-                  )}
+          (() => {
+            const grouped: { date: string; sessions: typeof sessions }[] = [];
+            for (const session of sessions) {
+              const date = session.completedAt.slice(0, 10);
+              const last = grouped[grouped.length - 1];
+              if (last && last.date === date) {
+                last.sessions.push(session);
+              } else {
+                grouped.push({ date, sessions: [session] });
+              }
+            }
+            return grouped.map(({ date, sessions: daySessions }) => (
+              <div key={date} className="mb-6">
+                <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-3">
+                  {formatSessionDate(daySessions[0].completedAt)}
+                </p>
+                <div className="space-y-3">
+                  {daySessions.map((session) => {
+                    const planName = session.planId ? planMap[session.planId]?.name : undefined;
+                    const exerciseCount = session.exercises.length;
+                    const mins = durationMinutes(session.startedAt, session.completedAt);
+                    const label = planName ?? t.free_session;
+                    const categories = [
+                      ...new Set(
+                        session.exercises
+                          .map((e) => e.category)
+                          .filter((c): c is string => Boolean(c)),
+                      ),
+                    ];
+                    return (
+                      <Link
+                        key={session.id}
+                        href={`/history/${session.id}`}
+                        className="flex items-center justify-between rounded-2xl bg-[#1F2937] border border-[#374151] px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150"
+                      >
+                        <div className="text-left min-w-0">
+                          <p className="text-[#F9FAFB] font-semibold text-base truncate">{label}</p>
+                          <p className="text-[#4B5563] text-xs mt-1">
+                            {exerciseCount}{' '}
+                            {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular} · {mins}{' '}
+                            {t.min_label}
+                          </p>
+                          {categories.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {categories.map((cat) => (
+                                <CategoryBadge key={cat} category={cat} />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
+                          <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
-                <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
-                  <ChevronRight className="w-4 h-4 text-[#6B7280]" />
-                </span>
-              </Link>
-            );
-          })
+              </div>
+            ));
+          })()
         )}
       </div>
 
