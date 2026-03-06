@@ -85,7 +85,7 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              {t.home_follow_plan}
+              <span className="flex items-center gap-2">📋 {t.home_follow_plan}</span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -96,7 +96,7 @@ function StartScreen({
               className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              {t.home_free_session}
+              <span className="flex items-center gap-2">⚡ {t.home_free_session}</span>
               <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -109,7 +109,7 @@ function StartScreen({
               className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
               style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
             >
-              {t.home_start_free_session}
+              <span className="flex items-center gap-2">⚡ {t.home_start_free_session}</span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
@@ -688,6 +688,7 @@ export default function HomePage() {
       reps?: number;
       duration?: number;
       scalingNote?: string;
+      category?: string;
     }): Exercise => ({
       id: crypto.randomUUID(),
       name: ex.name,
@@ -696,6 +697,7 @@ export default function HomePage() {
       reps: ex.reps,
       duration: ex.duration,
       scalingNote: ex.scalingNote,
+      category: ex.category,
     });
     const sharedExercises: Exercise[] = (selectedPlan.sharedExercises ?? []).map(toExercise);
     const coreExercises: Exercise[] = selectedDay.coreExercises.map(toExercise);

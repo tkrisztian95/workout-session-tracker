@@ -7,6 +7,7 @@ import { getPlans, togglePlanStatus } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
+import CategoryBadge from '@/components/CategoryBadge';
 
 export default function PlansPage() {
   const t = useTranslations();
@@ -110,9 +111,18 @@ export default function PlansPage() {
   );
 }
 
+function getPlanCategories(plan: WorkoutPlan): string[] {
+  const all = [
+    ...plan.sharedExercises,
+    ...plan.days.flatMap((d) => [...d.coreExercises, ...d.optionalExercises]),
+  ];
+  return [...new Set(all.map((e) => e.category).filter((c): c is string => Boolean(c)))];
+}
+
 function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus: () => void }) {
   const t = useTranslations();
   const isCompleted = plan.status === 'completed';
+  const categories = getPlanCategories(plan);
 
   return (
     <div
@@ -135,6 +145,13 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
             <span className="ml-2 text-[#4B5563] text-xs">· {t.plan_completed_label}</span>
           )}
         </p>
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {categories.map((cat) => (
+              <CategoryBadge key={cat} category={cat} />
+            ))}
+          </div>
+        )}
       </Link>
       <div className="flex items-center gap-2 flex-shrink-0">
         <button

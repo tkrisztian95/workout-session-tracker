@@ -32,7 +32,6 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const [reps, setReps] = useState('10');
   const [duration, setDuration] = useState('60');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  // TODO: Exercise type does not yet have a category field; manualCategory is captured but not persisted.
   const [manualCategory, setManualCategory] = useState('');
 
   const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
@@ -46,6 +45,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
       sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
       reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
       duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
+      category: (selectedCategory ?? manualCategory) || undefined,
     });
     setName('');
     setType('sets-reps');

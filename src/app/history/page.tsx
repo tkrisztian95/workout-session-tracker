@@ -8,6 +8,7 @@ import ActivityTiles from '@/components/ActivityTiles';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
+import CategoryBadge from '@/components/CategoryBadge';
 
 function formatSessionDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
@@ -76,6 +77,11 @@ export default function HistoryPage() {
             const exerciseCount = session.exercises.length;
             const mins = durationMinutes(session.startedAt, session.completedAt);
             const label = planName ?? t.free_session;
+            const categories = [
+              ...new Set(
+                session.exercises.map((e) => e.category).filter((c): c is string => Boolean(c)),
+              ),
+            ];
 
             return (
               <Link
@@ -92,6 +98,13 @@ export default function HistoryPage() {
                     {exerciseCount} {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular}{' '}
                     · {mins} {t.min_label}
                   </p>
+                  {categories.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {categories.map((cat) => (
+                        <CategoryBadge key={cat} category={cat} />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
                   <ChevronRight className="w-4 h-4 text-[#6B7280]" />
