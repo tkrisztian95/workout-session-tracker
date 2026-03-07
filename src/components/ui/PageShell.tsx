@@ -9,7 +9,7 @@ interface PageProps extends React.HTMLAttributes<HTMLElement> {
 export const Page = forwardRef<HTMLElement, PageProps>(({ className = '', ...props }, ref) => (
   <main
     ref={ref}
-    className={`min-h-screen bg-base flex flex-col max-w-md mx-auto ${className}`}
+    className={`h-dvh bg-base flex flex-col max-w-md mx-auto ${className}`}
     {...props}
   />
 ));
@@ -23,7 +23,11 @@ interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
   ({ className = '', ...props }, ref) => (
-    <div ref={ref} className={`px-6 pt-14 pb-6 ${className}`} {...props} />
+    <div
+      ref={ref}
+      className={`px-6 pt-14 pb-6 sticky top-0 z-10 bg-base ${className}`}
+      {...props}
+    />
   ),
 );
 PageHeader.displayName = 'PageHeader';
