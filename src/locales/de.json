@@ -60,6 +60,8 @@
   "session_complete_sets": "Sätze",
   "session_complete_duration": "Dauer",
   "session_complete_cta": "Tippe irgendwo, um dein Training zu speichern",
+  "session_rate_prompt": "Wie hat es sich angefühlt?",
+  "session_rate_skip": "Überspringen",
 
   "add_exercise_title": "Übung hinzufügen",
   "exercise_name_label": "Übungsname",

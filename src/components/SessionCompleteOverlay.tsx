@@ -2,14 +2,14 @@
 
 import { Dumbbell, Timer, Trophy } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
-import { calcSessionStats, formatDuration } from '@/lib/sessionUtils';
+import { calcSessionStats, formatDuration, RATING_EMOJIS } from '@/lib/sessionUtils';
 import { useTranslations } from '@/lib/locale-context';
 import { Card, HeadingXL } from '@/components/ui';
 
 interface Props {
   exercises: Exercise[];
   startedAt: string;
-  onDismiss: () => void;
+  onDismiss: (rating?: 1 | 2 | 3 | 4 | 5) => void;
 }
 
 export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss }: Props) {
@@ -17,10 +17,7 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
   const stats = calcSessionStats(exercises, startedAt);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm session-complete-overlay"
-      onClick={onDismiss}
-    >
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm session-complete-overlay">
       <style>{`
         @keyframes sessionScaleFadeIn {
           from { opacity: 0; transform: scale(0.7); }
@@ -57,7 +54,7 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
         </p>
 
         {/* Stats */}
-        <div className="session-complete-stats w-full grid grid-cols-3 gap-3 mb-10">
+        <div className="session-complete-stats w-full grid grid-cols-3 gap-3 mb-8">
           <Card className="px-3 py-4 flex flex-col items-center gap-1">
             <Dumbbell className="w-5 h-5 text-brand mb-1" />
             <HeadingXL as="span" className="text-3xl">
@@ -85,8 +82,30 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
           </Card>
         </div>
 
-        {/* CTA */}
-        <p className="session-complete-cta text-dim text-sm">{t.session_complete_cta}</p>
+        {/* Rating */}
+        <div className="session-complete-cta w-full flex flex-col items-center gap-3">
+          <p className="text-secondary text-sm font-medium">{t.session_rate_prompt}</p>
+          <div className="flex gap-3">
+            {RATING_EMOJIS.map((emoji, i) => {
+              const value = (i + 1) as 1 | 2 | 3 | 4 | 5;
+              return (
+                <button
+                  key={value}
+                  onClick={() => onDismiss(value)}
+                  className="text-3xl w-12 h-12 rounded-2xl bg-surface flex items-center justify-center transition-all duration-150 active:scale-90"
+                >
+                  {emoji}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => onDismiss(undefined)}
+            className="text-dim text-sm mt-1 active:opacity-60"
+          >
+            {t.session_rate_skip}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -421,7 +421,7 @@ function SessionView({
 }: {
   session: ActiveSession;
   onUpdate: (session: ActiveSession) => void;
-  onFinish: () => void;
+  onFinish: (rating?: 1 | 2 | 3 | 4 | 5) => void;
   onDiscard: () => void;
 }) {
   const t = useTranslations();
@@ -560,9 +560,9 @@ function SessionView({
         <SessionCompleteOverlay
           exercises={session.exercises}
           startedAt={session.startedAt}
-          onDismiss={() => {
+          onDismiss={(rating) => {
             setShowCompleteOverlay(false);
-            onFinish();
+            onFinish(rating);
           }}
         />
       )}
@@ -670,7 +670,7 @@ export default function HomePage() {
     setActive(session);
   };
 
-  const handleFinish = () => {
+  const handleFinish = (rating?: 1 | 2 | 3 | 4 | 5) => {
     if (!activeSession) return;
     saveSession({
       id: activeSession.id,
@@ -679,6 +679,7 @@ export default function HomePage() {
       exercises: activeSession.exercises,
       planId: activeSession.planId,
       planDayId: activeSession.planDayId,
+      rating,
     });
     clearActiveSession();
     setActive(null);

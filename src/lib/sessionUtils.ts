@@ -1,5 +1,13 @@
 import type { Exercise } from './types';
 
+export const RATING_EMOJIS: [string, string, string, string, string] = [
+  '😩',
+  '😕',
+  '😐',
+  '💪',
+  '🔥',
+];
+
 export function formatExerciseDetail(ex: {
   type: 'sets-reps' | 'sets-duration' | 'duration';
   sets?: number;
