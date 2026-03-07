@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Check, ChevronLeft, Minus, X, Plus } from 'lucide-react';
+import { Check, ChevronLeft, Minus, X, Plus, Trash2 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
-import { getSessions, getPlans, updateSession } from '@/lib/storage';
+import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
-import { HeadingXL, ListLabel, Page, PageHeader } from '@/components/ui';
+import { Button, HeadingXL, IconButton, ListLabel, Page, PageHeader } from '@/components/ui';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
@@ -30,6 +30,7 @@ function parseNum(value: string): number | undefined {
 
 export default function SessionDetailPage() {
   const t = useTranslations();
+  const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
   const [session, setSession] = useState<WorkoutSession | null>(() => {
@@ -44,6 +45,7 @@ export default function SessionDetailPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<WorkoutSession | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<WorkoutSession['exercises'][number]['type']>('sets-reps');
 
@@ -56,6 +58,11 @@ export default function SessionDetailPage() {
     plan && session.planDayId ? plan.days.find((d) => d.id === session.planDayId) : undefined;
   const planName = plan?.name;
   const dayName = planDay?.name;
+  function handleDelete() {
+    deleteSession(session!.id);
+    router.push('/history');
+  }
+
   function handleEdit() {
     setDraft(structuredClone(session));
     setIsEditing(true);
@@ -148,7 +155,18 @@ export default function SessionDetailPage() {
           )}
         </div>
         <SessionDateLabel iso={session.completedAt} format="long" className="mt-3" />
-        <HeadingXL className="mt-1">{dayName ?? planName ?? t.free_session}</HeadingXL>
+        <div className="flex items-center gap-2 mt-1">
+          <HeadingXL>{dayName ?? planName ?? t.free_session}</HeadingXL>
+          {isEditing && (
+            <IconButton
+              onClick={() => setShowDeleteConfirm(true)}
+              aria-label="Delete session"
+              className="flex-shrink-0"
+            >
+              <Trash2 className="w-4 h-4 text-muted" />
+            </IconButton>
+          )}
+        </div>
         {planName && <p className="text-brand text-sm mt-1 font-medium">{planName}</p>}
         <p className="text-muted text-sm mt-2">
           {displaySession.exercises.length}{' '}
@@ -354,6 +372,29 @@ export default function SessionDetailPage() {
       </div>
 
       <BottomNav active="history" />
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
+          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
+            <HeadingXL as="h3" className="text-2xl mb-2">
+              {t.delete_session_title}
+            </HeadingXL>
+            <p className="text-secondary text-sm mb-6">{t.history_delete_body}</p>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 py-3.5"
+              >
+                {t.cancel}
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleDelete} className="flex-1 py-3.5">
+                {t.delete}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Page>
   );
 }

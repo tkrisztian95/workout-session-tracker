@@ -149,6 +149,11 @@ export function saveSession(session: WorkoutSession): void {
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }
 
+export function deleteSession(id: string): void {
+  const sessions = getSessions().filter((s) => s.id !== id);
+  localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
+}
+
 export function updateSession(session: WorkoutSession): void {
   const sessions = getSessions();
   const index = sessions.findIndex((s) => s.id === session.id);

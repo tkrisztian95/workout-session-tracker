@@ -120,6 +120,8 @@
   "no_shared_exercises": "Még nincs közös gyakorlat",
   "add_shared_exercise": "Közös gyakorlat hozzáadása",
   "delete_plan_title": "Töröljük a tervet?",
+  "delete_session_title": "Töröljük az edzést?",
+  "history_delete_body": "Az edzés véglegesen törlődik. Ez a művelet nem vonható vissza.",
   "plan_not_found": "A terv nem található.",
   "edit_plan_title": "Terv szerkesztése",
 
