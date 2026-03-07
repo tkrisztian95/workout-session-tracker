@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-[#111827]">
+    <html lang="en" className="bg-base">
       <body className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}>
         <LocaleProvider>{children}</LocaleProvider>
       </body>

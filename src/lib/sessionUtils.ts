@@ -1,5 +1,18 @@
 import type { Exercise } from './types';
 
+export function formatSessionDate(
+  iso: string,
+  locale: string,
+  format: 'short' | 'long' = 'short',
+): string {
+  return new Date(iso).toLocaleDateString(locale, {
+    weekday: format,
+    month: format,
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export interface SessionStats {
   completedExercises: number;
   completedSets: number;

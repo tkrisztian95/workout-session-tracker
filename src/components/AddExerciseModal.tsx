@@ -7,17 +7,21 @@ import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import { useTranslations } from '@/lib/locale-context';
 import { WGER_CATEGORIES } from '@/lib/wgerClient';
+import {
+  BottomSheet,
+  Button,
+  FieldLabel,
+  HeadingXL,
+  IconButton,
+  Input,
+  Select,
+} from '@/components/ui';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (exercise: Omit<Exercise, 'id'>) => void;
 }
-
-const inputClass =
-  'w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563] transition-shadow duration-150';
-
-const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
 
 export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const t = useTranslations();
@@ -63,196 +67,160 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   };
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      />
-
-      {/* Bottom sheet */}
-      <div
-        className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-[#1F2937] rounded-t-3xl px-6 pt-4 pb-10 transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        {/* Drag handle */}
-        <div className="w-10 h-1 rounded-full bg-[#4B5563] mx-auto mb-5" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2
-            className="text-[#F9FAFB] text-2xl font-bold tracking-tight"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
-            {t.add_exercise_title}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t.close}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer hover:bg-[#4B5563] transition-colors duration-150"
-          >
-            <X className="w-4 h-4 text-[#9CA3AF]" />
-          </button>
-        </div>
-
-        <div className="space-y-5">
-          {/* Name */}
-          <div className="relative">
-            <label htmlFor="exercise-name" className={labelClass}>
-              {t.exercise_name_label}
-            </label>
-            <input
-              id="exercise-name"
-              type="text"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setSelectedCategory(null);
-              }}
-              onBlur={() => setTimeout(clearSuggestions, 150)}
-              placeholder={t.exercise_name_placeholder}
-              autoComplete="off"
-              className={inputClass}
-            />
-            <ExerciseSuggestionList
-              suggestions={suggestions}
-              loading={loading}
-              onSelect={(n, cat) => {
-                setName(n);
-                setSelectedCategory(cat);
-                setManualCategory('');
-                clearSuggestions();
-              }}
-            />
-            {selectedCategory ? (
-              <p className="mt-1.5 text-xs text-[#6B7280]">
-                {t.exercise_category_prefix}{' '}
-                <span className="text-[#9CA3AF] font-medium">{selectedCategory}</span>
-              </p>
-            ) : (
-              <div className="mt-2">
-                <label htmlFor="exercise-category" className={labelClass}>
-                  {t.exercise_category_label}
-                </label>
-                <select
-                  id="exercise-category"
-                  value={manualCategory}
-                  onChange={(e) => setManualCategory(e.target.value)}
-                  className="w-full bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] transition-shadow duration-150"
-                >
-                  <option value="">{t.exercise_category_none}</option>
-                  {WGER_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {t.category_labels[cat] ?? cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* Type toggle */}
-          <div>
-            <p className={labelClass}>{t.exercise_type_label}</p>
-            <div className="flex rounded-xl border border-[#374151] overflow-hidden">
-              {(['sets-reps', 'sets-duration', 'duration'] as const).map((typ) => (
-                <button
-                  key={typ}
-                  onClick={() => setType(typ)}
-                  className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
-                    type === typ
-                      ? 'bg-[#F97316] text-white'
-                      : 'bg-transparent text-[#6B7280] hover:text-[#9CA3AF]'
-                  }`}
-                >
-                  {typeLabels[typ]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sets + Reps/Duration */}
-          <div className="flex gap-3">
-            {type !== 'duration' && (
-              <div className="flex-1">
-                <label htmlFor="sets" className={labelClass}>
-                  {t.exercise_sets_label}
-                </label>
-                <input
-                  id="sets"
-                  type="number"
-                  inputMode="numeric"
-                  value={sets}
-                  onChange={(e) => setSets(e.target.value)}
-                  min={1}
-                  className={inputClass}
-                />
-              </div>
-            )}
-            {type === 'sets-reps' && (
-              <div className="flex-1">
-                <label htmlFor="reps" className={labelClass}>
-                  {t.exercise_reps_label}
-                </label>
-                <input
-                  id="reps"
-                  type="number"
-                  inputMode="numeric"
-                  value={reps}
-                  onChange={(e) => setReps(e.target.value)}
-                  min={1}
-                  className={inputClass}
-                />
-              </div>
-            )}
-            {type !== 'sets-reps' && (
-              <>
-                <div className="flex-1">
-                  <label htmlFor="duration-mins" className={labelClass}>
-                    {t.min_label}
-                  </label>
-                  <input
-                    id="duration-mins"
-                    type="number"
-                    inputMode="numeric"
-                    value={durationMins}
-                    onChange={(e) => setDurationMins(e.target.value)}
-                    min={0}
-                    className={inputClass}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label htmlFor="duration-secs" className={labelClass}>
-                    {t.exercise_duration_label}
-                  </label>
-                  <input
-                    id="duration-secs"
-                    type="number"
-                    inputMode="numeric"
-                    value={durationSecs}
-                    onChange={(e) => setDurationSecs(e.target.value)}
-                    min={0}
-                    max={59}
-                    className={inputClass}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Submit */}
-          <button
-            onClick={handleSubmit}
-            disabled={!name.trim()}
-            className="w-full bg-[#F97316] text-white font-semibold text-base py-4 rounded-2xl cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-transform duration-150 mt-1"
-          >
-            {t.add_exercise_title}
-          </button>
-        </div>
+    <BottomSheet isOpen={isOpen} onClose={onClose}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <HeadingXL as="h2" className="text-2xl">
+          {t.add_exercise_title}
+        </HeadingXL>
+        <IconButton
+          size="sm"
+          onClick={onClose}
+          aria-label={t.close}
+          className="bg-elevated hover:bg-border-subtle"
+        >
+          <X className="w-4 h-4 text-secondary" />
+        </IconButton>
       </div>
-    </>
+
+      <div className="space-y-5">
+        {/* Name */}
+        <div className="relative">
+          <FieldLabel htmlFor="exercise-name">{t.exercise_name_label}</FieldLabel>
+          <Input
+            id="exercise-name"
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setSelectedCategory(null);
+            }}
+            onBlur={() => setTimeout(clearSuggestions, 150)}
+            placeholder={t.exercise_name_placeholder}
+            autoComplete="off"
+          />
+          <ExerciseSuggestionList
+            suggestions={suggestions}
+            loading={loading}
+            onSelect={(n, cat) => {
+              setName(n);
+              setSelectedCategory(cat);
+              setManualCategory('');
+              clearSuggestions();
+            }}
+          />
+          {selectedCategory ? (
+            <p className="mt-1.5 text-xs text-muted">
+              {t.exercise_category_prefix}{' '}
+              <span className="text-secondary font-medium">{selectedCategory}</span>
+            </p>
+          ) : (
+            <div className="mt-2">
+              <FieldLabel htmlFor="exercise-category">{t.exercise_category_label}</FieldLabel>
+              <Select
+                id="exercise-category"
+                value={manualCategory}
+                onChange={(e) => setManualCategory(e.target.value)}
+              >
+                <option value="">{t.exercise_category_none}</option>
+                {WGER_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {t.category_labels[cat] ?? cat}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
+        </div>
+
+        {/* Type toggle */}
+        <div>
+          <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
+            {t.exercise_type_label}
+          </p>
+          <div className="flex rounded-xl border border-border overflow-hidden">
+            {(['sets-reps', 'sets-duration', 'duration'] as const).map((typ) => (
+              <button
+                key={typ}
+                onClick={() => setType(typ)}
+                className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                  type === typ
+                    ? 'bg-brand text-white'
+                    : 'bg-transparent text-muted hover:text-secondary'
+                }`}
+              >
+                {typeLabels[typ]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sets + Reps/Duration */}
+        <div className="flex gap-3">
+          {type !== 'duration' && (
+            <div className="flex-1">
+              <FieldLabel htmlFor="sets">{t.exercise_sets_label}</FieldLabel>
+              <Input
+                id="sets"
+                type="number"
+                inputMode="numeric"
+                value={sets}
+                onChange={(e) => setSets(e.target.value)}
+                min={1}
+              />
+            </div>
+          )}
+          {type === 'sets-reps' && (
+            <div className="flex-1">
+              <FieldLabel htmlFor="reps">{t.exercise_reps_label}</FieldLabel>
+              <Input
+                id="reps"
+                type="number"
+                inputMode="numeric"
+                value={reps}
+                onChange={(e) => setReps(e.target.value)}
+                min={1}
+              />
+            </div>
+          )}
+          {type !== 'sets-reps' && (
+            <>
+              <div className="flex-1">
+                <FieldLabel htmlFor="duration-mins">{t.min_label}</FieldLabel>
+                <Input
+                  id="duration-mins"
+                  type="number"
+                  inputMode="numeric"
+                  value={durationMins}
+                  onChange={(e) => setDurationMins(e.target.value)}
+                  min={0}
+                />
+              </div>
+              <div className="flex-1">
+                <FieldLabel htmlFor="duration-secs">{t.exercise_duration_label}</FieldLabel>
+                <Input
+                  id="duration-secs"
+                  type="number"
+                  inputMode="numeric"
+                  value={durationSecs}
+                  onChange={(e) => setDurationSecs(e.target.value)}
+                  min={0}
+                  max={59}
+                />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Submit */}
+        <Button
+          onClick={handleSubmit}
+          disabled={!name.trim()}
+          className="w-full mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {t.add_exercise_title}
+        </Button>
+      </div>
+    </BottomSheet>
   );
 }

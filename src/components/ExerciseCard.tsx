@@ -2,6 +2,7 @@
 
 import { Check, X } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
+import { IconButton } from '@/components/ui';
 
 interface Props {
   exercise: Exercise;
@@ -20,65 +21,60 @@ export default function ExerciseCard({ exercise, onComplete, onDismiss }: Props)
   const detail = exerciseDetail(exercise);
   const isDismissed = exercise.dismissed === true;
   const isCompleted = exercise.completed === true;
+  const isDone = isCompleted || isDismissed;
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 transition-all duration-200 ${
+      className={`rounded-2xl border flex items-center justify-between px-4 py-4 gap-3 transition-all duration-200 ${
         isDismissed
-          ? 'bg-[#111827] border-[#1F2937] opacity-40'
+          ? 'bg-base border-surface opacity-40'
           : isCompleted
-            ? 'bg-[#1F2937] border-[#374151] opacity-70'
-            : 'bg-[#1F2937] border-[#374151]'
+            ? 'bg-surface border-border opacity-70'
+            : 'bg-surface border-border'
       }`}
     >
       <div className="min-w-0 flex-1">
         <p
           className={`font-semibold text-base leading-tight truncate ${
-            isCompleted || isDismissed ? 'line-through text-[#6B7280]' : 'text-[#F9FAFB]'
+            isDone ? 'line-through text-muted' : 'text-foreground'
           }`}
         >
           {exercise.name}
         </p>
-        <p
-          className={`text-sm mt-1 font-medium ${isCompleted || isDismissed ? 'text-[#4B5563]' : 'text-[#F97316]'}`}
-        >
-          {detail}
-        </p>
+        <p className={`text-sm mt-1 font-medium ${isDone ? 'text-dim' : 'text-brand'}`}>{detail}</p>
         {exercise.scalingNote && (
-          <p className="text-[#6B7280] text-xs mt-1.5 leading-snug">{exercise.scalingNote}</p>
+          <p className="text-muted text-xs mt-1.5 leading-snug">{exercise.scalingNote}</p>
         )}
       </div>
 
       {!isDismissed && (
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Tick / complete button */}
-          <button
+          <IconButton
             onClick={onComplete}
             aria-label={
               isCompleted
                 ? `Unmark ${exercise.name} as complete`
                 : `Mark ${exercise.name} as complete`
             }
-            className={`w-11 h-11 flex items-center justify-center rounded-full transition-colors duration-150 cursor-pointer ${
+            className={
               isCompleted
-                ? 'bg-green-500/20 border border-green-500/50 active:bg-green-500/40'
-                : 'bg-[#374151] active:bg-green-900/40'
-            }`}
+                ? 'bg-success/20 border border-success/50 active:bg-success/40'
+                : 'active:bg-success/10'
+            }
           >
             <Check
-              className={`w-4 h-4 ${isCompleted ? 'text-green-400' : 'text-[#9CA3AF]'}`}
+              className={`w-4 h-4 ${isCompleted ? 'text-success' : 'text-secondary'}`}
               strokeWidth={isCompleted ? 3 : 2}
             />
-          </button>
+          </IconButton>
 
-          {/* Dismiss button */}
-          <button
+          <IconButton
             onClick={onDismiss}
             aria-label={`Dismiss ${exercise.name}`}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer active:bg-red-900/40 transition-colors duration-150"
+            className="active:bg-danger/20"
           >
-            <X className="w-4 h-4 text-[#9CA3AF]" />
-          </button>
+            <X className="w-4 h-4 text-secondary" />
+          </IconButton>
         </div>
       )}
     </div>

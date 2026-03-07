@@ -13,30 +13,24 @@ export default function BottomNav({ active }: Props) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-30">
-      <div className="bg-[#1F2937] border-t border-[#374151] flex">
+      <div className="bg-surface border-t border-border flex">
         <Link
           href="/"
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${
-            active === 'home' ? 'text-[#F97316]' : 'text-[#4B5563]'
-          }`}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${active === 'home' ? 'text-brand' : 'text-dim'}`}
         >
           <Home className="w-5 h-5" />
           <span className="text-xs font-medium">{t.nav_home}</span>
         </Link>
         <Link
           href="/plans"
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${
-            active === 'plans' ? 'text-[#F97316]' : 'text-[#4B5563]'
-          }`}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${active === 'plans' ? 'text-brand' : 'text-dim'}`}
         >
           <ClipboardList className="w-5 h-5" />
           <span className="text-xs font-medium">{t.nav_plans}</span>
         </Link>
         <Link
           href="/history"
-          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${
-            active === 'history' ? 'text-[#F97316]' : 'text-[#4B5563]'
-          }`}
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${active === 'history' ? 'text-brand' : 'text-dim'}`}
         >
           <Clock className="w-5 h-5" />
           <span className="text-xs font-medium">{t.nav_history}</span>

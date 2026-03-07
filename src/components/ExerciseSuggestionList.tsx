@@ -18,11 +18,11 @@ export default function ExerciseSuggestionList({ suggestions, loading, onSelect 
 
   return (
     <ul
-      className="absolute left-0 right-0 top-full mt-1 z-60 bg-[#111827] border border-[#374151] rounded-xl overflow-y-auto max-h-56 shadow-lg"
+      className="absolute left-0 right-0 top-full mt-1 z-60 bg-base border border-border rounded-xl overflow-y-auto max-h-56 shadow-lg"
       style={{ touchAction: 'pan-y' }}
     >
       {showLoading && (
-        <li className="px-4 py-3 text-[#6B7280] text-sm animate-pulse">
+        <li className="px-4 py-3 text-muted text-sm animate-pulse">
           {t.exercise_suggestions_loading}
         </li>
       )}
@@ -36,10 +36,10 @@ export default function ExerciseSuggestionList({ suggestions, loading, onSelect 
                 e.preventDefault();
                 onSelect(ex.name, ex.category);
               }}
-              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[#1F2937] active:bg-[#374151] transition-colors duration-100 cursor-pointer min-h-[48px]"
+              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-surface active:bg-elevated transition-colors duration-100 cursor-pointer min-h-[48px]"
             >
-              <span className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</span>
-              <span className="ml-3 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full bg-[#374151] text-[#9CA3AF]">
+              <span className="text-foreground text-sm font-medium truncate">{ex.name}</span>
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-elevated text-secondary ml-3 shrink-0">
                 {ex.category}
               </span>
             </button>

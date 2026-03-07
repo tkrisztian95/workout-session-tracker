@@ -7,9 +7,7 @@ import { savePlan } from '@/lib/storage';
 import type { PlanDay, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import { useTranslations } from '@/lib/locale-context';
-
-const inputClass =
-  'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
+import { Button, CtaBar, FieldLabel, HeadingXL, Input, Page, PageHeader } from '@/components/ui';
 
 function newDay(): PlanDay {
   return {
@@ -55,27 +53,15 @@ export default function NewPlanPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-32">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-6">
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.new_plan}
-        </h1>
-      </div>
+    <Page className="pb-32">
+      <PageHeader>
+        <HeadingXL>{t.new_plan}</HeadingXL>
+      </PageHeader>
 
       <div className="px-6 space-y-6">
-        {/* Plan name */}
         <div>
-          <label
-            htmlFor="plan-name"
-            className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
-          >
-            {t.plan_name_label}
-          </label>
-          <input
+          <FieldLabel htmlFor="plan-name">{t.plan_name_label}</FieldLabel>
+          <Input
             id="plan-name"
             type="text"
             value={name}
@@ -85,14 +71,12 @@ export default function NewPlanPage() {
             }}
             placeholder={t.plan_name_placeholder}
             autoComplete="off"
-            className={inputClass}
           />
-          {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+          {error && <p className="text-danger text-xs mt-1.5">{error}</p>}
         </div>
 
-        {/* Training days */}
         <div>
-          <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-3">
+          <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-3">
             {t.training_days_label}
           </p>
           <div className="space-y-4">
@@ -107,7 +91,7 @@ export default function NewPlanPage() {
           </div>
           <button
             onClick={() => setDays((prev) => [...prev, newDay()])}
-            className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-4 cursor-pointer"
+            className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             {t.add_training_day}
@@ -115,24 +99,16 @@ export default function NewPlanPage() {
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 pt-6 bg-gradient-to-t from-[#111827] via-[#111827]/90 to-transparent">
+      <CtaBar>
         <div className="flex gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex-1 py-4 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex-1 py-4">
             {t.discard}
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-[2] bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-transform duration-150 disabled:opacity-40"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
+          </Button>
+          <Button onClick={handleSave} className="flex-[2] gap-2">
             {t.save_plan}
-          </button>
+          </Button>
         </div>
-      </div>
-    </main>
+      </CtaBar>
+    </Page>
   );
 }
