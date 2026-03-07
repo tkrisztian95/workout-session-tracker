@@ -5,45 +5,13 @@ import { X, Plus } from 'lucide-react';
 import type { PlanDay, PlanExercise } from '@/lib/types';
 import AddPlanExerciseModal from './AddPlanExerciseModal';
 import { useTranslations } from '@/lib/locale-context';
-import CategoryBadge from '@/components/CategoryBadge';
+import PlanExerciseRow from '@/components/PlanExerciseRow';
 import { Card, IconButton, Input } from '@/components/ui';
 
 interface Props {
   day: PlanDay;
   onChange: (day: PlanDay) => void;
   onRemove: () => void;
-}
-
-function planExerciseDetail(ex: PlanExercise): string {
-  if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
-  if (ex.type === 'sets-duration') return `${ex.sets}×${ex.duration}s`;
-  const d = ex.duration ?? 0;
-  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
-}
-
-function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void }) {
-  const detail = planExerciseDetail(ex);
-
-  return (
-    <div className="flex items-center gap-2 bg-base border border-border rounded-xl px-3 py-2.5">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
-          {ex.category && <CategoryBadge category={ex.category} />}
-        </div>
-        <p className="text-brand text-xs mt-0.5">{detail}</p>
-        {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}
-      </div>
-      <IconButton
-        size="sm"
-        onClick={onRemove}
-        aria-label={`Remove ${ex.name}`}
-        className="flex-shrink-0"
-      >
-        <X className="w-3.5 h-3.5 text-secondary" />
-      </IconButton>
-    </div>
-  );
 }
 
 export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
@@ -155,7 +123,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         </p>
         <div className="space-y-2">
           {day.coreExercises.map((ex) => (
-            <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
+            <PlanExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
           ))}
           {day.coreExercises.length === 0 && (
             <p className="text-muted text-sm">{t.plan_day_no_core}</p>
@@ -170,7 +138,11 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         </p>
         <div className="space-y-2">
           {day.optionalExercises.map((ex) => (
-            <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('optional', ex.id)} />
+            <PlanExerciseRow
+              key={ex.id}
+              ex={ex}
+              onRemove={() => removeExercise('optional', ex.id)}
+            />
           ))}
           {day.optionalExercises.length === 0 && (
             <p className="text-muted text-sm">{t.plan_day_no_optional}</p>
