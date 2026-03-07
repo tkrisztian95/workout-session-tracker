@@ -148,3 +148,12 @@ export function saveSession(session: WorkoutSession): void {
   sessions.push(session);
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }
+
+export function updateSession(session: WorkoutSession): void {
+  const sessions = getSessions();
+  const index = sessions.findIndex((s) => s.id === session.id);
+  if (index >= 0) {
+    sessions[index] = session;
+  }
+  localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
+}
