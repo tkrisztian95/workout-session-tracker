@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { saveUserName, saveLocale } from '@/lib/storage';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import type { Locale } from '@/lib/i18n';
+import { Button, IconButton, Input, HeadingXL } from '@/components/ui';
 
 interface UserNameModalProps {
   onComplete: (name: string) => void;
@@ -41,31 +42,26 @@ export default function UserNameModal({ onComplete }: UserNameModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-[#111827] z-50 flex items-center justify-center px-6"
+      className="fixed inset-0 bg-base z-50 flex items-center justify-center px-6"
       onClick={() => setLangOpen(false)}
     >
       <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
         {/* Title row with inline language picker */}
         <div className="flex items-start justify-between gap-3 mb-2 relative">
-          <h1
-            className="text-[#F9FAFB] text-4xl font-bold leading-tight tracking-tight"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
-            {t.onboarding_title}
-          </h1>
+          <HeadingXL className="text-4xl">{t.onboarding_title}</HeadingXL>
 
           <div className="relative flex-shrink-0">
-            <button
+            <IconButton
               type="button"
               onClick={() => setLangOpen((o) => !o)}
               aria-label="Select language"
-              className="w-11 h-11 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center text-2xl cursor-pointer active:scale-95 transition-transform duration-150"
+              className="border border-border text-2xl"
             >
               {currentLang.flag}
-            </button>
+            </IconButton>
 
             {langOpen && (
-              <div className="absolute top-[52px] right-0 bg-[#1F2937] border border-[#374151] rounded-2xl overflow-hidden shadow-xl z-10 min-w-[160px]">
+              <div className="absolute top-[52px] right-0 bg-surface border border-border rounded-2xl overflow-hidden shadow-xl z-10 min-w-[160px]">
                 {LANGUAGES.map(({ locale, label, flag }) => (
                   <button
                     key={locale}
@@ -73,8 +69,8 @@ export default function UserNameModal({ onComplete }: UserNameModalProps) {
                     onClick={() => handleLocaleChange(locale)}
                     className={`w-full flex items-center gap-3 px-4 py-3.5 text-sm font-semibold cursor-pointer transition-colors duration-150 ${
                       selectedLocale === locale
-                        ? 'text-[#F97316] bg-[#F97316]/10'
-                        : 'text-[#9CA3AF] active:bg-[#374151]'
+                        ? 'text-brand bg-brand/10'
+                        : 'text-secondary active:bg-elevated'
                     }`}
                   >
                     <span className="text-xl leading-none">{flag}</span>
@@ -86,25 +82,24 @@ export default function UserNameModal({ onComplete }: UserNameModalProps) {
           </div>
         </div>
 
-        <p className="text-[#6B7280] text-sm mb-6">{t.onboarding_subtitle}</p>
+        <p className="text-muted text-sm mb-6">{t.onboarding_subtitle}</p>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t.onboarding_name_placeholder}
             autoFocus
-            className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] placeholder-[#4B5563] rounded-2xl px-4 py-4 text-base outline-none focus:border-[#F97316] transition-colors"
+            className="rounded-2xl py-4 focus:border-brand"
           />
 
-          <button
+          <Button
             type="submit"
             disabled={!name.trim()}
-            className="w-full bg-[#F97316] text-white font-bold text-xl py-4 rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-150"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            className="w-full py-4 text-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {t.onboarding_submit}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

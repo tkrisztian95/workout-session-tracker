@@ -4,6 +4,7 @@ import { Dumbbell, Timer, Trophy } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import { calcSessionStats, formatDuration } from '@/lib/sessionUtils';
 import { useTranslations } from '@/lib/locale-context';
+import { Card, HeadingXL } from '@/components/ui';
 
 interface Props {
   exercises: Exercise[];
@@ -17,7 +18,7 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-[#111827]/95 backdrop-blur-sm session-complete-overlay"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm session-complete-overlay"
       onClick={onDismiss}
     >
       <style>{`
@@ -45,61 +46,47 @@ export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss
 
       <div className="flex flex-col items-center px-8 text-center">
         {/* Icon */}
-        <div className="session-complete-icon w-28 h-28 rounded-full bg-[#F97316]/15 border-2 border-[#F97316]/40 flex items-center justify-center mb-6">
-          <Trophy className="w-14 h-14 text-[#F97316]" />
+        <div className="session-complete-icon w-28 h-28 rounded-full bg-brand/15 border-2 border-brand/40 flex items-center justify-center mb-6">
+          <Trophy className="w-14 h-14 text-brand" />
         </div>
 
         {/* Title */}
-        <h1
-          className="session-complete-title text-[#F9FAFB] text-5xl font-bold leading-tight tracking-tight mb-2"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.session_complete_title}
-        </h1>
-        <p className="session-complete-title text-[#6B7280] text-base mb-8">
+        <HeadingXL className="session-complete-title mb-2">{t.session_complete_title}</HeadingXL>
+        <p className="session-complete-title text-muted text-base mb-8">
           {t.session_complete_subtitle}
         </p>
 
         {/* Stats */}
         <div className="session-complete-stats w-full grid grid-cols-3 gap-3 mb-10">
-          <div className="bg-[#1F2937] border border-[#374151] rounded-2xl px-3 py-4 flex flex-col items-center gap-1">
-            <Dumbbell className="w-5 h-5 text-[#F97316] mb-1" />
-            <span
-              className="text-[#F9FAFB] text-3xl font-bold leading-none"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+          <Card className="px-3 py-4 flex flex-col items-center gap-1">
+            <Dumbbell className="w-5 h-5 text-brand mb-1" />
+            <HeadingXL as="span" className="text-3xl">
               {stats.completedExercises}
-            </span>
-            <span className="text-[#6B7280] text-xs">{t.session_complete_exercises}</span>
-          </div>
+            </HeadingXL>
+            <span className="text-muted text-xs">{t.session_complete_exercises}</span>
+          </Card>
 
-          <div className="bg-[#1F2937] border border-[#374151] rounded-2xl px-3 py-4 flex flex-col items-center gap-1">
+          <Card className="px-3 py-4 flex flex-col items-center gap-1">
             <div className="w-5 h-5 mb-1 flex items-center justify-center">
-              <span className="text-[#F97316] text-lg font-bold leading-none">×</span>
+              <span className="text-brand text-lg font-bold leading-none">×</span>
             </div>
-            <span
-              className="text-[#F9FAFB] text-3xl font-bold leading-none"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+            <HeadingXL as="span" className="text-3xl">
               {stats.completedSets}
-            </span>
-            <span className="text-[#6B7280] text-xs">{t.session_complete_sets}</span>
-          </div>
+            </HeadingXL>
+            <span className="text-muted text-xs">{t.session_complete_sets}</span>
+          </Card>
 
-          <div className="bg-[#1F2937] border border-[#374151] rounded-2xl px-3 py-4 flex flex-col items-center gap-1">
-            <Timer className="w-5 h-5 text-[#F97316] mb-1" />
-            <span
-              className="text-[#F9FAFB] text-2xl font-bold leading-none"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+          <Card className="px-3 py-4 flex flex-col items-center gap-1">
+            <Timer className="w-5 h-5 text-brand mb-1" />
+            <HeadingXL as="span" className="text-2xl">
               {formatDuration(stats.elapsedSeconds)}
-            </span>
-            <span className="text-[#6B7280] text-xs">{t.session_complete_duration}</span>
-          </div>
+            </HeadingXL>
+            <span className="text-muted text-xs">{t.session_complete_duration}</span>
+          </Card>
         </div>
 
         {/* CTA */}
-        <p className="session-complete-cta text-[#4B5563] text-sm">{t.session_complete_cta}</p>
+        <p className="session-complete-cta text-dim text-sm">{t.session_complete_cta}</p>
       </div>
     </div>
   );

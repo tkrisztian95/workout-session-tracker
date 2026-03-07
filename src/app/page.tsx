@@ -18,8 +18,21 @@ import {
   getUserName,
 } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
-import { useTranslations } from '@/lib/locale-context';
+import { useLocale, useTranslations } from '@/lib/locale-context';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
+import {
+  BackButton,
+  Badge,
+  Button,
+  CardRow,
+  CtaBar,
+  EmptyState,
+  HeadingXL,
+  LabelOverline,
+  ListLabel,
+  Page,
+  PageHeader,
+} from '@/components/ui';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
 
@@ -31,8 +44,8 @@ function todayWeekday(): number {
   return new Date().getDay();
 }
 
-function formatDate(): string {
-  return new Date().toLocaleDateString('en-US', {
+function formatDate(locale: string): string {
+  return new Date().toLocaleDateString(locale, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -65,96 +78,74 @@ function StartScreen({
   lastSessionInfo: { relativeLabel: string; sessionName: string } | null;
 }) {
   const t = useTranslations();
+  const { locale } = useLocale();
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
-      <div className="px-6 pt-14 pb-6">
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">
-          {formatDate()}
-        </p>
+    <Page className="pb-20">
+      <PageHeader>
+        <LabelOverline>{formatDate(locale)}</LabelOverline>
         {greeting && (
           <p
-            className="text-[#F97316] text-lg font-semibold mt-1"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+            className="text-brand text-lg font-semibold mt-1"
+            style={{ fontFamily: 'var(--font-condensed)' }}
           >
             {greeting}
           </p>
         )}
         {lastSessionInfo && (
-          <p className="text-[#6B7280] text-sm mt-1.5">
-            <span className="text-[#4B5563]">{t.last_workout_label}: </span>
-            <span className="text-[#9CA3AF]">{lastSessionInfo.relativeLabel}</span>
-            <span className="mx-1.5 text-[#374151]">·</span>
-            <span className="text-[#9CA3AF]">{lastSessionInfo.sessionName}</span>
+          <p className="text-muted text-sm mt-1.5">
+            <span className="text-dim">{t.last_workout_label}: </span>
+            <span className="text-secondary">{lastSessionInfo.relativeLabel}</span>
+            <span className="mx-1.5 text-border">·</span>
+            <span className="text-secondary">{lastSessionInfo.sessionName}</span>
           </p>
         )}
-      </div>
+      </PageHeader>
 
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight mb-2"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.home_title}
-        </h1>
+        <HeadingXL className="mb-2">{t.home_title}</HeadingXL>
         {hasPlans ? (
           <>
-            <button
-              onClick={onFollowPlan}
-              className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+            <Button size="lg" onClick={onFollowPlan}>
               <span className="flex items-center gap-2">
                 <ClipboardList className="w-5 h-5" /> {t.home_follow_plan}
               </span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
-            </button>
+            </Button>
 
-            <button
-              onClick={onFreeSession}
-              className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+            <Button variant="secondary" size="lg" onClick={onFreeSession}>
               <span className="flex items-center gap-2">
                 <Dumbbell className="w-5 h-5" /> {t.home_free_session}
               </span>
-              <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
+              <span className="w-8 h-8 rounded-full bg-elevated flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <button
-              onClick={onFreeSession}
-              className="w-full bg-[#F97316] text-white font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+            <Button size="lg" onClick={onFreeSession}>
               <span className="flex items-center gap-2">
                 <Dumbbell className="w-5 h-5" /> {t.home_start_free_session}
               </span>
               <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
-            </button>
+            </Button>
 
-            <button
-              onClick={onCreatePlan}
-              className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-xl py-5 rounded-2xl flex items-center justify-between px-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+            <Button variant="secondary" size="lg" onClick={onCreatePlan}>
               {t.home_create_plan}
-              <span className="w-8 h-8 rounded-full bg-[#374151] flex items-center justify-center">
+              <span className="w-8 h-8 rounded-full bg-elevated flex items-center justify-center">
                 <ChevronRight className="w-5 h-5" />
               </span>
-            </button>
+            </Button>
           </>
         )}
       </div>
 
       <BottomNav active="home" />
-    </main>
+    </Page>
   );
 }
 
@@ -169,55 +160,42 @@ function PlanPickerScreen({
 }) {
   const t = useTranslations();
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
-      <div className="px-6 pt-14 pb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 cursor-pointer mb-2"
-          aria-label="Go back"
-        >
-          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
-            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+    <Page className="pb-20">
+      <PageHeader>
+        <BackButton onClick={onBack} aria-label="Go back">
+          <span className="w-9 h-9 rounded-full flex items-center justify-center bg-surface active:bg-elevated">
+            <ChevronLeft className="w-5 h-5 text-secondary" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
-        </button>
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.choose_plan_title}
-        </h1>
-      </div>
+          <span className="text-sm font-medium text-secondary">{t.back}</span>
+        </BackButton>
+        <HeadingXL>{t.choose_plan_title}</HeadingXL>
+      </PageHeader>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
         {plans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-24 text-center">
-            <p className="text-[#9CA3AF] text-base font-medium">{t.no_plans_title}</p>
-            <p className="text-[#6B7280] text-sm mt-1">{t.no_plans_go_to_plans}</p>
+          <div className="flex flex-col items-center justify-center pt-24 text-center select-none">
+            <p className="text-secondary text-base font-medium">{t.no_plans_title}</p>
+            <p className="text-muted text-sm mt-1">{t.no_plans_go_to_plans}</p>
           </div>
         ) : (
           plans.map((plan) => (
-            <button
-              key={plan.id}
-              onClick={() => onSelect(plan)}
-              className="w-full flex items-center justify-between rounded-2xl bg-[#1F2937] border border-[#374151] px-4 py-4 gap-3 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-            >
+            <CardRow key={plan.id} onClick={() => onSelect(plan)}>
               <div className="text-left">
-                <p className="text-[#F9FAFB] font-semibold text-base">{plan.name}</p>
-                <p className="text-[#6B7280] text-sm mt-0.5">
+                <p className="text-foreground font-semibold text-base">{plan.name}</p>
+                <p className="text-muted text-sm mt-0.5">
                   {plan.days.length} day{plan.days.length !== 1 ? 's' : ''}
                 </p>
               </div>
-              <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
-                <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+              <span className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0">
+                <ChevronRight className="w-4 h-4 text-muted" />
               </span>
-            </button>
+            </CardRow>
           ))
         )}
       </div>
 
       <BottomNav active="home" />
-    </main>
+    </Page>
   );
 }
 
@@ -252,28 +230,17 @@ function DayPickerScreen({
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
-      <div className="px-6 pt-14 pb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 cursor-pointer mb-2"
-          aria-label="Go back"
-        >
-          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
-            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+    <Page className="pb-20">
+      <PageHeader>
+        <BackButton onClick={onBack} aria-label="Go back">
+          <span className="w-9 h-9 rounded-full flex items-center justify-center bg-surface active:bg-elevated">
+            <ChevronLeft className="w-5 h-5 text-secondary" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
-        </button>
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
-          {plan.name}
-        </p>
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.choose_day_title}
-        </h1>
-      </div>
+          <span className="text-sm font-medium text-secondary">{t.back}</span>
+        </BackButton>
+        <LabelOverline className="mb-1">{plan.name}</LabelOverline>
+        <HeadingXL>{t.choose_day_title}</HeadingXL>
+      </PageHeader>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
         {plan.days.map((day, index) => {
@@ -287,36 +254,28 @@ function DayPickerScreen({
               ref={isNext ? nextDayRef : null}
               onClick={() => onSelect(day)}
               className={`w-full flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 ${
-                isNext ? 'bg-[#F97316]/10 border-[#F97316]/40' : 'bg-[#1F2937] border-[#374151]'
+                isNext ? 'bg-brand/10 border-brand/40' : 'bg-surface border-border'
               }`}
             >
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <p className="text-[#F9FAFB] font-semibold text-base">
+                  <p className="text-foreground font-semibold text-base">
                     {day.name || t.free_session}
                   </p>
-                  {isNext && (
-                    <span className="text-[#F97316] text-xs font-semibold bg-[#F97316]/10 px-2 py-0.5 rounded-full">
-                      {t.next_badge}
-                    </span>
-                  )}
-                  {isSuggested && !isNext && (
-                    <span className="text-[#6B7280] text-xs bg-[#1F2937] border border-[#374151] px-2 py-0.5 rounded-full">
-                      {t.today_badge}
-                    </span>
-                  )}
+                  {isNext && <Badge variant="brand">{t.next_badge}</Badge>}
+                  {isSuggested && !isNext && <Badge variant="subtle">{t.today_badge}</Badge>}
                 </div>
-                <p className="text-[#6B7280] text-sm mt-0.5">
+                <p className="text-muted text-sm mt-0.5">
                   {coreCount} core{optionalCount > 0 ? ` · ${optionalCount} optional` : ''}
                 </p>
                 {day.weekdays.length > 0 && (
-                  <p className="text-[#4B5563] text-xs mt-1">
+                  <p className="text-dim text-xs mt-1">
                     {day.weekdays.map((w) => t.weekday_abbr[w]).join(', ')}
                   </p>
                 )}
               </div>
-              <span className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center flex-shrink-0">
-                <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+              <span className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0">
+                <ChevronRight className="w-4 h-4 text-muted" />
               </span>
             </button>
           );
@@ -324,7 +283,7 @@ function DayPickerScreen({
       </div>
 
       <BottomNav active="home" />
-    </main>
+    </Page>
   );
 }
 
@@ -352,49 +311,39 @@ function OptionalPickerScreen({
   };
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-32">
-      <div className="px-6 pt-14 pb-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 cursor-pointer mb-2"
-          aria-label="Go back"
-        >
-          <span className="w-9 h-9 rounded-full bg-[#1F2937] flex items-center justify-center active:bg-[#374151] transition-colors duration-150">
-            <ChevronLeft className="w-5 h-5 text-[#9CA3AF]" />
+    <Page className="pb-32">
+      <PageHeader>
+        <BackButton onClick={onBack} aria-label="Go back">
+          <span className="w-9 h-9 rounded-full flex items-center justify-center bg-surface active:bg-elevated">
+            <ChevronLeft className="w-5 h-5 text-secondary" />
           </span>
-          <span className="text-sm font-medium text-[#9CA3AF]">{t.back}</span>
-        </button>
-        <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase mb-1">
+          <span className="text-sm font-medium text-secondary">{t.back}</span>
+        </BackButton>
+        <LabelOverline className="mb-1">
           {plan.name} · {day.name}
-        </p>
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.optional_exercises_title}
-        </h1>
-        <p className="text-[#6B7280] text-sm mt-2">{t.optional_exercises_subtitle}</p>
-      </div>
+        </LabelOverline>
+        <HeadingXL>{t.optional_exercises_title}</HeadingXL>
+        <p className="text-muted text-sm mt-2">{t.optional_exercises_subtitle}</p>
+      </PageHeader>
 
       <div className="flex-1 px-6 space-y-4 overflow-y-auto pb-4">
-        {/* Core exercises (read-only) */}
         {day.coreExercises.length > 0 && (
           <div>
-            <p className="text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
+            <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
               {t.core_always_included}
             </p>
             <div className="space-y-2">
               {day.coreExercises.map((ex) => (
                 <div
                   key={ex.id}
-                  className="flex items-center gap-3 bg-[#1F2937] border border-[#374151] rounded-xl px-3 py-2.5"
+                  className="flex items-center gap-3 bg-surface border border-border rounded-xl px-3 py-2.5"
                 >
-                  <div className="w-5 h-5 rounded-md bg-[#F97316] flex items-center justify-center flex-shrink-0">
+                  <div className="w-5 h-5 rounded-md bg-brand flex items-center justify-center flex-shrink-0">
                     <Check className="w-3 h-3 text-white" strokeWidth={3} />
                   </div>
                   <div>
-                    <p className="text-[#F9FAFB] text-sm font-medium">{ex.name}</p>
-                    <p className="text-[#F97316] text-xs">
+                    <p className="text-foreground text-sm font-medium">{ex.name}</p>
+                    <p className="text-brand text-xs">
                       {ex.type === 'sets-reps'
                         ? `${ex.sets}×${ex.reps}`
                         : `${ex.sets}×${ex.duration}s`}
@@ -406,10 +355,9 @@ function OptionalPickerScreen({
           </div>
         )}
 
-        {/* Optional exercises (toggle) */}
         {day.optionalExercises.length > 0 ? (
           <div>
-            <p className="text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2">
+            <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
               {t.optional_label}
             </p>
             <div className="space-y-2">
@@ -420,19 +368,19 @@ function OptionalPickerScreen({
                     key={ex.id}
                     onClick={() => toggle(ex.id)}
                     className={`w-full flex items-center gap-3 rounded-xl border px-3 py-2.5 cursor-pointer transition-colors duration-150 text-left ${
-                      checked ? 'bg-[#1F2937] border-[#F97316]/50' : 'bg-[#111827] border-[#374151]'
+                      checked ? 'bg-surface border-brand/50' : 'bg-base border-border'
                     }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                        checked ? 'bg-[#F97316] border-[#F97316]' : 'border-[#4B5563]'
+                        checked ? 'bg-brand border-brand' : 'border-border-subtle'
                       }`}
                     >
                       {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                     </div>
                     <div>
-                      <p className="text-[#F9FAFB] text-sm font-medium">{ex.name}</p>
-                      <p className="text-[#6B7280] text-xs">
+                      <p className="text-foreground text-sm font-medium">{ex.name}</p>
+                      <p className="text-muted text-xs">
                         {ex.type === 'sets-reps'
                           ? `${ex.sets}×${ex.reps}`
                           : `${ex.sets}×${ex.duration}s`}
@@ -444,20 +392,16 @@ function OptionalPickerScreen({
             </div>
           </div>
         ) : (
-          <p className="text-[#6B7280] text-sm">{t.no_optional_in_day}</p>
+          <p className="text-muted text-sm">{t.no_optional_in_day}</p>
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 pt-6 bg-gradient-to-t from-[#111827] via-[#111827]/90 to-transparent">
-        <button
-          onClick={() => onStart(selected)}
-          className="w-full bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
+      <CtaBar>
+        <Button onClick={() => onStart(selected)} className="w-full py-4">
           {t.start_session}
-        </button>
-      </div>
-    </main>
+        </Button>
+      </CtaBar>
+    </Page>
   );
 }
 
@@ -473,6 +417,7 @@ function SessionView({
   onDiscard: () => void;
 }) {
   const t = useTranslations();
+  const { locale } = useLocale();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
@@ -510,43 +455,32 @@ function SessionView({
   const totalCount = session.exercises.length;
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-20">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-6">
+    <Page className="pb-20">
+      <PageHeader>
         <div className="flex items-center justify-between mb-1">
-          <p className="text-[#6B7280] text-xs font-medium tracking-widest uppercase">
-            {formatDate()}
-          </p>
+          <LabelOverline>{formatDate(locale)}</LabelOverline>
           <SessionTimer startedAt={session.startedAt} />
         </div>
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold mt-1 leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {session.planDayName ?? t.free_session}
-        </h1>
+        <HeadingXL className="mt-1">{session.planDayName ?? t.free_session}</HeadingXL>
         {session.planName && (
-          <p className="text-[#F97316] text-sm mt-1 font-medium">{session.planName}</p>
+          <p className="text-brand text-sm mt-1 font-medium">{session.planName}</p>
         )}
         {totalCount > 0 && (
-          <p className="text-[#6B7280] text-sm mt-2">
+          <p className="text-muted text-sm mt-2">
             {t.session_progress
               .replace('{remaining}', String(remaining.length))
               .replace('{done}', String(completed.length))}
           </p>
         )}
-      </div>
+      </PageHeader>
 
-      {/* Exercise list */}
       <div className="flex-1 px-6 pb-52 space-y-3 overflow-y-auto">
         {totalCount === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-24 text-center select-none">
-            <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
-              <Dumbbell className="w-9 h-9 text-[#374151]" />
-            </div>
-            <p className="text-[#9CA3AF] text-base font-medium">{t.no_exercises_title}</p>
-            <p className="text-[#6B7280] text-sm mt-1">{t.no_exercises_subtitle}</p>
-          </div>
+          <EmptyState
+            icon={<Dumbbell className="w-9 h-9 text-border" />}
+            title={t.no_exercises_title}
+            subtitle={t.no_exercises_subtitle}
+          />
         ) : (
           <>
             {remaining.map((exercise) => (
@@ -560,9 +494,7 @@ function SessionView({
 
             {completed.length > 0 && (
               <>
-                <p className="text-[#6B7280] text-xs font-medium uppercase tracking-wide pt-2">
-                  {t.completed_section}
-                </p>
+                <ListLabel>{t.completed_section}</ListLabel>
                 {completed.map((exercise) => (
                   <ExerciseCard
                     key={exercise.id}
@@ -576,9 +508,7 @@ function SessionView({
 
             {dismissed.length > 0 && (
               <>
-                <p className="text-[#4B5563] text-xs font-medium uppercase tracking-wide pt-2">
-                  {t.skipped_section}
-                </p>
+                <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
                 {dismissed.map((exercise) => (
                   <ExerciseCard
                     key={exercise.id}
@@ -593,32 +523,24 @@ function SessionView({
         )}
       </div>
 
-      {/* Bottom actions */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 pt-4 bg-gradient-to-t from-[#111827] via-[#111827]/95 to-transparent space-y-2">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full bg-[#1F2937] border border-[#374151] text-[#F9FAFB] font-bold text-base py-3.5 rounded-2xl flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
+      <CtaBar slim className="space-y-2">
+        <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full gap-2">
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           {t.add_exercise_button}
-        </button>
+        </Button>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="ghost"
             onClick={() => setShowDiscardConfirm(true)}
-            className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold text-sm cursor-pointer"
+            className="flex-1 py-3.5 text-sm"
           >
             {t.discard}
-          </button>
-          <button
-            onClick={() => setShowCompleteOverlay(true)}
-            className="flex-[2] bg-[#F97316] text-white font-bold text-base py-3.5 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
+          </Button>
+          <Button onClick={() => setShowCompleteOverlay(true)} className="flex-[2]">
             {t.finish_session}
-          </button>
+          </Button>
         </div>
-      </div>
+      </CtaBar>
 
       <AddExerciseModal
         isOpen={isModalOpen}
@@ -626,7 +548,6 @@ function SessionView({
         onAdd={handleAdd}
       />
 
-      {/* Session complete overlay */}
       {showCompleteOverlay && (
         <SessionCompleteOverlay
           exercises={session.exercises}
@@ -638,35 +559,29 @@ function SessionView({
         />
       )}
 
-      {/* Discard confirmation */}
       {showDiscardConfirm && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
-          <div className="w-full bg-[#1F2937] rounded-t-3xl px-6 pt-6 pb-10">
-            <h3
-              className="text-[#F9FAFB] text-2xl font-bold mb-2"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
+            <HeadingXL as="h3" className="text-2xl mb-2">
               {t.discard_session_title}
-            </h3>
-            <p className="text-[#9CA3AF] text-sm mb-6">{t.discard_session_subtitle}</p>
+            </HeadingXL>
+            <p className="text-secondary text-sm mb-6">{t.discard_session_subtitle}</p>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setShowDiscardConfirm(false)}
-                className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer"
+                className="flex-1 py-3.5"
               >
                 {t.keep_going}
-              </button>
-              <button
-                onClick={onDiscard}
-                className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-semibold cursor-pointer active:scale-[0.98] transition-transform"
-              >
+              </Button>
+              <Button variant="danger" onClick={onDiscard} className="flex-1">
                 {t.discard}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </main>
+    </Page>
   );
 }
 
@@ -862,7 +777,7 @@ export default function HomePage() {
     <StartScreen
       hasPlans={plans.length > 0}
       onFollowPlan={() => {
-        setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active')); // refresh, active only
+        setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active'));
         setStep('pick-plan');
       }}
       onFreeSession={startFreeSession}

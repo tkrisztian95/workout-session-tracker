@@ -9,9 +9,16 @@ import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
-
-const inputClass =
-  'w-full bg-[#1F2937] text-[#F9FAFB] rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]';
+import {
+  Button,
+  CtaBar,
+  FieldLabel,
+  HeadingXL,
+  IconButton,
+  Input,
+  Page,
+  PageHeader,
+} from '@/components/ui';
 
 function newDay(): PlanDay {
   return {
@@ -90,43 +97,31 @@ export default function PlanDetailPage() {
 
   if (!plan) {
     return (
-      <main className="min-h-screen bg-[#111827] flex items-center justify-center max-w-md mx-auto">
-        <p className="text-[#6B7280]">{t.plan_not_found}</p>
-      </main>
+      <Page className="items-center justify-center">
+        <p className="text-muted">{t.plan_not_found}</p>
+      </Page>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-32">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-6">
+    <Page className="pb-32">
+      <PageHeader>
         <div className="flex items-start justify-between gap-3">
-          <h1
-            className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
-            {t.edit_plan_title}
-          </h1>
-          <button
+          <HeadingXL>{t.edit_plan_title}</HeadingXL>
+          <IconButton
             onClick={() => setShowDeleteConfirm(true)}
-            className="mt-1 w-10 h-10 flex items-center justify-center rounded-full bg-[#1F2937] border border-[#374151] cursor-pointer hover:border-red-500/50 transition-colors"
             aria-label="Delete plan"
+            className="mt-1 border border-border hover:border-danger/50"
           >
-            <Trash2 className="w-4 h-4 text-[#6B7280]" />
-          </button>
+            <Trash2 className="w-4 h-4 text-muted" />
+          </IconButton>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="px-6 space-y-6">
-        {/* Plan name */}
         <div>
-          <label
-            htmlFor="edit-plan-name"
-            className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2"
-          >
-            {t.plan_name_label}
-          </label>
-          <input
+          <FieldLabel htmlFor="edit-plan-name">{t.plan_name_label}</FieldLabel>
+          <Input
             id="edit-plan-name"
             type="text"
             value={name}
@@ -135,58 +130,56 @@ export default function PlanDetailPage() {
               setError('');
             }}
             placeholder={t.plan_name_placeholder}
-            className={inputClass}
           />
-          {error && <p className="text-red-400 text-xs mt-1.5">{error}</p>}
+          {error && <p className="text-danger text-xs mt-1.5">{error}</p>}
         </div>
 
-        {/* Shared exercises */}
         <div>
-          <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-1">
+          <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-1">
             {t.shared_exercises_label}
           </p>
-          <p className="text-[#6B7280] text-xs mb-3">{t.shared_exercises_subtitle}</p>
+          <p className="text-muted text-xs mb-3">{t.shared_exercises_subtitle}</p>
           <div className="space-y-2">
             {sharedExercises.map((ex) => (
               <div
                 key={ex.id}
-                className="flex items-center gap-2 bg-[#1F2937] border border-[#374151] rounded-xl px-3 py-2.5"
+                className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2.5"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+                    <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
                     {ex.category && <CategoryBadge category={ex.category} />}
                   </div>
-                  <p className="text-[#F97316] text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
+                  <p className="text-brand text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
                   {ex.scalingNote && (
-                    <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>
+                    <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>
                   )}
                 </div>
-                <button
+                <IconButton
+                  size="sm"
                   onClick={() => removeShared(ex.id)}
                   aria-label={`Remove ${ex.name}`}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer flex-shrink-0"
+                  className="flex-shrink-0"
                 >
-                  <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
-                </button>
+                  <X className="w-3.5 h-3.5 text-secondary" />
+                </IconButton>
               </div>
             ))}
             {sharedExercises.length === 0 && (
-              <p className="text-[#6B7280] text-sm">{t.no_shared_exercises}</p>
+              <p className="text-muted text-sm">{t.no_shared_exercises}</p>
             )}
           </div>
           <button
             onClick={() => setIsSharedModalOpen(true)}
-            className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-3 cursor-pointer"
+            className="flex items-center gap-2 text-brand text-sm font-semibold mt-3 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             {t.add_shared_exercise}
           </button>
         </div>
 
-        {/* Training days */}
         <div>
-          <p className="block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-3">
+          <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-3">
             {t.training_days_label}
           </p>
           <div className="space-y-4">
@@ -201,7 +194,7 @@ export default function PlanDetailPage() {
           </div>
           <button
             onClick={() => setDays((prev) => [...prev, newDay()])}
-            className="flex items-center gap-2 text-[#F97316] text-sm font-semibold mt-4 cursor-pointer"
+            className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             {t.add_training_day}
@@ -209,51 +202,37 @@ export default function PlanDetailPage() {
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 pt-6 bg-gradient-to-t from-[#111827] via-[#111827]/90 to-transparent">
+      <CtaBar>
         <div className="flex gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex-1 py-4 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer active:scale-[0.98] transition-transform duration-150"
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex-1 py-4">
             {t.discard}
-          </button>
-          <button
-            onClick={handleSave}
-            className="flex-[2] bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl cursor-pointer active:scale-[0.98] transition-transform duration-150"
-            style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-          >
+          </Button>
+          <Button onClick={handleSave} className="flex-[2]">
             {t.save_changes}
-          </button>
+          </Button>
         </div>
-      </div>
+      </CtaBar>
 
-      {/* Delete confirmation overlay */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
-          <div className="w-full bg-[#1F2937] rounded-t-3xl px-6 pt-6 pb-10">
-            <h3
-              className="text-[#F9FAFB] text-2xl font-bold mb-2"
-              style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-            >
+          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
+            <HeadingXL as="h3" className="text-2xl mb-2">
               {t.delete_plan_title}
-            </h3>
-            <p className="text-[#9CA3AF] text-sm mb-6">
+            </HeadingXL>
+            <p className="text-secondary text-sm mb-6">
               &ldquo;{plan.name}&rdquo; will be permanently deleted. This cannot be undone.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3.5 rounded-2xl border border-[#374151] text-[#9CA3AF] font-semibold cursor-pointer"
+                className="flex-1 py-3.5"
               >
                 {t.cancel}
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-semibold cursor-pointer active:scale-[0.98] transition-transform"
-              >
+              </Button>
+              <Button variant="danger" size="sm" onClick={handleDelete} className="flex-1 py-3.5">
                 {t.delete}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -265,6 +244,6 @@ export default function PlanDetailPage() {
         onAdd={handleAddShared}
         showRole={false}
       />
-    </main>
+    </Page>
   );
 }

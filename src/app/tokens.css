@@ -1,0 +1,62 @@
+/* ═══════════════════════════════════════════════════════════
+   DESIGN SYSTEM TOKENS — Workout Sessions Tracker
+   Dark, energetic, orange-accented fitness theme
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── 1. Raw palette ─────────────────────────────────────────
+   Primitive values. Do NOT use these directly in components.
+   Reference semantic tokens (section 2) instead.
+   ─────────────────────────────────────────────────────────── */
+:root {
+  --palette-gray-900: #111827;
+  --palette-gray-800: #1f2937;
+  --palette-gray-700: #374151;
+  --palette-gray-600: #4b5563;
+  --palette-gray-500: #6b7280;
+  --palette-gray-400: #9ca3af;
+  --palette-gray-100: #f9fafb;
+
+  --palette-orange-500: #f97316;
+  --palette-orange-400: #fb923c;
+
+  --palette-green-500: #22c55e;
+  --palette-green-400: #4ade80;
+
+  --palette-red-500: #ef4444;
+}
+
+/* ── 2. Semantic color tokens ───────────────────────────────
+   Exposed to Tailwind v4 as utility classes:
+     bg-base, bg-surface, bg-elevated
+     text-foreground, text-secondary, text-muted, text-dim
+     text-brand, text-success, text-danger
+     border-border, border-border-subtle
+   ─────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Backgrounds */
+  --color-base: var(--palette-gray-900); /* page bg        */
+  --color-surface: var(--palette-gray-800); /* cards, panels  */
+  --color-elevated: var(--palette-gray-700); /* hover, inputs  */
+
+  /* Borders */
+  --color-border: var(--palette-gray-700);
+  --color-border-subtle: var(--palette-gray-600);
+
+  /* Text hierarchy */
+  --color-foreground: var(--palette-gray-100); /* primary text   */
+  --color-secondary: var(--palette-gray-400); /* secondary text */
+  --color-muted: var(--palette-gray-500); /* muted / hints  */
+  --color-dim: var(--palette-gray-600); /* very subtle    */
+
+  /* Brand */
+  --color-brand: var(--palette-orange-500);
+  --color-brand-alt: var(--palette-orange-400);
+
+  /* Status */
+  --color-success: var(--palette-green-500);
+  --color-danger: var(--palette-red-500);
+
+  /* Typography */
+  --font-condensed: var(--font-barlow-condensed), sans-serif;
+  --font-body: var(--font-barlow), system-ui, sans-serif;
+}

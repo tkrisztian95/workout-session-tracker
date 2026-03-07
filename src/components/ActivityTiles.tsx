@@ -67,10 +67,10 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                 'flex flex-col items-center gap-1 w-[52px] py-3 rounded-2xl transition-all duration-150',
                 hasWorkout ? 'cursor-pointer active:scale-95' : 'cursor-default',
                 isToday && hasWorkout
-                  ? 'bg-[#F97316]'
+                  ? 'bg-brand'
                   : isToday
-                    ? 'bg-[#1F2937] ring-2 ring-[#F97316]/60'
-                    : 'bg-[#1F2937]',
+                    ? 'bg-surface ring-2 ring-brand/60'
+                    : 'bg-surface',
               ].join(' ')}
             >
               <span
@@ -79,10 +79,10 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                   isToday && hasWorkout
                     ? 'text-white/80'
                     : isToday
-                      ? 'text-[#F97316]'
+                      ? 'text-brand'
                       : hasWorkout
                         ? 'text-white/80'
-                        : 'text-[#6B7280]',
+                        : 'text-muted',
                 ].join(' ')}
               >
                 {t.weekday_abbr[day.getDay()]}
@@ -93,20 +93,20 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                   isToday && hasWorkout
                     ? 'text-white'
                     : hasWorkout || isToday
-                      ? 'text-[#F9FAFB]'
-                      : 'text-[#374151]',
+                      ? 'text-foreground'
+                      : 'text-border',
                 ].join(' ')}
-                style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+                style={{ fontFamily: 'var(--font-condensed)' }}
               >
                 {day.getDate()}
               </span>
-              {hasWorkout ? (
-                <span className={['text-[10px] font-bold', 'text-white/70'].join(' ')}>
-                  {count > 1 ? `×${count}` : '●'}
-                </span>
-              ) : (
-                <span className="text-[10px] text-transparent select-none">·</span>
-              )}
+              <span className="h-3 flex items-center justify-center">
+                {count > 1 ? (
+                  <span className="text-[10px] font-bold text-white/70">{`×${count}`}</span>
+                ) : hasWorkout ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/70 block" />
+                ) : null}
+              </span>
             </button>
           );
         })}

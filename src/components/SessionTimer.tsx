@@ -30,7 +30,7 @@ export default function SessionTimer({ startedAt }: Props) {
   }, [startedAt]);
 
   return (
-    <div className="flex items-center gap-1.5 text-[#6B7280] text-sm">
+    <div className="flex items-center gap-1.5 text-muted text-sm">
       <Timer className="w-3.5 h-3.5" />
       <span className="font-mono font-medium tabular-nums">{formatElapsed(elapsed)}</span>
     </div>

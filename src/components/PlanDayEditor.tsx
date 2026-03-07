@@ -6,14 +6,13 @@ import type { PlanDay, PlanExercise } from '@/lib/types';
 import AddPlanExerciseModal from './AddPlanExerciseModal';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
+import { Card, IconButton, Input } from '@/components/ui';
 
 interface Props {
   day: PlanDay;
   onChange: (day: PlanDay) => void;
   onRemove: () => void;
 }
-
-const labelClass = 'block text-[#9CA3AF] text-xs font-medium uppercase tracking-wide mb-2';
 
 function planExerciseDetail(ex: PlanExercise): string {
   if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
@@ -26,24 +25,23 @@ function ExerciseRow({ ex, onRemove }: { ex: PlanExercise; onRemove: () => void 
   const detail = planExerciseDetail(ex);
 
   return (
-    <div className="flex items-center gap-2 bg-[#111827] border border-[#374151] rounded-xl px-3 py-2.5">
+    <div className="flex items-center gap-2 bg-base border border-border rounded-xl px-3 py-2.5">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-[#F9FAFB] text-sm font-medium truncate">{ex.name}</p>
+          <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
           {ex.category && <CategoryBadge category={ex.category} />}
         </div>
-        <p className="text-[#F97316] text-xs mt-0.5">{detail}</p>
-        {ex.scalingNote && (
-          <p className="text-[#6B7280] text-xs mt-0.5 truncate">{ex.scalingNote}</p>
-        )}
+        <p className="text-brand text-xs mt-0.5">{detail}</p>
+        {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}
       </div>
-      <button
+      <IconButton
+        size="sm"
         onClick={onRemove}
         aria-label={`Remove ${ex.name}`}
-        className="w-8 h-8 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer flex-shrink-0"
+        className="flex-shrink-0"
       >
-        <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
-      </button>
+        <X className="w-3.5 h-3.5 text-secondary" />
+      </IconButton>
     </div>
   );
 }
@@ -86,23 +84,23 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
   };
 
   return (
-    <div className="bg-[#1F2937] border border-[#374151] rounded-2xl p-4 space-y-4">
+    <Card className="p-4 space-y-4">
       {/* Day name + remove */}
       <div className="flex items-center gap-3">
-        <input
+        <Input
           type="text"
           value={day.name}
           onChange={(e) => onChange({ ...day, name: e.target.value })}
           placeholder={t.plan_day_name_placeholder}
-          className="flex-1 bg-[#111827] text-[#F9FAFB] rounded-xl px-4 py-2.5 text-base outline-none focus:ring-2 focus:ring-[#F97316] border border-[#374151] placeholder-[#4B5563]"
+          className="flex-1 py-2.5"
         />
-        <button
+        <IconButton
           onClick={onRemove}
           aria-label="Remove day"
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-[#374151] cursor-pointer hover:bg-red-900/40 transition-colors"
+          className="hover:bg-danger/20 transition-colors"
         >
-          <X className="w-4 h-4 text-[#9CA3AF]" />
-        </button>
+          <X className="w-4 h-4 text-secondary" />
+        </IconButton>
       </div>
 
       {/* Schedule toggle + weekday selector */}
@@ -113,7 +111,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         >
           <span
             className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-              showSchedule ? 'bg-[#F97316] border-[#F97316]' : 'bg-transparent border-[#6B7280]'
+              showSchedule ? 'bg-brand border-brand' : 'bg-transparent border-muted'
             }`}
           >
             {showSchedule && (
@@ -129,7 +127,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
               </svg>
             )}
           </span>
-          <span className={showSchedule ? 'text-[#F9FAFB]' : 'text-[#6B7280]'}>
+          <span className={showSchedule ? 'text-foreground' : 'text-muted'}>
             {t.plan_day_schedule}
           </span>
         </button>
@@ -140,9 +138,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
                 key={idx}
                 onClick={() => toggleWeekday(idx)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
-                  day.weekdays.includes(idx)
-                    ? 'bg-[#F97316] text-white'
-                    : 'bg-[#374151] text-[#9CA3AF]'
+                  day.weekdays.includes(idx) ? 'bg-brand text-white' : 'bg-elevated text-secondary'
                 }`}
               >
                 {label}
@@ -154,26 +150,30 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
 
       {/* Core exercises */}
       <div>
-        <p className={labelClass}>{t.plan_day_core_exercises}</p>
+        <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
+          {t.plan_day_core_exercises}
+        </p>
         <div className="space-y-2">
           {day.coreExercises.map((ex) => (
             <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
           ))}
           {day.coreExercises.length === 0 && (
-            <p className="text-[#6B7280] text-sm">{t.plan_day_no_core}</p>
+            <p className="text-muted text-sm">{t.plan_day_no_core}</p>
           )}
         </div>
       </div>
 
       {/* Optional exercises */}
       <div>
-        <p className={labelClass}>{t.plan_day_optional_exercises}</p>
+        <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
+          {t.plan_day_optional_exercises}
+        </p>
         <div className="space-y-2">
           {day.optionalExercises.map((ex) => (
             <ExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('optional', ex.id)} />
           ))}
           {day.optionalExercises.length === 0 && (
-            <p className="text-[#6B7280] text-sm">{t.plan_day_no_optional}</p>
+            <p className="text-muted text-sm">{t.plan_day_no_optional}</p>
           )}
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
       {/* Add exercise button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="flex items-center gap-2 text-[#F97316] text-sm font-semibold cursor-pointer"
+        className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer"
       >
         <Plus className="w-4 h-4" />
         {t.plan_day_add_exercise}
@@ -192,6 +192,6 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddExercise}
       />
-    </div>
+    </Card>
   );
 }

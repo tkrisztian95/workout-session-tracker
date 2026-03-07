@@ -8,6 +8,7 @@ import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
+import { EmptyState, HeadingXL, IconButton, Page, PageHeader } from '@/components/ui';
 
 export default function PlansPage() {
   const t = useTranslations();
@@ -23,37 +24,28 @@ export default function PlansPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#111827] flex flex-col max-w-md mx-auto pb-24">
-      {/* Header */}
-      <div className="px-6 pt-14 pb-6">
-        <h1
-          className="text-[#F9FAFB] text-5xl font-bold leading-none tracking-tight"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
-        >
-          {t.plans_title}
-        </h1>
+    <Page className="pb-24">
+      <PageHeader>
+        <HeadingXL>{t.plans_title}</HeadingXL>
         {activePlans.length > 0 && (
-          <p className="text-[#6B7280] text-sm mt-3">
+          <p className="text-muted text-sm mt-3">
             {activePlans.length}{' '}
             {activePlans.length !== 1 ? t.plans_active_plans : t.plans_active_plan}
           </p>
         )}
-      </div>
+      </PageHeader>
 
-      {/* Plan list */}
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
         {activePlans.length === 0 && completedPlans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-24 text-center select-none">
-            <div className="w-20 h-20 rounded-full bg-[#1F2937] border border-[#374151] flex items-center justify-center mb-5">
-              <Dumbbell className="w-9 h-9 text-[#374151]" />
-            </div>
-            <p className="text-[#9CA3AF] text-base font-medium">{t.plans_no_plans_title}</p>
-            <p className="text-[#6B7280] text-sm mt-1">{t.plans_no_plans_subtitle}</p>
-          </div>
+          <EmptyState
+            icon={<Dumbbell className="w-9 h-9 text-border" />}
+            title={t.plans_no_plans_title}
+            subtitle={t.plans_no_plans_subtitle}
+          />
         ) : (
           <>
             {activePlans.length === 0 && (
-              <p className="text-[#6B7280] text-sm py-2">{t.plans_no_active}</p>
+              <p className="text-muted text-sm py-2">{t.plans_no_active}</p>
             )}
             {activePlans.map((plan) => (
               <PlanCard
@@ -63,18 +55,17 @@ export default function PlansPage() {
               />
             ))}
 
-            {/* Completed section */}
             {completedPlans.length > 0 && (
               <div className="pt-2">
                 <button
                   onClick={() => setCompletedOpen((o) => !o)}
                   className="flex items-center gap-2 w-full text-left py-2 cursor-pointer"
                 >
-                  <span className="text-[#6B7280] text-xs font-medium uppercase tracking-wide">
+                  <span className="text-muted text-xs font-medium tracking-widest uppercase">
                     {t.plan_completed_count.replace('{n}', String(completedPlans.length))}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-[#6B7280] transition-transform duration-200 ${completedOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-muted transition-transform duration-200 ${completedOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {completedOpen && (
@@ -95,11 +86,13 @@ export default function PlansPage() {
       </div>
 
       {/* New Plan CTA */}
-      <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto px-6 pb-4 pt-6 bg-gradient-to-t from-[#111827] via-[#111827]/90 to-transparent">
+      <div
+        className="fixed bottom-16 left-0 right-0 max-w-md mx-auto px-6 pb-4 pt-6"
+        style={{ background: 'linear-gradient(to top, var(--color-base) 60%, transparent)' }}
+      >
         <Link
           href="/plans/new"
-          className="w-full bg-[#F97316] text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform duration-150"
-          style={{ fontFamily: 'var(--font-barlow-condensed), sans-serif' }}
+          className="font-bold rounded-2xl cursor-pointer transition-transform duration-150 active:scale-[0.98] flex items-center justify-center font-condensed bg-brand text-white text-base py-3.5 px-6 w-full gap-2"
         >
           <Plus className="w-5 h-5" strokeWidth={2.5} />
           {t.new_plan}
@@ -107,7 +100,7 @@ export default function PlansPage() {
       </div>
 
       <BottomNav active="plans" />
-    </main>
+    </Page>
   );
 }
 
@@ -127,23 +120,19 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
   return (
     <div
       className={`flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 ${
-        isCompleted ? 'bg-[#1F2937]/50 border-[#374151]/50' : 'bg-[#1F2937] border-[#374151]'
+        isCompleted ? 'bg-surface/50 border-border/50' : 'bg-surface border-border'
       }`}
     >
       <Link
         href={`/plans/${plan.id}`}
         className="flex-1 min-w-0 active:opacity-70 transition-opacity duration-150"
       >
-        <p
-          className={`font-semibold text-base ${isCompleted ? 'text-[#6B7280]' : 'text-[#F9FAFB]'}`}
-        >
+        <p className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}>
           {plan.name}
         </p>
-        <p className="text-[#6B7280] text-sm mt-0.5">
+        <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
-          {isCompleted && (
-            <span className="ml-2 text-[#4B5563] text-xs">· {t.plan_completed_label}</span>
-          )}
+          {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
         </p>
         {categories.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -154,23 +143,24 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
         )}
       </Link>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <button
+        <IconButton
+          size="sm"
           onClick={onToggleStatus}
           aria-label={isCompleted ? 'Reactivate plan' : 'Mark plan as completed'}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#374151]/50 cursor-pointer active:scale-90 transition-transform duration-150"
+          className="bg-elevated/50 active:scale-90"
         >
           {isCompleted ? (
-            <RotateCcw className="w-4 h-4 text-[#9CA3AF]" />
+            <RotateCcw className="w-4 h-4 text-secondary" />
           ) : (
-            <CheckCircle className="w-4 h-4 text-[#6B7280]" />
+            <CheckCircle className="w-4 h-4 text-muted" />
           )}
-        </button>
+        </IconButton>
         <Link
           href={`/plans/${plan.id}`}
           tabIndex={-1}
-          className="w-7 h-7 rounded-full bg-[#374151]/50 flex items-center justify-center"
+          className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0"
         >
-          <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+          <ChevronRight className="w-4 h-4 text-muted" />
         </Link>
       </div>
     </div>

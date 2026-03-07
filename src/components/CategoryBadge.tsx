@@ -20,7 +20,7 @@ export default function CategoryBadge({ category }: { category: string }) {
   const t = useTranslations();
   const label = t.category_labels[category as keyof typeof t.category_labels] ?? category;
   return (
-    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#374151] text-[#9CA3AF]">
+    <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-elevated text-secondary">
       <span>{getCategoryEmoji(category)}</span>
       {label}
     </span>
