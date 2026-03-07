@@ -6,6 +6,7 @@ import { ChevronRight, Clock } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import ActivityTiles from '@/components/ActivityTiles';
 import { getSessions, getPlans } from '@/lib/storage';
+import { RATING_EMOJIS } from '@/lib/sessionUtils';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
@@ -90,9 +91,16 @@ export default function HistoryPage() {
                         className="rounded-2xl bg-surface border border-border flex items-center justify-between px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150"
                       >
                         <div className="text-left min-w-0">
-                          <p className="text-foreground font-semibold text-base truncate">
-                            {label}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-foreground font-semibold text-base truncate">
+                              {label}
+                            </p>
+                            {session.rating != null && (
+                              <span className="text-base leading-none">
+                                {RATING_EMOJIS[session.rating - 1]}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-dim text-xs mt-1">
                             {exerciseCount}{' '}
                             {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular} · {mins}{' '}

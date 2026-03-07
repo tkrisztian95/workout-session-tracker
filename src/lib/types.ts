@@ -66,4 +66,5 @@ export interface WorkoutSession {
   exercises: Exercise[];
   planId?: string;
   planDayId?: string;
+  rating?: 1 | 2 | 3 | 4 | 5;
 }
