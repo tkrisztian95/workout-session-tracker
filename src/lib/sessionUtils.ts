@@ -1,5 +1,17 @@
 import type { Exercise } from './types';
 
+export function formatExerciseDetail(ex: {
+  type: 'sets-reps' | 'sets-duration' | 'duration';
+  sets?: number;
+  reps?: number;
+  duration?: number;
+}): string {
+  if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
+  if (ex.type === 'sets-duration') return `${ex.sets}×${ex.duration}s`;
+  const d = ex.duration ?? 0;
+  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+}
+
 export function formatSessionDate(
   iso: string,
   locale: string,

@@ -346,7 +346,11 @@ function OptionalPickerScreen({
                     <p className="text-brand text-xs">
                       {ex.type === 'sets-reps'
                         ? `${ex.sets}×${ex.reps}`
-                        : `${ex.sets}×${ex.duration}s`}
+                        : ex.type === 'sets-duration'
+                          ? `${ex.sets}×${ex.duration}s`
+                          : (ex.duration ?? 0) >= 60
+                            ? `${Math.round((ex.duration ?? 0) / 60)} min`
+                            : `${ex.duration}s`}
                     </p>
                   </div>
                 </div>
@@ -383,7 +387,11 @@ function OptionalPickerScreen({
                       <p className="text-muted text-xs">
                         {ex.type === 'sets-reps'
                           ? `${ex.sets}×${ex.reps}`
-                          : `${ex.sets}×${ex.duration}s`}
+                          : ex.type === 'sets-duration'
+                            ? `${ex.sets}×${ex.duration}s`
+                            : (ex.duration ?? 0) >= 60
+                              ? `${Math.round((ex.duration ?? 0) / 60)} min`
+                              : `${ex.duration}s`}
                       </p>
                     </div>
                   </button>
