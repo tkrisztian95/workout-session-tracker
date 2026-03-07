@@ -120,6 +120,8 @@
   "no_shared_exercises": "No shared exercises yet",
   "add_shared_exercise": "Add Shared Exercise",
   "delete_plan_title": "Delete Plan?",
+  "delete_session_title": "Delete Session?",
+  "history_delete_body": "This session will be permanently deleted. This cannot be undone.",
   "plan_not_found": "Plan not found.",
   "edit_plan_title": "Edit Plan",
 

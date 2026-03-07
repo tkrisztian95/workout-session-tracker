@@ -120,6 +120,8 @@
   "no_shared_exercises": "Noch keine gemeinsamen Übungen",
   "add_shared_exercise": "Gemeinsame Übung hinzufügen",
   "delete_plan_title": "Plan löschen?",
+  "delete_session_title": "Einheit löschen?",
+  "history_delete_body": "Diese Einheit wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
   "plan_not_found": "Plan nicht gefunden.",
   "edit_plan_title": "Plan bearbeiten",
 
