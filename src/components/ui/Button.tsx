@@ -49,7 +49,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       ref={ref}
       className={
         size === 'sm'
-          ? `w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-surface active:bg-elevated ${className}`
+          ? `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-surface active:bg-elevated ${className}`
           : `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-elevated ${className}`
       }
       {...props}

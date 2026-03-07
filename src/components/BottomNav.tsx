@@ -13,7 +13,7 @@ export default function BottomNav({ active }: Props) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-30">
-      <div className="bg-surface border-t border-border flex">
+      <div className="bg-surface border-t border-border flex pb-[env(safe-area-inset-bottom)]">
         <Link
           href="/"
           className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${active === 'home' ? 'text-brand' : 'text-dim'}`}

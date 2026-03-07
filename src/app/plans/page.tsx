@@ -59,7 +59,7 @@ export default function PlansPage() {
               <div className="pt-2">
                 <button
                   onClick={() => setCompletedOpen((o) => !o)}
-                  className="flex items-center gap-2 w-full text-left py-2 cursor-pointer"
+                  className="flex items-center gap-2 w-full text-left py-3 cursor-pointer"
                 >
                   <span className="text-muted text-xs font-medium tracking-widest uppercase">
                     {t.plan_completed_count.replace('{n}', String(completedPlans.length))}
