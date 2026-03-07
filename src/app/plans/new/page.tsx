@@ -77,7 +77,7 @@ export default function NewPlanPage() {
 
         <div>
           <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-3">
-            {t.training_days_label}
+            {t.training_days_label} ({days.length})
           </p>
           <div className="space-y-4">
             {days.map((day, i) => (
