@@ -151,7 +151,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
       {/* Core exercises */}
       <div>
         <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
-          {t.plan_day_core_exercises}
+          {t.plan_day_core_exercises} ({day.coreExercises.length})
         </p>
         <div className="space-y-2">
           {day.coreExercises.map((ex) => (
@@ -166,7 +166,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
       {/* Optional exercises */}
       <div>
         <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
-          {t.plan_day_optional_exercises}
+          {t.plan_day_optional_exercises} ({day.optionalExercises.length})
         </p>
         <div className="space-y-2">
           {day.optionalExercises.map((ex) => (

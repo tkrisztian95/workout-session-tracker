@@ -136,7 +136,7 @@ export default function PlanDetailPage() {
 
         <div>
           <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-1">
-            {t.shared_exercises_label}
+            {t.shared_exercises_label} ({sharedExercises.length})
           </p>
           <p className="text-muted text-xs mb-3">{t.shared_exercises_subtitle}</p>
           <div className="space-y-2">
@@ -180,7 +180,7 @@ export default function PlanDetailPage() {
 
         <div>
           <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-3">
-            {t.training_days_label}
+            {t.training_days_label} ({days.length})
           </p>
           <div className="space-y-4">
             {days.map((day, i) => (
