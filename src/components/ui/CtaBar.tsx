@@ -13,7 +13,7 @@ export const CtaBar = forwardRef<HTMLDivElement, CtaBarProps>(
   ({ slim = false, className = '', style, ...props }, ref) => (
     <div
       ref={ref}
-      className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-10 ${slim ? 'pt-4' : 'pt-6'} ${className}`}
+      className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] ${slim ? 'pt-4' : 'pt-6'} ${className}`}
       style={{ background: GRADIENT, ...style }}
       {...props}
     />

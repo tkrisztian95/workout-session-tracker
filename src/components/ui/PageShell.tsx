@@ -25,7 +25,7 @@ export const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
   ({ className = '', ...props }, ref) => (
     <div
       ref={ref}
-      className={`px-6 pt-14 pb-6 sticky top-0 z-10 bg-base ${className}`}
+      className={`px-6 pb-6 sticky top-0 z-10 bg-base pt-[max(3.5rem,env(safe-area-inset-top))] ${className}`}
       {...props}
     />
   ),
