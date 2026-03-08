@@ -73,7 +73,7 @@ export default function PlansPage() {
         </div>
       </PageHeader>
 
-      <div className="flex-1 px-6 space-y-3 overflow-y-auto">
+      <div className="flex-1 px-6 space-y-3 overflow-y-auto pb-28">
         {activePlans.length === 0 && completedPlans.length === 0 ? (
           <EmptyState
             icon={<Dumbbell className="w-9 h-9 text-border" />}
