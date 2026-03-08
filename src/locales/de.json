@@ -7,6 +7,17 @@
   "nav_home": "Start",
   "nav_plans": "Pläne",
   "nav_history": "Verlauf",
+  "nav_profile": "Profil",
+
+  "profile_title": "Profil",
+  "profile_name_label": "Anzeigename",
+  "profile_save_name": "Name speichern",
+  "profile_name_saved": "Name gespeichert!",
+  "profile_language_label": "Sprache",
+  "profile_reset_label": "Daten löschen & Zurücksetzen",
+  "profile_reset_warning": "Dies löscht dauerhaft alle deine Pläne, Trainings und Einstellungen.",
+  "profile_reset_confirm": "Ja, alles zurücksetzen",
+  "profile_reset_cancel": "Abbrechen",
 
   "back": "Zurück",
   "close": "Schließen",
