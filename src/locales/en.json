@@ -139,5 +139,6 @@
   "exercise_singular": "exercise",
   "exercise_plural": "exercises",
   "min_label": "min",
-  "no_exercises_recorded": "No exercises recorded."
+  "no_exercises_recorded": "No exercises recorded.",
+  "session_started_at": "Started"
 }

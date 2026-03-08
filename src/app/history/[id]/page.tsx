@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Check, ChevronLeft, Minus, X, Plus, Trash2 } from 'lucide-react';
+import { Check, ChevronLeft, Clock, Minus, X, Plus, Trash2 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
-import { useTranslations } from '@/lib/locale-context';
+import { useLocale, useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import { Button, HeadingXL, IconButton, ListLabel, Page, PageHeader } from '@/components/ui';
@@ -30,6 +30,7 @@ function parseNum(value: string): number | undefined {
 
 export default function SessionDetailPage() {
   const t = useTranslations();
+  const { locale } = useLocale();
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
@@ -170,28 +171,41 @@ export default function SessionDetailPage() {
         {planName && <p className="text-brand text-sm mt-1 font-medium">{planName}</p>}
         <p className="text-muted text-sm mt-2">
           {displaySession.exercises.length}{' '}
-          {displaySession.exercises.length !== 1 ? t.exercise_plural : t.exercise_singular} ·{' '}
+          {displaySession.exercises.length !== 1 ? t.exercise_plural : t.exercise_singular}
+        </p>
+        <p className="text-muted text-sm mt-1 flex items-center gap-1.5">
+          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+          {t.session_started_at}{' '}
+          {new Date(displaySession.startedAt).toLocaleTimeString(locale, {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+          {' · '}
           {isEditing && draft ? (
-            <input
-              type="number"
-              min={1}
-              value={mins}
-              onChange={(e) => {
-                const n = parseNum(e.target.value);
-                if (n == null || n < 1) return;
-                setDraft({
-                  ...draft,
-                  completedAt: new Date(
-                    new Date(draft.startedAt).getTime() + n * 60000,
-                  ).toISOString(),
-                });
-              }}
-              className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-sm text-foreground text-center"
-            />
+            <>
+              <input
+                type="number"
+                min={1}
+                value={mins}
+                onChange={(e) => {
+                  const n = parseNum(e.target.value);
+                  if (n == null || n < 1) return;
+                  setDraft({
+                    ...draft,
+                    completedAt: new Date(
+                      new Date(draft.startedAt).getTime() + n * 60000,
+                    ).toISOString(),
+                  });
+                }}
+                className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-sm text-foreground text-center"
+              />{' '}
+              {t.min_label}
+            </>
           ) : (
-            mins
-          )}{' '}
-          {t.min_label}
+            <>
+              {mins} {t.min_label}
+            </>
+          )}
         </p>
       </PageHeader>
 

@@ -139,5 +139,6 @@
   "exercise_singular": "Übung",
   "exercise_plural": "Übungen",
   "min_label": "Min",
-  "no_exercises_recorded": "Keine Übungen aufgezeichnet."
+  "no_exercises_recorded": "Keine Übungen aufgezeichnet.",
+  "session_started_at": "Beginn"
 }
