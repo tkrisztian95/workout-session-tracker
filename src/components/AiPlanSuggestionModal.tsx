@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Sparkles, RefreshCw, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Sparkles, RefreshCw, Loader2, ChevronDown } from 'lucide-react';
 import { getLlmConfig, saveLlmConfig, getPlans, getSessions } from '@/lib/storage';
 import { suggestPlan } from '@/lib/ai';
 import type { LlmConfig, WorkoutPlan } from '@/lib/types';
@@ -45,34 +45,56 @@ const MODELS = [
 ];
 
 export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSuggestionModalProps) {
-  const [view, setView] = useState<View>('config');
-  const [apiKey, setApiKey] = useState(() => getLlmConfig()?.apiKey ?? '');
-  const [model, setModel] = useState(() => getLlmConfig()?.model ?? 'gpt-4o-mini');
+  const savedConfig = getLlmConfig();
+  const hasSavedConfig = !!savedConfig?.apiKey;
+
+  const [view, setView] = useState<View>(() => (hasSavedConfig ? 'loading' : 'config'));
+  const [apiKey, setApiKey] = useState(() => savedConfig?.apiKey ?? '');
+  const [model, setModel] = useState(() => savedConfig?.model ?? 'gpt-4o-mini');
   const [error, setError] = useState('');
   const [suggestedPlan, setSuggestedPlan] = useState<Omit<WorkoutPlan, 'id' | 'status'> | null>(
     null,
   );
+  const [reasoning, setReasoning] = useState<string | undefined>(undefined);
+  const [autoGenerating, setAutoGenerating] = useState(hasSavedConfig);
+  const [reasoningOpen, setReasoningOpen] = useState(false);
 
-  const handleGenerate = async () => {
-    if (!apiKey.trim()) {
+  const handleGenerate = async (config?: LlmConfig) => {
+    const effectiveKey = config?.apiKey ?? apiKey.trim();
+    if (!effectiveKey) {
       setError('API key is required');
       return;
     }
     setError('');
-    const config: LlmConfig = { provider: 'openai', apiKey: apiKey.trim(), model };
-    saveLlmConfig(config);
+    const effectiveConfig: LlmConfig = config ?? {
+      provider: 'openai',
+      apiKey: effectiveKey,
+      model,
+    };
+    if (!config) saveLlmConfig(effectiveConfig);
     setView('loading');
     try {
       const plans = getPlans();
       const sessions = getSessions();
-      const result = await suggestPlan(config, plans, sessions);
+      const result = await suggestPlan(effectiveConfig, plans, sessions);
       setSuggestedPlan(result);
+      setReasoning(result.reasoning);
       setView('preview');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate plan');
       setView('config');
+    } finally {
+      setAutoGenerating(false);
     }
   };
+
+  // Auto-generate on mount when saved config exists
+  useEffect(() => {
+    if (hasSavedConfig && savedConfig) {
+      handleGenerate(savedConfig);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUse = () => {
     if (!suggestedPlan) return;
@@ -81,8 +103,19 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
 
   const handleRegenerate = () => {
     setSuggestedPlan(null);
+    setReasoning(undefined);
     setView('config');
   };
+
+  const handleChangeSettings = () => {
+    setSuggestedPlan(null);
+    setReasoning(undefined);
+    setAutoGenerating(false);
+    setError('');
+    setView('config');
+  };
+
+  const savedModel = savedConfig?.model ?? model;
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
@@ -150,7 +183,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
               generate suggestions.
             </p>
 
-            <Button onClick={handleGenerate} className="w-full gap-2 mt-2">
+            <Button onClick={() => handleGenerate()} className="w-full gap-2 mt-2">
               <Sparkles className="w-4 h-4" />
               Save & Generate
             </Button>
@@ -162,6 +195,17 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="w-8 h-8 text-brand animate-spin" />
             <p className="text-secondary text-sm">Generating your plan...</p>
+            {autoGenerating && (
+              <p className="text-dim text-xs">
+                Using saved API key · {savedModel}{' '}
+                <button
+                  onClick={handleChangeSettings}
+                  className="text-brand underline cursor-pointer"
+                >
+                  Change
+                </button>
+              </p>
+            )}
           </div>
         )}
 
@@ -189,6 +233,25 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
                 </p>
               )}
             </div>
+
+            {reasoning && (
+              <div className="bg-elevated rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setReasoningOpen((o) => !o)}
+                  className="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
+                >
+                  <p className="text-muted text-xs font-medium uppercase tracking-wide">
+                    Why this plan
+                  </p>
+                  <ChevronDown
+                    className={`w-4 h-4 text-muted transition-transform duration-200 ${reasoningOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {reasoningOpen && (
+                  <p className="text-secondary text-sm leading-relaxed px-4 pb-4">{reasoning}</p>
+                )}
+              </div>
+            )}
 
             <div className="flex gap-3">
               <Button
