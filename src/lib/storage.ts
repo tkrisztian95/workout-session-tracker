@@ -1,4 +1,4 @@
-import type { WorkoutPlan, ActiveSession, WorkoutSession, Exercise, PlanExercise } from './types';
+import type { WorkoutPlan, ActiveSession, WorkoutSession } from './types';
 import type { Locale } from './i18n';
 
 const KEYS = {
@@ -9,35 +9,6 @@ const KEYS = {
   locale: 'wst_locale',
 } as const;
 
-// ─── Migration ────────────────────────────────────────────────────────────────
-
-/** Maps legacy type values to the new 3-way model. */
-export function migrateExerciseType(type: string): Exercise['type'] {
-  if (type === 'reps') return 'sets-reps';
-  if (type === 'duration') return 'sets-duration';
-  return type as Exercise['type'];
-}
-
-function migrateExercise<T extends { type: string }>(ex: T): T {
-  return { ...ex, type: migrateExerciseType(ex.type) };
-}
-
-function migratePlanExercises(exercises: PlanExercise[]): PlanExercise[] {
-  return exercises.map((ex) => migrateExercise(ex));
-}
-
-function migratePlan(plan: WorkoutPlan): WorkoutPlan {
-  return {
-    ...plan,
-    sharedExercises: migratePlanExercises(plan.sharedExercises ?? []),
-    days: plan.days.map((day) => ({
-      ...day,
-      coreExercises: migratePlanExercises(day.coreExercises),
-      optionalExercises: migratePlanExercises(day.optionalExercises),
-    })),
-  };
-}
-
 // ─── Plans ────────────────────────────────────────────────────────────────────
 
 export function getPlans(): WorkoutPlan[] {
@@ -45,8 +16,7 @@ export function getPlans(): WorkoutPlan[] {
   try {
     const raw = localStorage.getItem(KEYS.plans);
     if (!raw) return [];
-    const plans = JSON.parse(raw) as WorkoutPlan[];
-    return plans.map(migratePlan);
+    return JSON.parse(raw) as WorkoutPlan[];
   } catch {
     return [];
   }
@@ -84,11 +54,7 @@ export function getActiveSession(): ActiveSession | null {
   try {
     const raw = localStorage.getItem(KEYS.activeSession);
     if (!raw) return null;
-    const session = JSON.parse(raw) as ActiveSession;
-    return {
-      ...session,
-      exercises: session.exercises.map((ex) => migrateExercise(ex)),
-    };
+    return JSON.parse(raw) as ActiveSession;
   } catch {
     return null;
   }
@@ -109,11 +75,7 @@ export function getSessions(): WorkoutSession[] {
   try {
     const raw = localStorage.getItem(KEYS.sessions);
     if (!raw) return [];
-    const sessions = JSON.parse(raw) as WorkoutSession[];
-    return sessions.map((s) => ({
-      ...s,
-      exercises: s.exercises.map((ex) => migrateExercise(ex)),
-    }));
+    return JSON.parse(raw) as WorkoutSession[];
   } catch {
     return [];
   }
