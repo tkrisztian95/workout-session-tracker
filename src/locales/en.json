@@ -60,8 +60,9 @@
   "session_complete_sets": "sets",
   "session_complete_duration": "duration",
   "session_complete_cta": "Tap anywhere to save your session",
+  "session_rate_cta": "Save Session",
   "session_rate_prompt": "How did it feel?",
-  "session_rate_skip": "Skip",
+  "session_rate_skip": "Save without rating",
 
   "add_exercise_title": "Add Exercise",
   "exercise_name_label": "Exercise Name",

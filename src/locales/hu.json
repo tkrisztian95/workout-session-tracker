@@ -60,8 +60,9 @@
   "session_complete_sets": "sorozat",
   "session_complete_duration": "időtartam",
   "session_complete_cta": "Érintsd meg bárhol az edzés mentéséhez",
+  "session_rate_cta": "Edzés mentése",
   "session_rate_prompt": "Hogy érezted magad?",
-  "session_rate_skip": "Kihagyás",
+  "session_rate_skip": "Mentés értékelés nélkül",
 
   "add_exercise_title": "Gyakorlat hozzáadása",
   "exercise_name_label": "Gyakorlat neve",
