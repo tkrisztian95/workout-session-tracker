@@ -139,5 +139,6 @@
   "exercise_singular": "gyakorlat",
   "exercise_plural": "gyakorlat",
   "min_label": "perc",
-  "no_exercises_recorded": "Nem rögzítettek gyakorlatot."
+  "no_exercises_recorded": "Nem rögzítettek gyakorlatot.",
+  "session_started_at": "Kezdés"
 }
