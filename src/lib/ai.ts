@@ -73,9 +73,16 @@ function summarisePlan(plan: WorkoutPlan): string {
   return `"${plan.name}" — ${plan.days.length} day(s): ${days}`;
 }
 
+export type AiPlanPreferences = {
+  focus?: string;
+  daysPerWeek?: string;
+  goal?: string;
+};
+
 export function buildPlanSuggestionPrompt(
   plans: WorkoutPlan[],
   sessions: WorkoutSession[],
+  preferences?: AiPlanPreferences,
 ): string {
   const recentSessions = [...sessions]
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
@@ -89,7 +96,18 @@ export function buildPlanSuggestionPrompt(
       ? recentSessions.map(summariseSession).join('\n')
       : 'No completed sessions yet.';
 
-  return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.`;
+  let preferenceText = '';
+  if (preferences) {
+    const parts: string[] = [];
+    if (preferences.focus) parts.push(`focused on ${preferences.focus}`);
+    if (preferences.daysPerWeek) parts.push(`${preferences.daysPerWeek} days per week`);
+    if (preferences.goal) parts.push(`with the goal to ${preferences.goal.toLowerCase()}`);
+    if (parts.length > 0) {
+      preferenceText = ` Please create a plan ${parts.join(', ')}.`;
+    }
+  }
+
+  return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
@@ -98,8 +116,9 @@ export async function suggestPlan(
   config: LlmConfig,
   plans: WorkoutPlan[],
   sessions: WorkoutSession[],
+  preferences?: AiPlanPreferences,
 ): Promise<AiPlanResult> {
-  const userMessage = buildPlanSuggestionPrompt(plans, sessions);
+  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
