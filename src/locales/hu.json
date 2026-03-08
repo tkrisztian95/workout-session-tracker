@@ -7,6 +7,17 @@
   "nav_home": "Főoldal",
   "nav_plans": "Tervek",
   "nav_history": "Előzmények",
+  "nav_profile": "Profil",
+
+  "profile_title": "Profil",
+  "profile_name_label": "Megjelenítési név",
+  "profile_save_name": "Név mentése",
+  "profile_name_saved": "Név elmentve!",
+  "profile_language_label": "Nyelv",
+  "profile_reset_label": "Adatok törlése és visszaállítás",
+  "profile_reset_warning": "Ez véglegesen törli az összes tervedet, edzésedet és beállításodat.",
+  "profile_reset_confirm": "Igen, mindent törlök",
+  "profile_reset_cancel": "Mégse",
 
   "back": "Vissza",
   "close": "Bezárás",

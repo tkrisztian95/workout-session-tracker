@@ -7,6 +7,17 @@
   "nav_home": "Home",
   "nav_plans": "Plans",
   "nav_history": "History",
+  "nav_profile": "Profile",
+
+  "profile_title": "Profile",
+  "profile_name_label": "Display Name",
+  "profile_save_name": "Save Name",
+  "profile_name_saved": "Name saved!",
+  "profile_language_label": "Language",
+  "profile_reset_label": "Clear Data & Reset",
+  "profile_reset_warning": "This will permanently delete all your plans, sessions, and settings.",
+  "profile_reset_confirm": "Yes, Reset Everything",
+  "profile_reset_cancel": "Cancel",
 
   "back": "Back",
   "close": "Close",
