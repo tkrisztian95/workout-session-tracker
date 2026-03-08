@@ -2,8 +2,9 @@ import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise } fr
 
 const SYSTEM_PROMPT = `You are a personal fitness coach. Based on the user's existing workout plans and session history, suggest a new workout plan tailored to their goals and progress.
 
-Return a JSON object with the following structure (no extra fields):
+Return a JSON object with the following structure:
 {
+  "reasoning": string,
   "name": string,
   "days": Array<{
     "id": string,
@@ -47,7 +48,7 @@ Return a JSON object with the following structure (no extra fields):
   "updatedAt": string
 }
 
-Use crypto.randomUUID()-style UUIDs for all id fields. Set createdAt and updatedAt to the current ISO timestamp. weekdays uses 0=Sunday through 6=Saturday.`;
+The "reasoning" field must always be included: 1–3 sentences explaining why this plan suits the user based on their history. Use crypto.randomUUID()-style UUIDs for all id fields. Set createdAt and updatedAt to the current ISO timestamp. weekdays uses 0=Sunday through 6=Saturday.`;
 
 function summariseSession(session: WorkoutSession): string {
   const date = session.completedAt.slice(0, 10);
@@ -91,11 +92,13 @@ export function buildPlanSuggestionPrompt(
   return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.`;
 }
 
+export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
+
 export async function suggestPlan(
   config: LlmConfig,
   plans: WorkoutPlan[],
   sessions: WorkoutSession[],
-): Promise<Omit<WorkoutPlan, 'id' | 'status'>> {
+): Promise<AiPlanResult> {
   const userMessage = buildPlanSuggestionPrompt(plans, sessions);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -141,7 +144,7 @@ export async function suggestPlan(
     throw new Error('Unexpected response format from OpenAI API');
   }
 
-  let parsed: Omit<WorkoutPlan, 'id' | 'status'>;
+  let parsed: AiPlanResult & { reasoning?: string };
   try {
     parsed = JSON.parse(content);
   } catch {
@@ -170,5 +173,6 @@ export async function suggestPlan(
     sharedExercises: ensureIds(parsed.sharedExercises ?? []),
     createdAt: parsed.createdAt ?? now,
     updatedAt: parsed.updatedAt ?? now,
+    ...(parsed.reasoning ? { reasoning: parsed.reasoning } : {}),
   };
 }
