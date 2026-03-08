@@ -51,6 +51,7 @@ export interface WorkoutPlan {
   createdAt: string; // ISO date string
   updatedAt: string;
   status?: 'active' | 'completed';
+  aiGenerated?: boolean;
 }
 
 // ─── Session data models ──────────────────────────────────────────────────────

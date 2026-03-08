@@ -41,6 +41,7 @@ export default function PlansPage() {
       ...planData,
       id: crypto.randomUUID(),
       status: 'active',
+      aiGenerated: true,
       createdAt: planData.createdAt ?? now,
       updatedAt: now,
     };
@@ -168,9 +169,16 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
         href={`/plans/${plan.id}`}
         className="flex-1 min-w-0 active:opacity-70 transition-opacity duration-150"
       >
-        <p className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}>
-          {plan.name}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p
+            className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}
+          >
+            {plan.name}
+          </p>
+          {plan.aiGenerated === true && (
+            <Sparkles className="w-3.5 h-3.5 text-brand flex-shrink-0" />
+          )}
+        </div>
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
