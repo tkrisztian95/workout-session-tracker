@@ -1,4 +1,4 @@
-import type { WorkoutPlan, ActiveSession, WorkoutSession } from './types';
+import type { WorkoutPlan, ActiveSession, WorkoutSession, LlmConfig } from './types';
 import type { Locale } from './i18n';
 
 const KEYS = {
@@ -7,6 +7,7 @@ const KEYS = {
   activeSession: 'wst_active_session',
   userName: 'wst_user_name',
   locale: 'wst_locale',
+  llmConfig: 'wst_llm_config',
 } as const;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -103,6 +104,23 @@ export function getLocale(): Locale | null {
 
 export function saveLocale(locale: Locale): void {
   localStorage.setItem(KEYS.locale, locale);
+}
+
+// ─── LLM Config ───────────────────────────────────────────────────────────────
+
+export function getLlmConfig(): LlmConfig | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(KEYS.llmConfig);
+    if (!raw) return null;
+    return JSON.parse(raw) as LlmConfig;
+  } catch {
+    return null;
+  }
+}
+
+export function saveLlmConfig(config: LlmConfig): void {
+  localStorage.setItem(KEYS.llmConfig, JSON.stringify(config));
 }
 
 export function saveSession(session: WorkoutSession): void {

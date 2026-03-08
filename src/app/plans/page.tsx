@@ -2,18 +2,30 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Dumbbell, ChevronRight, ChevronDown, CheckCircle, RotateCcw } from 'lucide-react';
-import { getPlans, togglePlanStatus } from '@/lib/storage';
+import { useRouter } from 'next/navigation';
+import {
+  Plus,
+  Dumbbell,
+  ChevronRight,
+  ChevronDown,
+  CheckCircle,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react';
+import { getPlans, togglePlanStatus, savePlan } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import { EmptyState, HeadingXL, IconButton, Page, PageHeader } from '@/components/ui';
+import AiPlanSuggestionModal from '@/components/AiPlanSuggestionModal';
 
 export default function PlansPage() {
   const t = useTranslations();
+  const router = useRouter();
   const [plans, setPlans] = useState<WorkoutPlan[]>(() => getPlans());
   const [completedOpen, setCompletedOpen] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
 
   const activePlans = plans.filter((p) => (p.status ?? 'active') === 'active');
   const completedPlans = plans.filter((p) => p.status === 'completed');
@@ -23,16 +35,41 @@ export default function PlansPage() {
     setPlans(getPlans());
   };
 
+  const handleAiApply = (planData: Omit<WorkoutPlan, 'id' | 'status'>) => {
+    const now = new Date().toISOString();
+    const newPlan: WorkoutPlan = {
+      ...planData,
+      id: crypto.randomUUID(),
+      status: 'active',
+      createdAt: planData.createdAt ?? now,
+      updatedAt: now,
+    };
+    savePlan(newPlan);
+    setShowAiModal(false);
+    router.push(`/plans/${newPlan.id}`);
+  };
+
   return (
     <Page className="pb-24">
       <PageHeader>
-        <HeadingXL>{t.plans_title}</HeadingXL>
-        {activePlans.length > 0 && (
-          <p className="text-muted text-sm mt-3">
-            {activePlans.length}{' '}
-            {activePlans.length !== 1 ? t.plans_active_plans : t.plans_active_plan}
-          </p>
-        )}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <HeadingXL>{t.plans_title}</HeadingXL>
+            {activePlans.length > 0 && (
+              <p className="text-muted text-sm mt-3">
+                {activePlans.length}{' '}
+                {activePlans.length !== 1 ? t.plans_active_plans : t.plans_active_plan}
+              </p>
+            )}
+          </div>
+          <IconButton
+            onClick={() => setShowAiModal(true)}
+            aria-label="AI Suggest Plan"
+            className="mt-1 border border-border flex-shrink-0"
+          >
+            <Sparkles className="w-4 h-4 text-brand" />
+          </IconButton>
+        </div>
       </PageHeader>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto">
@@ -98,6 +135,10 @@ export default function PlansPage() {
           {t.new_plan}
         </Link>
       </div>
+
+      {showAiModal && (
+        <AiPlanSuggestionModal onApply={handleAiApply} onClose={() => setShowAiModal(false)} />
+      )}
 
       <BottomNav active="plans" />
     </Page>

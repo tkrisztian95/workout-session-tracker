@@ -1,3 +1,11 @@
+// ─── LLM Config ───────────────────────────────────────────────────────────────
+
+export interface LlmConfig {
+  provider: 'openai';
+  apiKey: string;
+  model: string;
+}
+
 // ─── Exercise (used in sessions) ─────────────────────────────────────────────
 
 export interface Exercise {
