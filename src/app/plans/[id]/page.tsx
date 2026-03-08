@@ -104,7 +104,7 @@ export default function PlanDetailPage() {
   }
 
   return (
-    <Page className="pb-32">
+    <Page>
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
           <HeadingXL>{t.edit_plan_title}</HeadingXL>
@@ -118,7 +118,7 @@ export default function PlanDetailPage() {
         </div>
       </PageHeader>
 
-      <div className="px-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-6 pb-36 space-y-6">
         <div>
           <FieldLabel htmlFor="edit-plan-name">{t.plan_name_label}</FieldLabel>
           <Input
