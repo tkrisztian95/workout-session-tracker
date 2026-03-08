@@ -116,32 +116,25 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             onSelect={(n, cat) => {
               setName(n);
               setSelectedCategory(cat);
-              setManualCategory('');
+              setManualCategory(cat ?? '');
               clearSuggestions();
             }}
           />
-          {selectedCategory ? (
-            <p className="mt-1.5 text-xs text-muted">
-              {t.exercise_category_prefix}{' '}
-              <span className="text-secondary font-medium">{selectedCategory}</span>
-            </p>
-          ) : (
-            <div className="mt-2">
-              <FieldLabel htmlFor="plan-exercise-category">{t.exercise_category_label}</FieldLabel>
-              <Select
-                id="plan-exercise-category"
-                value={manualCategory}
-                onChange={(e) => setManualCategory(e.target.value)}
-              >
-                <option value="">{t.exercise_category_none}</option>
-                {WGER_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {t.category_labels[cat] ?? cat}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          )}
+          <div className="mt-2">
+            <FieldLabel htmlFor="plan-exercise-category">{t.exercise_category_label}</FieldLabel>
+            <Select
+              id="plan-exercise-category"
+              value={manualCategory}
+              onChange={(e) => setManualCategory(e.target.value)}
+            >
+              <option value="">{t.exercise_category_none}</option>
+              {WGER_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {t.category_labels[cat] ?? cat}
+                </option>
+              ))}
+            </Select>
+          </div>
         </div>
 
         {/* Role toggle */}
