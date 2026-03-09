@@ -3,24 +3,19 @@
 import { useState } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Check, ChevronLeft, Clock, Minus, X, Plus, Trash2 } from 'lucide-react';
+import { Check, ChevronLeft, Clock, Minus, X, Plus, Trash2, Pencil } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
-import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
+import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import { Button, HeadingXL, IconButton, ListLabel, Page, PageHeader } from '@/components/ui';
+import AddExerciseModal from '@/components/AddExerciseModal';
+import { formatExerciseDetail } from '@/lib/sessionUtils';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
-}
-
-function exerciseDetail(exercise: WorkoutSession['exercises'][number]): string {
-  if (exercise.type === 'sets-reps') return `${exercise.sets ?? '?'}×${exercise.reps ?? '?'} reps`;
-  if (exercise.type === 'sets-duration')
-    return `${exercise.sets ?? '?'}×${exercise.duration ?? '?'}s`;
-  return `${exercise.duration ?? '?'}s`;
 }
 
 function parseNum(value: string): number | undefined {
@@ -47,8 +42,8 @@ export default function SessionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState<WorkoutSession | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newType, setNewType] = useState<WorkoutSession['exercises'][number]['type']>('sets-reps');
+  const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   if (!session) {
     notFound();
@@ -59,6 +54,7 @@ export default function SessionDetailPage() {
     plan && session.planDayId ? plan.days.find((d) => d.id === session.planDayId) : undefined;
   const planName = plan?.name;
   const dayName = planDay?.name;
+
   function handleDelete() {
     deleteSession(session!.id);
     router.push('/history');
@@ -87,17 +83,23 @@ export default function SessionDetailPage() {
     setDraft({ ...draft, exercises: draft.exercises.filter((ex) => ex.id !== exerciseId) });
   }
 
-  function addDraftExercise() {
-    if (!draft || !newName.trim()) return;
-    const exercise: WorkoutSession['exercises'][number] = {
-      id: crypto.randomUUID(),
-      name: newName.trim(),
-      type: newType,
-      completed: false,
-      dismissed: false,
-    };
-    setDraft({ ...draft, exercises: [...draft.exercises, exercise] });
-    setNewName('');
+  function handleAddExercise(ex: Omit<Exercise, 'id'>) {
+    if (!draft) return;
+    setDraft({
+      ...draft,
+      exercises: [...draft.exercises, { ...ex, id: crypto.randomUUID(), completed: false }],
+    });
+    setIsAddModalOpen(false);
+  }
+
+  function handleEditExercise(updated: Omit<Exercise, 'id'>) {
+    if (!draft || !editingExercise) return;
+    const id = editingExercise.id;
+    setDraft({
+      ...draft,
+      exercises: draft.exercises.map((ex) => (ex.id === id ? { ...ex, ...updated, id } : ex)),
+    });
+    setEditingExercise(null);
   }
 
   function updateDraftExercise(
@@ -247,64 +249,24 @@ export default function SessionDetailPage() {
                     </p>
                     {exercise.category && <CategoryBadge category={exercise.category} />}
                   </div>
-                  {isEditing ? (
-                    <div className="flex items-center gap-2 mt-1">
-                      {(exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && (
-                        <label className="flex items-center gap-1 text-xs text-muted">
-                          {t.exercise_sets_label}
-                          <input
-                            type="number"
-                            min={0}
-                            className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-xs text-foreground text-center"
-                            value={exercise.sets ?? ''}
-                            onChange={(e) =>
-                              updateDraftExercise(exercise.id, { sets: parseNum(e.target.value) })
-                            }
-                          />
-                        </label>
-                      )}
-                      {exercise.type === 'sets-reps' && (
-                        <label className="flex items-center gap-1 text-xs text-muted">
-                          {t.exercise_reps_label}
-                          <input
-                            type="number"
-                            min={0}
-                            className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-xs text-foreground text-center"
-                            value={exercise.reps ?? ''}
-                            onChange={(e) =>
-                              updateDraftExercise(exercise.id, { reps: parseNum(e.target.value) })
-                            }
-                          />
-                        </label>
-                      )}
-                      {(exercise.type === 'sets-duration' || exercise.type === 'duration') && (
-                        <label className="flex items-center gap-1 text-xs text-muted">
-                          {t.exercise_duration_label}
-                          <input
-                            type="number"
-                            min={0}
-                            className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-xs text-foreground text-center"
-                            value={exercise.duration ?? ''}
-                            onChange={(e) =>
-                              updateDraftExercise(exercise.id, {
-                                duration: parseNum(e.target.value),
-                              })
-                            }
-                          />
-                        </label>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted text-xs mt-0.5">{exerciseDetail(exercise)}</p>
-                  )}
+                  <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
                 </div>
                 {isEditing && (
-                  <button
-                    onClick={() => removeDraftExercise(exercise.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated flex-shrink-0"
-                  >
-                    <X className="w-4 h-4 text-dim" />
-                  </button>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <IconButton
+                      size="sm"
+                      onClick={() => setEditingExercise(exercise)}
+                      aria-label={`Edit ${exercise.name}`}
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-muted" />
+                    </IconButton>
+                    <button
+                      onClick={() => removeDraftExercise(exercise.id)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated"
+                    >
+                      <X className="w-4 h-4 text-dim" />
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -337,15 +299,24 @@ export default function SessionDetailPage() {
                         <p className="text-muted font-medium text-sm">{exercise.name}</p>
                         {exercise.category && <CategoryBadge category={exercise.category} />}
                       </div>
-                      <p className="text-dim text-xs mt-0.5">{exerciseDetail(exercise)}</p>
+                      <p className="text-dim text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
                     </div>
                     {isEditing && (
-                      <button
-                        onClick={() => removeDraftExercise(exercise.id)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated flex-shrink-0"
-                      >
-                        <X className="w-4 h-4 text-dim" />
-                      </button>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <IconButton
+                          size="sm"
+                          onClick={() => setEditingExercise(exercise)}
+                          aria-label={`Edit ${exercise.name}`}
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-muted" />
+                        </IconButton>
+                        <button
+                          onClick={() => removeDraftExercise(exercise.id)}
+                          className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated"
+                        >
+                          <X className="w-4 h-4 text-dim" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -354,34 +325,13 @@ export default function SessionDetailPage() {
           </>
         )}
         {isEditing && (
-          <div className="flex gap-2 pt-1">
-            <input
-              type="text"
-              placeholder={t.exercise_name_placeholder}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addDraftExercise()}
-              className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-dim"
-            />
-            <select
-              value={newType}
-              onChange={(e) =>
-                setNewType(e.target.value as WorkoutSession['exercises'][number]['type'])
-              }
-              className="rounded-xl border border-border bg-surface px-2 py-2 text-sm text-foreground"
-            >
-              <option value="sets-reps">{t.exercise_type_sets_reps}</option>
-              <option value="sets-duration">{t.exercise_type_sets_duration}</option>
-              <option value="duration">{t.exercise_type_duration}</option>
-            </select>
-            <button
-              onClick={addDraftExercise}
-              disabled={!newName.trim()}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-brand disabled:opacity-40"
-            >
-              <Plus className="w-5 h-5 text-white" />
-            </button>
-          </div>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer pt-1"
+          >
+            <Plus className="w-4 h-4" />
+            {t.add_exercise_title}
+          </button>
         )}
       </div>
 
@@ -409,6 +359,19 @@ export default function SessionDetailPage() {
           </div>
         </div>
       )}
+
+      <AddExerciseModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddExercise}
+      />
+      <AddExerciseModal
+        isOpen={editingExercise !== null}
+        onClose={() => setEditingExercise(null)}
+        onAdd={handleAddExercise}
+        onEdit={handleEditExercise}
+        initialValues={editingExercise ?? undefined}
+      />
     </Page>
   );
 }
