@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X, Pencil } from 'lucide-react';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 import CategoryBadge from '@/components/CategoryBadge';
 import { IconButton } from '@/components/ui';
@@ -17,10 +17,11 @@ interface ExerciseLike {
 interface Props {
   ex: ExerciseLike;
   onRemove?: () => void;
+  onEdit?: () => void;
   className?: string;
 }
 
-export default function PlanExerciseRow({ ex, onRemove, className = 'bg-base' }: Props) {
+export default function PlanExerciseRow({ ex, onRemove, onEdit, className = 'bg-base' }: Props) {
   return (
     <div
       className={`flex items-center gap-2 border border-border rounded-xl px-3 py-2.5 ${className}`}
@@ -33,6 +34,16 @@ export default function PlanExerciseRow({ ex, onRemove, className = 'bg-base' }:
         <p className="text-brand text-xs mt-0.5">{formatExerciseDetail(ex)}</p>
         {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}
       </div>
+      {onEdit && (
+        <IconButton
+          size="sm"
+          onClick={onEdit}
+          aria-label={`Edit ${ex.name}`}
+          className="flex-shrink-0"
+        >
+          <Pencil className="w-3.5 h-3.5 text-muted" />
+        </IconButton>
+      )}
       {onRemove && (
         <IconButton
           size="sm"

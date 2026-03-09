@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { PlanExercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
@@ -21,11 +21,21 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (exercise: Omit<PlanExercise, 'id'>) => void;
+  onEdit?: (exercise: Omit<PlanExercise, 'id'>) => void;
+  /** Pre-populate fields and switch to edit mode */
+  initialValues?: PlanExercise;
   /** When false, hides the role selector and defaults role to 'core' (for shared exercises). Default true. */
   showRole?: boolean;
 }
 
-export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole = true }: Props) {
+export default function AddPlanExerciseModal({
+  isOpen,
+  onClose,
+  onAdd,
+  onEdit,
+  initialValues,
+  showRole = true,
+}: Props) {
   const t = useTranslations();
   const typeLabels: Record<PlanExercise['type'], string> = {
     'sets-reps': t.exercise_type_sets_reps,
@@ -45,6 +55,25 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
 
   const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
 
+  const isEditMode = !!initialValues;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialValues) {
+      setName(initialValues.name);
+      setType(initialValues.type);
+      setSets(String(initialValues.sets ?? 3));
+      setReps(String(initialValues.reps ?? 10));
+      setDuration(String(initialValues.duration ?? 60));
+      setRole(initialValues.role);
+      setWeightKg(initialValues.weightKg !== undefined ? String(initialValues.weightKg) : '');
+      setScalingNote(initialValues.scalingNote ?? '');
+      setSelectedCategory(null);
+      setManualCategory(initialValues.category ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const reset = () => {
     setName('');
     setType('sets-reps');
@@ -63,7 +92,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
     const trimmed = name.trim();
     if (!trimmed) return;
     const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
-    onAdd({
+    const exercise: Omit<PlanExercise, 'id'> = {
       name: trimmed,
       type,
       sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
@@ -73,7 +102,12 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
       role: showRole ? role : 'core',
       scalingNote: scalingNote.trim() || undefined,
       category: (selectedCategory ?? manualCategory) || undefined,
-    });
+    };
+    if (isEditMode && onEdit) {
+      onEdit(exercise);
+    } else {
+      onAdd(exercise);
+    }
     reset();
   };
 
@@ -86,7 +120,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
     <BottomSheet isOpen={isOpen} onClose={handleClose}>
       <div className="flex items-center justify-between mb-6">
         <HeadingXL as="h2" className="text-2xl">
-          {t.add_exercise_title}
+          {isEditMode ? 'Edit exercise' : t.add_exercise_title}
         </HeadingXL>
         <IconButton
           size="sm"
@@ -268,7 +302,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
           disabled={!name.trim()}
           className="w-full mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {t.add_exercise_title}
+          {isEditMode ? 'Save changes' : t.add_exercise_title}
         </Button>
       </div>
     </BottomSheet>

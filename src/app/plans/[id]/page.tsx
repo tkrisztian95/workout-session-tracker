@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, Pencil } from 'lucide-react';
 import { getPlans, savePlan, deletePlan } from '@/lib/storage';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
@@ -55,6 +55,7 @@ export default function PlanDetailPage() {
     String(getPlans().find((p) => p.id === params.id)?.scheduledWeeks ?? ''),
   );
   const [isSharedModalOpen, setIsSharedModalOpen] = useState(false);
+  const [editingShared, setEditingShared] = useState<PlanExercise | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
   const [weeksError, setWeeksError] = useState('');
@@ -104,6 +105,13 @@ export default function PlanDetailPage() {
   const handleAddShared = (ex: Omit<PlanExercise, 'id'>) => {
     setSharedExercises((prev) => [...prev, { ...ex, id: crypto.randomUUID() }]);
     setIsSharedModalOpen(false);
+  };
+
+  const handleEditShared = (updated: Omit<PlanExercise, 'id'>) => {
+    if (!editingShared) return;
+    const id = editingShared.id;
+    setSharedExercises((prev) => prev.map((e) => (e.id === id ? { ...updated, id } : e)));
+    setEditingShared(null);
   };
 
   const removeShared = (id: string) => {
@@ -188,6 +196,14 @@ export default function PlanDetailPage() {
                     <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>
                   )}
                 </div>
+                <IconButton
+                  size="sm"
+                  onClick={() => setEditingShared(ex)}
+                  aria-label={`Edit ${ex.name}`}
+                  className="flex-shrink-0"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-muted" />
+                </IconButton>
                 <IconButton
                   size="sm"
                   onClick={() => removeShared(ex.id)}
@@ -275,6 +291,14 @@ export default function PlanDetailPage() {
         isOpen={isSharedModalOpen}
         onClose={() => setIsSharedModalOpen(false)}
         onAdd={handleAddShared}
+        showRole={false}
+      />
+      <AddPlanExerciseModal
+        isOpen={editingShared !== null}
+        onClose={() => setEditingShared(null)}
+        onAdd={handleAddShared}
+        onEdit={handleEditShared}
+        initialValues={editingShared ?? undefined}
         showRole={false}
       />
     </Page>
