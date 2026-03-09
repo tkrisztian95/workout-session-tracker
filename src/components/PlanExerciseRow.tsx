@@ -9,6 +9,7 @@ interface ExerciseLike {
   sets?: number;
   reps?: number;
   duration?: number;
+  weightKg?: number;
   scalingNote?: string;
   category?: string;
 }

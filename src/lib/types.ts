@@ -15,6 +15,7 @@ export interface Exercise {
   sets?: number; // present for sets-reps / sets-duration; absent for duration
   reps?: number; // present for sets-reps
   duration?: number; // seconds; present for sets-duration and duration
+  weightKg?: number;
   scalingNote?: string;
   category?: string;
   completed?: boolean; // in-session tracking
@@ -30,6 +31,7 @@ export interface PlanExercise {
   sets?: number;
   reps?: number;
   duration?: number;
+  weightKg?: number;
   role: 'core' | 'optional';
   scalingNote?: string;
   category?: string;
@@ -52,6 +54,7 @@ export interface WorkoutPlan {
   updatedAt: string;
   status?: 'active' | 'completed';
   aiGenerated?: boolean;
+  scheduledWeeks?: number;
 }
 
 // ─── Session data models ──────────────────────────────────────────────────────
