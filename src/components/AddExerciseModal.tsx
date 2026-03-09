@@ -125,30 +125,32 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
 
       <div className="space-y-5">
         {/* Name */}
-        <div className="relative">
-          <FieldLabel htmlFor="exercise-name">{t.exercise_name_label}</FieldLabel>
-          <Input
-            id="exercise-name"
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setSelectedCategory(null);
-            }}
-            onBlur={() => setTimeout(clearSuggestions, 150)}
-            placeholder={t.exercise_name_placeholder}
-            autoComplete="off"
-          />
-          <ExerciseSuggestionList
-            suggestions={suggestions}
-            loading={loading}
-            onSelect={(n, cat) => {
-              setName(n);
-              setSelectedCategory(cat);
-              setManualCategory(cat ?? '');
-              clearSuggestions();
-            }}
-          />
+        <div>
+          <div className="relative">
+            <FieldLabel htmlFor="exercise-name">{t.exercise_name_label}</FieldLabel>
+            <Input
+              id="exercise-name"
+              type="text"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setSelectedCategory(null);
+              }}
+              onBlur={() => setTimeout(clearSuggestions, 150)}
+              placeholder={t.exercise_name_placeholder}
+              autoComplete="off"
+            />
+            <ExerciseSuggestionList
+              suggestions={suggestions}
+              loading={loading}
+              onSelect={(n, cat) => {
+                setName(n);
+                setSelectedCategory(cat);
+                setManualCategory(cat ?? '');
+                clearSuggestions();
+              }}
+            />
+          </div>
           <div className="mt-2">
             {selectedCategory && (
               <p className="mb-1.5 text-xs text-muted">

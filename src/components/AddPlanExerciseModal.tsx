@@ -134,30 +134,32 @@ export default function AddPlanExerciseModal({
 
       <div className="space-y-5">
         {/* Name */}
-        <div className="relative">
-          <FieldLabel htmlFor="plan-exercise-name">{t.exercise_name_label}</FieldLabel>
-          <Input
-            id="plan-exercise-name"
-            type="text"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setSelectedCategory(null);
-            }}
-            onBlur={() => setTimeout(clearSuggestions, 150)}
-            placeholder={t.exercise_name_placeholder}
-            autoComplete="off"
-          />
-          <ExerciseSuggestionList
-            suggestions={suggestions}
-            loading={loading}
-            onSelect={(n, cat) => {
-              setName(n);
-              setSelectedCategory(cat);
-              setManualCategory(cat ?? '');
-              clearSuggestions();
-            }}
-          />
+        <div>
+          <div className="relative">
+            <FieldLabel htmlFor="plan-exercise-name">{t.exercise_name_label}</FieldLabel>
+            <Input
+              id="plan-exercise-name"
+              type="text"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setSelectedCategory(null);
+              }}
+              onBlur={() => setTimeout(clearSuggestions, 150)}
+              placeholder={t.exercise_name_placeholder}
+              autoComplete="off"
+            />
+            <ExerciseSuggestionList
+              suggestions={suggestions}
+              loading={loading}
+              onSelect={(n, cat) => {
+                setName(n);
+                setSelectedCategory(cat);
+                setManualCategory(cat ?? '');
+                clearSuggestions();
+              }}
+            />
+          </div>
           <div className="mt-2">
             <FieldLabel htmlFor="plan-exercise-category">{t.exercise_category_label}</FieldLabel>
             <Select
