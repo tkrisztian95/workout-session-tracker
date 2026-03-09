@@ -17,6 +17,7 @@ interface Props {
 export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
   const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<PlanExercise | null>(null);
   const [showSchedule, setShowSchedule] = useState(day.weekdays.length > 0);
 
   const toggleSchedule = () => {
@@ -49,6 +50,17 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
     } else {
       onChange({ ...day, optionalExercises: day.optionalExercises.filter((e) => e.id !== id) });
     }
+  };
+
+  const handleEditExercise = (updated: Omit<PlanExercise, 'id'>) => {
+    if (!editingExercise) return;
+    const id = editingExercise.id;
+    onChange({
+      ...day,
+      coreExercises: day.coreExercises.map((e) => (e.id === id ? { ...updated, id } : e)),
+      optionalExercises: day.optionalExercises.map((e) => (e.id === id ? { ...updated, id } : e)),
+    });
+    setEditingExercise(null);
   };
 
   return (
@@ -123,7 +135,12 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         </p>
         <div className="space-y-2">
           {day.coreExercises.map((ex) => (
-            <PlanExerciseRow key={ex.id} ex={ex} onRemove={() => removeExercise('core', ex.id)} />
+            <PlanExerciseRow
+              key={ex.id}
+              ex={ex}
+              onEdit={() => setEditingExercise(ex)}
+              onRemove={() => removeExercise('core', ex.id)}
+            />
           ))}
           {day.coreExercises.length === 0 && (
             <p className="text-muted text-sm">{t.plan_day_no_core}</p>
@@ -141,6 +158,7 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
             <PlanExerciseRow
               key={ex.id}
               ex={ex}
+              onEdit={() => setEditingExercise(ex)}
               onRemove={() => removeExercise('optional', ex.id)}
             />
           ))}
@@ -163,6 +181,13 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddExercise}
+      />
+      <AddPlanExerciseModal
+        isOpen={editingExercise !== null}
+        onClose={() => setEditingExercise(null)}
+        onAdd={handleAddExercise}
+        onEdit={handleEditExercise}
+        initialValues={editingExercise ?? undefined}
       />
     </Card>
   );
