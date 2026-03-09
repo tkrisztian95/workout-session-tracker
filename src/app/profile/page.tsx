@@ -8,6 +8,7 @@ import { Page, PageHeader, HeadingXL, LabelOverline } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
 import { getUserName, saveUserName } from '@/lib/storage';
 import LanguageCard from '@/components/LanguageCard';
+import SexCard from '@/components/SexCard';
 import AiConfigCard from '@/components/AiConfigCard';
 
 function getInitials(name: string): string {
@@ -90,6 +91,9 @@ function ProfilePageInner() {
 
         {/* ── Language ── */}
         <LanguageCard />
+
+        {/* ── Sex ── */}
+        <SexCard />
 
         {/* ── AI Configuration ── */}
         <AiConfigCard defaultOpen={expandAi} />

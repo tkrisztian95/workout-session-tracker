@@ -1,4 +1,4 @@
-import type { WorkoutPlan, ActiveSession, WorkoutSession, LlmConfig } from './types';
+import type { WorkoutPlan, ActiveSession, WorkoutSession, LlmConfig, Sex } from './types';
 import type { Locale } from './i18n';
 
 const KEYS = {
@@ -8,6 +8,7 @@ const KEYS = {
   userName: 'wst_user_name',
   locale: 'wst_locale',
   llmConfig: 'wst_llm_config',
+  userSex: 'wst_user_sex',
 } as const;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -128,6 +129,23 @@ export function getLocale(): Locale | null {
 
 export function saveLocale(locale: Locale): void {
   localStorage.setItem(KEYS.locale, locale);
+}
+
+// ─── User sex ─────────────────────────────────────────────────────────────────
+
+export function getSex(): Sex | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.userSex);
+  if (stored === 'male' || stored === 'female') return stored;
+  return null;
+}
+
+export function saveSex(sex: Sex | null): void {
+  if (sex === null) {
+    localStorage.removeItem(KEYS.userSex);
+  } else {
+    localStorage.setItem(KEYS.userSex, sex);
+  }
 }
 
 // ─── LLM Config ───────────────────────────────────────────────────────────────
