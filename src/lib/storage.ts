@@ -39,6 +39,30 @@ export function deletePlan(id: string): void {
   localStorage.setItem(KEYS.plans, JSON.stringify(plans));
 }
 
+export function duplicatePlan(id: string): WorkoutPlan {
+  const plans = getPlans();
+  const original = plans.find((p) => p.id === id);
+  if (!original) throw new Error(`Plan ${id} not found`);
+  const now = new Date().toISOString();
+  const copy: WorkoutPlan = {
+    ...original,
+    id: crypto.randomUUID(),
+    name: `${original.name} (copy)`,
+    status: 'active',
+    createdAt: now,
+    updatedAt: now,
+    days: original.days.map((day) => ({
+      ...day,
+      id: crypto.randomUUID(),
+      coreExercises: day.coreExercises.map((ex) => ({ ...ex, id: crypto.randomUUID() })),
+      optionalExercises: day.optionalExercises.map((ex) => ({ ...ex, id: crypto.randomUUID() })),
+    })),
+    sharedExercises: original.sharedExercises.map((ex) => ({ ...ex, id: crypto.randomUUID() })),
+  };
+  savePlan(copy);
+  return copy;
+}
+
 export function togglePlanStatus(id: string): void {
   const plans = getPlans();
   const index = plans.findIndex((p) => p.id === id);

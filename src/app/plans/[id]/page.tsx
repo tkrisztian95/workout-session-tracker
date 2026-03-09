@@ -51,22 +51,37 @@ export default function PlanDetailPage() {
   const [sharedExercises, setSharedExercises] = useState<PlanExercise[]>(
     () => getPlans().find((p) => p.id === params.id)?.sharedExercises ?? [],
   );
+  const [scheduledWeeks, setScheduledWeeks] = useState<string>(() =>
+    String(getPlans().find((p) => p.id === params.id)?.scheduledWeeks ?? ''),
+  );
   const [isSharedModalOpen, setIsSharedModalOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
+  const [weeksError, setWeeksError] = useState('');
 
   const handleSave = () => {
     if (!name.trim()) {
       setError(t.plan_name_required);
       return;
     }
+    if (scheduledWeeks !== '') {
+      const weeks = Number(scheduledWeeks);
+      if (!Number.isInteger(weeks) || weeks < 1 || weeks > 52) {
+        setWeeksError('Duration must be between 1 and 52 weeks.');
+        return;
+      }
+    }
     if (!plan) return;
+    const parsedWeeks = scheduledWeeks !== '' ? Number(scheduledWeeks) : undefined;
     const updated: WorkoutPlan = {
       ...plan,
       name: name.trim(),
       days,
       sharedExercises,
       updatedAt: new Date().toISOString(),
+      ...(parsedWeeks !== undefined
+        ? { scheduledWeeks: parsedWeeks }
+        : { scheduledWeeks: undefined }),
     };
     savePlan(updated);
     router.push('/plans');
@@ -132,6 +147,24 @@ export default function PlanDetailPage() {
             placeholder={t.plan_name_placeholder}
           />
           {error && <p className="text-danger text-xs mt-1.5">{error}</p>}
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="edit-plan-weeks">Scheduled duration (weeks)</FieldLabel>
+          <Input
+            id="edit-plan-weeks"
+            type="number"
+            inputMode="numeric"
+            value={scheduledWeeks}
+            onChange={(e) => {
+              setScheduledWeeks(e.target.value);
+              setWeeksError('');
+            }}
+            placeholder="e.g. 4"
+            min={1}
+            max={52}
+          />
+          {weeksError && <p className="text-danger text-xs mt-1.5">{weeksError}</p>}
         </div>
 
         <div>

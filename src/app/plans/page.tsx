@@ -11,8 +11,9 @@ import {
   CheckCircle,
   RotateCcw,
   Sparkles,
+  Copy,
 } from 'lucide-react';
-import { getPlans, togglePlanStatus, savePlan } from '@/lib/storage';
+import { getPlans, togglePlanStatus, savePlan, duplicatePlan } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
@@ -33,6 +34,12 @@ export default function PlansPage() {
   const handleToggleStatus = (id: string) => {
     togglePlanStatus(id);
     setPlans(getPlans());
+  };
+
+  const handleDuplicate = (id: string) => {
+    const copy = duplicatePlan(id);
+    setPlans(getPlans());
+    router.push(`/plans/${copy.id}`);
   };
 
   const handleAiApply = (planData: Omit<WorkoutPlan, 'id' | 'status'>) => {
@@ -90,6 +97,7 @@ export default function PlansPage() {
                 key={plan.id}
                 plan={plan}
                 onToggleStatus={() => handleToggleStatus(plan.id)}
+                onDuplicate={() => handleDuplicate(plan.id)}
               />
             ))}
 
@@ -154,7 +162,15 @@ function getPlanCategories(plan: WorkoutPlan): string[] {
   return [...new Set(all.map((e) => e.category).filter((c): c is string => Boolean(c)))];
 }
 
-function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus: () => void }) {
+function PlanCard({
+  plan,
+  onToggleStatus,
+  onDuplicate,
+}: {
+  plan: WorkoutPlan;
+  onToggleStatus: () => void;
+  onDuplicate: () => void;
+}) {
   const t = useTranslations();
   const isCompleted = plan.status === 'completed';
   const categories = getPlanCategories(plan);
@@ -181,6 +197,11 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
         </div>
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
+          {plan.scheduledWeeks && (
+            <span className="ml-2">
+              · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
+            </span>
+          )}
           {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
         </p>
         {categories.length > 0 && (
@@ -192,6 +213,14 @@ function PlanCard({ plan, onToggleStatus }: { plan: WorkoutPlan; onToggleStatus:
         )}
       </Link>
       <div className="flex items-center gap-2 flex-shrink-0">
+        <IconButton
+          size="sm"
+          onClick={onDuplicate}
+          aria-label="Duplicate plan"
+          className="bg-elevated/50 active:scale-90"
+        >
+          <Copy className="w-4 h-4 text-muted" />
+        </IconButton>
         <IconButton
           size="sm"
           onClick={onToggleStatus}

@@ -38,6 +38,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
   const [reps, setReps] = useState('10');
   const [duration, setDuration] = useState('60');
   const [role, setRole] = useState<PlanExercise['role']>('core');
+  const [weightKg, setWeightKg] = useState('');
   const [scalingNote, setScalingNote] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [manualCategory, setManualCategory] = useState('');
@@ -51,6 +52,7 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
     setReps('10');
     setDuration('60');
     setRole('core');
+    setWeightKg('');
     setScalingNote('');
     setSelectedCategory(null);
     setManualCategory('');
@@ -60,12 +62,14 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
   const handleSubmit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
     onAdd({
       name: trimmed,
       type,
       sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
       reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
       duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
+      weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
       role: showRole ? role : 'core',
       scalingNote: scalingNote.trim() || undefined,
       category: (selectedCategory ?? manualCategory) || undefined,
@@ -225,6 +229,24 @@ export default function AddPlanExerciseModal({ isOpen, onClose, onAdd, showRole 
             </div>
           )}
         </div>
+
+        {/* Weight */}
+        {(type === 'sets-reps' || type === 'sets-duration') && (
+          <div>
+            <FieldLabel htmlFor="plan-weight">
+              Weight (kg) <span className="normal-case text-muted">(optional)</span>
+            </FieldLabel>
+            <Input
+              id="plan-weight"
+              type="number"
+              inputMode="decimal"
+              value={weightKg}
+              onChange={(e) => setWeightKg(e.target.value)}
+              placeholder="e.g. 80"
+              min={0}
+            />
+          </div>
+        )}
 
         {/* Scaling note */}
         <div>

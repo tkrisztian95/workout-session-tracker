@@ -634,6 +634,7 @@ export default function HomePage() {
       sets?: number;
       reps?: number;
       duration?: number;
+      weightKg?: number;
       scalingNote?: string;
       category?: string;
     }): Exercise => ({
@@ -643,6 +644,7 @@ export default function HomePage() {
       sets: ex.sets,
       reps: ex.reps,
       duration: ex.duration,
+      weightKg: ex.weightKg,
       scalingNote: ex.scalingNote,
       category: ex.category,
     });

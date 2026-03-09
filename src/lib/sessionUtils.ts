@@ -13,11 +13,16 @@ export function formatExerciseDetail(ex: {
   sets?: number;
   reps?: number;
   duration?: number;
+  weightKg?: number;
 }): string {
-  if (ex.type === 'sets-reps') return `${ex.sets}×${ex.reps}`;
-  if (ex.type === 'sets-duration') return `${ex.sets}×${ex.duration}s`;
-  const d = ex.duration ?? 0;
-  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+  let base: string;
+  if (ex.type === 'sets-reps') base = `${ex.sets}×${ex.reps}`;
+  else if (ex.type === 'sets-duration') base = `${ex.sets}×${ex.duration}s`;
+  else {
+    const d = ex.duration ?? 0;
+    base = d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+  }
+  return ex.weightKg ? `${base} · ${ex.weightKg} kg` : base;
 }
 
 export function formatSessionDate(
