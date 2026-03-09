@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, AlertTriangle } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
@@ -20,7 +20,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export default function ProfilePage() {
+function ProfilePageInner() {
   const t = useTranslations();
   const searchParams = useSearchParams();
   const [name, setName] = useState(() => getUserName() ?? '');
@@ -138,5 +138,13 @@ export default function ProfilePage() {
 
       <BottomNav active="profile" />
     </Page>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense>
+      <ProfilePageInner />
+    </Suspense>
   );
 }
