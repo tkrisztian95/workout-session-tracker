@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
@@ -21,9 +21,12 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (exercise: Omit<Exercise, 'id'>) => void;
+  onEdit?: (exercise: Omit<Exercise, 'id'>) => void;
+  /** Pre-populate fields and switch to edit mode */
+  initialValues?: Exercise;
 }
 
-export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
+export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initialValues }: Props) {
   const t = useTranslations();
   const typeLabels: Record<Exercise['type'], string> = {
     'sets-reps': t.exercise_type_sets_reps,
@@ -42,22 +45,26 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
 
   const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
 
-  const handleSubmit = () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
-    onAdd({
-      name: trimmed,
-      type,
-      sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
-      reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
-      duration:
-        type !== 'sets-reps'
-          ? Math.max(1, Number(durationMins) * 60 + Number(durationSecs))
-          : undefined,
-      weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
-      category: manualCategory || undefined,
-    });
+  const isEditMode = !!initialValues;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialValues) {
+      setName(initialValues.name);
+      setType(initialValues.type);
+      setSets(String(initialValues.sets ?? 3));
+      setReps(String(initialValues.reps ?? 10));
+      const totalSecs = initialValues.duration ?? 0;
+      setDurationMins(String(Math.floor(totalSecs / 60)));
+      setDurationSecs(String(totalSecs % 60));
+      setWeightKg(initialValues.weightKg !== undefined ? String(initialValues.weightKg) : '');
+      setSelectedCategory(null);
+      setManualCategory(initialValues.category ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const reset = () => {
     setName('');
     setType('sets-reps');
     setSets('3');
@@ -70,16 +77,45 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
     clearSuggestions();
   };
 
+  const handleSubmit = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
+    const exercise: Omit<Exercise, 'id'> = {
+      name: trimmed,
+      type,
+      sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
+      reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
+      duration:
+        type !== 'sets-reps'
+          ? Math.max(1, Number(durationMins) * 60 + Number(durationSecs))
+          : undefined,
+      weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
+      category: manualCategory || undefined,
+    };
+    if (isEditMode && onEdit) {
+      onEdit(exercise);
+    } else {
+      onAdd(exercise);
+    }
+    reset();
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose}>
+    <BottomSheet isOpen={isOpen} onClose={handleClose}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <HeadingXL as="h2" className="text-2xl">
-          {t.add_exercise_title}
+          {isEditMode ? 'Edit exercise' : t.add_exercise_title}
         </HeadingXL>
         <IconButton
           size="sm"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label={t.close}
           className="bg-elevated hover:bg-border-subtle"
         >
@@ -239,7 +275,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
           disabled={!name.trim()}
           className="w-full mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {t.add_exercise_title}
+          {isEditMode ? 'Save changes' : t.add_exercise_title}
         </Button>
       </div>
     </BottomSheet>
