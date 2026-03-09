@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Sparkles, RefreshCw, Loader2, ChevronDown } from 'lucide-react';
-import { getLlmConfig, getPlans, getSessions } from '@/lib/storage';
+import { getLlmConfig, getPlans, getSessions, getLocale } from '@/lib/storage';
 import { suggestPlan } from '@/lib/ai';
 import type { AiPlanPreferences } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
@@ -105,7 +105,14 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
     try {
       const plans = getPlans();
       const sessions = getSessions();
-      const result = await suggestPlan(config, plans, sessions, preferences);
+      const localeLanguage: Record<string, string> = {
+        en: 'English',
+        hu: 'Hungarian',
+        de: 'German',
+      };
+      const locale = getLocale();
+      const language = locale ? localeLanguage[locale] : undefined;
+      const result = await suggestPlan(config, plans, sessions, preferences, language);
       setSuggestedPlan(result);
       setReasoning(result.reasoning);
       setView('preview');

@@ -83,6 +83,7 @@ export function buildPlanSuggestionPrompt(
   plans: WorkoutPlan[],
   sessions: WorkoutSession[],
   preferences?: AiPlanPreferences,
+  language?: string,
 ): string {
   const recentSessions = [...sessions]
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
@@ -107,7 +108,11 @@ export function buildPlanSuggestionPrompt(
     }
   }
 
-  return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}`;
+  const languageInstruction = language
+    ? `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${language}.`
+    : '';
+
+  return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
@@ -117,8 +122,9 @@ export async function suggestPlan(
   plans: WorkoutPlan[],
   sessions: WorkoutSession[],
   preferences?: AiPlanPreferences,
+  language?: string,
 ): Promise<AiPlanResult> {
-  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences);
+  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences, language);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
