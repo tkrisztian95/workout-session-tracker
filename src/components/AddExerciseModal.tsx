@@ -36,6 +36,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const [reps, setReps] = useState('10');
   const [durationMins, setDurationMins] = useState('1');
   const [durationSecs, setDurationSecs] = useState('0');
+  const [weightKg, setWeightKg] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [manualCategory, setManualCategory] = useState('');
 
@@ -44,6 +45,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
   const handleSubmit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
     onAdd({
       name: trimmed,
       type,
@@ -53,6 +55,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
         type !== 'sets-reps'
           ? Math.max(1, Number(durationMins) * 60 + Number(durationSecs))
           : undefined,
+      weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
       category: manualCategory || undefined,
     });
     setName('');
@@ -61,6 +64,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
     setReps('10');
     setDurationMins('1');
     setDurationSecs('0');
+    setWeightKg('');
     setSelectedCategory(null);
     setManualCategory('');
     clearSuggestions();
@@ -210,6 +214,24 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd }: Props) {
             </>
           )}
         </div>
+
+        {/* Weight */}
+        {(type === 'sets-reps' || type === 'sets-duration') && (
+          <div>
+            <FieldLabel htmlFor="exercise-weight">
+              Weight (kg) <span className="normal-case text-muted">(optional)</span>
+            </FieldLabel>
+            <Input
+              id="exercise-weight"
+              type="number"
+              inputMode="decimal"
+              value={weightKg}
+              onChange={(e) => setWeightKg(e.target.value)}
+              placeholder="e.g. 80"
+              min={0}
+            />
+          </div>
+        )}
 
         {/* Submit */}
         <Button
