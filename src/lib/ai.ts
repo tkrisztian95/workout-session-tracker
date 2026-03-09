@@ -1,4 +1,5 @@
-import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise } from './types';
+import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise, Sex } from './types';
+import { getSex } from './storage';
 
 const SYSTEM_PROMPT = `You are a personal fitness coach. Based on the user's existing workout plans and session history, suggest a new workout plan tailored to their goals and progress.
 
@@ -84,6 +85,7 @@ export function buildPlanSuggestionPrompt(
   sessions: WorkoutSession[],
   preferences?: AiPlanPreferences,
   language?: string,
+  sex?: Sex | null,
 ): string {
   const recentSessions = [...sessions]
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
@@ -112,7 +114,9 @@ export function buildPlanSuggestionPrompt(
     ? `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${language}.`
     : '';
 
-  return `Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
+  const sexLine = sex ? `My biological sex: ${sex}.\n\n` : '';
+
+  return `${sexLine}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
@@ -124,7 +128,8 @@ export async function suggestPlan(
   preferences?: AiPlanPreferences,
   language?: string,
 ): Promise<AiPlanResult> {
-  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences, language);
+  const sex = getSex();
+  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences, language, sex);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
