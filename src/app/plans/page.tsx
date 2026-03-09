@@ -121,6 +121,7 @@ export default function PlansPage() {
                         key={plan.id}
                         plan={plan}
                         onToggleStatus={() => handleToggleStatus(plan.id)}
+                        onDuplicate={() => handleDuplicate(plan.id)}
                       />
                     ))}
                   </div>
