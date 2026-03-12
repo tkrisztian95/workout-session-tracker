@@ -250,6 +250,18 @@ export default function SessionDetailPage() {
                     {exercise.category && <CategoryBadge category={exercise.category} />}
                   </div>
                   <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
+                  {exercise.loggedSets && exercise.loggedSets.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {exercise.loggedSets.map((s, i) => (
+                        <span
+                          key={i}
+                          className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
+                        >
+                          {s.weight}kg×{s.reps}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {isEditing && (
                   <div className="flex items-center gap-1 flex-shrink-0">
