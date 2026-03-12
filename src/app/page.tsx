@@ -457,10 +457,32 @@ function SessionView({
     onUpdate(updated);
   };
 
+  const handleUndoDismiss = (id: string) => {
+    const updated: ActiveSession = {
+      ...session,
+      exercises: session.exercises.map((e) => (e.id === id ? { ...e, dismissed: false } : e)),
+    };
+    onUpdate(updated);
+  };
+
+  const handleSetActive = (id: string) => {
+    const exercises = session.exercises;
+    const targetIndex = exercises.findIndex((e) => e.id === id);
+    const activeIndex = exercises.findIndex((e) => !e.completed && !e.dismissed);
+    if (targetIndex === -1 || activeIndex === -1 || targetIndex === activeIndex) return;
+    const reordered = [...exercises];
+    const [target] = reordered.splice(targetIndex, 1);
+    const insertAt = targetIndex < activeIndex ? activeIndex - 1 : activeIndex;
+    reordered.splice(insertAt, 0, target);
+    onUpdate({ ...session, exercises: reordered });
+  };
+
   const remaining = session.exercises.filter((e) => !e.completed && !e.dismissed);
   const completed = session.exercises.filter((e) => e.completed && !e.dismissed);
   const dismissed = session.exercises.filter((e) => e.dismissed);
   const totalCount = session.exercises.length;
+  const activeExercise = remaining[0] ?? null;
+  const queue = remaining.slice(1);
 
   return (
     <Page className="pb-20">
@@ -491,14 +513,34 @@ function SessionView({
           />
         ) : (
           <>
-            {remaining.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                onComplete={() => handleComplete(exercise.id)}
-                onDismiss={() => handleDismiss(exercise.id)}
-              />
-            ))}
+            {activeExercise && (
+              <>
+                <ListLabel>{t.active_exercise_section}</ListLabel>
+                <ExerciseCard
+                  key={activeExercise.id}
+                  exercise={activeExercise}
+                  isActive
+                  targetWeightLabel={t.target_weight}
+                  onComplete={() => handleComplete(activeExercise.id)}
+                  onDismiss={() => handleDismiss(activeExercise.id)}
+                />
+              </>
+            )}
+
+            {queue.length > 0 && (
+              <>
+                <ListLabel>{t.upcoming_section}</ListLabel>
+                {queue.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    onComplete={() => handleComplete(exercise.id)}
+                    onDismiss={() => handleDismiss(exercise.id)}
+                    onSetActive={() => handleSetActive(exercise.id)}
+                  />
+                ))}
+              </>
+            )}
 
             {completed.length > 0 && (
               <>
@@ -523,6 +565,7 @@ function SessionView({
                     exercise={exercise}
                     onComplete={() => handleComplete(exercise.id)}
                     onDismiss={() => handleDismiss(exercise.id)}
+                    onUndoDismiss={() => handleUndoDismiss(exercise.id)}
                   />
                 ))}
               </>
