@@ -515,6 +515,16 @@ function SessionView({
     onUpdate(updated);
   };
 
+  const handleRemoveSet = (id: string, index: number) => {
+    const updated: ActiveSession = {
+      ...session,
+      exercises: session.exercises.map((e) =>
+        e.id === id ? { ...e, loggedSets: (e.loggedSets ?? []).filter((_, i) => i !== index) } : e,
+      ),
+    };
+    onUpdate(updated);
+  };
+
   const handleSetActive = (id: string) => {
     const exercises = session.exercises;
     const targetIndex = exercises.findIndex((e) => e.id === id);
@@ -562,13 +572,26 @@ function SessionView({
         {session.planName && (
           <p className="text-brand text-sm mt-1 font-medium">{session.planName}</p>
         )}
-        {totalCount > 0 && (
-          <p className="text-muted text-sm mt-2">
-            {t.session_progress
-              .replace('{remaining}', String(remaining.length))
-              .replace('{done}', String(completed.length))}
-          </p>
-        )}
+        {totalCount > 0 &&
+          (() => {
+            const activeTotal = completed.length + remaining.length;
+            const pct = activeTotal > 0 ? (completed.length / activeTotal) * 100 : 0;
+            return (
+              <>
+                <p className="text-muted text-sm mt-2">
+                  {t.session_progress
+                    .replace('{remaining}', String(remaining.length))
+                    .replace('{done}', String(completed.length))}
+                </p>
+                <div className="mt-2 h-1 rounded-full bg-border overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-brand transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </>
+            );
+          })()}
       </PageHeader>
 
       <div className="flex-1 px-6 pb-52 space-y-3 overflow-y-auto">
@@ -591,6 +614,7 @@ function SessionView({
                   onComplete={() => handleComplete(activeExercise.id)}
                   onDismiss={() => handleDismiss(activeExercise.id)}
                   onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
+                  onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
                 />
               </>
             )}

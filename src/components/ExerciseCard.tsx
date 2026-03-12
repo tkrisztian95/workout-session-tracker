@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, X, Play, RotateCcw, Plus } from 'lucide-react';
+import { Check, X, RotateCcw, Plus } from 'lucide-react';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { IconButton } from '@/components/ui';
 
@@ -14,6 +14,7 @@ interface Props {
   onSetActive?: () => void;
   onUndoDismiss?: () => void;
   onLogSet?: (set: Omit<LoggedSet, 'loggedAt'>) => void;
+  onRemoveSet?: (index: number) => void;
 }
 
 function exerciseDetail(ex: Exercise): string {
@@ -40,10 +41,12 @@ export default function ExerciseCard({
   onSetActive,
   onUndoDismiss,
   onLogSet,
+  onRemoveSet,
 }: Props) {
   const [showSetForm, setShowSetForm] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
+  const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
 
   const detail = exerciseDetail(exercise);
   const isDismissed = exercise.dismissed === true;
@@ -51,6 +54,14 @@ export default function ExerciseCard({
   const isDone = isCompleted || isDismissed;
   const showActiveStyle = isActive && !isDone;
   const canLogSets = exercise.type === 'sets-reps' && !isDone && !!onLogSet;
+
+  const loggedCount = exercise.loggedSets?.length ?? 0;
+  const setsGoalAchieved =
+    exercise.type === 'sets-reps' && exercise.sets != null && loggedCount >= exercise.sets;
+  const weightGoalAchieved =
+    exercise.weightKg != null &&
+    loggedCount > 0 &&
+    exercise.loggedSets!.every((s) => s.weight >= exercise.weightKg!);
 
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
@@ -69,9 +80,7 @@ export default function ExerciseCard({
 
   return (
     <div
-      className={`rounded-2xl border flex flex-col px-4 gap-3 transition-all duration-200 ${
-        showActiveStyle ? 'py-5' : 'py-4'
-      } ${
+      className={`rounded-2xl border flex flex-col transition-all duration-200 ${
         isDismissed
           ? 'bg-base border-surface opacity-40'
           : isCompleted
@@ -81,150 +90,231 @@ export default function ExerciseCard({
               : 'bg-surface border-border'
       }`}
     >
-      {/* Main row */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p
-            className={`leading-tight truncate ${
-              showActiveStyle ? 'text-lg font-bold' : 'text-base font-semibold'
-            } ${isDone ? 'line-through text-muted' : 'text-foreground'}`}
-          >
-            {exercise.name}
-          </p>
-          <p
-            className={`mt-1 font-medium ${showActiveStyle ? 'text-base' : 'text-sm'} ${
-              isDone ? 'text-dim' : 'text-brand'
-            }`}
-          >
-            {detail}
-          </p>
-          {showActiveStyle && exercise.weightKg != null && (
-            <p className="text-sm text-foreground font-medium mt-1.5">
-              {targetWeightLabel}: {exercise.weightKg} kg
+      {/* ── Active exercise ─────────────────────────────────────────────── */}
+      {showActiveStyle ? (
+        <>
+          {/* Info area */}
+          <div className="px-4 pt-5 pb-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-lg font-bold leading-tight text-foreground flex-1">
+                {exercise.name}
+              </p>
+              <button
+                onClick={onDismiss}
+                className="text-xs text-muted font-medium px-2.5 py-1 rounded-lg border border-border/60 active:bg-elevated active:border-border cursor-pointer transition-colors duration-150 flex-shrink-0"
+              >
+                Skip
+              </button>
+            </div>
+            <p className="flex items-center gap-1.5 mt-1 text-base font-medium text-brand">
+              {detail}
+              {setsGoalAchieved && (
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
+                  <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
+                </span>
+              )}
             </p>
+            {exercise.weightKg != null && (
+              <p className="flex items-center gap-1.5 text-sm text-foreground font-medium mt-1.5">
+                {targetWeightLabel}: {exercise.weightKg} kg
+                {weightGoalAchieved && (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
+                    <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
+                  </span>
+                )}
+              </p>
+            )}
+            {exercise.scalingNote && (
+              <p className="mt-1.5 text-sm text-secondary leading-snug">{exercise.scalingNote}</p>
+            )}
+          </div>
+
+          {/* Set progress slots — shown for sets-reps exercises */}
+          {exercise.type === 'sets-reps' && exercise.sets != null && (
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+              {Array.from({
+                length: Math.max(exercise.sets, exercise.loggedSets?.length ?? 0),
+              }).map((_, i) => {
+                const logged = exercise.loggedSets?.[i];
+                return logged ? (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      if (!onRemoveSet) return;
+                      if (pendingDeleteIndex === i) {
+                        onRemoveSet(i);
+                        setPendingDeleteIndex(null);
+                      } else {
+                        setPendingDeleteIndex(i);
+                      }
+                    }}
+                    onBlur={() => setPendingDeleteIndex(null)}
+                    className={`inline-flex items-center gap-1.5 text-xs rounded-lg px-2.5 py-1.5 font-medium border transition-all duration-200 cursor-pointer ${
+                      pendingDeleteIndex === i
+                        ? 'bg-danger/15 border-danger/50 text-danger'
+                        : 'bg-brand/10 border-brand/40 text-brand'
+                    }`}
+                  >
+                    {pendingDeleteIndex === i ? (
+                      <>
+                        <X className="w-3 h-3" strokeWidth={2.5} />
+                        Remove
+                      </>
+                    ) : (
+                      `${logged.weight} kg × ${logged.reps}`
+                    )}
+                  </button>
+                ) : (
+                  <span
+                    key={i}
+                    className="text-xs rounded-lg px-2.5 py-1 font-medium border border-dashed border-border text-dim"
+                  >
+                    set {i + 1}
+                  </span>
+                );
+              })}
+            </div>
           )}
-          {exercise.scalingNote && (
+
+          {/* Action bar — swaps to set-entry form when logging */}
+          <div className="px-4 pb-4 pt-3 border-t border-border/50">
+            {showSetForm ? (
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="kg"
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  className="w-16 text-sm bg-base border border-border rounded-xl px-2 py-2.5 text-foreground text-center focus:outline-none focus:border-brand"
+                />
+                <span className="text-muted text-xs">×</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="reps"
+                  value={repsInput}
+                  onChange={(e) => setRepsInput(e.target.value)}
+                  className="w-16 text-sm bg-base border border-border rounded-xl px-2 py-2.5 text-foreground text-center focus:outline-none focus:border-brand"
+                />
+                <button
+                  onClick={() => setShowSetForm(false)}
+                  className="flex flex-1 items-center justify-center py-2.5 rounded-xl bg-elevated text-muted text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitSet}
+                  className="flex flex-1 items-center justify-center py-2.5 rounded-xl bg-brand/15 text-brand text-sm font-semibold active:bg-brand/25 cursor-pointer transition-colors duration-150"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {canLogSets && (
+                  <button
+                    onClick={openSetForm}
+                    className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-elevated text-secondary text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150"
+                  >
+                    <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    Log set
+                  </button>
+                )}
+                <button
+                  onClick={onComplete}
+                  className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-success/15 text-success text-sm font-semibold active:bg-success/25 cursor-pointer transition-colors duration-150"
+                >
+                  <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        /* ── Non-active / completed / dismissed / queue ─────────────────── */
+        <div
+          className={`flex items-center px-4 py-3.5 gap-3 ${onSetActive ? 'cursor-pointer active:bg-elevated/60' : ''}`}
+          onClick={!isDone && onSetActive ? onSetActive : undefined}
+        >
+          {/* Info */}
+          <div className="min-w-0 flex-1">
             <p
-              className={`mt-1.5 leading-snug ${
-                showActiveStyle ? 'text-sm text-secondary' : 'text-xs text-muted'
+              className={`text-sm font-semibold leading-tight truncate ${
+                isDone ? 'line-through text-muted' : 'text-foreground'
               }`}
             >
-              {exercise.scalingNote}
+              {exercise.name}
             </p>
-          )}
-        </div>
-
-        {isDismissed ? (
-          onUndoDismiss && (
-            <div className="flex-shrink-0">
-              <IconButton
-                onClick={onUndoDismiss}
-                aria-label={`Restore ${exercise.name}`}
-                className="active:bg-brand/20"
-              >
-                <RotateCcw className="w-4 h-4 text-secondary" />
-              </IconButton>
-            </div>
-          )
-        ) : (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {onSetActive && (
-              <IconButton
-                onClick={onSetActive}
-                aria-label={`Do ${exercise.name} now`}
-                className="active:bg-brand/20"
-              >
-                <Play className="w-4 h-4 text-secondary" />
-              </IconButton>
+            <p className={`mt-0.5 text-xs font-medium ${isDone ? 'text-dim' : 'text-brand'}`}>
+              {detail}
+            </p>
+            {exercise.scalingNote && !isDone && (
+              <p className="mt-1 text-xs text-muted leading-snug">{exercise.scalingNote}</p>
             )}
-            {canLogSets && (
-              <IconButton
-                onClick={openSetForm}
-                aria-label={`Log set for ${exercise.name}`}
-                className="active:bg-brand/20"
-              >
-                <Plus className="w-4 h-4 text-secondary" />
-              </IconButton>
+            {/* Logged sets inline for completed */}
+            {exercise.loggedSets && exercise.loggedSets.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {exercise.loggedSets.map((s, i) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
+                  >
+                    {s.weight}kg×{s.reps}
+                  </span>
+                ))}
+              </div>
             )}
-            <IconButton
-              onClick={onComplete}
-              aria-label={
-                isCompleted
-                  ? `Unmark ${exercise.name} as complete`
-                  : `Mark ${exercise.name} as complete`
-              }
-              className={
-                isCompleted
-                  ? 'bg-success/20 border border-success/50 active:bg-success/40'
-                  : 'active:bg-success/10'
-              }
-            >
-              <Check
-                className={`w-4 h-4 ${isCompleted ? 'text-success' : 'text-secondary'}`}
-                strokeWidth={isCompleted ? 3 : 2}
-              />
-            </IconButton>
-
-            <IconButton
-              onClick={onDismiss}
-              aria-label={`Dismiss ${exercise.name}`}
-              className="active:bg-danger/20"
-            >
-              <X className="w-4 h-4 text-secondary" />
-            </IconButton>
           </div>
-        )}
-      </div>
 
-      {/* Logged sets list */}
-      {exercise.loggedSets && exercise.loggedSets.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border/50">
-          {exercise.loggedSets.map((s, i) => (
-            <span
-              key={i}
-              className="text-xs bg-elevated rounded-lg px-2 py-1 text-secondary font-medium"
-            >
-              {s.weight} kg × {s.reps}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Inline set-entry form */}
-      {showSetForm && (
-        <div
-          className="flex items-center gap-2 pt-1 border-t border-border/50"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <input
-            type="number"
-            inputMode="decimal"
-            placeholder="kg"
-            value={weightInput}
-            onChange={(e) => setWeightInput(e.target.value)}
-            className="w-16 text-sm bg-base border border-border rounded-lg px-2 py-1.5 text-foreground text-center focus:outline-none focus:border-brand"
-          />
-          <span className="text-muted text-xs">×</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="reps"
-            value={repsInput}
-            onChange={(e) => setRepsInput(e.target.value)}
-            className="w-16 text-sm bg-base border border-border rounded-lg px-2 py-1.5 text-foreground text-center focus:outline-none focus:border-brand"
-          />
-          <button
-            onClick={submitSet}
-            className="ml-auto text-xs font-semibold text-brand px-3 py-1.5 rounded-lg active:bg-brand/10"
+          {/* Actions */}
+          <div
+            className="flex items-center gap-1.5 flex-shrink-0"
+            onClick={(e) => e.stopPropagation()}
           >
-            Save
-          </button>
-          <button
-            onClick={() => setShowSetForm(false)}
-            className="text-xs text-muted px-2 py-1.5 rounded-lg active:bg-elevated"
-          >
-            Cancel
-          </button>
+            {isDismissed ? (
+              onUndoDismiss && (
+                <IconButton
+                  onClick={onUndoDismiss}
+                  aria-label={`Restore ${exercise.name}`}
+                  className="active:bg-brand/20"
+                >
+                  <RotateCcw className="w-4 h-4 text-secondary" />
+                </IconButton>
+              )
+            ) : (
+              <>
+                <IconButton
+                  onClick={onComplete}
+                  aria-label={
+                    isCompleted
+                      ? `Unmark ${exercise.name} as complete`
+                      : `Mark ${exercise.name} as complete`
+                  }
+                  className={
+                    isCompleted
+                      ? 'bg-success/20 border border-success/50 active:bg-success/40'
+                      : 'active:bg-success/10'
+                  }
+                >
+                  <Check
+                    className={`w-4 h-4 ${isCompleted ? 'text-success' : 'text-secondary'}`}
+                    strokeWidth={isCompleted ? 3 : 2}
+                  />
+                </IconButton>
+                {!isCompleted && (
+                  <IconButton
+                    onClick={onDismiss}
+                    aria-label={`Dismiss ${exercise.name}`}
+                    className="active:bg-danger/20"
+                  >
+                    <X className="w-4 h-4 text-secondary" />
+                  </IconButton>
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
