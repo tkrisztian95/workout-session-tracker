@@ -160,5 +160,18 @@
   "exercise_plural": "Übungen",
   "min_label": "Min",
   "no_exercises_recorded": "Keine Übungen aufgezeichnet.",
-  "session_started_at": "Beginn"
+  "session_started_at": "Beginn",
+  "session_paused": "Sitzung pausiert",
+
+  "exercise_skip": "Überspringen",
+  "exercise_remove_set": "Entfernen",
+  "exercise_set_slot": "Satz {n}",
+  "exercise_log_set": "Satz erfassen",
+  "exercise_done": "Fertig",
+  "exercise_detail_sets_reps": "{sets} Sätze × {reps} Wdh.",
+  "exercise_detail_sets_duration": "{sets} Sätze · {duration}s",
+  "exercise_restore_aria": "{name} wiederherstellen",
+  "exercise_mark_complete_aria": "{name} als erledigt markieren",
+  "exercise_unmark_complete_aria": "{name} als nicht erledigt markieren",
+  "exercise_dismiss_aria": "{name} überspringen"
 }

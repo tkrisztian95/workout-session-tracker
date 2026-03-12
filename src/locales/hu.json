@@ -160,5 +160,18 @@
   "exercise_plural": "gyakorlat",
   "min_label": "perc",
   "no_exercises_recorded": "Nem rögzítettek gyakorlatot.",
-  "session_started_at": "Kezdés"
+  "session_started_at": "Kezdés",
+  "session_paused": "Szünet",
+
+  "exercise_skip": "Kihagyás",
+  "exercise_remove_set": "Törlés",
+  "exercise_set_slot": "{n}. sor",
+  "exercise_log_set": "Sorozat rögzítése",
+  "exercise_done": "Kész",
+  "exercise_detail_sets_reps": "{sets} sor × {reps} ism.",
+  "exercise_detail_sets_duration": "{sets} sor · {duration}s",
+  "exercise_restore_aria": "{name} visszaállítása",
+  "exercise_mark_complete_aria": "{name} befejezettnek jelölése",
+  "exercise_unmark_complete_aria": "{name} befejezettség visszavonása",
+  "exercise_dismiss_aria": "{name} kihagyása"
 }
