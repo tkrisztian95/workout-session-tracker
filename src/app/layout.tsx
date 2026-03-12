@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Barlow, Barlow_Condensed } from 'next/font/google';
 import { LocaleProvider } from '@/lib/locale-context';
+import { PostHogProvider } from '@/components/PostHogProvider';
 import './globals.css';
 
 const barlow = Barlow({
@@ -36,7 +37,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-base">
       <body className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}>
-        <LocaleProvider>{children}</LocaleProvider>
+        <PostHogProvider>
+          <LocaleProvider>{children}</LocaleProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
