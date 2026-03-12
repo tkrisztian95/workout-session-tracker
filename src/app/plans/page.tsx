@@ -216,7 +216,7 @@ function PlanCard({
         )}
       </Link>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="relative flex items-center gap-2 flex-shrink-0">
         <ChevronRight className="w-4 h-4 text-muted/40 pointer-events-none" />
         <IconButton
           size="sm"
@@ -226,45 +226,45 @@ function PlanCard({
         >
           <MoreVertical className="w-4 h-4 text-muted" />
         </IconButton>
-      </div>
 
-      {menuOpen && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-          <div className="absolute right-4 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
-            <button
-              className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-              onClick={() => {
-                setMenuOpen(false);
-                onDuplicate();
-              }}
-            >
-              <Copy className="w-4 h-4 text-muted flex-shrink-0" />
-              {t.plan_action_duplicate}
-            </button>
-            <div className="h-px bg-border/50 mx-3" />
-            <button
-              className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-              onClick={() => {
-                setMenuOpen(false);
-                onToggleStatus();
-              }}
-            >
-              {isCompleted ? (
-                <>
-                  <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
-                  {t.plan_action_reactivate}
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
-                  {t.plan_action_mark_completed}
-                </>
-              )}
-            </button>
-          </div>
-        </>
-      )}
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+            <div className="absolute right-0 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDuplicate();
+                }}
+              >
+                <Copy className="w-4 h-4 text-muted flex-shrink-0" />
+                {t.plan_action_duplicate}
+              </button>
+              <div className="h-px bg-border/50 mx-3" />
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onToggleStatus();
+                }}
+              >
+                {isCompleted ? (
+                  <>
+                    <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
+                    {t.plan_action_reactivate}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
+                    {t.plan_action_mark_completed}
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -49,8 +49,8 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       ref={ref}
       className={
         size === 'sm'
-          ? `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-surface active:bg-elevated ${className}`
-          : `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-elevated ${className}`
+          ? `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-surface border border-border active:bg-elevated ${className}`
+          : `w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer bg-elevated border border-border ${className}`
       }
       {...props}
     />
