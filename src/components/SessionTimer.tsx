@@ -5,6 +5,16 @@ import { Timer } from 'lucide-react';
 
 interface Props {
   startedAt: string;
+  totalPausedMs: number;
+  pausedAt?: string;
+}
+
+function calcElapsed(startedAt: string, totalPausedMs: number, pausedAt?: string): number {
+  const activeMs =
+    (pausedAt ? new Date(pausedAt).getTime() : Date.now()) -
+    new Date(startedAt).getTime() -
+    totalPausedMs;
+  return Math.floor(Math.max(0, activeMs) / 1000);
 }
 
 function formatElapsed(seconds: number): string {
@@ -17,22 +27,23 @@ function formatElapsed(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export default function SessionTimer({ startedAt }: Props) {
-  const [elapsed, setElapsed] = useState(() =>
-    Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000),
-  );
+export default function SessionTimer({ startedAt, totalPausedMs, pausedAt }: Props) {
+  const [, tick] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
-    }, 1000);
+    if (pausedAt) return;
+    const interval = setInterval(() => tick((n) => n + 1), 1000);
     return () => clearInterval(interval);
-  }, [startedAt]);
+  }, [pausedAt, startedAt, totalPausedMs]);
+
+  const elapsed = calcElapsed(startedAt, totalPausedMs, pausedAt);
 
   return (
     <div className="flex items-center gap-1.5 text-muted text-sm">
-      <Timer className="w-3.5 h-3.5" />
-      <span className="font-mono font-medium tabular-nums">{formatElapsed(elapsed)}</span>
+      <Timer className={`w-3.5 h-3.5 ${pausedAt ? 'text-warning' : ''}`} />
+      <span className={`font-mono font-medium tabular-nums ${pausedAt ? 'text-warning' : ''}`}>
+        {formatElapsed(elapsed)}
+      </span>
     </div>
   );
 }
