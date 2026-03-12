@@ -10,12 +10,18 @@ import { Button, Card, HeadingXL } from '@/components/ui';
 interface Props {
   exercises: Exercise[];
   startedAt: string;
+  totalPausedMs?: number;
   onDismiss: (rating?: 1 | 2 | 3 | 4 | 5) => void;
 }
 
-export default function SessionCompleteOverlay({ exercises, startedAt, onDismiss }: Props) {
+export default function SessionCompleteOverlay({
+  exercises,
+  startedAt,
+  totalPausedMs = 0,
+  onDismiss,
+}: Props) {
   const t = useTranslations();
-  const stats = calcSessionStats(exercises, startedAt);
+  const stats = calcSessionStats(exercises, startedAt, totalPausedMs);
   const [view, setView] = useState<'summary' | 'rating'>('summary');
 
   return (

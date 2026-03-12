@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Dumbbell, ChevronLeft, ChevronRight, Check, ClipboardList } from 'lucide-react';
+import {
+  Plus,
+  Dumbbell,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  ClipboardList,
+  Pause,
+  Play as PlayIcon,
+} from 'lucide-react';
 import ExerciseCard from '@/components/ExerciseCard';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import SessionTimer from '@/components/SessionTimer';
@@ -439,12 +448,35 @@ function SessionView({
     setIsModalOpen(false);
   };
 
+  const isPaused = session.pausedAt !== undefined;
+
+  const handlePause = () => {
+    const updated: ActiveSession = { ...session, pausedAt: new Date().toISOString() };
+    onUpdate(updated);
+  };
+
+  const handleResume = () => {
+    const pausedMs = session.pausedAt ? Date.now() - new Date(session.pausedAt).getTime() : 0;
+    const updated: ActiveSession = {
+      ...session,
+      pausedAt: undefined,
+      totalPausedMs: (session.totalPausedMs ?? 0) + pausedMs,
+    };
+    onUpdate(updated);
+  };
+
   const handleComplete = (id: string) => {
     const updated: ActiveSession = {
       ...session,
-      exercises: session.exercises.map((e) =>
-        e.id === id ? { ...e, completed: !e.completed } : e,
-      ),
+      exercises: session.exercises.map((e) => {
+        if (e.id !== id) return e;
+        const nowCompleted = !e.completed;
+        return {
+          ...e,
+          completed: nowCompleted,
+          completedAt: nowCompleted ? new Date().toISOString() : undefined,
+        };
+      }),
     };
     onUpdate(updated);
   };
@@ -461,6 +493,24 @@ function SessionView({
     const updated: ActiveSession = {
       ...session,
       exercises: session.exercises.map((e) => (e.id === id ? { ...e, dismissed: false } : e)),
+    };
+    onUpdate(updated);
+  };
+
+  const handleLogSet = (id: string, weight: number, reps: number) => {
+    const updated: ActiveSession = {
+      ...session,
+      exercises: session.exercises.map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              loggedSets: [
+                ...(e.loggedSets ?? []),
+                { weight, reps, loggedAt: new Date().toISOString() },
+              ],
+            }
+          : e,
+      ),
     };
     onUpdate(updated);
   };
@@ -489,7 +539,24 @@ function SessionView({
       <PageHeader>
         <div className="flex items-center justify-between mb-1">
           <LabelOverline>{formatDate(locale)}</LabelOverline>
-          <SessionTimer startedAt={session.startedAt} />
+          <div className="flex items-center gap-2">
+            <SessionTimer
+              startedAt={session.startedAt}
+              totalPausedMs={session.totalPausedMs ?? 0}
+              pausedAt={session.pausedAt}
+            />
+            <button
+              onClick={isPaused ? handleResume : handlePause}
+              aria-label={isPaused ? 'Resume session' : 'Pause session'}
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
+            >
+              {isPaused ? (
+                <PlayIcon className="w-3.5 h-3.5 text-brand" />
+              ) : (
+                <Pause className="w-3.5 h-3.5 text-secondary" />
+              )}
+            </button>
+          </div>
         </div>
         <HeadingXL className="mt-1">{session.planDayName ?? t.free_session}</HeadingXL>
         {session.planName && (
@@ -523,6 +590,7 @@ function SessionView({
                   targetWeightLabel={t.target_weight}
                   onComplete={() => handleComplete(activeExercise.id)}
                   onDismiss={() => handleDismiss(activeExercise.id)}
+                  onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
                 />
               </>
             )}
@@ -537,6 +605,7 @@ function SessionView({
                     onComplete={() => handleComplete(exercise.id)}
                     onDismiss={() => handleDismiss(exercise.id)}
                     onSetActive={() => handleSetActive(exercise.id)}
+                    onLogSet={(s) => handleLogSet(exercise.id, s.weight, s.reps)}
                   />
                 ))}
               </>
@@ -603,6 +672,7 @@ function SessionView({
         <SessionCompleteOverlay
           exercises={session.exercises}
           startedAt={session.startedAt}
+          totalPausedMs={session.totalPausedMs ?? 0}
           onDismiss={(rating) => {
             setShowCompleteOverlay(false);
             onFinish(rating);
@@ -663,6 +733,7 @@ export default function HomePage() {
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
       exercises: [],
+      totalPausedMs: 0,
     };
     setActiveSession(session);
     setActive(session);
@@ -704,6 +775,7 @@ export default function HomePage() {
       planDayId: selectedDay.id,
       planName: selectedPlan.name,
       planDayName: selectedDay.name,
+      totalPausedMs: 0,
     };
     setActiveSession(session);
     setActive(session);

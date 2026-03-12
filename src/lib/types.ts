@@ -12,6 +12,12 @@ export interface LlmConfig {
 
 // ─── Exercise (used in sessions) ─────────────────────────────────────────────
 
+export interface LoggedSet {
+  weight: number; // kg
+  reps: number;
+  loggedAt: string; // ISO timestamp
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -24,6 +30,8 @@ export interface Exercise {
   category?: string;
   completed?: boolean; // in-session tracking
   dismissed?: boolean; // in-session tracking
+  completedAt?: string; // ISO timestamp set when exercise is marked complete
+  loggedSets?: LoggedSet[]; // per-set log for sets-reps exercises
 }
 
 // ─── Plan data models ─────────────────────────────────────────────────────────
@@ -72,6 +80,8 @@ export interface ActiveSession {
   planDayId?: string;
   planName?: string;
   planDayName?: string;
+  pausedAt?: string; // ISO timestamp set when session is paused; absent when active
+  totalPausedMs: number; // cumulative ms spent paused across all pause/resume cycles
 }
 
 /** A completed session (stored in the wst_sessions array). */

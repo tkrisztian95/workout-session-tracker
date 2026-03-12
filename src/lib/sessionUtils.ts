@@ -49,11 +49,17 @@ export interface SessionStats {
  * Dismissed exercises are excluded from all counts.
  * `startedAt` is used to compute elapsed time.
  */
-export function calcSessionStats(exercises: Exercise[], startedAt: string): SessionStats {
+export function calcSessionStats(
+  exercises: Exercise[],
+  startedAt: string,
+  totalPausedMs = 0,
+): SessionStats {
   const nonDismissed = exercises.filter((e) => !e.dismissed);
   const completed = nonDismissed.filter((e) => e.completed);
   const completedSets = completed.reduce((sum, e) => sum + (e.sets ?? 0), 0);
-  const elapsedSeconds = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000);
+  const elapsedSeconds = Math.floor(
+    (Date.now() - new Date(startedAt).getTime() - totalPausedMs) / 1000,
+  );
   return {
     completedExercises: completed.length,
     completedSets,
