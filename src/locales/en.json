@@ -160,5 +160,18 @@
   "exercise_plural": "exercises",
   "min_label": "min",
   "no_exercises_recorded": "No exercises recorded.",
-  "session_started_at": "Started"
+  "session_started_at": "Started",
+  "session_paused": "Session paused",
+
+  "exercise_skip": "Skip",
+  "exercise_remove_set": "Remove",
+  "exercise_set_slot": "set {n}",
+  "exercise_log_set": "Log set",
+  "exercise_done": "Done",
+  "exercise_detail_sets_reps": "{sets} sets × {reps} reps",
+  "exercise_detail_sets_duration": "{sets} sets · {duration}s",
+  "exercise_restore_aria": "Restore {name}",
+  "exercise_mark_complete_aria": "Mark {name} as complete",
+  "exercise_unmark_complete_aria": "Unmark {name} as complete",
+  "exercise_dismiss_aria": "Dismiss {name}"
 }

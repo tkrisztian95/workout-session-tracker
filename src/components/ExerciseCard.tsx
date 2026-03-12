@@ -4,24 +4,31 @@ import { useState } from 'react';
 import { Check, X, RotateCcw, Plus } from 'lucide-react';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { IconButton } from '@/components/ui';
+import { useTranslations } from '@/lib/locale-context';
+import type { Translations } from '@/lib/i18n';
 
 interface Props {
   exercise: Exercise;
   onComplete: () => void;
   onDismiss: () => void;
   isActive?: boolean;
-  targetWeightLabel?: string;
   onSetActive?: () => void;
   onUndoDismiss?: () => void;
   onLogSet?: (set: Omit<LoggedSet, 'loggedAt'>) => void;
   onRemoveSet?: (index: number) => void;
 }
 
-function exerciseDetail(ex: Exercise): string {
-  if (ex.type === 'sets-reps') return `${ex.sets} sets × ${ex.reps} reps`;
-  if (ex.type === 'sets-duration') return `${ex.sets} sets · ${ex.duration}s`;
+function exerciseDetail(ex: Exercise, t: Translations): string {
+  if (ex.type === 'sets-reps')
+    return t.exercise_detail_sets_reps
+      .replace('{sets}', String(ex.sets ?? 0))
+      .replace('{reps}', String(ex.reps ?? 0));
+  if (ex.type === 'sets-duration')
+    return t.exercise_detail_sets_duration
+      .replace('{sets}', String(ex.sets ?? 0))
+      .replace('{duration}', String(ex.duration ?? 0));
   const d = ex.duration ?? 0;
-  return d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
+  return d >= 60 ? `${Math.round(d / 60)} ${t.min_label}` : `${d}s`;
 }
 
 function defaultWeight(exercise: Exercise): string {
@@ -37,18 +44,18 @@ export default function ExerciseCard({
   onComplete,
   onDismiss,
   isActive = false,
-  targetWeightLabel = 'Target',
   onSetActive,
   onUndoDismiss,
   onLogSet,
   onRemoveSet,
 }: Props) {
+  const t = useTranslations();
   const [showSetForm, setShowSetForm] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
 
-  const detail = exerciseDetail(exercise);
+  const detail = exerciseDetail(exercise, t);
   const isDismissed = exercise.dismissed === true;
   const isCompleted = exercise.completed === true;
   const isDone = isCompleted || isDismissed;
@@ -103,7 +110,7 @@ export default function ExerciseCard({
                 onClick={onDismiss}
                 className="text-xs text-muted font-medium px-2.5 py-1 rounded-lg border border-border/60 active:bg-elevated active:border-border cursor-pointer transition-colors duration-150 flex-shrink-0"
               >
-                Skip
+                {t.exercise_skip}
               </button>
             </div>
             <p className="flex items-center gap-1.5 mt-1 text-base font-medium text-brand">
@@ -116,7 +123,7 @@ export default function ExerciseCard({
             </p>
             {exercise.weightKg != null && (
               <p className="flex items-center gap-1.5 text-sm text-foreground font-medium mt-1.5">
-                {targetWeightLabel}: {exercise.weightKg} kg
+                {t.target_weight}: {exercise.weightKg} kg
                 {weightGoalAchieved && (
                   <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
                     <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
@@ -158,7 +165,7 @@ export default function ExerciseCard({
                     {pendingDeleteIndex === i ? (
                       <>
                         <X className="w-3 h-3" strokeWidth={2.5} />
-                        Remove
+                        {t.exercise_remove_set}
                       </>
                     ) : (
                       `${logged.weight} kg × ${logged.reps}`
@@ -169,7 +176,7 @@ export default function ExerciseCard({
                     key={i}
                     className="text-xs rounded-lg px-2.5 py-1 font-medium border border-dashed border-border text-dim"
                   >
-                    set {i + 1}
+                    {t.exercise_set_slot.replace('{n}', String(i + 1))}
                   </span>
                 );
               })}
@@ -201,13 +208,13 @@ export default function ExerciseCard({
                   onClick={() => setShowSetForm(false)}
                   className="flex flex-1 items-center justify-center py-2.5 rounded-xl bg-elevated text-muted text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   onClick={submitSet}
                   className="flex flex-1 items-center justify-center py-2.5 rounded-xl bg-brand/15 text-brand text-sm font-semibold active:bg-brand/25 cursor-pointer transition-colors duration-150"
                 >
-                  Save
+                  {t.save_label}
                 </button>
               </div>
             ) : (
@@ -218,7 +225,7 @@ export default function ExerciseCard({
                     className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-elevated text-secondary text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150"
                   >
                     <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
-                    Log set
+                    {t.exercise_log_set}
                   </button>
                 )}
                 <button
@@ -226,7 +233,7 @@ export default function ExerciseCard({
                   className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-success/15 text-success text-sm font-semibold active:bg-success/25 cursor-pointer transition-colors duration-150"
                 >
                   <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                  Done
+                  {t.exercise_done}
                 </button>
               </div>
             )}
@@ -277,7 +284,7 @@ export default function ExerciseCard({
               onUndoDismiss && (
                 <IconButton
                   onClick={onUndoDismiss}
-                  aria-label={`Restore ${exercise.name}`}
+                  aria-label={t.exercise_restore_aria.replace('{name}', exercise.name)}
                   className="active:bg-brand/20"
                 >
                   <RotateCcw className="w-4 h-4 text-secondary" />
@@ -289,8 +296,8 @@ export default function ExerciseCard({
                   onClick={onComplete}
                   aria-label={
                     isCompleted
-                      ? `Unmark ${exercise.name} as complete`
-                      : `Mark ${exercise.name} as complete`
+                      ? t.exercise_unmark_complete_aria.replace('{name}', exercise.name)
+                      : t.exercise_mark_complete_aria.replace('{name}', exercise.name)
                   }
                   className={
                     isCompleted
@@ -306,7 +313,7 @@ export default function ExerciseCard({
                 {!isCompleted && (
                   <IconButton
                     onClick={onDismiss}
-                    aria-label={`Dismiss ${exercise.name}`}
+                    aria-label={t.exercise_dismiss_aria.replace('{name}', exercise.name)}
                     className="active:bg-danger/20"
                   >
                     <X className="w-4 h-4 text-secondary" />

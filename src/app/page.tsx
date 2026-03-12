@@ -580,76 +580,90 @@ function SessionView({
         />
       </PageHeader>
 
-      <div className="flex-1 px-6 pb-52 space-y-3 overflow-y-auto">
-        {totalCount === 0 ? (
-          <EmptyState
-            icon={<Dumbbell className="w-9 h-9 text-border" />}
-            title={t.no_exercises_title}
-            subtitle={t.no_exercises_subtitle}
-          />
-        ) : (
-          <>
-            {activeExercise && (
-              <>
-                <ListLabel>{t.active_exercise_section}</ListLabel>
-                <ExerciseCard
-                  key={activeExercise.id}
-                  exercise={activeExercise}
-                  isActive
-                  targetWeightLabel={t.target_weight}
-                  onComplete={() => handleComplete(activeExercise.id)}
-                  onDismiss={() => handleDismiss(activeExercise.id)}
-                  onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
-                  onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
-                />
-              </>
-            )}
-
-            {queue.length > 0 && (
-              <>
-                <ListLabel>{t.upcoming_section}</ListLabel>
-                {queue.map((exercise) => (
+      <div className="flex-1 relative overflow-hidden">
+        <div className="h-full px-6 pb-52 space-y-3 overflow-y-auto">
+          {totalCount === 0 ? (
+            <EmptyState
+              icon={<Dumbbell className="w-9 h-9 text-border" />}
+              title={t.no_exercises_title}
+              subtitle={t.no_exercises_subtitle}
+            />
+          ) : (
+            <>
+              {activeExercise && (
+                <>
+                  <ListLabel>{t.active_exercise_section}</ListLabel>
                   <ExerciseCard
-                    key={exercise.id}
-                    exercise={exercise}
-                    onComplete={() => handleComplete(exercise.id)}
-                    onDismiss={() => handleDismiss(exercise.id)}
-                    onSetActive={() => handleSetActive(exercise.id)}
-                    onLogSet={(s) => handleLogSet(exercise.id, s.weight, s.reps)}
+                    key={activeExercise.id}
+                    exercise={activeExercise}
+                    isActive
+                    onComplete={() => handleComplete(activeExercise.id)}
+                    onDismiss={() => handleDismiss(activeExercise.id)}
+                    onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
+                    onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
                   />
-                ))}
-              </>
-            )}
+                </>
+              )}
 
-            {completed.length > 0 && (
-              <>
-                <ListLabel>{t.completed_section}</ListLabel>
-                {completed.map((exercise) => (
-                  <ExerciseCard
-                    key={exercise.id}
-                    exercise={exercise}
-                    onComplete={() => handleComplete(exercise.id)}
-                    onDismiss={() => handleDismiss(exercise.id)}
-                  />
-                ))}
-              </>
-            )}
+              {queue.length > 0 && (
+                <>
+                  <ListLabel>{t.upcoming_section}</ListLabel>
+                  {queue.map((exercise) => (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      onComplete={() => handleComplete(exercise.id)}
+                      onDismiss={() => handleDismiss(exercise.id)}
+                      onSetActive={() => handleSetActive(exercise.id)}
+                      onLogSet={(s) => handleLogSet(exercise.id, s.weight, s.reps)}
+                    />
+                  ))}
+                </>
+              )}
 
-            {dismissed.length > 0 && (
-              <>
-                <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
-                {dismissed.map((exercise) => (
-                  <ExerciseCard
-                    key={exercise.id}
-                    exercise={exercise}
-                    onComplete={() => handleComplete(exercise.id)}
-                    onDismiss={() => handleDismiss(exercise.id)}
-                    onUndoDismiss={() => handleUndoDismiss(exercise.id)}
-                  />
-                ))}
-              </>
-            )}
-          </>
+              {completed.length > 0 && (
+                <>
+                  <ListLabel>{t.completed_section}</ListLabel>
+                  {completed.map((exercise) => (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      onComplete={() => handleComplete(exercise.id)}
+                      onDismiss={() => handleDismiss(exercise.id)}
+                    />
+                  ))}
+                </>
+              )}
+
+              {dismissed.length > 0 && (
+                <>
+                  <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
+                  {dismissed.map((exercise) => (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      onComplete={() => handleComplete(exercise.id)}
+                      onDismiss={() => handleDismiss(exercise.id)}
+                      onUndoDismiss={() => handleUndoDismiss(exercise.id)}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        {isPaused && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-base/80 backdrop-blur-sm z-10">
+            <button
+              onClick={handleResume}
+              aria-label="Resume session"
+              className="w-24 h-24 rounded-full bg-brand flex items-center justify-center shadow-lg active:scale-95 transition-transform duration-150 cursor-pointer"
+            >
+              <PlayIcon className="w-10 h-10 text-white ml-1" />
+            </button>
+            <p className="text-secondary text-sm font-medium mt-4">{t.session_paused}</p>
+          </div>
         )}
       </div>
 
