@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation';
 import {
   Plus,
   Dumbbell,
-  ChevronRight,
   ChevronDown,
   CheckCircle,
   RotateCcw,
   Sparkles,
   Copy,
+  MoreVertical,
+  ChevronRight,
 } from 'lucide-react';
 import { getPlans, togglePlanStatus, savePlan, duplicatePlan } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
@@ -175,27 +176,28 @@ function PlanCard({
   const t = useTranslations();
   const isCompleted = plan.status === 'completed';
   const categories = getPlanCategories(plan);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 ${
+      className={`relative flex items-center rounded-2xl border px-4 py-4 gap-3 ${
         isCompleted ? 'bg-surface/50 border-border/50' : 'bg-surface border-border'
       }`}
     >
+      {plan.aiGenerated === true && (
+        <div className="absolute -top-px left-3 flex items-center gap-1 bg-brand text-white rounded-b-md px-1.5 py-0.5">
+          <Sparkles className="w-2.5 h-2.5" />
+          <span className="text-[9px] font-bold tracking-wide uppercase leading-none">AI</span>
+        </div>
+      )}
+
       <Link
         href={`/plans/${plan.id}`}
         className="flex-1 min-w-0 active:opacity-70 transition-opacity duration-150"
       >
-        <div className="flex items-center gap-1.5">
-          <p
-            className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}
-          >
-            {plan.name}
-          </p>
-          {plan.aiGenerated === true && (
-            <Sparkles className="w-3.5 h-3.5 text-brand flex-shrink-0" />
-          )}
-        </div>
+        <p className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}>
+          {plan.name}
+        </p>
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {plan.scheduledWeeks && (
@@ -213,35 +215,56 @@ function PlanCard({
           </div>
         )}
       </Link>
+
       <div className="flex items-center gap-2 flex-shrink-0">
+        <ChevronRight className="w-4 h-4 text-muted/40 pointer-events-none" />
         <IconButton
           size="sm"
-          onClick={onDuplicate}
-          aria-label="Duplicate plan"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Plan actions"
           className="bg-elevated/50 active:scale-90"
         >
-          <Copy className="w-4 h-4 text-muted" />
+          <MoreVertical className="w-4 h-4 text-muted" />
         </IconButton>
-        <IconButton
-          size="sm"
-          onClick={onToggleStatus}
-          aria-label={isCompleted ? 'Reactivate plan' : 'Mark plan as completed'}
-          className="bg-elevated/50 active:scale-90"
-        >
-          {isCompleted ? (
-            <RotateCcw className="w-4 h-4 text-secondary" />
-          ) : (
-            <CheckCircle className="w-4 h-4 text-muted" />
-          )}
-        </IconButton>
-        <Link
-          href={`/plans/${plan.id}`}
-          tabIndex={-1}
-          className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0"
-        >
-          <ChevronRight className="w-4 h-4 text-muted" />
-        </Link>
       </div>
+
+      {menuOpen && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+          <div className="absolute right-4 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
+            <button
+              className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+              onClick={() => {
+                setMenuOpen(false);
+                onDuplicate();
+              }}
+            >
+              <Copy className="w-4 h-4 text-muted flex-shrink-0" />
+              {t.plan_action_duplicate}
+            </button>
+            <div className="h-px bg-border/50 mx-3" />
+            <button
+              className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+              onClick={() => {
+                setMenuOpen(false);
+                onToggleStatus();
+              }}
+            >
+              {isCompleted ? (
+                <>
+                  <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
+                  {t.plan_action_reactivate}
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
+                  {t.plan_action_mark_completed}
+                </>
+              )}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
