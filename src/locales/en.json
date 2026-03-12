@@ -59,6 +59,7 @@
 
   "free_session": "Free Session",
   "session_progress": "{remaining} remaining · {done} done",
+  "session_progress_skipped": "· {skipped} skipped",
   "no_exercises_title": "No exercises yet",
   "no_exercises_subtitle": "Tap the button below to add one",
   "active_exercise_section": "Now",
