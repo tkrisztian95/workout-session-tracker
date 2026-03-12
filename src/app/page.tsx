@@ -581,7 +581,7 @@ function SessionView({
       </PageHeader>
 
       <div className="flex-1 relative overflow-hidden">
-        <div className="h-full px-6 pb-52 space-y-3 overflow-y-auto">
+        <div className="h-full px-6 pb-36 space-y-3 overflow-y-auto">
           {totalCount === 0 ? (
             <EmptyState
               icon={<Dumbbell className="w-9 h-9 text-border" />}
@@ -651,6 +651,11 @@ function SessionView({
               )}
             </>
           )}
+
+          <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full gap-2">
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            {t.add_exercise_button}
+          </Button>
         </div>
 
         {isPaused && (
@@ -668,10 +673,6 @@ function SessionView({
       </div>
 
       <CtaBar slim className="space-y-2">
-        <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full gap-2">
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          {t.add_exercise_button}
-        </Button>
         <div className="flex gap-2">
           <Button
             variant="ghost"
