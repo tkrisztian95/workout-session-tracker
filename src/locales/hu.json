@@ -59,6 +59,7 @@
 
   "free_session": "Szabad edzés",
   "session_progress": "{remaining} hátra · {done} kész",
+  "session_progress_skipped": "· {skipped} kihagyva",
   "no_exercises_title": "Még nincs gyakorlat",
   "no_exercises_subtitle": "Koppints az alábbi gombra egy hozzáadásához",
   "active_exercise_section": "Most",

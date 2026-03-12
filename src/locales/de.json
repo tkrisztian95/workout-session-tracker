@@ -59,6 +59,7 @@
 
   "free_session": "Freies Training",
   "session_progress": "{remaining} verbleibend · {done} fertig",
+  "session_progress_skipped": "· {skipped} übersprungen",
   "no_exercises_title": "Noch keine Übungen",
   "no_exercises_subtitle": "Tippe die Schaltfläche unten, um eine hinzuzufügen",
   "active_exercise_section": "Jetzt",
