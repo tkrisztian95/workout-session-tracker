@@ -7,11 +7,12 @@ import { suggestPlan } from '@/lib/ai';
 import type { AiPlanPreferences } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
 import { Button, FieldLabel } from '@/components/ui';
+import { useTranslations } from '@/lib/locale-context';
 import Link from 'next/link';
 
 const URL_SPLIT_RE = /(https?:\/\/[^\s]+)/g;
 
-function ErrorMessage({ message }: { message: string }) {
+function ErrorMessage({ message, openLinkLabel }: { message: string; openLinkLabel: string }) {
   const parts = message.split(URL_SPLIT_RE);
   return (
     <p className="text-danger text-sm">
@@ -24,7 +25,7 @@ function ErrorMessage({ message }: { message: string }) {
             rel="noopener noreferrer"
             className="underline font-medium"
           >
-            Open ↗
+            {openLinkLabel}
           </a>
         ) : (
           part
@@ -47,16 +48,18 @@ const GOAL_OPTIONS = ['Build muscle', 'Lose weight', 'Improve cardio', 'Maintain
 
 function ChipPicker({
   options,
+  labels,
   value,
   onChange,
 }: {
   options: string[];
+  labels?: string[];
   value: string;
   onChange: (v: string) => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {options.map((opt) => (
+      {options.map((opt, i) => (
         <button
           key={opt}
           type="button"
@@ -67,7 +70,7 @@ function ChipPicker({
               : 'bg-elevated text-secondary border-transparent'
           }`}
         >
-          {opt}
+          {labels ? labels[i] : opt}
         </button>
       ))}
     </div>
@@ -75,6 +78,7 @@ function ChipPicker({
 }
 
 export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSuggestionModalProps) {
+  const t = useTranslations();
   const savedConfig = getLlmConfig();
   const hasSavedConfig = !!savedConfig?.apiKey;
 
@@ -145,17 +149,15 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="w-5 h-5 text-brand" />
               <h2 className="font-bold text-lg text-foreground font-condensed">
-                AI Plan Suggestion
+                {t.ai_modal_title}
               </h2>
             </div>
-            <p className="text-muted text-sm leading-snug">
-              Get a tailored workout plan based on your training history and existing plans.
-            </p>
+            <p className="text-muted text-sm leading-snug">{t.ai_modal_subtitle}</p>
           </div>
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-elevated flex items-center justify-center cursor-pointer shrink-0 ml-3"
-            aria-label="Close"
+            aria-label={t.close}
           >
             <X className="w-4 h-4 text-muted" />
           </button>
@@ -165,15 +167,13 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         {view === 'no-config' && (
           <div className="space-y-4">
             <div className="bg-elevated rounded-2xl px-4 py-5 text-center space-y-3">
-              <p className="text-secondary text-sm leading-relaxed">
-                To use AI plan suggestions, add your OpenAI API key in Settings.
-              </p>
+              <p className="text-secondary text-sm leading-relaxed">{t.ai_no_config_message}</p>
               <Link
                 href="/profile?expand=ai"
                 onClick={onClose}
                 className="inline-block text-brand text-sm font-semibold"
               >
-                Go to Profile → AI Configuration
+                {t.ai_no_config_link}
               </Link>
             </div>
           </div>
@@ -183,17 +183,20 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         {view === 'config' && (
           <div className="space-y-4">
             <div>
-              <FieldLabel>Preferences (optional)</FieldLabel>
-              <p className="text-dim text-xs mb-3 -mt-1">
-                The more you share, the better the plan fits your goals.
-              </p>
+              <FieldLabel>{t.ai_preferences_label}</FieldLabel>
+              <p className="text-dim text-xs mb-3 -mt-1">{t.ai_preferences_subtitle}</p>
               <div className="space-y-3">
                 <div>
-                  <p className="text-dim text-xs mb-1.5">Training focus</p>
-                  <ChipPicker options={FOCUS_OPTIONS} value={focus} onChange={setFocus} />
+                  <p className="text-dim text-xs mb-1.5">{t.ai_focus_label}</p>
+                  <ChipPicker
+                    options={FOCUS_OPTIONS}
+                    labels={t.ai_focus_options}
+                    value={focus}
+                    onChange={setFocus}
+                  />
                 </div>
                 <div>
-                  <p className="text-dim text-xs mb-1.5">Days per week</p>
+                  <p className="text-dim text-xs mb-1.5">{t.ai_days_per_week_label}</p>
                   <ChipPicker
                     options={DAYS_PER_WEEK_OPTIONS}
                     value={daysPerWeek}
@@ -201,17 +204,22 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
                   />
                 </div>
                 <div>
-                  <p className="text-dim text-xs mb-1.5">Fitness goal</p>
-                  <ChipPicker options={GOAL_OPTIONS} value={goal} onChange={setGoal} />
+                  <p className="text-dim text-xs mb-1.5">{t.ai_goal_label}</p>
+                  <ChipPicker
+                    options={GOAL_OPTIONS}
+                    labels={t.ai_goal_options}
+                    value={goal}
+                    onChange={setGoal}
+                  />
                 </div>
               </div>
             </div>
 
-            {error && <ErrorMessage message={error} />}
+            {error && <ErrorMessage message={error} openLinkLabel={t.ai_error_open_link} />}
 
             <Button onClick={handleGenerate} className="w-full gap-2 mt-2">
               <Sparkles className="w-4 h-4" />
-              Generate
+              {t.ai_generate_button}
             </Button>
           </div>
         )}
@@ -220,7 +228,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         {view === 'loading' && (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="w-8 h-8 text-brand animate-spin" />
-            <p className="text-secondary text-sm">Generating your plan...</p>
+            <p className="text-secondary text-sm">{t.ai_generating}</p>
           </div>
         )}
 
@@ -231,20 +239,22 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
               <p className="font-bold text-foreground text-base">{suggestedPlan.name}</p>
               <p className="text-muted text-sm">
                 {suggestedPlan.days.length}{' '}
-                {suggestedPlan.days.length !== 1 ? 'training days' : 'training day'}
+                {suggestedPlan.days.length !== 1 ? t.ai_training_days : t.ai_training_day}
               </p>
               {suggestedPlan.days.map((day) => (
                 <div key={day.id} className="pt-1">
                   <p className="text-secondary text-sm font-medium">{day.name || 'Day'}</p>
                   <p className="text-dim text-xs">
-                    {day.coreExercises.length + day.optionalExercises.length} exercises
+                    {day.coreExercises.length + day.optionalExercises.length} {t.ai_exercises}
                   </p>
                 </div>
               ))}
               {suggestedPlan.sharedExercises.length > 0 && (
                 <p className="text-dim text-xs pt-1">
-                  + {suggestedPlan.sharedExercises.length} shared exercise
-                  {suggestedPlan.sharedExercises.length !== 1 ? 's' : ''}
+                  + {suggestedPlan.sharedExercises.length}{' '}
+                  {suggestedPlan.sharedExercises.length !== 1
+                    ? t.ai_shared_exercises
+                    : t.ai_shared_exercise}
                 </p>
               )}
             </div>
@@ -256,7 +266,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
                   className="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
                 >
                   <p className="text-muted text-xs font-medium uppercase tracking-wide">
-                    Why this plan
+                    {t.ai_why_this_plan}
                   </p>
                   <ChevronDown
                     className={`w-4 h-4 text-muted transition-transform duration-200 ${reasoningOpen ? 'rotate-180' : ''}`}
@@ -276,11 +286,11 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
                 className="flex-1 gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Regenerate
+                {t.ai_regenerate_button}
               </Button>
               <Button onClick={handleUse} className="flex-[2] gap-2">
                 <Sparkles className="w-4 h-4" />
-                Use this plan
+                {t.ai_use_plan_button}
               </Button>
             </div>
           </div>
