@@ -68,7 +68,7 @@ export default function PlanDetailPage() {
     if (scheduledWeeks !== '') {
       const weeks = Number(scheduledWeeks);
       if (!Number.isInteger(weeks) || weeks < 1 || weeks > 52) {
-        setWeeksError('Duration must be between 1 and 52 weeks.');
+        setWeeksError(t.plan_scheduled_duration_error);
         return;
       }
     }
@@ -158,7 +158,7 @@ export default function PlanDetailPage() {
         </div>
 
         <div>
-          <FieldLabel htmlFor="edit-plan-weeks">Scheduled duration (weeks)</FieldLabel>
+          <FieldLabel htmlFor="edit-plan-weeks">{t.plan_scheduled_duration_label}</FieldLabel>
           <Input
             id="edit-plan-weeks"
             type="number"
@@ -168,7 +168,7 @@ export default function PlanDetailPage() {
               setScheduledWeeks(e.target.value);
               setWeeksError('');
             }}
-            placeholder="e.g. 4"
+            placeholder={t.plan_scheduled_duration_placeholder}
             min={1}
             max={52}
           />
@@ -269,7 +269,7 @@ export default function PlanDetailPage() {
               {t.delete_plan_title}
             </HeadingXL>
             <p className="text-secondary text-sm mb-6">
-              &ldquo;{plan.name}&rdquo; will be permanently deleted. This cannot be undone.
+              {t.delete_plan_body.replace('{name}', plan.name)}
             </p>
             <div className="flex gap-3">
               <Button
