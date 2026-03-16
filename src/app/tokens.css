@@ -16,6 +16,11 @@
   --palette-gray-400: #9ca3af;
   --palette-gray-100: #f9fafb;
 
+  --palette-white: #ffffff;
+  --palette-gray-50: #f9fafb;
+  --palette-gray-200: #e5e7eb;
+  --palette-gray-300: #d1d5db;
+
   --palette-orange-500: #f97316;
   --palette-orange-400: #fb923c;
 
@@ -25,6 +30,30 @@
   --palette-red-500: #ef4444;
 }
 
+/* ── Light theme overrides ──────────────────────────────────
+   Applied when <html data-theme="light"> is set.
+   Overrides the semantic @theme inline vars at runtime.
+   ─────────────────────────────────────────────────────────── */
+[data-theme='light'] {
+  --color-base: var(--palette-white);
+  --color-surface: var(--palette-gray-50);
+  --color-elevated: var(--palette-gray-200);
+
+  --color-border: var(--palette-gray-200);
+  --color-border-subtle: var(--palette-gray-300);
+
+  --color-foreground: var(--palette-gray-900);
+  --color-secondary: var(--palette-gray-600);
+  --color-muted: var(--palette-gray-500);
+  --color-dim: var(--palette-gray-400);
+
+  --color-brand: var(--palette-orange-500);
+  --color-brand-alt: var(--palette-orange-400);
+
+  --color-success: var(--palette-green-500);
+  --color-danger: var(--palette-red-500);
+}
+
 /* ── 2. Semantic color tokens ───────────────────────────────
    Exposed to Tailwind v4 as utility classes:
      bg-base, bg-surface, bg-elevated
@@ -32,7 +61,12 @@
      text-brand, text-success, text-danger
      border-border, border-border-subtle
    ─────────────────────────────────────────────────────────── */
-@theme inline {
+/* ── Dark theme defaults (applied to :root) ─────────────────
+   Using @theme (not inline) so Tailwind utilities reference
+   var(--color-*), allowing [data-theme="light"] to override
+   them at runtime.
+   ─────────────────────────────────────────────────────────── */
+@theme {
   /* Backgrounds */
   --color-base: var(--palette-gray-900); /* page bg        */
   --color-surface: var(--palette-gray-800); /* cards, panels  */
@@ -55,8 +89,13 @@
   /* Status */
   --color-success: var(--palette-green-500);
   --color-danger: var(--palette-red-500);
+}
 
-  /* Typography */
+/* ── Typography tokens ──────────────────────────────────────
+   Kept as @theme inline so font-family values chain correctly
+   through the Next.js font CSS variables.
+   ─────────────────────────────────────────────────────────── */
+@theme inline {
   --font-condensed: var(--font-barlow-condensed), sans-serif;
   --font-body: var(--font-barlow), system-ui, sans-serif;
 }

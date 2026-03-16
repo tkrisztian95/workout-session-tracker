@@ -25,7 +25,7 @@ export default function DangerZoneCard() {
             className="w-full flex items-center gap-3 px-4 py-4 transition-colors duration-150 cursor-pointer active:bg-danger/10"
           >
             <AlertTriangle className="w-5 h-5 text-danger flex-shrink-0" />
-            <span className="text-white text-base font-medium">{t.profile_reset_label}</span>
+            <span className="text-foreground text-base font-medium">{t.profile_reset_label}</span>
           </button>
         ) : (
           <div className="p-4 space-y-4">
@@ -36,7 +36,7 @@ export default function DangerZoneCard() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="flex-1 py-3.5 rounded-xl border border-border text-white text-sm font-bold font-condensed cursor-pointer active:bg-elevated transition-colors"
+                className="flex-1 py-3.5 rounded-xl border border-border text-foreground text-sm font-bold font-condensed cursor-pointer active:bg-elevated transition-colors"
               >
                 {t.profile_reset_cancel}
               </button>

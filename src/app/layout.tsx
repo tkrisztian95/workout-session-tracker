@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Barlow, Barlow_Condensed } from 'next/font/google';
 import { LocaleProvider } from '@/lib/locale-context';
+import { ThemeProvider } from '@/lib/theme-context';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import './globals.css';
 
@@ -29,16 +30,31 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+const themeScript = `
+(function() {
+  try {
+    var t = localStorage.getItem('wst_theme');
+    var resolved = t === 'light' ? 'light' : t === 'dark' ? 'dark' : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (resolved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  } catch(e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-base">
+    <html lang="en" className="bg-base" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}>
         <PostHogProvider>
-          <LocaleProvider>{children}</LocaleProvider>
+          <ThemeProvider>
+            <LocaleProvider>{children}</LocaleProvider>
+          </ThemeProvider>
         </PostHogProvider>
       </body>
     </html>

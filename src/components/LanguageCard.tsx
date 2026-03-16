@@ -35,7 +35,7 @@ export default function LanguageCard() {
           <Globe className="w-5 h-5 text-secondary" />
         </div>
         <div className="flex-1 text-left">
-          <p className="text-white text-sm font-semibold leading-tight">
+          <p className="text-foreground text-sm font-semibold leading-tight">
             {t.profile_language_label}
           </p>
           <p className="text-dim text-xs mt-0.5">{activeLabel}</p>
@@ -54,7 +54,9 @@ export default function LanguageCard() {
                 onClick={() => handleSelect(code)}
                 className={`w-full flex items-center justify-between px-4 py-3.5 transition-colors duration-150 cursor-pointer ${active ? 'bg-brand/10' : 'active:bg-elevated'}`}
               >
-                <span className={`text-sm font-medium ${active ? 'text-brand' : 'text-white'}`}>
+                <span
+                  className={`text-sm font-medium ${active ? 'text-brand' : 'text-foreground'}`}
+                >
                   {label}
                 </span>
                 {active && <Check className="w-4 h-4 text-brand flex-shrink-0" strokeWidth={2.5} />}

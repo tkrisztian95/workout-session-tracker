@@ -9,6 +9,7 @@ const KEYS = {
   locale: 'wst_locale',
   llmConfig: 'wst_llm_config',
   userSex: 'wst_user_sex',
+  theme: 'wst_theme',
 } as const;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -183,4 +184,19 @@ export function updateSession(session: WorkoutSession): void {
     sessions[index] = session;
   }
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
+}
+
+// ─── Theme ────────────────────────────────────────────────────────────────────
+
+export type Theme = 'light' | 'dark' | 'system';
+
+export function getTheme(): Theme | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.theme);
+  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+  return null;
+}
+
+export function saveTheme(theme: Theme): void {
+  localStorage.setItem(KEYS.theme, theme);
 }
