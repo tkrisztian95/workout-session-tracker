@@ -8,6 +8,7 @@ import { Page, PageHeader, HeadingXL, LabelOverline } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
 import { getUserName, saveUserName, getSex, saveSex } from '@/lib/storage';
 import LanguageCard from '@/components/LanguageCard';
+import ThemeCard from '@/components/ThemeCard';
 import AiConfigCard from '@/components/AiConfigCard';
 import { getInitials } from '@/utils';
 import DangerZoneCard from '@/components/DangerZoneCard';
@@ -76,7 +77,7 @@ function ProfilePageInner() {
                 onChange={(e) => setName(e.target.value)}
                 onBlur={handleNameBlur}
                 placeholder={t.onboarding_name_placeholder}
-                className="w-full bg-transparent text-white text-sm mt-0.5 outline-none placeholder:text-dim"
+                className="w-full bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
               />
             </div>
           </div>
@@ -86,7 +87,7 @@ function ProfilePageInner() {
               <User className="w-5 h-5 text-secondary" />
             </div>
             <div className="flex-1 min-w-0 pointer-events-none">
-              <p className="text-white text-sm font-semibold leading-tight">
+              <p className="text-foreground text-sm font-semibold leading-tight">
                 {t.profile_sex_label}
               </p>
               <p className="text-dim text-xs mt-0.5">
@@ -118,6 +119,9 @@ function ProfilePageInner() {
 
         {/* ── Language ── */}
         <LanguageCard />
+
+        {/* ── Theme ── */}
+        <ThemeCard />
 
         {/* ── AI Configuration ── */}
         <AiConfigCard defaultOpen={expandAi} />

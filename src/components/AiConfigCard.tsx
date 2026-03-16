@@ -34,14 +34,14 @@ export default function AiConfigCard({ defaultOpen = false }: AiConfigCardProps)
         <div className="flex-1 text-left min-w-0">
           {apiKey ? (
             <>
-              <p className="text-white text-sm font-semibold leading-tight">AI Companion</p>
+              <p className="text-foreground text-sm font-semibold leading-tight">AI Companion</p>
               <p className="text-dim text-xs mt-0.5 truncate">
                 {apiKey.slice(0, 5)}··· · {model}
               </p>
             </>
           ) : (
             <>
-              <p className="text-white text-sm font-semibold leading-tight">
+              <p className="text-foreground text-sm font-semibold leading-tight">
                 Connect your AI companion
               </p>
               <p className="text-dim text-xs mt-0.5">Use your own OpenAI subscription</p>
