@@ -1,34 +1,20 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
-### Requirement: Success animation is shown when a session is completed
+### Requirement: Animation is dismissible
 
-The system SHALL display a visual success animation when the user finishes a session.
+The system SHALL allow the user to dismiss the session completion overlay, but tapping the background SHALL NOT immediately dismiss — the user must use the emoji rating or the Skip action to proceed.
 
-#### Scenario: Animation plays on session finish
+#### Scenario: Background tap no longer dismisses overlay
 
-- **WHEN** user taps the "Finish" action to complete a session
-- **THEN** a full-screen or prominent success animation plays (e.g., scale-in + fade, or celebratory effect)
+- **WHEN** the success animation/stats are showing
+- **THEN** tapping the background outside the content does NOT dismiss the overlay
 
-#### Scenario: Animation is dismissible
+#### Scenario: Rating emoji dismisses overlay
 
-- **WHEN** the success animation is showing
-- **THEN** user can tap or interact to dismiss it and proceed
+- **WHEN** user taps an emoji rating option
+- **THEN** the overlay is dismissed after saving
 
-### Requirement: Session stat summary is shown on completion
+#### Scenario: Skip action dismisses overlay
 
-The system SHALL display key stats for the completed session alongside the success animation.
-
-#### Scenario: Stats shown after session finish
-
-- **WHEN** user finishes a session
-- **THEN** the completion screen displays: total exercises completed (excluding dismissed), total sets completed, and elapsed session time
-
-#### Scenario: Dismissed exercises excluded from stats
-
-- **WHEN** one or more exercises were dismissed during the session
-- **THEN** the stat summary counts only non-dismissed exercises and their sets
-
-#### Scenario: Stats shown before save confirmation
-
-- **WHEN** the completion screen is displayed
-- **THEN** the stats and animation are visible before the user confirms saving the session
+- **WHEN** user taps the Skip action
+- **THEN** the overlay is dismissed without a rating saved
