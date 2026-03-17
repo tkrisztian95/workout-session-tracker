@@ -1,56 +1,15 @@
-### Requirement: History tab shows list of completed sessions
+## ADDED Requirements
 
-The system SHALL provide a History tab in the bottom navigation that displays all completed workout sessions in reverse chronological order.
+### Requirement: History cards display session rating when available
 
-#### Scenario: History tab is accessible
+The system SHALL show the session's emoji rating on the history card if the session has a rating.
 
-- **WHEN** user taps the History tab in the bottom nav
-- **THEN** the app navigates to the history screen showing a list of past sessions
+#### Scenario: Rated session shows emoji badge on card
 
-#### Scenario: Sessions shown newest first
+- **WHEN** a history card is rendered for a session that has a `rating` value
+- **THEN** the corresponding emoji is displayed on the card (e.g., 🔥 for rating 5)
 
-- **WHEN** the history screen is displayed
-- **THEN** sessions are listed with the most recently completed session at the top
+#### Scenario: Unrated session shows no rating indicator
 
-#### Scenario: Empty state shown when no sessions exist
-
-- **WHEN** the user has no completed sessions
-- **THEN** the history screen displays an empty state message encouraging the user to complete their first workout
-
-### Requirement: History cards show session summary
-
-Each session in the history list SHALL display a summary card with date, plan name (if any), exercise count, and duration.
-
-#### Scenario: Session with plan shows plan name
-
-- **WHEN** a completed session has an associated plan
-- **THEN** the history card displays the plan name and day name
-
-#### Scenario: Free session shows generic label
-
-- **WHEN** a completed session has no associated plan
-- **THEN** the history card displays "Free Session" as the label
-
-#### Scenario: Duration is shown on each card
-
-- **WHEN** a session card is displayed
-- **THEN** the elapsed time between `startedAt` and `completedAt` is shown formatted as minutes (e.g., "42 min")
-
-### Requirement: Tapping a history card navigates to session detail
-
-The system SHALL navigate to a session detail view at `/history/[id]` when a history card is tapped. The detail view SHALL support both read-only display and an edit mode for modifying exercise data.
-
-#### Scenario: Session detail shows exercises
-
-- **WHEN** user taps a history card
-- **THEN** the detail view displays the list of exercises for that session with completion states
-
-#### Scenario: Back navigation returns to history list
-
-- **WHEN** user is on a session detail view and navigates back
-- **THEN** the app returns to the history list
-
-#### Scenario: Edit mode is accessible from the session detail
-
-- **WHEN** user is viewing the session detail
-- **THEN** an Edit button is visible that enters edit mode for modifying exercise data
+- **WHEN** a history card is rendered for a session with no `rating` field
+- **THEN** no emoji or rating placeholder is shown on the card
