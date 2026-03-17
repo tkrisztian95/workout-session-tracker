@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Workout Sessions Tracker
+
+A mobile-first web app for tracking workout sessions and managing personalized fitness plans. All data is stored locally in the browser — no account or backend required.
+
+## Features
+
+- **Workout Sessions** — Start free-form or plan-based sessions with a real-time timer. Log sets, reps, and weights per exercise. Pause and resume anytime. Rate sessions on completion.
+- **Workout Plans** — Create multi-day plans with core and optional exercises. Schedule days by weekday and manage plan status (active/archived).
+- **Session History** — Browse completed sessions grouped by date, view an activity heatmap, and drill into session details.
+- **AI Plan Suggestions** — Generate personalized workout plans using OpenAI based on your history and profile (requires your own API key).
+- **Profile & Settings** — Configure name, theme (light/dark/system), and language (English, Hungarian, German).
+
+## Tech Stack
+
+- **Next.js 16** (App Router) + **React 19**
+- **TypeScript 5**
+- **Tailwind CSS 4**
+- **localStorage** for all persistence (no backend)
+- **PostHog** for analytics
+- **OpenAI** for AI plan generation
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                | Description              |
+| ---------------------- | ------------------------ |
+| `npm run dev`          | Start development server |
+| `npm run build`        | Build for production     |
+| `npm start`            | Run production build     |
+| `npm run lint`         | Run ESLint               |
+| `npm run lint:fix`     | Auto-fix lint issues     |
+| `npm run format`       | Format with Prettier     |
+| `npm run format:check` | Check formatting         |
 
-## Learn More
+## Data & Privacy
 
-To learn more about Next.js, take a look at the following resources:
+All user data (plans, sessions, profile) is stored exclusively in `localStorage` under `wst_*` keys. Nothing is sent to any server except:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **PostHog** — anonymous usage analytics
+- **OpenAI** — only when you explicitly use the AI plan suggestion feature with your own API key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
