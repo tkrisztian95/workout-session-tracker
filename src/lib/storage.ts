@@ -10,6 +10,7 @@ const KEYS = {
   llmConfig: 'wst_llm_config',
   userSex: 'wst_user_sex',
   theme: 'wst_theme',
+  consentAccepted: 'wst_consent_accepted',
 } as const;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -199,4 +200,24 @@ export function getTheme(): Theme | null {
 
 export function saveTheme(theme: Theme): void {
   localStorage.setItem(KEYS.theme, theme);
+}
+
+// ─── Consent ──────────────────────────────────────────────────────────────────
+
+export function hasSeenConsent(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(KEYS.consentAccepted) !== null;
+}
+
+export function getConsentAccepted(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(KEYS.consentAccepted) === 'true';
+}
+
+export function saveConsentAccepted(): void {
+  localStorage.setItem(KEYS.consentAccepted, 'true');
+}
+
+export function saveConsentDeclined(): void {
+  localStorage.setItem(KEYS.consentAccepted, 'false');
 }

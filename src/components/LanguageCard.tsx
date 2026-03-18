@@ -12,15 +12,25 @@ const LOCALES: { code: Locale; label: string }[] = [
   { code: 'de', label: 'Deutsch' },
 ];
 
-export default function LanguageCard() {
+interface LanguageCardProps {
+  open?: boolean;
+  onToggle?: () => void;
+}
+
+export default function LanguageCard({ open: openProp, onToggle }: LanguageCardProps = {}) {
   const t = useTranslations();
   const { locale, setLocale } = useLocale();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp : internalOpen;
+  const toggle = controlled ? onToggle! : () => setInternalOpen((o) => !o);
 
   function handleSelect(next: Locale) {
     setLocale(next);
     saveLocale(next);
-    setOpen(false);
+    if (controlled) onToggle?.();
+    else setInternalOpen(false);
   }
 
   const activeLabel = LOCALES.find((l) => l.code === locale)?.label ?? locale;
@@ -28,7 +38,7 @@ export default function LanguageCard() {
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
       >
         <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">

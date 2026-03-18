@@ -26,8 +26,10 @@ import {
   getSessions,
   saveSession,
   getUserName,
+  hasSeenConsent,
 } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
+import ConsentModal from '@/components/ConsentModal';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import {
@@ -746,6 +748,7 @@ export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [userName, setUserName] = useState<string | null>(() => getUserName());
+  const [consentSeen, setConsentSeen] = useState(() => hasSeenConsent());
   const [isFirstVisit, setIsFirstVisit] = useState(false);
 
   const handleNameComplete = (name: string) => {
@@ -891,6 +894,11 @@ export default function HomePage() {
     return <UserNameModal onComplete={handleNameComplete} />;
   }
 
+  // New user just finished onboarding: full-page consent before entering the app
+  if (!consentSeen && isFirstVisit) {
+    return <ConsentModal onComplete={() => setConsentSeen(true)} />;
+  }
+
   const greeting = isFirstVisit
     ? t.greeting_first.replace('{name}', userName)
     : t.greeting_returning.replace('{name}', userName);
@@ -925,16 +933,19 @@ export default function HomePage() {
   })();
 
   return (
-    <StartScreen
-      hasPlans={plans.length > 0}
-      onFollowPlan={() => {
-        setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active'));
-        setStep('pick-plan');
-      }}
-      onFreeSession={startFreeSession}
-      onCreatePlan={() => router.push('/plans/new')}
-      greeting={greeting}
-      lastSessionInfo={lastSessionInfo}
-    />
+    <>
+      <StartScreen
+        hasPlans={plans.length > 0}
+        onFollowPlan={() => {
+          setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active'));
+          setStep('pick-plan');
+        }}
+        onFreeSession={startFreeSession}
+        onCreatePlan={() => router.push('/plans/new')}
+        greeting={greeting}
+        lastSessionInfo={lastSessionInfo}
+      />
+      {!consentSeen && <ConsentModal variant="modal" onComplete={() => setConsentSeen(true)} />}
+    </>
   );
 }
