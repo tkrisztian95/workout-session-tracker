@@ -549,10 +549,17 @@ function SessionView({
 
   return (
     <Page className="pb-20">
-      <PageHeader>
-        <div className="flex items-center justify-between mb-1">
-          <LabelOverline>{formatDate(locale)}</LabelOverline>
-          <div className="flex items-center gap-2">
+      <PageHeader className="pb-1">
+        <LabelOverline className="mb-1">{formatDate(locale)}</LabelOverline>
+        <HeadingXL className="mt-1">{session.planDayName ?? t.free_session}</HeadingXL>
+        {session.planName && (
+          <p className="text-brand text-sm mt-1 font-medium">{session.planName}</p>
+        )}
+      </PageHeader>
+
+      <div className="flex-1 relative overflow-hidden flex flex-col">
+        <div className="px-6 pt-3 pb-3 space-y-3 flex-shrink-0">
+          <div className="flex items-center justify-between">
             <SessionTimer
               startedAt={session.startedAt}
               totalPausedMs={session.totalPausedMs ?? 0}
@@ -570,20 +577,27 @@ function SessionView({
               )}
             </button>
           </div>
+          <div>
+            <SessionProgressBar
+              completed={completed.length}
+              remaining={remaining.length}
+              dismissed={dismissed.length}
+            />
+          </div>
+          {activeExercise && (
+            <ExerciseCard
+              key={activeExercise.id}
+              exercise={activeExercise}
+              isActive
+              onComplete={() => handleComplete(activeExercise.id)}
+              onDismiss={() => handleDismiss(activeExercise.id)}
+              onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
+              onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
+            />
+          )}
         </div>
-        <HeadingXL className="mt-1">{session.planDayName ?? t.free_session}</HeadingXL>
-        {session.planName && (
-          <p className="text-brand text-sm mt-1 font-medium">{session.planName}</p>
-        )}
-        <SessionProgressBar
-          completed={completed.length}
-          remaining={remaining.length}
-          dismissed={dismissed.length}
-        />
-      </PageHeader>
 
-      <div className="flex-1 relative overflow-hidden">
-        <div className="h-full px-6 pb-36 space-y-3 overflow-y-auto">
+        <div className="flex-1 px-6 pb-36 space-y-3 overflow-y-auto pt-3">
           {totalCount === 0 ? (
             <EmptyState
               icon={<Dumbbell className="w-9 h-9 text-border" />}
@@ -592,21 +606,6 @@ function SessionView({
             />
           ) : (
             <>
-              {activeExercise && (
-                <>
-                  <ListLabel>{t.active_exercise_section}</ListLabel>
-                  <ExerciseCard
-                    key={activeExercise.id}
-                    exercise={activeExercise}
-                    isActive
-                    onComplete={() => handleComplete(activeExercise.id)}
-                    onDismiss={() => handleDismiss(activeExercise.id)}
-                    onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
-                    onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
-                  />
-                </>
-              )}
-
               {queue.length > 0 && (
                 <>
                   <ListLabel>{t.upcoming_section}</ListLabel>
