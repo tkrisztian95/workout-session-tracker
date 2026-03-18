@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, X, RotateCcw, Plus } from 'lucide-react';
+import { Check, X, RotateCcw, Plus, Info } from 'lucide-react';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { IconButton } from '@/components/ui';
+import LoggedSetBadge from '@/components/LoggedSetBadge';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
 
@@ -77,7 +78,7 @@ export default function ExerciseCard({
   };
 
   const submitSet = () => {
-    const w = parseFloat(weightInput);
+    const w = weightInput.trim() === '' ? 0 : parseFloat(weightInput);
     const r = parseInt(repsInput, 10);
     if (!isNaN(w) && !isNaN(r) && r > 0) {
       onLogSet!({ weight: w, reps: r });
@@ -132,7 +133,10 @@ export default function ExerciseCard({
               </p>
             )}
             {exercise.scalingNote && (
-              <p className="mt-1.5 text-sm text-secondary leading-snug">{exercise.scalingNote}</p>
+              <div className="mt-2 flex items-start gap-1.5 bg-elevated/40 rounded-xl px-3 py-2 border border-border/50">
+                <Info className="w-3.5 h-3.5 text-brand/70 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-secondary leading-snug">{exercise.scalingNote}</p>
+              </div>
             )}
           </div>
 
@@ -144,9 +148,12 @@ export default function ExerciseCard({
               }).map((_, i) => {
                 const logged = exercise.loggedSets?.[i];
                 return logged ? (
-                  <button
+                  <LoggedSetBadge
                     key={i}
-                    onClick={() => {
+                    set={logged}
+                    isPendingDelete={pendingDeleteIndex === i}
+                    removeLabel={t.exercise_remove_set}
+                    onRemove={() => {
                       if (!onRemoveSet) return;
                       if (pendingDeleteIndex === i) {
                         onRemoveSet(i);
@@ -156,21 +163,7 @@ export default function ExerciseCard({
                       }
                     }}
                     onBlur={() => setPendingDeleteIndex(null)}
-                    className={`inline-flex items-center gap-1.5 text-xs rounded-lg px-2.5 py-1.5 font-medium border transition-all duration-200 cursor-pointer ${
-                      pendingDeleteIndex === i
-                        ? 'bg-danger/15 border-danger/50 text-danger'
-                        : 'bg-brand/10 border-brand/40 text-brand'
-                    }`}
-                  >
-                    {pendingDeleteIndex === i ? (
-                      <>
-                        <X className="w-3 h-3" strokeWidth={2.5} />
-                        {t.exercise_remove_set}
-                      </>
-                    ) : (
-                      `${logged.weight} kg × ${logged.reps}`
-                    )}
-                  </button>
+                  />
                 ) : (
                   <span
                     key={i}
@@ -264,12 +257,7 @@ export default function ExerciseCard({
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {exercise.loggedSets.map((s, i) => (
-                  <span
-                    key={i}
-                    className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
-                  >
-                    {s.weight}kg×{s.reps}
-                  </span>
+                  <LoggedSetBadge key={i} set={s} />
                 ))}
               </div>
             )}
