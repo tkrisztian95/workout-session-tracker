@@ -1,6 +1,7 @@
 {
   "onboarding_title": "Mi a neved?",
   "onboarding_subtitle": "Ezzel köszöntünk majd.",
+  "onboarding_mobile_note": "Ez az alkalmazás mobilra van optimalizálva. A legjobb élményért nyisd meg telefonon.",
   "onboarding_name_placeholder": "Neved",
   "onboarding_submit": "Gyerünk",
 

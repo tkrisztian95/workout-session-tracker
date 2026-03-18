@@ -5,6 +5,7 @@ import { saveUserName, saveLocale } from '@/lib/storage';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import type { Locale } from '@/lib/i18n';
 import { Button, IconButton, Input, HeadingXL } from '@/components/ui';
+import MobileOptimizedNote from '@/components/MobileOptimizedNote';
 
 interface UserNameModalProps {
   onComplete: (name: string) => void;
@@ -83,6 +84,10 @@ export default function UserNameModal({ onComplete }: UserNameModalProps) {
         </div>
 
         <p className="text-muted text-sm mb-6">{t.onboarding_subtitle}</p>
+
+        <div className="mb-6">
+          <MobileOptimizedNote />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             type="text"

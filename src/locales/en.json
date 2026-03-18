@@ -1,6 +1,7 @@
 {
   "onboarding_title": "What's your name?",
   "onboarding_subtitle": "We'll use it to greet you.",
+  "onboarding_mobile_note": "This app is optimized for mobile. For the best experience, open it on your phone.",
   "onboarding_name_placeholder": "Your name",
   "onboarding_submit": "Let's Go",
 
