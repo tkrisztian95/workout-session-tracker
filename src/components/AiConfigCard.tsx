@@ -7,14 +7,24 @@ import { Button, FieldLabel, Input, Select } from '@/components/ui';
 
 interface AiConfigCardProps {
   defaultOpen?: boolean;
+  open?: boolean;
+  onToggle?: () => void;
 }
 
-export default function AiConfigCard({ defaultOpen = false }: AiConfigCardProps) {
+export default function AiConfigCard({
+  defaultOpen = false,
+  open: openProp,
+  onToggle,
+}: AiConfigCardProps) {
   const savedConfig = getLlmConfig();
   const [apiKey, setApiKey] = useState(() => savedConfig?.apiKey ?? '');
   const [model, setModel] = useState(() => savedConfig?.model ?? 'gpt-4o-mini');
   const [saved, setSaved] = useState(false);
-  const [open, setOpen] = useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp : internalOpen;
+  const toggle = controlled ? onToggle! : () => setInternalOpen((o) => !o);
 
   function handleSave() {
     saveLlmConfig({ provider: 'openai', apiKey: apiKey.trim(), model });
@@ -25,7 +35,7 @@ export default function AiConfigCard({ defaultOpen = false }: AiConfigCardProps)
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
       >
         <div className="w-10 h-10 rounded-xl bg-brand/15 flex items-center justify-center shrink-0">
@@ -83,6 +93,7 @@ export default function AiConfigCard({ defaultOpen = false }: AiConfigCardProps)
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-..."
               autoComplete="off"
+              data-ph-no-capture
             />
           </div>
           <div>

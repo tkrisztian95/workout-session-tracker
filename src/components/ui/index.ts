@@ -3,6 +3,7 @@ export { Card, CardRow } from './Card';
 export { Badge } from './Badge';
 export { FieldLabel, Input, Select } from './Input';
 export { BottomSheet } from './BottomSheet';
+export { ModalSheet } from './ModalSheet';
 export { LabelOverline, HeadingXL, ListLabel } from './Typography';
 export { Page, PageHeader } from './PageShell';
 export { CtaBar } from './CtaBar';

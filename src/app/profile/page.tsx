@@ -12,17 +12,24 @@ import ThemeCard from '@/components/ThemeCard';
 import AiConfigCard from '@/components/AiConfigCard';
 import { getInitials } from '@/utils';
 import DangerZoneCard from '@/components/DangerZoneCard';
+import AboutCard from '@/components/AboutCard';
 import type { Sex } from '@/lib/types';
 
 function ProfilePageInner() {
   const t = useTranslations();
   const searchParams = useSearchParams();
+  const expandAi = searchParams.get('expand') === 'ai';
   const [name, setName] = useState(() => getUserName() ?? '');
   const [nameSaved, setNameSaved] = useState(false);
   const savedNameRef = useRef(getUserName() ?? '');
   const [sex, setSex] = useState<Sex | null>(() => getSex());
+  const [openCard, setOpenCard] = useState<'sex' | 'language' | 'theme' | 'ai' | null>(
+    expandAi ? 'ai' : null,
+  );
 
-  const expandAi = searchParams.get('expand') === 'ai';
+  function toggleCard(card: 'sex' | 'language' | 'theme' | 'ai') {
+    setOpenCard((c) => (c === card ? null : card));
+  }
 
   function handleNameBlur() {
     const trimmed = name.trim();
@@ -78,56 +85,85 @@ function ProfilePageInner() {
                 onBlur={handleNameBlur}
                 placeholder={t.onboarding_name_placeholder}
                 className="w-full bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                data-ph-no-capture
               />
             </div>
           </div>
-          {/* Sex row — ghost select overlay */}
-          <div className="relative flex items-center gap-4 px-4 py-4">
-            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0 pointer-events-none">
-              <User className="w-5 h-5 text-secondary" />
-            </div>
-            <div className="flex-1 min-w-0 pointer-events-none">
-              <p className="text-foreground text-sm font-semibold leading-tight">
-                {t.profile_sex_label}
-              </p>
-              <p className="text-dim text-xs mt-0.5">
-                {sex === 'male'
-                  ? t.profile_sex_male
-                  : sex === 'female'
-                    ? t.profile_sex_female
-                    : t.profile_sex_not_specified}
-              </p>
-            </div>
-            <ChevronDown className="w-4 h-4 text-muted shrink-0 pointer-events-none" />
-            <select
-              id="sex-select"
-              value={sex ?? ''}
-              onChange={(e) => {
-                const v = e.target.value;
-                const next = v === '' ? null : (v as Sex);
-                setSex(next);
-                saveSex(next);
-              }}
-              className="absolute inset-0 w-full opacity-0 cursor-pointer"
+          {/* Sex row — inline expand/collapse */}
+          <div data-ph-no-capture>
+            <button
+              onClick={() => toggleCard('sex')}
+              className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
             >
-              <option value="">{t.profile_sex_not_specified}</option>
-              <option value="male">{t.profile_sex_male}</option>
-              <option value="female">{t.profile_sex_female}</option>
-            </select>
+              <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-secondary" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-foreground text-sm font-semibold leading-tight">
+                  {t.profile_sex_label}
+                </p>
+                <p className="text-dim text-xs mt-0.5">
+                  {sex === 'male'
+                    ? t.profile_sex_male
+                    : sex === 'female'
+                      ? t.profile_sex_female
+                      : t.profile_sex_not_specified}
+                </p>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-muted transition-transform duration-200 shrink-0 ${openCard === 'sex' ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {openCard === 'sex' && (
+              <div className="border-t border-border divide-y divide-border/60">
+                {(
+                  [
+                    { value: null, label: t.profile_sex_not_specified },
+                    { value: 'male' as Sex, label: t.profile_sex_male },
+                    { value: 'female' as Sex, label: t.profile_sex_female },
+                  ] as { value: Sex | null; label: string }[]
+                ).map(({ value, label }) => {
+                  const active = sex === value;
+                  return (
+                    <button
+                      key={value ?? 'none'}
+                      onClick={() => {
+                        setSex(value);
+                        saveSex(value);
+                        setOpenCard(null);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 transition-colors duration-150 cursor-pointer ${active ? 'bg-brand/10' : 'active:bg-elevated'}`}
+                    >
+                      <span
+                        className={`text-sm font-medium ${active ? 'text-brand' : 'text-foreground'}`}
+                      >
+                        {label}
+                      </span>
+                      {active && (
+                        <Check className="w-4 h-4 text-brand flex-shrink-0" strokeWidth={2.5} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
         {/* ── Language ── */}
-        <LanguageCard />
+        <LanguageCard open={openCard === 'language'} onToggle={() => toggleCard('language')} />
 
         {/* ── Theme ── */}
-        <ThemeCard />
+        <ThemeCard open={openCard === 'theme'} onToggle={() => toggleCard('theme')} />
 
         {/* ── AI Configuration ── */}
-        <AiConfigCard defaultOpen={expandAi} />
+        <AiConfigCard open={openCard === 'ai'} onToggle={() => toggleCard('ai')} />
 
         {/* ── Danger zone ── */}
         <DangerZoneCard />
+
+        {/* ── About ── */}
+        <AboutCard />
       </div>
 
       <BottomNav active="profile" />
