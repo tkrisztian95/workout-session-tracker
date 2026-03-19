@@ -560,30 +560,32 @@ function SessionView({
       </PageHeader>
 
       <div className="flex-1 relative overflow-hidden flex flex-col">
-        <div className="px-6 pt-3 pb-3 space-y-3 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <SessionTimer
-              startedAt={session.startedAt}
-              totalPausedMs={session.totalPausedMs ?? 0}
-              pausedAt={session.pausedAt}
-            />
-            <button
-              onClick={isPaused ? handleResume : handlePause}
-              aria-label={isPaused ? 'Resume session' : 'Pause session'}
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
-            >
-              {isPaused ? (
-                <PlayIcon className="w-3.5 h-3.5 text-brand" />
-              ) : (
-                <Pause className="w-3.5 h-3.5 text-secondary" />
-              )}
-            </button>
-          </div>
+        <div className="px-6 pb-3 space-y-3 flex-shrink-0">
           <div>
             <SessionProgressBar
               completed={completed.length}
               remaining={remaining.length}
               dismissed={dismissed.length}
+              rightSlot={
+                <div className="flex items-center gap-2">
+                  <SessionTimer
+                    startedAt={session.startedAt}
+                    totalPausedMs={session.totalPausedMs ?? 0}
+                    pausedAt={session.pausedAt}
+                  />
+                  <button
+                    onClick={isPaused ? handleResume : handlePause}
+                    aria-label={isPaused ? 'Resume session' : 'Pause session'}
+                    className="w-7 h-7 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
+                  >
+                    {isPaused ? (
+                      <PlayIcon className="w-3.5 h-3.5 text-brand" />
+                    ) : (
+                      <Pause className="w-3.5 h-3.5 text-secondary" />
+                    )}
+                  </button>
+                </div>
+              }
             />
           </div>
           {activeExercise && (
