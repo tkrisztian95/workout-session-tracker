@@ -74,6 +74,7 @@ export default function ExerciseCard({
     exercise.weightKg != null &&
     loggedCount > 0 &&
     exercise.loggedSets!.some((s) => s.weight >= exercise.weightKg!);
+  const allTargetsAchieved = setsGoalAchieved && (exercise.weightKg == null || weightGoalAchieved);
 
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
@@ -225,13 +226,21 @@ export default function ExerciseCard({
                     {t.exercise_log_set}
                   </button>
                 )}
-                <button
-                  onClick={onComplete}
-                  className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-success/15 text-success text-sm font-semibold active:bg-success/25 cursor-pointer transition-colors duration-150"
-                >
-                  <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                  {t.exercise_done}
-                </button>
+                <div className={`relative flex-1${allTargetsAchieved ? '' : ''}`}>
+                  {allTargetsAchieved && (
+                    <span
+                      className="absolute inset-0 rounded-xl bg-success motion-safe:animate-ping-sm opacity-40"
+                      style={{ animationDelay: '2s', animationDuration: '2s' }}
+                    />
+                  )}
+                  <button
+                    onClick={onComplete}
+                    className="relative flex w-full items-center justify-center gap-1.5 py-2.5 rounded-xl bg-success/15 text-success text-sm font-semibold active:bg-success/25 cursor-pointer transition-colors duration-150"
+                  >
+                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    {t.exercise_done}
+                  </button>
+                </div>
               </div>
             )}
           </div>
