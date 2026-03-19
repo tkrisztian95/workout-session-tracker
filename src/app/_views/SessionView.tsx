@@ -150,7 +150,7 @@ export function SessionView({
   const queue = remaining.slice(1);
 
   return (
-    <Page className="pb-20">
+    <Page>
       <PageHeader className="pb-1">
         <LabelOverline className="mb-1">{formatDate(locale)}</LabelOverline>
         <HeadingXL className="mt-1">{session.planDayName ?? t.free_session}</HeadingXL>
@@ -201,7 +201,7 @@ export function SessionView({
           )}
         </div>
 
-        <div className="flex-1 px-6 pb-36 space-y-3 overflow-y-auto">
+        <div className="flex-1 px-6 pb-28 space-y-3 overflow-y-auto">
           {totalCount === 0 ? (
             <>
               <EmptyState
