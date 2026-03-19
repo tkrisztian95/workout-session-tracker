@@ -77,6 +77,9 @@
   "discard_session_title": "Eldobod az edzést?",
   "discard_session_subtitle": "Ez az edzés nem lesz elmentve.",
   "keep_going": "Folytatás",
+  "finish_early_title": "Befejezed korán?",
+  "finish_early_subtitle": "Még {count} gyakorlat van hátra.",
+  "finish_anyway": "Mégis befejezem",
 
   "session_complete_title": "Edzés befejezve!",
   "session_complete_subtitle": "Szép munka! Íme az eredményed.",

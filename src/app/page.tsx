@@ -440,6 +440,7 @@ function SessionView({
   const { locale } = useLocale();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
 
   const handleAdd = (exercise: Omit<Exercise, 'id'>) => {
@@ -545,6 +546,7 @@ function SessionView({
   const dismissed = session.exercises.filter((e) => e.dismissed);
   const totalCount = session.exercises.length;
   const activeExercise = remaining[0] ?? null;
+  const allDone = totalCount > 0 && remaining.length === 0;
   const queue = remaining.slice(1);
 
   return (
@@ -682,9 +684,27 @@ function SessionView({
           >
             {t.discard}
           </Button>
-          <Button onClick={() => setShowCompleteOverlay(true)} className="flex-[2]">
-            {t.finish_session}
-          </Button>
+          {allDone ? (
+            <div className="flex-[2] relative">
+              <span className="absolute inset-0 rounded-2xl bg-brand motion-safe:animate-ping-sm opacity-60" />
+              <Button onClick={() => setShowCompleteOverlay(true)} className="relative w-full">
+                {t.finish_session}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => {
+                if (remaining.length > 0) {
+                  setShowFinishConfirm(true);
+                } else {
+                  setShowCompleteOverlay(true);
+                }
+              }}
+              className="flex-[2]"
+            >
+              {t.finish_session}
+            </Button>
+          )}
         </div>
       </CtaBar>
 
@@ -704,6 +724,37 @@ function SessionView({
             onFinish(rating);
           }}
         />
+      )}
+
+      {showFinishConfirm && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
+          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
+            <HeadingXL as="h3" className="text-2xl mb-2">
+              {t.finish_early_title}
+            </HeadingXL>
+            <p className="text-secondary text-sm mb-6">
+              {t.finish_early_subtitle.replace('{count}', String(remaining.length))}
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowFinishConfirm(false)}
+                className="flex-1 py-3.5"
+              >
+                {t.keep_going}
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowFinishConfirm(false);
+                  setShowCompleteOverlay(true);
+                }}
+                className="flex-1"
+              >
+                {t.finish_anyway}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showDiscardConfirm && (
