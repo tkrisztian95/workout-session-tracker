@@ -23,6 +23,7 @@
   "stats_weekly_frequency": "Heti",
   "stats_empty_title": "Még nincs edzés",
   "stats_empty_subtitle": "Fejezz be egy edzést, hogy lásd a statisztikáidat",
+  "stats_summary_title": "Összefoglaló",
   "stats_volume_chart_title": "Heti volumen",
   "stats_no_volume_data": "Rögzíts sorozatokat súllyal a volumentrend megtekintéséhez",
   "stats_progression_table_title": "Gyakorlat fejlődés",
@@ -34,6 +35,8 @@
   "stats_range_all": "Mindenkori",
   "stats_unit_kg": "kg",
   "stats_unit_min": "perc",
+  "stats_category_radar_title": "Edzési egyensúly",
+  "stats_category_other": "Egyéb",
 
   "profile_title": "Profil",
   "profile_name_label": "Megjelenítési név",

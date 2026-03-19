@@ -23,6 +23,7 @@
   "stats_weekly_frequency": "Per Week",
   "stats_empty_title": "No sessions yet",
   "stats_empty_subtitle": "Complete a workout to see your stats here",
+  "stats_summary_title": "Summary",
   "stats_volume_chart_title": "Weekly Volume",
   "stats_no_volume_data": "No volume data — log sets with weight to see this chart",
   "stats_progression_table_title": "Exercise Progression",
@@ -34,6 +35,8 @@
   "stats_range_all": "All",
   "stats_unit_kg": "kg",
   "stats_unit_min": "min",
+  "stats_category_radar_title": "Training Balance",
+  "stats_category_other": "Other",
 
   "profile_title": "Profile",
   "profile_name_label": "Display Name",
