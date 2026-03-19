@@ -7,6 +7,7 @@ Return a JSON object with the following structure:
 {
   "reasoning": string,
   "name": string,
+  "scheduledWeeks": number | undefined,
   "days": Array<{
     "id": string,
     "name": string,
@@ -18,6 +19,7 @@ Return a JSON object with the following structure:
       "sets": number | undefined,
       "reps": number | undefined,
       "duration": number | undefined,
+      "weightKg": number | undefined,
       "role": "core",
       "scalingNote": string | undefined,
       "category": string | undefined
@@ -29,6 +31,7 @@ Return a JSON object with the following structure:
       "sets": number | undefined,
       "reps": number | undefined,
       "duration": number | undefined,
+      "weightKg": number | undefined,
       "role": "optional",
       "scalingNote": string | undefined,
       "category": string | undefined
@@ -41,6 +44,7 @@ Return a JSON object with the following structure:
     "sets": number | undefined,
     "reps": number | undefined,
     "duration": number | undefined,
+    "weightKg": number | undefined,
     "role": "core" | "optional",
     "scalingNote": string | undefined,
     "category": string | undefined
@@ -49,29 +53,80 @@ Return a JSON object with the following structure:
   "updatedAt": string
 }
 
-The "reasoning" field must always be included: 1–3 sentences explaining why this plan suits the user based on their history. Use crypto.randomUUID()-style UUIDs for all id fields. Set createdAt and updatedAt to the current ISO timestamp. weekdays uses 0=Sunday through 6=Saturday.`;
+The "reasoning" field must always be included: 1–3 sentences explaining why this plan suits the user based on their history. Use crypto.randomUUID()-style UUIDs for all id fields. Set createdAt and updatedAt to the current ISO timestamp. weekdays uses 0=Sunday through 6=Saturday. Set weightKg when you know or can reasonably infer a starting weight for the exercise.`;
 
 function summariseSession(session: WorkoutSession): string {
   const date = session.completedAt.slice(0, 10);
   const exercises = session.exercises
     .map((e) => {
-      if (e.type === 'sets-reps') return `${e.name} ${e.sets}×${e.reps}`;
-      if (e.type === 'sets-duration') return `${e.name} ${e.sets}×${e.duration}s`;
-      return `${e.name} ${e.duration}s`;
+      let desc: string;
+      if (e.type === 'sets-reps') {
+        const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
+        if (e.loggedSets && e.loggedSets.length > 0) {
+          const sets = e.loggedSets.map((s) => `${s.reps}r@${s.weight}kg`).join('+');
+          desc = `${e.name} [${sets}]`;
+        } else {
+          desc = `${e.name} ${e.sets}×${e.reps}${weight}`;
+        }
+      } else if (e.type === 'sets-duration') {
+        const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
+        desc = `${e.name} ${e.sets}×${e.duration}s${weight}`;
+      } else {
+        desc = `${e.name} ${e.duration}s`;
+      }
+      if (e.category) desc += ` [${e.category}]`;
+      return desc;
     })
     .join(', ');
   const rating = session.rating ? ` (rating: ${session.rating}/5)` : '';
   return `${date}: ${exercises}${rating}`;
 }
 
+const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function summariseExercise(e: PlanExercise): string {
+  let desc: string;
+  if (e.type === 'sets-reps') {
+    const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
+    desc = `${e.name} ${e.sets}×${e.reps}${weight}`;
+  } else if (e.type === 'sets-duration') {
+    const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
+    desc = `${e.name} ${e.sets}×${e.duration}s${weight}`;
+  } else {
+    desc = `${e.name} ${e.duration}s`;
+  }
+  const tags: string[] = [];
+  if (e.category) tags.push(e.category);
+  if (e.role === 'optional') tags.push('optional');
+  if (e.scalingNote) tags.push(`note: ${e.scalingNote}`);
+  if (tags.length > 0) desc += ` (${tags.join(', ')})`;
+  return desc;
+}
+
 function summarisePlan(plan: WorkoutPlan): string {
-  const days = plan.days
-    .map((d) => {
-      const exerciseCount = d.coreExercises.length + d.optionalExercises.length;
-      return `${d.name || 'Day'} (${exerciseCount} exercises)`;
-    })
-    .join(', ');
-  return `"${plan.name}" — ${plan.days.length} day(s): ${days}`;
+  const meta: string[] = [`"${plan.name}"`];
+  if (plan.status) meta.push(`status: ${plan.status}`);
+  if (plan.scheduledWeeks) meta.push(`${plan.scheduledWeeks} weeks`);
+
+  const days = plan.days.map((d) => {
+    const weekdays =
+      d.weekdays.length > 0 ? d.weekdays.map((w) => WEEKDAY_NAMES[w]).join('/') : 'no fixed days';
+    const core = d.coreExercises.map((e) => `    - ${summariseExercise(e)}`).join('\n');
+    const optional = d.optionalExercises.map((e) => `    - ${summariseExercise(e)}`).join('\n');
+    let dayStr = `  ${d.name || 'Day'} (${weekdays})`;
+    if (core) dayStr += `\n  Core:\n${core}`;
+    if (optional) dayStr += `\n  Optional:\n${optional}`;
+    return dayStr;
+  });
+
+  let result = `${meta.join(', ')} — ${plan.days.length} day(s):\n${days.join('\n')}`;
+
+  if (plan.sharedExercises.length > 0) {
+    const shared = plan.sharedExercises.map((e) => `  - ${summariseExercise(e)}`).join('\n');
+    result += `\n  Shared exercises:\n${shared}`;
+  }
+
+  return result;
 }
 
 export type AiPlanPreferences = {
@@ -227,6 +282,7 @@ export async function suggestPlan(
     sharedExercises: ensureIds(parsed.sharedExercises ?? []),
     createdAt: parsed.createdAt ?? now,
     updatedAt: parsed.updatedAt ?? now,
+    ...(parsed.scheduledWeeks ? { scheduledWeeks: parsed.scheduledWeeks } : {}),
     ...(parsed.reasoning ? { reasoning: parsed.reasoning } : {}),
   };
 }
