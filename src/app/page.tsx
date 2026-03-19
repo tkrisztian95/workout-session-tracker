@@ -626,6 +626,15 @@ function SessionView({
                 </>
               )}
 
+              <Button
+                variant="secondary"
+                onClick={() => setIsModalOpen(true)}
+                className="w-full gap-2"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2.5} />
+                {t.add_exercise_button}
+              </Button>
+
               {completed.length > 0 && (
                 <>
                   <ListLabel>{t.completed_section}</ListLabel>
@@ -656,11 +665,6 @@ function SessionView({
               )}
             </>
           )}
-
-          <Button variant="secondary" onClick={() => setIsModalOpen(true)} className="w-full gap-2">
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            {t.add_exercise_button}
-          </Button>
         </div>
 
         {isPaused && (
