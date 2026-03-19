@@ -240,8 +240,8 @@ export function getExerciseWeightProgression(
     }
   }
 
-  // Map: exerciseName → array of { sessionDate, meanWeight }
-  const map = new Map<string, { date: string; meanWeight: number }[]>();
+  // Map: exerciseName → array of { sessionDate, maxWeight }
+  const map = new Map<string, { date: string; maxWeight: number }[]>();
 
   for (const session of completed) {
     // Group sets per exercise name within this session
@@ -256,9 +256,9 @@ export function getExerciseWeightProgression(
     }
 
     for (const [name, weights] of exerciseWeights) {
-      const meanWeight = weights.reduce((a, b) => a + b, 0) / weights.length;
+      const maxWeight = Math.max(...weights);
       if (!map.has(name)) map.set(name, []);
-      map.get(name)!.push({ date: session.completedAt, meanWeight });
+      map.get(name)!.push({ date: session.completedAt, maxWeight });
     }
   }
 
@@ -267,15 +267,15 @@ export function getExerciseWeightProgression(
   for (const [exerciseName, entries] of map) {
     // Take last 5 appearances
     const last5 = entries.slice(-5);
-    const sessionWeights = last5.map((e) => Math.round(e.meanWeight * 10) / 10);
+    const sessionWeights = last5.map((e) => Math.round(e.maxWeight * 10) / 10);
     const sessionDates = last5.map((e) =>
       new Date(e.date).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
     );
 
     let trend: Trend = 'flat';
     if (last5.length >= 2) {
-      const prev = last5[last5.length - 2].meanWeight;
-      const curr = last5[last5.length - 1].meanWeight;
+      const prev = last5[last5.length - 2].maxWeight;
+      const curr = last5[last5.length - 1].maxWeight;
       if (curr > prev) trend = 'up';
       else if (curr < prev) trend = 'down';
     }
