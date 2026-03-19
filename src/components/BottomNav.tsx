@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, ClipboardList, Clock, User } from 'lucide-react';
+import { Home, ClipboardList, Clock, BarChart2, User } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
 
 interface Props {
-  active: 'home' | 'plans' | 'history' | 'profile';
+  active: 'home' | 'plans' | 'history' | 'stats' | 'profile';
 }
 
 export default function BottomNav({ active }: Props) {
@@ -34,6 +34,13 @@ export default function BottomNav({ active }: Props) {
         >
           <Clock className="w-5 h-5" />
           <span className="text-xs font-medium">{t.nav_history}</span>
+        </Link>
+        <Link
+          href="/stats"
+          className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 cursor-pointer transition-colors ${active === 'stats' ? 'text-brand' : 'text-dim'}`}
+        >
+          <BarChart2 className="w-5 h-5" />
+          <span className="text-xs font-medium">{t.nav_stats}</span>
         </Link>
         <Link
           href="/profile"
