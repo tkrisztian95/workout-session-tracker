@@ -23,6 +23,7 @@
   "stats_weekly_frequency": "Pro Woche",
   "stats_empty_title": "Noch keine Einheiten",
   "stats_empty_subtitle": "Schließe ein Training ab, um deine Statistiken zu sehen",
+  "stats_summary_title": "Übersicht",
   "stats_volume_chart_title": "Wöchentliches Volumen",
   "stats_no_volume_data": "Erfasse Sätze mit Gewicht, um Volumentrends zu sehen",
   "stats_progression_table_title": "Übungsfortschritt",
@@ -34,6 +35,8 @@
   "stats_range_all": "Alle",
   "stats_unit_kg": "kg",
   "stats_unit_min": "Min",
+  "stats_category_radar_title": "Trainingsbalance",
+  "stats_category_other": "Sonstiges",
 
   "profile_title": "Profil",
   "profile_name_label": "Anzeigename",

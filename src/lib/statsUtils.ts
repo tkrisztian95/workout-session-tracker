@@ -159,6 +159,7 @@ export type Trend = 'up' | 'down' | 'flat';
 export interface ExerciseProgression {
   exerciseName: string;
   sessionWeights: number[];
+  sessionDates: string[];
   trend: Trend;
 }
 
@@ -195,6 +196,9 @@ export function getExerciseWeightProgression(sessions: WorkoutSession[]): Exerci
     // Take last 5 appearances
     const last5 = entries.slice(-5);
     const sessionWeights = last5.map((e) => Math.round(e.meanWeight * 10) / 10);
+    const sessionDates = last5.map((e) =>
+      new Date(e.date).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+    );
 
     let trend: Trend = 'flat';
     if (last5.length >= 2) {
@@ -204,10 +208,35 @@ export function getExerciseWeightProgression(sessions: WorkoutSession[]): Exerci
       else if (curr < prev) trend = 'down';
     }
 
-    results.push({ exerciseName, sessionWeights, trend });
+    results.push({ exerciseName, sessionWeights, sessionDates, trend });
   }
 
   results.sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 
   return results;
+}
+
+export interface CategoryDistributionPoint {
+  category: string;
+  count: number;
+}
+
+export function getCategoryDistribution(sessions: WorkoutSession[]): CategoryDistributionPoint[] {
+  const completed = sessions.filter((s) => s.completedAt);
+  const map = new Map<string, number>();
+
+  for (const session of completed) {
+    const seen = new Set<string>();
+    for (const exercise of session.exercises) {
+      const cat = exercise.category?.trim() || 'Other';
+      if (!seen.has(cat)) {
+        seen.add(cat);
+        map.set(cat, (map.get(cat) ?? 0) + 1);
+      }
+    }
+  }
+
+  return Array.from(map.entries())
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count);
 }

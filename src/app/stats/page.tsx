@@ -1,14 +1,27 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { BarChart2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  LineChart,
+  Line,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+} from 'recharts';
+import { BarChart2, TrendingUp, TrendingDown, Minus, ChevronDown } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getSessions } from '@/lib/storage';
 import {
   computeStats,
   getWeeklyVolumeChartData,
   getExerciseWeightProgression,
+  getCategoryDistribution,
   filterSessionsByRange,
   type TimeRange,
 } from '@/lib/statsUtils';
@@ -38,9 +51,17 @@ function StatCard({ label, value, unit }: { label: string; value: string; unit?:
 
 // ─── Progression Table ────────────────────────────────────────────────────────
 
+const progressionChartConfig = {
+  weight: {
+    label: 'Weight (kg)',
+    theme: { light: '#f97316', dark: '#f97316' },
+  },
+} satisfies ChartConfig;
+
 function ProgressionTable({ sessions }: { sessions: WorkoutSession[] }) {
   const t = useTranslations();
   const rows = useMemo(() => getExerciseWeightProgression(sessions), [sessions]);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   if (rows.length === 0) return null;
 
@@ -50,40 +71,129 @@ function ProgressionTable({ sessions }: { sessions: WorkoutSession[] }) {
         {t.stats_progression_table_title}
       </h2>
       <div className="rounded-2xl bg-surface border border-border overflow-hidden">
-        {rows.map((row, i) => (
-          <div
-            key={row.exerciseName}
-            className={`flex items-center justify-between px-4 py-3 gap-3 ${i > 0 ? 'border-t border-border' : ''}`}
-          >
-            {/* Exercise name */}
-            <p className="text-foreground text-sm font-medium truncate flex-1 min-w-0">
-              {row.exerciseName}
-            </p>
+        {rows.map((row, i) => {
+          const isExpanded = expanded === row.exerciseName;
+          const chartData = row.sessionWeights.map((w, idx) => ({
+            date: row.sessionDates[idx],
+            weight: w,
+          }));
+          return (
+            <div key={row.exerciseName} className={i > 0 ? 'border-t border-border' : ''}>
+              {/* Row header — tappable */}
+              <button
+                type="button"
+                onClick={() => setExpanded(isExpanded ? null : row.exerciseName)}
+                className="w-full flex items-center justify-between px-4 py-3 gap-3 text-left"
+              >
+                {/* Exercise name */}
+                <p className="text-foreground text-sm font-medium truncate flex-1 min-w-0">
+                  {row.exerciseName}
+                </p>
 
-            {/* Weight history pills */}
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {row.sessionWeights.map((w, idx) => (
-                <span
-                  key={idx}
-                  className={`text-xs px-1.5 py-0.5 rounded-md font-mono ${
-                    idx === row.sessionWeights.length - 1
-                      ? 'bg-brand/20 text-brand font-semibold'
-                      : 'bg-elevated text-secondary'
-                  }`}
-                >
-                  {w}
-                </span>
-              ))}
-            </div>
+                {/* Weight history pills */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {row.sessionWeights.map((w, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-xs px-1.5 py-0.5 rounded-md font-mono ${
+                        idx === row.sessionWeights.length - 1
+                          ? 'bg-brand/20 text-brand font-semibold'
+                          : 'bg-elevated text-secondary'
+                      }`}
+                    >
+                      {w}
+                    </span>
+                  ))}
+                </div>
 
-            {/* Trend icon */}
-            <div className="flex-shrink-0">
-              {row.trend === 'up' && <TrendingUp className="w-4 h-4 text-success" />}
-              {row.trend === 'down' && <TrendingDown className="w-4 h-4 text-danger" />}
-              {row.trend === 'flat' && <Minus className="w-4 h-4 text-muted" />}
+                {/* Trend icon */}
+                <div className="flex-shrink-0">
+                  {row.trend === 'up' && <TrendingUp className="w-4 h-4 text-success" />}
+                  {row.trend === 'down' && <TrendingDown className="w-4 h-4 text-danger" />}
+                  {row.trend === 'flat' && <Minus className="w-4 h-4 text-muted" />}
+                </div>
+
+                {/* Expand chevron */}
+                <ChevronDown
+                  className={`w-4 h-4 text-muted flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* Collapsible chart */}
+              {isExpanded && (
+                <div className="px-4 pb-4 border-t border-border">
+                  <ChartContainer config={progressionChartConfig} className="h-[120px] w-full">
+                    <LineChart data={chartData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+                      <CartesianGrid vertical={false} strokeOpacity={0.3} />
+                      <XAxis
+                        dataKey="date"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel indicator="dot" />}
+                      />
+                      <Line
+                        dataKey="weight"
+                        type="monotone"
+                        stroke="var(--color-weight)"
+                        strokeWidth={2}
+                        dot={{ r: 3, fill: 'var(--color-weight)' }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ─── Category Radar Chart ─────────────────────────────────────────────────────
+
+const radarChartConfig = {
+  count: {
+    label: 'Sessions',
+    theme: { light: '#f97316', dark: '#f97316' },
+  },
+} satisfies ChartConfig;
+
+function CategoryRadarChart({ sessions }: { sessions: WorkoutSession[] }) {
+  const t = useTranslations();
+  const data = useMemo(() => getCategoryDistribution(sessions), [sessions]);
+
+  const uniqueCategories = data.length;
+  if (sessions.filter((s) => s.completedAt).length < 2 || uniqueCategories <= 1) return null;
+
+  return (
+    <section>
+      <h2 className="text-foreground font-semibold text-base mb-3">
+        {t.stats_category_radar_title}
+      </h2>
+      <div className="rounded-2xl bg-surface border border-border p-4">
+        <ChartContainer config={radarChartConfig} className="h-[220px] w-full">
+          <RadarChart data={data}>
+            <PolarGrid strokeOpacity={0.3} />
+            <PolarAngleAxis dataKey="category" tick={{ fontSize: 11 }} />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel indicator="dot" />}
+            />
+            <Radar
+              dataKey="count"
+              fill="var(--color-count)"
+              fillOpacity={0.25}
+              stroke="var(--color-count)"
+              strokeWidth={2}
+            />
+          </RadarChart>
+        </ChartContainer>
       </div>
     </section>
   );
@@ -145,7 +255,7 @@ export default function StatsPage() {
   const t = useTranslations();
 
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
-  const [range, setRange] = useState<TimeRange>('all');
+  const [range, setRange] = useState<TimeRange>('month');
 
   const filteredSessions = useMemo(() => filterSessionsByRange(sessions, range), [sessions, range]);
 
@@ -174,28 +284,39 @@ export default function StatsPage() {
             <RangeSelector selected={range} onChange={setRange} />
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <StatCard label={t.stats_total_sessions} value={String(stats.totalSessions)} />
-              <StatCard
-                label={t.stats_total_volume}
-                value={stats.totalVolumeKg.toLocaleString()}
-                unit="kg"
-              />
-              <StatCard
-                label={t.stats_avg_duration}
-                value={String(stats.avgDurationMin)}
-                unit="min"
-              />
-              <StatCard
-                label={t.stats_avg_weight}
-                value={stats.avgWeightKg > 0 ? String(stats.avgWeightKg) : '—'}
-                unit={stats.avgWeightKg > 0 ? 'kg' : undefined}
-              />
-              <StatCard
-                label={t.stats_weekly_frequency}
-                value={stats.weeklyFrequency > 0 ? String(stats.weeklyFrequency) : '—'}
-              />
-            </div>
+            <section>
+              <h2 className="text-foreground font-semibold text-base mb-3">
+                {t.stats_summary_title}
+              </h2>
+              <div className="grid grid-cols-2 gap-3">
+                <StatCard label={t.stats_total_sessions} value={String(stats.totalSessions)} />
+                <StatCard
+                  label={t.stats_total_volume}
+                  value={stats.totalVolumeKg.toLocaleString()}
+                  unit="kg"
+                />
+                <StatCard
+                  label={t.stats_avg_duration}
+                  value={String(stats.avgDurationMin)}
+                  unit="min"
+                />
+                <StatCard
+                  label={t.stats_avg_weight}
+                  value={stats.avgWeightKg > 0 ? String(stats.avgWeightKg) : '—'}
+                  unit={stats.avgWeightKg > 0 ? 'kg' : undefined}
+                />
+                <StatCard
+                  label={t.stats_weekly_frequency}
+                  value={stats.weeklyFrequency > 0 ? String(stats.weeklyFrequency) : '—'}
+                />
+              </div>
+            </section>
+
+            {/* Exercise Progression Table */}
+            <ProgressionTable sessions={filteredSessions} />
+
+            {/* Category Radar Chart */}
+            <CategoryRadarChart sessions={filteredSessions} />
 
             {/* Weekly Volume Chart */}
             <section>
@@ -234,9 +355,6 @@ export default function StatsPage() {
                 </div>
               )}
             </section>
-
-            {/* Exercise Progression Table */}
-            <ProgressionTable sessions={filteredSessions} />
           </>
         )}
       </div>
