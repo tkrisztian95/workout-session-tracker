@@ -17,6 +17,10 @@ import AddExerciseModal from '@/components/AddExerciseModal';
 import SessionTimer from '@/components/SessionTimer';
 import SessionProgressBar from '@/components/SessionProgressBar';
 import SessionCompleteOverlay from '@/components/SessionCompleteOverlay';
+import SessionPausedOverlay from '@/components/SessionPausedOverlay';
+import PulsingButton from '@/components/PulsingButton';
+import FinishSessionConfirmSheet from '@/components/FinishSessionConfirmSheet';
+import DiscardSessionConfirmSheet from '@/components/DiscardSessionConfirmSheet';
 import BottomNav from '@/components/BottomNav';
 import {
   getActiveSession,
@@ -677,18 +681,7 @@ function SessionView({
           )}
         </div>
 
-        {isPaused && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-base/80 backdrop-blur-sm z-10">
-            <button
-              onClick={handleResume}
-              aria-label="Resume session"
-              className="w-24 h-24 rounded-full bg-brand flex items-center justify-center shadow-lg active:scale-95 transition-transform duration-150 cursor-pointer"
-            >
-              <PlayIcon className="w-10 h-10 text-white ml-1" />
-            </button>
-            <p className="text-secondary text-sm font-medium mt-4">{t.session_paused}</p>
-          </div>
-        )}
+        {isPaused && <SessionPausedOverlay onResume={handleResume} />}
       </div>
 
       <CtaBar slim className="space-y-2">
@@ -701,12 +694,9 @@ function SessionView({
             {t.discard}
           </Button>
           {allDone ? (
-            <div className="flex-[2] relative">
-              <span className="absolute inset-0 rounded-2xl bg-brand motion-safe:animate-ping-sm opacity-60" />
-              <Button onClick={() => setShowCompleteOverlay(true)} className="relative w-full">
-                {t.finish_session}
-              </Button>
-            </div>
+            <PulsingButton onClick={() => setShowCompleteOverlay(true)} className="flex-[2]">
+              {t.finish_session}
+            </PulsingButton>
           ) : (
             <Button
               onClick={() => {
@@ -743,57 +733,21 @@ function SessionView({
       )}
 
       {showFinishConfirm && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
-          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
-            <HeadingXL as="h3" className="text-2xl mb-2">
-              {t.finish_early_title}
-            </HeadingXL>
-            <p className="text-secondary text-sm mb-6">
-              {t.finish_early_subtitle.replace('{count}', String(remaining.length))}
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowFinishConfirm(false)}
-                className="flex-1 py-3.5"
-              >
-                {t.keep_going}
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowFinishConfirm(false);
-                  setShowCompleteOverlay(true);
-                }}
-                className="flex-1"
-              >
-                {t.finish_anyway}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <FinishSessionConfirmSheet
+          remainingCount={remaining.length}
+          onKeepGoing={() => setShowFinishConfirm(false)}
+          onFinish={() => {
+            setShowFinishConfirm(false);
+            setShowCompleteOverlay(true);
+          }}
+        />
       )}
 
       {showDiscardConfirm && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
-          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
-            <HeadingXL as="h3" className="text-2xl mb-2">
-              {t.discard_session_title}
-            </HeadingXL>
-            <p className="text-secondary text-sm mb-6">{t.discard_session_subtitle}</p>
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowDiscardConfirm(false)}
-                className="flex-1 py-3.5"
-              >
-                {t.keep_going}
-              </Button>
-              <Button variant="danger" onClick={onDiscard} className="flex-1">
-                {t.discard}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DiscardSessionConfirmSheet
+          onKeepGoing={() => setShowDiscardConfirm(false)}
+          onDiscard={onDiscard}
+        />
       )}
     </Page>
   );

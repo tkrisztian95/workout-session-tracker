@@ -177,18 +177,22 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
         {t.plan_day_add_exercise}
       </button>
 
-      <AddPlanExerciseModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAdd={handleAddExercise}
-      />
-      <AddPlanExerciseModal
-        isOpen={editingExercise !== null}
-        onClose={() => setEditingExercise(null)}
-        onAdd={handleAddExercise}
-        onEdit={handleEditExercise}
-        initialValues={editingExercise ?? undefined}
-      />
+      {isModalOpen && (
+        <AddPlanExerciseModal
+          isOpen
+          onClose={() => setIsModalOpen(false)}
+          onAdd={handleAddExercise}
+        />
+      )}
+      {editingExercise !== null && (
+        <AddPlanExerciseModal
+          isOpen
+          onClose={() => setEditingExercise(null)}
+          onAdd={handleAddExercise}
+          onEdit={handleEditExercise}
+          initialValues={editingExercise}
+        />
+      )}
     </Card>
   );
 }
