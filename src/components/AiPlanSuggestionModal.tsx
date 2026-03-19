@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Sparkles, RefreshCw, Loader2, ChevronDown } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import { getLlmConfig, getPlans, getSessions, getLocale } from '@/lib/storage';
 import { suggestPlan } from '@/lib/ai';
 import type { AiPlanPreferences } from '@/lib/ai';
@@ -79,6 +80,7 @@ function ChipPicker({
 
 export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSuggestionModalProps) {
   const t = useTranslations();
+  const posthog = usePostHog();
   const savedConfig = getLlmConfig();
   const hasSavedConfig = !!savedConfig?.apiKey;
 
@@ -92,6 +94,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
   const [focus, setFocus] = useState('');
   const [daysPerWeek, setDaysPerWeek] = useState('');
   const [goal, setGoal] = useState('');
+  const generationStartRef = useRef<number>(0);
 
   const handleGenerate = async () => {
     const config = getLlmConfig();
@@ -106,6 +109,13 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
       daysPerWeek: daysPerWeek || undefined,
       goal: goal || undefined,
     };
+    posthog?.capture('ai_plan_generation_started', {
+      model: config.model,
+      focus: focus || null,
+      days_per_week: daysPerWeek || null,
+      goal: goal || null,
+    });
+    generationStartRef.current = Date.now();
     try {
       const plans = getPlans();
       const sessions = getSessions();
@@ -120,18 +130,44 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
       setSuggestedPlan(result);
       setReasoning(result.reasoning);
       setView('preview');
+      posthog?.capture('ai_plan_generation_succeeded', {
+        model: config.model,
+        duration_ms: Date.now() - generationStartRef.current,
+        day_count: result.days.length,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate plan');
+      const message = err instanceof Error ? err.message : 'Failed to generate plan';
+      setError(message);
       setView('config');
+      posthog?.capture('ai_plan_generation_failed', {
+        model: config.model,
+        duration_ms: Date.now() - generationStartRef.current,
+        error_type: message.includes('no credits')
+          ? 'quota'
+          : message.includes('Invalid API key')
+            ? 'auth'
+            : message.includes('parse JSON')
+              ? 'parse'
+              : message.includes('missing required')
+                ? 'validation'
+                : 'api',
+      });
     }
   };
 
   const handleUse = () => {
     if (!suggestedPlan) return;
+    posthog?.capture('ai_plan_applied', {
+      model: getLlmConfig()?.model,
+      day_count: suggestedPlan.days.length,
+    });
     onApply(suggestedPlan);
   };
 
   const handleRegenerate = () => {
+    posthog?.capture('ai_plan_regenerated', {
+      model: getLlmConfig()?.model,
+    });
     setSuggestedPlan(null);
     setReasoning(undefined);
     setFocus('');
