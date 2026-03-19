@@ -1,5 +1,5 @@
 import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise, Sex } from './types';
-import { getSex } from './storage';
+import { getSex, getAge, getHeightCm, getWeightKg } from './storage';
 
 const SYSTEM_PROMPT = `You are a personal fitness coach. Based on the user's existing workout plans and session history, suggest a new workout plan tailored to their goals and progress.
 
@@ -86,6 +86,9 @@ export function buildPlanSuggestionPrompt(
   preferences?: AiPlanPreferences,
   language?: string,
   sex?: Sex | null,
+  age?: number | null,
+  heightCm?: number | null,
+  weightKg?: number | null,
 ): string {
   const recentSessions = [...sessions]
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
@@ -114,9 +117,18 @@ export function buildPlanSuggestionPrompt(
     ? `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${language}.`
     : '';
 
-  const sexLine = sex ? `My biological sex: ${sex}.\n\n` : '';
+  const metricLines = [
+    sex ? `My biological sex: ${sex}.` : '',
+    age ? `My age: ${age} years.` : '',
+    heightCm ? `My height: ${heightCm} cm.` : '',
+    weightKg ? `My weight: ${weightKg} kg.` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 
-  return `${sexLine}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
+  const metricsPreamble = metricLines ? `${metricLines}\n\n` : '';
+
+  return `${metricsPreamble}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
@@ -129,7 +141,19 @@ export async function suggestPlan(
   language?: string,
 ): Promise<AiPlanResult> {
   const sex = getSex();
-  const userMessage = buildPlanSuggestionPrompt(plans, sessions, preferences, language, sex);
+  const age = getAge();
+  const heightCm = getHeightCm();
+  const weightKg = getWeightKg();
+  const userMessage = buildPlanSuggestionPrompt(
+    plans,
+    sessions,
+    preferences,
+    language,
+    sex,
+    age,
+    heightCm,
+    weightKg,
+  );
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

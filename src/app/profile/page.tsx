@@ -2,11 +2,22 @@
 
 import { useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Check, ChevronDown, Pencil, User } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, Dumbbell, Pencil, Ruler, User } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { Page, PageHeader, HeadingXL } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
-import { getUserName, saveUserName, getSex, saveSex } from '@/lib/storage';
+import {
+  getUserName,
+  saveUserName,
+  getSex,
+  saveSex,
+  getAge,
+  saveAge,
+  getHeightCm,
+  saveHeightCm,
+  getWeightKg,
+  saveWeightKg,
+} from '@/lib/storage';
 import LanguageCard from '@/components/LanguageCard';
 import ThemeCard from '@/components/ThemeCard';
 import AiConfigCard from '@/components/AiConfigCard';
@@ -23,11 +34,26 @@ function ProfilePageInner() {
   const [nameSaved, setNameSaved] = useState(false);
   const savedNameRef = useRef(getUserName() ?? '');
   const [sex, setSex] = useState<Sex | null>(() => getSex());
-  const [openCard, setOpenCard] = useState<'sex' | 'language' | 'theme' | 'ai' | null>(
-    expandAi ? 'ai' : null,
-  );
+  const [age, setAge] = useState(() => {
+    const v = getAge();
+    return v !== null ? String(v) : '';
+  });
+  const savedAgeRef = useRef(getAge());
+  const [heightCm, setHeightCm] = useState(() => {
+    const v = getHeightCm();
+    return v !== null ? String(v) : '';
+  });
+  const savedHeightRef = useRef(getHeightCm());
+  const [weightKg, setWeightKg] = useState(() => {
+    const v = getWeightKg();
+    return v !== null ? String(v) : '';
+  });
+  const savedWeightRef = useRef(getWeightKg());
+  const [openCard, setOpenCard] = useState<
+    'sex' | 'body-metrics' | 'language' | 'theme' | 'ai' | null
+  >(expandAi ? 'ai' : null);
 
-  function toggleCard(card: 'sex' | 'language' | 'theme' | 'ai') {
+  function toggleCard(card: 'sex' | 'body-metrics' | 'language' | 'theme' | 'ai') {
     setOpenCard((c) => (c === card ? null : card));
   }
 
@@ -38,6 +64,39 @@ function ProfilePageInner() {
     savedNameRef.current = trimmed;
     setNameSaved(true);
     setTimeout(() => setNameSaved(false), 2000);
+  }
+
+  function handleAgeBlur() {
+    const n = Number(age);
+    if (age === '' || !Number.isFinite(n) || n < 10 || n > 120) {
+      setAge(savedAgeRef.current !== null ? String(savedAgeRef.current) : '');
+      return;
+    }
+    const rounded = Math.round(n);
+    savedAgeRef.current = rounded;
+    saveAge(rounded);
+  }
+
+  function handleHeightBlur() {
+    const n = Number(heightCm);
+    if (heightCm === '' || !Number.isFinite(n) || n < 50 || n > 300) {
+      setHeightCm(savedHeightRef.current !== null ? String(savedHeightRef.current) : '');
+      return;
+    }
+    const rounded = Math.round(n);
+    savedHeightRef.current = rounded;
+    saveHeightCm(rounded);
+  }
+
+  function handleWeightBlur() {
+    const n = Number(weightKg);
+    if (weightKg === '' || !Number.isFinite(n) || n < 20 || n > 500) {
+      setWeightKg(savedWeightRef.current !== null ? String(savedWeightRef.current) : '');
+      return;
+    }
+    const rounded = Math.round(n * 10) / 10;
+    savedWeightRef.current = rounded;
+    saveWeightKg(rounded);
   }
 
   const initials = getInitials(name || '?');
@@ -147,6 +206,112 @@ function ProfilePageInner() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* ── Body metrics ── */}
+        <div
+          className="bg-surface border border-border rounded-2xl overflow-hidden divide-y divide-border/60"
+          data-ph-no-capture
+        >
+          <button
+            onClick={() => toggleCard('body-metrics')}
+            className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <Ruler className="w-5 h-5 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-foreground text-sm font-semibold leading-tight">
+                {t.profile_body_metrics_label}
+              </p>
+              <p className="text-dim text-xs mt-0.5">
+                {age || heightCm || weightKg
+                  ? [age && `${age} y`, heightCm && `${heightCm} cm`, weightKg && `${weightKg} kg`]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : t.profile_body_metrics_not_set}
+              </p>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-muted transition-transform duration-200 shrink-0 ${openCard === 'body-metrics' ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {openCard === 'body-metrics' && (
+            <div className="border-t border-border divide-y divide-border/60">
+              {/* Age row */}
+              <div className="flex items-center gap-4 px-4 py-4">
+                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                  <CalendarDays className="w-4 h-4 text-secondary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                    {t.profile_age_label}
+                  </p>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    onBlur={handleAgeBlur}
+                    placeholder={t.profile_age_placeholder}
+                    min={10}
+                    max={120}
+                    className="w-full bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                  />
+                </div>
+              </div>
+
+              {/* Height row */}
+              <div className="flex items-center gap-4 px-4 py-4">
+                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                  <Ruler className="w-4 h-4 text-secondary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                    {t.profile_height_label}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={heightCm}
+                      onChange={(e) => setHeightCm(e.target.value)}
+                      onBlur={handleHeightBlur}
+                      placeholder={t.profile_height_placeholder}
+                      min={50}
+                      max={300}
+                      className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                    />
+                    <span className="text-xs text-muted">{t.unit_cm}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weight row */}
+              <div className="flex items-center gap-4 px-4 py-4">
+                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                  <Dumbbell className="w-4 h-4 text-secondary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                    {t.profile_weight_label}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={weightKg}
+                      onChange={(e) => setWeightKg(e.target.value)}
+                      onBlur={handleWeightBlur}
+                      placeholder={t.profile_weight_placeholder}
+                      min={20}
+                      max={500}
+                      step={0.1}
+                      className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                    />
+                    <span className="text-xs text-muted">{t.unit_kg}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Language ── */}
