@@ -105,53 +105,107 @@ export interface WeeklyVolumePoint {
   volume: number;
 }
 
-export function getWeeklyVolumeChartData(
+function sessionVolume(session: WorkoutSession): number {
+  let v = 0;
+  for (const exercise of session.exercises) {
+    if (exercise.loggedSets) {
+      for (const set of exercise.loggedSets) {
+        if (set.weight > 0 && set.reps > 0) v += set.weight * set.reps;
+      }
+    }
+  }
+  return v;
+}
+
+function volumeInRange(sessions: WorkoutSession[], from: Date, to: Date): number {
+  return Math.round(
+    sessions
+      .filter((s) => {
+        const d = new Date(s.completedAt);
+        return d >= from && d < to;
+      })
+      .reduce((sum, s) => sum + sessionVolume(s), 0),
+  );
+}
+
+export function getVolumeChartData(
   sessions: WorkoutSession[],
-  weeks = 12,
+  range: TimeRange,
 ): WeeklyVolumePoint[] {
   const completed = sessions.filter((s) => s.completedAt);
-
-  // Build week start timestamps (Monday-aligned) going back `weeks` weeks
   const now = new Date();
-  // Get start of current week (Monday)
-  const dayOfWeek = now.getDay(); // 0 = Sun
+
+  // ── Hourly (1day) ────────────────────────────────────────────────────────
+  if (range === '1day') {
+    const dayStart = new Date(now);
+    dayStart.setHours(0, 0, 0, 0);
+    return Array.from({ length: 24 }, (_, h) => {
+      const from = new Date(dayStart);
+      from.setHours(h);
+      const to = new Date(dayStart);
+      to.setHours(h + 1);
+      return { weekLabel: `${h}h`, volume: volumeInRange(completed, from, to) };
+    });
+  }
+
+  // ── Daily (week) ──────────────────────────────────────────────────────────
+  if (range === 'week') {
+    const dayOfWeek = now.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - daysToMonday);
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days.map((label, i) => {
+      const from = new Date(weekStart);
+      from.setDate(weekStart.getDate() + i);
+      const to = new Date(from);
+      to.setDate(from.getDate() + 1);
+      return { weekLabel: label, volume: volumeInRange(completed, from, to) };
+    });
+  }
+
+  // ── Monthly (all) ─────────────────────────────────────────────────────────
+  if (range === 'all') {
+    if (completed.length === 0) return [];
+    const earliest = new Date(
+      [...completed].sort((a, b) => a.completedAt.localeCompare(b.completedAt))[0].completedAt,
+    );
+    earliest.setDate(1);
+    earliest.setHours(0, 0, 0, 0);
+    const points: WeeklyVolumePoint[] = [];
+    const cursor = new Date(earliest);
+    while (cursor <= now) {
+      const from = new Date(cursor);
+      const to = new Date(cursor);
+      to.setMonth(to.getMonth() + 1);
+      points.push({
+        weekLabel: from.toLocaleDateString('en', { month: 'short', year: '2-digit' }),
+        volume: volumeInRange(completed, from, to),
+      });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return points;
+  }
+
+  // ── Weekly (month = 5 weeks, 90days = 13 weeks) ───────────────────────────
+  const weeks = range === 'month' ? 5 : 13;
+  const dayOfWeek = now.getDay();
   const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
   const currentWeekStart = new Date(now);
   currentWeekStart.setHours(0, 0, 0, 0);
   currentWeekStart.setDate(currentWeekStart.getDate() - daysToMonday);
 
-  const points: WeeklyVolumePoint[] = [];
-
-  for (let i = weeks - 1; i >= 0; i--) {
-    const weekStart = new Date(currentWeekStart);
-    weekStart.setDate(weekStart.getDate() - i * 7);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const label = weekStart.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-
-    const volume = completed
-      .filter((s) => {
-        const d = new Date(s.completedAt);
-        return d >= weekStart && d < weekEnd;
-      })
-      .reduce((sum, s) => {
-        for (const exercise of s.exercises) {
-          if (exercise.loggedSets) {
-            for (const set of exercise.loggedSets) {
-              if (set.weight > 0 && set.reps > 0) {
-                sum += set.weight * set.reps;
-              }
-            }
-          }
-        }
-        return sum;
-      }, 0);
-
-    points.push({ weekLabel: label, volume: Math.round(volume) });
-  }
-
-  return points;
+  return Array.from({ length: weeks }, (_, i) => {
+    const from = new Date(currentWeekStart);
+    from.setDate(from.getDate() - (weeks - 1 - i) * 7);
+    const to = new Date(from);
+    to.setDate(to.getDate() + 7);
+    return {
+      weekLabel: from.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+      volume: volumeInRange(completed, from, to),
+    };
+  });
 }
 
 export type Trend = 'up' | 'down' | 'flat';
@@ -161,6 +215,7 @@ export interface ExerciseProgression {
   sessionWeights: number[];
   sessionDates: string[];
   trend: Trend;
+  sessionCount: number;
 }
 
 export function getExerciseWeightProgression(sessions: WorkoutSession[]): ExerciseProgression[] {
@@ -208,10 +263,16 @@ export function getExerciseWeightProgression(sessions: WorkoutSession[]): Exerci
       else if (curr < prev) trend = 'down';
     }
 
-    results.push({ exerciseName, sessionWeights, sessionDates, trend });
+    results.push({
+      exerciseName,
+      sessionWeights,
+      sessionDates,
+      trend,
+      sessionCount: entries.length,
+    });
   }
 
-  results.sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+  results.sort((a, b) => b.sessionCount - a.sessionCount);
 
   return results;
 }

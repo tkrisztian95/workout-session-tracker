@@ -19,7 +19,7 @@ import BottomNav from '@/components/BottomNav';
 import { getSessions } from '@/lib/storage';
 import {
   computeStats,
-  getWeeklyVolumeChartData,
+  getVolumeChartData,
   getExerciseWeightProgression,
   getCategoryDistribution,
   filterSessionsByRange,
@@ -260,8 +260,21 @@ export default function StatsPage() {
   const filteredSessions = useMemo(() => filterSessionsByRange(sessions, range), [sessions, range]);
 
   const stats = useMemo(() => computeStats(filteredSessions), [filteredSessions]);
-  const chartData = useMemo(() => getWeeklyVolumeChartData(filteredSessions), [filteredSessions]);
+  const chartData = useMemo(
+    () => getVolumeChartData(filteredSessions, range),
+    [filteredSessions, range],
+  );
   const hasVolume = chartData.some((d) => d.volume > 0);
+
+  const volumeTrend = useMemo(() => {
+    const nonZero = chartData.filter((d) => d.volume > 0);
+    if (nonZero.length < 2) return 'flat' as const;
+    const prev = nonZero[nonZero.length - 2].volume;
+    const curr = nonZero[nonZero.length - 1].volume;
+    if (curr > prev) return 'up' as const;
+    if (curr < prev) return 'down' as const;
+    return 'flat' as const;
+  }, [chartData]);
 
   const isEmpty = sessions.filter((s) => s.completedAt).length === 0;
 
@@ -321,7 +334,13 @@ export default function StatsPage() {
             {/* Weekly Volume Chart */}
             <section>
               <h2 className="text-foreground font-semibold text-base mb-3">
-                {t.stats_volume_chart_title}
+                {range === '1day'
+                  ? t.stats_volume_chart_title_hourly
+                  : range === 'week'
+                    ? t.stats_volume_chart_title_daily
+                    : range === 'all'
+                      ? t.stats_volume_chart_title_monthly
+                      : t.stats_volume_chart_title}
               </h2>
               {hasVolume ? (
                 <div className="rounded-2xl bg-surface border border-border p-4">
@@ -348,6 +367,26 @@ export default function StatsPage() {
                       <Bar dataKey="volume" fill="var(--color-volume)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ChartContainer>
+                  <div className="flex items-center gap-1 mt-2 justify-end">
+                    {volumeTrend === 'up' && (
+                      <>
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                        <span className="text-xs text-green-500">{t.stats_volume_trend_up}</span>
+                      </>
+                    )}
+                    {volumeTrend === 'down' && (
+                      <>
+                        <TrendingDown className="w-4 h-4 text-red-500" />
+                        <span className="text-xs text-red-500">{t.stats_volume_trend_down}</span>
+                      </>
+                    )}
+                    {volumeTrend === 'flat' && (
+                      <>
+                        <Minus className="w-4 h-4 text-muted" />
+                        <span className="text-xs text-muted">{t.stats_volume_trend_flat}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-2xl bg-surface border border-border px-4 py-8 text-center">
