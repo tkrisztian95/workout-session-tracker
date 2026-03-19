@@ -77,6 +77,9 @@
   "discard_session_title": "Discard Session?",
   "discard_session_subtitle": "This session will not be saved.",
   "keep_going": "Keep Going",
+  "finish_early_title": "Finish Early?",
+  "finish_early_subtitle": "You still have {count} exercise(s) remaining.",
+  "finish_anyway": "Finish Anyway",
 
   "session_complete_title": "Session Complete!",
   "session_complete_subtitle": "Great work. Here's what you accomplished.",

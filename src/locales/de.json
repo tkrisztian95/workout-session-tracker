@@ -77,6 +77,9 @@
   "discard_session_title": "Training verwerfen?",
   "discard_session_subtitle": "Dieses Training wird nicht gespeichert.",
   "keep_going": "Weitermachen",
+  "finish_early_title": "Früh beenden?",
+  "finish_early_subtitle": "Du hast noch {count} Übung(en) übrig.",
+  "finish_anyway": "Trotzdem beenden",
 
   "session_complete_title": "Training abgeschlossen!",
   "session_complete_subtitle": "Gut gemacht! Das hast du erreicht.",
