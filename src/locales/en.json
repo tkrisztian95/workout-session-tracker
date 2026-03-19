@@ -21,6 +21,8 @@
   "stats_avg_duration": "Avg Duration",
   "stats_avg_weight": "Avg Weight",
   "stats_weekly_frequency": "Per Week",
+  "stats_completed_plans": "Plans Done",
+  "stats_exercise_new_badge": "New",
   "stats_empty_title": "No sessions yet",
   "stats_empty_subtitle": "Complete a workout to see your stats here",
   "stats_summary_title": "Summary",

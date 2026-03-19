@@ -216,12 +216,29 @@ export interface ExerciseProgression {
   sessionDates: string[];
   trend: Trend;
   sessionCount: number;
+  isNew: boolean;
 }
 
-export function getExerciseWeightProgression(sessions: WorkoutSession[]): ExerciseProgression[] {
+export function getExerciseWeightProgression(
+  sessions: WorkoutSession[],
+  allSessions: WorkoutSession[],
+): ExerciseProgression[] {
   const completed = sessions
     .filter((s) => s.completedAt)
     .sort((a, b) => a.completedAt.localeCompare(b.completedAt));
+
+  // Build a map of exercise name → earliest date across ALL sessions (not just filtered)
+  const globalFirstDate = new Map<string, string>();
+  for (const session of allSessions) {
+    if (!session.completedAt) continue;
+    for (const exercise of session.exercises) {
+      if (!exercise.loggedSets?.some((s) => s.weight > 0)) continue;
+      const prev = globalFirstDate.get(exercise.name);
+      if (!prev || session.completedAt < prev) {
+        globalFirstDate.set(exercise.name, session.completedAt);
+      }
+    }
+  }
 
   // Map: exerciseName → array of { sessionDate, meanWeight }
   const map = new Map<string, { date: string; meanWeight: number }[]>();
@@ -263,12 +280,17 @@ export function getExerciseWeightProgression(sessions: WorkoutSession[]): Exerci
       else if (curr < prev) trend = 'down';
     }
 
+    const globalFirst = globalFirstDate.get(exerciseName);
+    const localFirst = entries[0]?.date;
+    const isNew = !!(globalFirst && localFirst && globalFirst === localFirst);
+
     results.push({
       exerciseName,
       sessionWeights,
       sessionDates,
       trend,
       sessionCount: entries.length,
+      isNew,
     });
   }
 
