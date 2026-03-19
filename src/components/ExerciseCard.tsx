@@ -64,12 +64,16 @@ export default function ExerciseCard({
   const canLogSets = exercise.type === 'sets-reps' && !isDone && !!onLogSet;
 
   const loggedCount = exercise.loggedSets?.length ?? 0;
+  const qualifyingSetCount =
+    exercise.weightKg != null
+      ? (exercise.loggedSets?.filter((s) => s.weight >= exercise.weightKg!).length ?? 0)
+      : loggedCount;
   const setsGoalAchieved =
-    exercise.type === 'sets-reps' && exercise.sets != null && loggedCount >= exercise.sets;
+    exercise.type === 'sets-reps' && exercise.sets != null && qualifyingSetCount >= exercise.sets;
   const weightGoalAchieved =
     exercise.weightKg != null &&
     loggedCount > 0 &&
-    exercise.loggedSets!.every((s) => s.weight >= exercise.weightKg!);
+    exercise.loggedSets!.some((s) => s.weight >= exercise.weightKg!);
 
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
