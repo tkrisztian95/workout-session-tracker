@@ -9,6 +9,9 @@ const KEYS = {
   locale: 'wst_locale',
   llmConfig: 'wst_llm_config',
   userSex: 'wst_user_sex',
+  userAge: 'wst_user_age',
+  userHeightCm: 'wst_user_height_cm',
+  userWeightKg: 'wst_user_weight_kg',
   theme: 'wst_theme',
   consentAccepted: 'wst_consent_accepted',
 } as const;
@@ -148,6 +151,44 @@ export function saveSex(sex: Sex | null): void {
   } else {
     localStorage.setItem(KEYS.userSex, sex);
   }
+}
+
+// ─── Body metrics ─────────────────────────────────────────────────────────────
+
+export function getAge(): number | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.userAge);
+  if (!stored) return null;
+  const n = Number(stored);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function saveAge(age: number): void {
+  localStorage.setItem(KEYS.userAge, String(age));
+}
+
+export function getHeightCm(): number | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.userHeightCm);
+  if (!stored) return null;
+  const n = Number(stored);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function saveHeightCm(cm: number): void {
+  localStorage.setItem(KEYS.userHeightCm, String(cm));
+}
+
+export function getWeightKg(): number | null {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(KEYS.userWeightKg);
+  if (!stored) return null;
+  const n = Number(stored);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function saveWeightKg(kg: number): void {
+  localStorage.setItem(KEYS.userWeightKg, String(kg));
 }
 
 // ─── LLM Config ───────────────────────────────────────────────────────────────
