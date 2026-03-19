@@ -201,7 +201,7 @@ export function SessionView({
           )}
         </div>
 
-        <div className="flex-1 px-6 pb-36 space-y-3 overflow-y-auto pt-3">
+        <div className="flex-1 px-6 pb-36 space-y-3 overflow-y-auto">
           {totalCount === 0 ? (
             <>
               <EmptyState
