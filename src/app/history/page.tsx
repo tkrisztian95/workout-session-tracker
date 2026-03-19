@@ -11,7 +11,7 @@ import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
-import { EmptyState, HeadingXL, LabelOverline, Page, PageHeader } from '@/components/ui';
+import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
@@ -41,8 +41,7 @@ export default function HistoryPage() {
   return (
     <Page className="pb-20">
       <PageHeader>
-        <LabelOverline>{t.history_activity_label}</LabelOverline>
-        <HeadingXL className="mt-1">{t.history_title}</HeadingXL>
+        <HeadingXL>{t.history_title}</HeadingXL>
       </PageHeader>
 
       <div className="px-6 pb-4">

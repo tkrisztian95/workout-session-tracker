@@ -4,7 +4,7 @@ import { useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, ChevronDown, Pencil, User } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
-import { Page, PageHeader, HeadingXL, LabelOverline } from '@/components/ui';
+import { Page, PageHeader, HeadingXL } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
 import { getUserName, saveUserName, getSex, saveSex } from '@/lib/storage';
 import LanguageCard from '@/components/LanguageCard';
@@ -45,8 +45,7 @@ function ProfilePageInner() {
   return (
     <Page className="pb-24">
       <PageHeader>
-        <LabelOverline>{t.profile_title}</LabelOverline>
-        <HeadingXL className="mt-1">{t.profile_title}</HeadingXL>
+        <HeadingXL>{t.profile_title}</HeadingXL>
       </PageHeader>
 
       <div className="flex-1 px-5 overflow-y-auto space-y-6 pb-4">

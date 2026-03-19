@@ -603,11 +603,21 @@ function SessionView({
 
         <div className="flex-1 px-6 pb-36 space-y-3 overflow-y-auto pt-3">
           {totalCount === 0 ? (
-            <EmptyState
-              icon={<Dumbbell className="w-9 h-9 text-border" />}
-              title={t.no_exercises_title}
-              subtitle={t.no_exercises_subtitle}
-            />
+            <>
+              <EmptyState
+                icon={<Dumbbell className="w-9 h-9 text-border" />}
+                title={t.no_exercises_title}
+                subtitle={t.no_exercises_subtitle}
+              />
+              <Button
+                variant="secondary"
+                onClick={() => setIsModalOpen(true)}
+                className="w-full gap-2"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2.5} />
+                {t.add_exercise_button}
+              </Button>
+            </>
           ) : (
             <>
               {queue.length > 0 && (
