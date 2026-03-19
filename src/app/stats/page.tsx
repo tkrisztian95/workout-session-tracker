@@ -14,9 +14,9 @@ import {
   PolarAngleAxis,
   Radar,
 } from 'recharts';
-import { BarChart2, TrendingUp, TrendingDown, Minus, ChevronDown } from 'lucide-react';
+import { BarChart2, TrendingUp, TrendingDown, Minus, ChevronDown, Sparkles } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
-import { getSessions } from '@/lib/storage';
+import { getSessions, getPlans } from '@/lib/storage';
 import {
   computeStats,
   getVolumeChartData,
@@ -58,9 +58,18 @@ const progressionChartConfig = {
   },
 } satisfies ChartConfig;
 
-function ProgressionTable({ sessions }: { sessions: WorkoutSession[] }) {
+function ProgressionTable({
+  sessions,
+  allSessions,
+}: {
+  sessions: WorkoutSession[];
+  allSessions: WorkoutSession[];
+}) {
   const t = useTranslations();
-  const rows = useMemo(() => getExerciseWeightProgression(sessions), [sessions]);
+  const rows = useMemo(
+    () => getExerciseWeightProgression(sessions, allSessions),
+    [sessions, allSessions],
+  );
   const [expanded, setExpanded] = useState<string | null>(null);
 
   if (rows.length === 0) return null;
@@ -145,6 +154,14 @@ function ProgressionTable({ sessions }: { sessions: WorkoutSession[] }) {
                       />
                     </LineChart>
                   </ChartContainer>
+                  {row.isNew && (
+                    <div className="flex justify-end mt-1">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-brand/15 text-brand text-[10px] font-semibold leading-none">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        {t.stats_exercise_new_badge}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -255,6 +272,10 @@ export default function StatsPage() {
   const t = useTranslations();
 
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
+  const completedPlans = useMemo(
+    () => getPlans().filter((p) => p.status === 'completed').length,
+    [],
+  );
   const [range, setRange] = useState<TimeRange>('month');
 
   const filteredSessions = useMemo(() => filterSessionsByRange(sessions, range), [sessions, range]);
@@ -322,11 +343,12 @@ export default function StatsPage() {
                   label={t.stats_weekly_frequency}
                   value={stats.weeklyFrequency > 0 ? String(stats.weeklyFrequency) : '—'}
                 />
+                <StatCard label={t.stats_completed_plans} value={String(completedPlans)} />
               </div>
             </section>
 
             {/* Exercise Progression Table */}
-            <ProgressionTable sessions={filteredSessions} />
+            <ProgressionTable sessions={filteredSessions} allSessions={sessions} />
 
             {/* Category Radar Chart */}
             <CategoryRadarChart sessions={filteredSessions} />
