@@ -20,12 +20,18 @@ export function BottomSheet({ isOpen, onClose, children, showHandle = true }: Bo
 
       {/* Sheet */}
       <div
-        className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-surface rounded-t-3xl px-6 pt-4 pb-10 transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-y-0' : 'translate-y-full'
+        className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-surface rounded-t-3xl flex flex-col max-h-[90dvh] transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-y-0 pointer-events-auto' : 'translate-y-full pointer-events-none'
         }`}
       >
-        {showHandle && <div className="w-10 h-1 rounded-full bg-border-subtle mx-auto mb-5" />}
-        {children}
+        {showHandle && (
+          <div className="flex-shrink-0 pt-4 pb-1">
+            <div className="w-10 h-1 rounded-full bg-border-subtle mx-auto" />
+          </div>
+        )}
+        <div className="overflow-y-auto overscroll-contain flex-1 px-6 pt-3 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
+          {children}
+        </div>
       </div>
     </>
   );

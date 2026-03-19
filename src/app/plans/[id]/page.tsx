@@ -7,6 +7,7 @@ import { getPlans, savePlan, deletePlan } from '@/lib/storage';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
+import DeletePlanConfirmSheet from '@/components/DeletePlanConfirmSheet';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
 import {
@@ -251,9 +252,14 @@ export default function PlanDetailPage() {
         </div>
       </div>
 
-      <CtaBar>
+      <CtaBar slim>
         <div className="flex gap-3">
-          <Button variant="ghost" size="sm" onClick={() => router.back()} className="flex-1 py-4">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => router.back()}
+            className="flex-1 py-4"
+          >
             {t.discard}
           </Button>
           <Button onClick={handleSave} className="flex-[2]">
@@ -263,44 +269,31 @@ export default function PlanDetailPage() {
       </CtaBar>
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end max-w-md mx-auto">
-          <div className="w-full bg-surface rounded-t-3xl px-6 pt-6 pb-10">
-            <HeadingXL as="h3" className="text-2xl mb-2">
-              {t.delete_plan_title}
-            </HeadingXL>
-            <p className="text-secondary text-sm mb-6">
-              {t.delete_plan_body.replace('{name}', plan.name)}
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3.5"
-              >
-                {t.cancel}
-              </Button>
-              <Button variant="danger" size="sm" onClick={handleDelete} className="flex-1 py-3.5">
-                {t.delete}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <DeletePlanConfirmSheet
+          planName={plan.name}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
       )}
 
-      <AddPlanExerciseModal
-        isOpen={isSharedModalOpen}
-        onClose={() => setIsSharedModalOpen(false)}
-        onAdd={handleAddShared}
-        showRole={false}
-      />
-      <AddPlanExerciseModal
-        isOpen={editingShared !== null}
-        onClose={() => setEditingShared(null)}
-        onAdd={handleAddShared}
-        onEdit={handleEditShared}
-        initialValues={editingShared ?? undefined}
-        showRole={false}
-      />
+      {isSharedModalOpen && (
+        <AddPlanExerciseModal
+          isOpen
+          onClose={() => setIsSharedModalOpen(false)}
+          onAdd={handleAddShared}
+          showRole={false}
+        />
+      )}
+      {editingShared !== null && (
+        <AddPlanExerciseModal
+          isOpen
+          onClose={() => setEditingShared(null)}
+          onAdd={handleAddShared}
+          onEdit={handleEditShared}
+          initialValues={editingShared}
+          showRole={false}
+        />
+      )}
     </Page>
   );
 }
