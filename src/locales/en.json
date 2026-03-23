@@ -331,6 +331,8 @@
   "ai_import_submit": "Parse with AI",
   "ai_import_loading": "Parsing...",
   "ai_import_confirm_title": "Review Import",
+  "session_label": "Session",
+  "ai_import_exercise_name_label": "Exercise name",
   "ai_import_review_title": "Review Import",
   "ai_import_save": "Save Session",
   "ai_import_save_n": "Save {{count}} sessions",
