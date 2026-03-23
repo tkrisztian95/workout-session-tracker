@@ -19,22 +19,22 @@ The system SHALL display an edit button on the session detail view that enters e
 
 ### Requirement: Users can edit numeric exercise fields in edit mode
 
-The system SHALL allow users to modify sets, reps, and duration values on each exercise while in edit mode.
+The system SHALL allow users to modify execution data on each exercise while in edit mode using the history exercise execution editor, not the plan-target modal.
 
-#### Scenario: Sets-reps exercise shows editable sets and reps inputs
+#### Scenario: Tapping the edit icon on a sets-reps exercise opens the history execution editor
 
-- **WHEN** the session detail is in edit mode and an exercise has type `sets-reps`
-- **THEN** the exercise row shows numeric inputs for sets and reps
+- **WHEN** the session detail is in edit mode and the user taps the edit icon on a `sets-reps` exercise
+- **THEN** the history exercise execution editor opens showing per-set logged rows (weight × reps)
 
-#### Scenario: Sets-duration exercise shows editable sets and duration inputs
+#### Scenario: Tapping the edit icon on a duration exercise opens the history execution editor
 
-- **WHEN** the session detail is in edit mode and an exercise has type `sets-duration`
-- **THEN** the exercise row shows numeric inputs for sets and duration (in seconds)
+- **WHEN** the session detail is in edit mode and the user taps the edit icon on a `duration` or `sets-duration` exercise
+- **THEN** the history exercise execution editor opens showing a duration (seconds) input
 
-#### Scenario: Duration-only exercise shows editable duration input
+#### Scenario: Confirming edits updates the draft
 
-- **WHEN** the session detail is in edit mode and an exercise has type `duration`
-- **THEN** the exercise row shows a single numeric input for duration (in seconds)
+- **WHEN** the user modifies execution data in the history exercise editor and confirms
+- **THEN** the exercise in the draft is updated with the new loggedSets or duration values
 
 ### Requirement: Users can toggle exercise completion state in edit mode
 
