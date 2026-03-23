@@ -1,4 +1,12 @@
-import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise, Sex } from './types';
+import type {
+  LlmConfig,
+  WorkoutPlan,
+  WorkoutSession,
+  PlanDay,
+  PlanExercise,
+  Exercise,
+  Sex,
+} from './types';
 import { getSex, getAge, getHeightCm, getWeightKg } from './storage';
 
 const SYSTEM_PROMPT = `You are a personal fitness coach. Based on the user's existing workout plans and session history, suggest a new workout plan tailored to their goals and progress.
@@ -284,5 +292,117 @@ export async function suggestPlan(
     updatedAt: parsed.updatedAt ?? now,
     ...(parsed.scheduledWeeks ? { scheduledWeeks: parsed.scheduledWeeks } : {}),
     ...(parsed.reasoning ? { reasoning: parsed.reasoning } : {}),
+  };
+}
+
+// ─── Session import from notes ────────────────────────────────────────────────
+
+const IMPORT_SYSTEM_PROMPT = `You are a fitness assistant that parses free-form workout notes into structured JSON.
+
+Return a JSON object with this exact structure:
+{
+  "date": string,        // ISO date "YYYY-MM-DD" inferred from the notes, or today's date if not mentioned
+  "durationMins": number, // total workout duration in minutes; infer from notes or use 60 as default
+  "exercises": Array<{
+    "name": string,      // exercise name in the requested language
+    "type": "sets-reps" | "sets-duration" | "duration",
+    "sets": number | undefined,
+    "reps": number | undefined,
+    "duration": number | undefined,  // seconds
+    "weightKg": number | undefined,
+    "category": string | undefined   // e.g. "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"
+  }>
+}
+
+Rules:
+- Translate ALL exercise names to the requested language. Use consistent, standard names.
+- If the same exercise appears under different names or spellings, merge into one entry.
+- Prefer exact names from the "existing history names" list when there is a clear match.
+- Default type to "sets-reps" when ambiguous.
+- Do not invent exercises not present in the notes.
+- Return valid JSON only — no markdown, no explanation.`;
+
+export type AiImportResult = {
+  date: string;
+  durationMins: number;
+  exercises: Omit<Exercise, 'id' | 'completed' | 'dismissed' | 'completedAt' | 'loggedSets'>[];
+};
+
+export async function importSession(
+  notes: string,
+  language: string,
+  existingExerciseNames: string[],
+  config: LlmConfig,
+): Promise<AiImportResult> {
+  const today = new Date().toISOString().slice(0, 10);
+  const existingNamesText =
+    existingExerciseNames.length > 0
+      ? `\n\nExisting exercise names from this user's history (prefer these when matching):\n${existingExerciseNames.join(', ')}`
+      : '';
+
+  const userMessage = `Today's date: ${today}
+Output language for exercise names: ${language}${existingNamesText}
+
+Workout notes to parse:
+${notes}`;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${config.apiKey}`,
+    },
+    body: JSON.stringify({
+      model: config.model,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: IMPORT_SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    let code = '';
+    let detail = '';
+    try {
+      const err = await response.json();
+      code = err?.error?.code ?? '';
+      detail = err?.error?.message ?? '';
+    } catch {
+      // ignore
+    }
+    if (code === 'insufficient_quota') {
+      throw new Error(
+        'Your OpenAI account has no credits. https://platform.openai.com/settings/organization/billing/overview',
+      );
+    }
+    if (response.status === 401) {
+      throw new Error('Invalid API key. Check your key at https://platform.openai.com/api-keys.');
+    }
+    throw new Error(`OpenAI API error ${response.status}${detail ? `: ${detail}` : ''}`);
+  }
+
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content !== 'string') {
+    throw new Error('Unexpected response format from OpenAI API');
+  }
+
+  let parsed: AiImportResult;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error('Failed to parse JSON response from OpenAI API');
+  }
+
+  if (!parsed.date || !Array.isArray(parsed.exercises)) {
+    throw new Error('Response is missing required fields (date, exercises)');
+  }
+
+  return {
+    date: parsed.date,
+    durationMins: typeof parsed.durationMins === 'number' ? parsed.durationMins : 60,
+    exercises: parsed.exercises,
   };
 }

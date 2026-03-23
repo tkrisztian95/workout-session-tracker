@@ -9,14 +9,16 @@ import {
   Dumbbell,
   Pencil,
   Plus,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
+import AiImportNotesSheet from '@/components/AiImportNotesSheet';
 import { HistoryExerciseEditorContent, formatTarget } from '@/components/HistoryExerciseEditor';
 import CategoryBadge from '@/components/CategoryBadge';
-import { getPlans, saveSession } from '@/lib/storage';
-import type { Exercise, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
+import { getPlans, getLlmConfig, saveSession } from '@/lib/storage';
+import type { Exercise, LlmConfig, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 
@@ -112,8 +114,10 @@ export default function NewHistorySessionSheet({
   const [durationMins, setDurationMins] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
   const [pendingExercise, setPendingExercise] = useState<Exercise | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [llmConfig] = useState<LlmConfig | null>(() => getLlmConfig());
 
   function reset() {
     setStep('type-select');
@@ -266,6 +270,26 @@ export default function NewHistorySessionSheet({
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted flex-shrink-0" />
               </button>
+
+              {llmConfig && (
+                <button
+                  onClick={() => setIsImportSheetOpen(true)}
+                  className="w-full flex items-center gap-4 rounded-2xl bg-surface border border-border px-4 py-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer text-left"
+                >
+                  <span className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="w-5 h-5 text-brand" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-foreground text-sm">
+                      {t.new_history_session_ai_import}
+                    </p>
+                    <p className="text-secondary text-xs mt-0.5">
+                      {t.new_history_session_ai_import_desc}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted flex-shrink-0" />
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -447,6 +471,17 @@ export default function NewHistorySessionSheet({
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExercise}
+      />
+
+      <AiImportNotesSheet
+        isOpen={isImportSheetOpen}
+        onClose={() => setIsImportSheetOpen(false)}
+        onConfirm={(session) => {
+          saveSession(session);
+          setIsImportSheetOpen(false);
+          reset();
+          onSaved(session.id);
+        }}
       />
     </>
   );

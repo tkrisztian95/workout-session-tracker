@@ -319,5 +319,18 @@
   "new_history_session_from_plan_desc": "Associate with a plan and pre-fill exercises",
   "new_history_session_free_desc": "Log exercises manually without a plan",
   "new_history_exercises_label": "Exercises",
-  "new_history_optional_label": "optional"
+  "new_history_optional_label": "optional",
+
+  "new_history_session_ai_import": "Import from notes (AI)",
+  "new_history_session_ai_import_desc": "Use AI to parse your workout notes",
+
+  "ai_import_title": "Import from Notes",
+  "ai_import_subtitle": "Paste your workout notes and AI will extract the exercises, sets, and weights.",
+  "ai_import_notes_label": "Workout notes",
+  "ai_import_placeholder": "e.g. Bench press 3x8 80kg, Squat 4x6 100kg...",
+  "ai_import_submit": "Parse with AI",
+  "ai_import_loading": "Parsing...",
+  "ai_import_confirm_title": "Review Import",
+  "ai_import_save": "Save Session",
+  "ai_import_discard": "Back"
 }

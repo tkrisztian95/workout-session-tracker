@@ -319,5 +319,18 @@
   "new_history_session_from_plan_desc": "Mit einem Plan verknüpfen und Übungen vorladen",
   "new_history_session_free_desc": "Übungen manuell ohne Plan erfassen",
   "new_history_exercises_label": "Übungen",
-  "new_history_optional_label": "optional"
+  "new_history_optional_label": "optional",
+
+  "new_history_session_ai_import": "Aus Notizen importieren (KI)",
+  "new_history_session_ai_import_desc": "KI analysiert deine Trainingsnotizen",
+
+  "ai_import_title": "Aus Notizen importieren",
+  "ai_import_subtitle": "Füge deine Trainingsnotizen ein – die KI erkennt Übungen, Sätze und Gewichte.",
+  "ai_import_notes_label": "Trainingsnotizen",
+  "ai_import_placeholder": "z.B. Bankdrücken 3x8 80kg, Kniebeugen 4x6 100kg...",
+  "ai_import_submit": "Mit KI analysieren",
+  "ai_import_loading": "Wird analysiert...",
+  "ai_import_confirm_title": "Import prüfen",
+  "ai_import_save": "Einheit speichern",
+  "ai_import_discard": "Zurück"
 }
