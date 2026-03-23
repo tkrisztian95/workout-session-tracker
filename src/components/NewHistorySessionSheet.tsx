@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ClipboardList,
   Dumbbell,
+  Loader2,
   Pencil,
   Plus,
   Sparkles,
@@ -14,15 +15,36 @@ import {
 } from 'lucide-react';
 import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
-import AiImportNotesSheet from '@/components/AiImportNotesSheet';
+import AiImportReviewView from '@/components/AiImportReviewView';
 import { HistoryExerciseEditorContent, formatTarget } from '@/components/HistoryExerciseEditor';
 import CategoryBadge from '@/components/CategoryBadge';
-import { getPlans, getLlmConfig, saveSession } from '@/lib/storage';
+import {
+  getPlans,
+  getLlmConfig,
+  saveSession,
+  getLocale,
+  getRecentExerciseNames,
+} from '@/lib/storage';
+import { importSessions, type AiImportResult } from '@/lib/ai';
 import type { Exercise, LlmConfig, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 
-type Step = 'type-select' | 'plan-pick' | 'day-pick' | 'form';
+const LOCALE_LANGUAGE: Record<string, string> = { en: 'English', hu: 'Hungarian', de: 'German' };
+
+function buildSession(result: AiImportResult): WorkoutSession {
+  const mins = result.durationMins;
+  const startedAt = new Date(`${result.date}T09:00:00`).toISOString();
+  const completedAt = new Date(new Date(startedAt).getTime() + mins * 60000).toISOString();
+  return {
+    id: crypto.randomUUID(),
+    startedAt,
+    completedAt,
+    exercises: result.exercises.map((ex) => ({ ...ex, id: crypto.randomUUID(), completed: true })),
+  };
+}
+
+type Step = 'type-select' | 'plan-pick' | 'day-pick' | 'form' | 'ai-import';
 
 const STEPS: Step[] = ['type-select', 'plan-pick', 'day-pick', 'form'];
 const FREE_STEPS: Step[] = ['type-select', 'form'];
@@ -114,7 +136,10 @@ export default function NewHistorySessionSheet({
   const [durationMins, setDurationMins] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isImportSheetOpen, setIsImportSheetOpen] = useState(false);
+  const [reviewDrafts, setReviewDrafts] = useState<WorkoutSession[] | null>(null);
+  const [aiNotes, setAiNotes] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const [pendingExercise, setPendingExercise] = useState<Exercise | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [llmConfig] = useState<LlmConfig | null>(() => getLlmConfig());
@@ -127,6 +152,27 @@ export default function NewHistorySessionSheet({
     setDate(todayIso());
     setDurationMins('');
     setExercises([]);
+    setAiNotes('');
+    setAiLoading(false);
+    setAiError(null);
+  }
+
+  async function handleAiSubmit() {
+    const config = getLlmConfig();
+    if (!config) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const locale = getLocale() ?? 'en';
+      const language = LOCALE_LANGUAGE[locale] ?? 'English';
+      const existingNames = getRecentExerciseNames();
+      const results = await importSessions(aiNotes, language, existingNames, config);
+      setReviewDrafts(results.map(buildSession));
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function handleClose() {
@@ -213,7 +259,9 @@ export default function NewHistorySessionSheet({
         ? t.new_history_day_pick_title
         : step === 'form'
           ? t.new_history_session_title
-          : t.new_history_session_type_title;
+          : step === 'ai-import'
+            ? t.ai_import_title
+            : t.new_history_session_type_title;
 
   const stepSubtitle = editorExercise ? (formatTarget(editorExercise) ?? undefined) : undefined;
 
@@ -273,7 +321,7 @@ export default function NewHistorySessionSheet({
 
               {llmConfig && (
                 <button
-                  onClick={() => setIsImportSheetOpen(true)}
+                  onClick={() => setStep('ai-import')}
                   className="w-full flex items-center gap-4 rounded-2xl bg-surface border border-border px-4 py-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer text-left"
                 >
                   <span className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0">
@@ -465,6 +513,53 @@ export default function NewHistorySessionSheet({
             )}
           </div>
         )}
+
+        {/* ── Step: ai-import ───────────────────────────────────────────────── */}
+        {step === 'ai-import' && (
+          <div className="flex-1 min-h-0 flex flex-col">
+            <StepHeader onBack={() => setStep('type-select')} stepIndex={0} totalSteps={1} />
+            <p className="text-secondary text-sm mb-4">{t.ai_import_subtitle}</p>
+            <div className="flex-1 min-h-0 flex flex-col mb-4">
+              <FieldLabel htmlFor="ai-import-notes">{t.ai_import_notes_label}</FieldLabel>
+              <textarea
+                id="ai-import-notes"
+                value={aiNotes}
+                onChange={(e) => setAiNotes(e.target.value)}
+                placeholder={t.ai_import_placeholder}
+                className="flex-1 min-h-0 w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-brand/40"
+              />
+            </div>
+            {aiError && (
+              <p className="text-danger text-sm mb-4 rounded-lg bg-danger/8 px-3 py-2">{aiError}</p>
+            )}
+            <div className="flex gap-3 flex-shrink-0">
+              <Button
+                variant="ghost"
+                onClick={() => setStep('type-select')}
+                className="flex-1 py-3.5"
+              >
+                {t.cancel}
+              </Button>
+              <Button
+                onClick={handleAiSubmit}
+                disabled={aiNotes.trim().length === 0 || aiLoading}
+                className="flex-1 py-3.5 flex items-center justify-center gap-2"
+              >
+                {aiLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {t.ai_import_loading}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    {t.ai_import_submit}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </ModalSheet>
 
       <AddExerciseModal
@@ -473,16 +568,21 @@ export default function NewHistorySessionSheet({
         onAdd={handleAddExercise}
       />
 
-      <AiImportNotesSheet
-        isOpen={isImportSheetOpen}
-        onClose={() => setIsImportSheetOpen(false)}
-        onConfirm={(sessions) => {
-          sessions.forEach((s) => saveSession(s));
-          setIsImportSheetOpen(false);
-          reset();
-          onSaved(sessions[sessions.length - 1].id);
-        }}
-      />
+      {reviewDrafts && (
+        <AiImportReviewView
+          sessions={reviewDrafts}
+          onBack={() => {
+            setReviewDrafts(null);
+            setStep('ai-import');
+          }}
+          onConfirm={(sessions) => {
+            sessions.forEach((s) => saveSession(s));
+            setReviewDrafts(null);
+            reset();
+            onSaved(sessions[sessions.length - 1].id);
+          }}
+        />
+      )}
     </>
   );
 }
