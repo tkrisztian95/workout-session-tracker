@@ -5,10 +5,10 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   Dumbbell,
   Pencil,
   Plus,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { BottomSheet, Button, FieldLabel } from '@/components/ui';
@@ -222,7 +222,7 @@ export default function NewHistorySessionSheet({
                 className="w-full flex items-center gap-4 rounded-2xl bg-surface border border-border px-4 py-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer text-left"
               >
                 <span className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0">
-                  <Dumbbell className="w-5 h-5 text-brand" />
+                  <ClipboardList className="w-5 h-5 text-brand" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-foreground text-sm">
@@ -243,7 +243,7 @@ export default function NewHistorySessionSheet({
                 className="w-full flex items-center gap-4 rounded-2xl bg-surface border border-border px-4 py-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer text-left"
               >
                 <span className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-secondary" />
+                  <Dumbbell className="w-5 h-5 text-secondary" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-foreground text-sm">
