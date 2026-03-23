@@ -476,11 +476,11 @@ export default function NewHistorySessionSheet({
       <AiImportNotesSheet
         isOpen={isImportSheetOpen}
         onClose={() => setIsImportSheetOpen(false)}
-        onConfirm={(session) => {
-          saveSession(session);
+        onConfirm={(sessions) => {
+          sessions.forEach((s) => saveSession(s));
           setIsImportSheetOpen(false);
           reset();
-          onSaved(session.id);
+          onSaved(sessions[sessions.length - 1].id);
         }}
       />
     </>

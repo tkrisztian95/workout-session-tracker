@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { ModalSheet, Button, FieldLabel } from '@/components/ui';
-import CategoryBadge from '@/components/CategoryBadge';
-import { importSession, type AiImportResult } from '@/lib/ai';
+import SessionDraftCard from '@/components/SessionDraftCard';
+import { importSessions, type AiImportResult } from '@/lib/ai';
 import { getLlmConfig, getLocale, getRecentExerciseNames } from '@/lib/storage';
-import type { WorkoutSession } from '@/lib/types';
+import type { Exercise, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
-import { formatExerciseDetail } from '@/lib/sessionUtils';
 
 const LOCALE_LANGUAGE: Record<string, string> = {
   en: 'English',
@@ -16,12 +15,12 @@ const LOCALE_LANGUAGE: Record<string, string> = {
   de: 'German',
 };
 
-type View = 'input' | 'confirm';
+type View = 'input' | 'review';
 
 interface AiImportNotesSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (session: WorkoutSession) => void;
+  onConfirm: (sessions: WorkoutSession[]) => void;
 }
 
 function buildSession(result: AiImportResult): WorkoutSession {
@@ -50,13 +49,13 @@ export default function AiImportNotesSheet({
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [parsedSession, setParsedSession] = useState<WorkoutSession | null>(null);
+  const [draftSessions, setDraftSessions] = useState<WorkoutSession[]>([]);
 
   function handleClose() {
     setView('input');
     setNotes('');
     setError(null);
-    setParsedSession(null);
+    setDraftSessions([]);
     onClose();
   }
 
@@ -69,9 +68,9 @@ export default function AiImportNotesSheet({
       const locale = getLocale() ?? 'en';
       const language = LOCALE_LANGUAGE[locale] ?? 'English';
       const existingNames = getRecentExerciseNames();
-      const result = await importSession(notes, language, existingNames, config);
-      setParsedSession(buildSession(result));
-      setView('confirm');
+      const results = await importSessions(notes, language, existingNames, config);
+      setDraftSessions(results.map(buildSession));
+      setView('review');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -80,14 +79,87 @@ export default function AiImportNotesSheet({
   }
 
   function handleSave() {
-    if (!parsedSession) return;
-    onConfirm(parsedSession);
+    if (draftSessions.length === 0) return;
+    onConfirm(draftSessions);
     setView('input');
     setNotes('');
-    setParsedSession(null);
+    setDraftSessions([]);
   }
 
-  const title = view === 'confirm' ? t.ai_import_confirm_title : t.ai_import_title;
+  // ── Draft mutation helpers ────────────────────────────────────────────────
+
+  function updateDraftDate(idx: number, date: string) {
+    setDraftSessions((prev) =>
+      prev.map((s, i) => {
+        if (i !== idx) return s;
+        const durationMs = new Date(s.completedAt).getTime() - new Date(s.startedAt).getTime();
+        const startedAt = new Date(`${date}T09:00:00`).toISOString();
+        const completedAt = new Date(new Date(startedAt).getTime() + durationMs).toISOString();
+        return { ...s, startedAt, completedAt };
+      }),
+    );
+  }
+
+  function updateDraftDuration(idx: number, mins: number) {
+    setDraftSessions((prev) =>
+      prev.map((s, i) => {
+        if (i !== idx) return s;
+        const completedAt = new Date(new Date(s.startedAt).getTime() + mins * 60000).toISOString();
+        return { ...s, completedAt };
+      }),
+    );
+  }
+
+  function updateDraftExercise(sessionIdx: number, exIdx: number, patch: Partial<Exercise>) {
+    setDraftSessions((prev) =>
+      prev.map((s, i) => {
+        if (i !== sessionIdx) return s;
+        const exercises = s.exercises.map((ex, j) => (j === exIdx ? { ...ex, ...patch } : ex));
+        return { ...s, exercises };
+      }),
+    );
+  }
+
+  function removeDraftExercise(sessionIdx: number, exIdx: number) {
+    setDraftSessions((prev) =>
+      prev.map((s, i) => {
+        if (i !== sessionIdx) return s;
+        return { ...s, exercises: s.exercises.filter((_, j) => j !== exIdx) };
+      }),
+    );
+  }
+
+  function addDraftExercise(sessionIdx: number) {
+    setDraftSessions((prev) =>
+      prev.map((s, i) => {
+        if (i !== sessionIdx) return s;
+        const newEx: Exercise = {
+          id: crypto.randomUUID(),
+          name: '',
+          type: 'sets-reps',
+          sets: 3,
+          reps: 10,
+          completed: true,
+        };
+        return { ...s, exercises: [...s.exercises, newEx] };
+      }),
+    );
+  }
+
+  function removeDraftSession(idx: number) {
+    setDraftSessions((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  // ── Derived state ─────────────────────────────────────────────────────────
+
+  const hasInvalidDraft = draftSessions.some((s) => s.exercises.length === 0);
+  const canSave = draftSessions.length > 0 && !hasInvalidDraft;
+  const saveLabel =
+    draftSessions.length === 1
+      ? t.ai_import_save
+      : t.ai_import_save_n.replace('{{count}}', String(draftSessions.length));
+
+  const title = view === 'review' ? t.ai_import_review_title : t.ai_import_title;
 
   return (
     <ModalSheet isOpen={isOpen} onClose={handleClose} title={title}>
@@ -137,58 +209,34 @@ export default function AiImportNotesSheet({
         </div>
       )}
 
-      {/* ── Confirm view ───────────────────────────────────────────────────── */}
-      {view === 'confirm' && parsedSession && (
+      {/* ── Review view ────────────────────────────────────────────────────── */}
+      {view === 'review' && (
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="flex gap-3 mb-4 flex-shrink-0">
-            <div className="flex-1 rounded-xl bg-surface border border-border px-3 py-2.5">
-              <p className="text-xs text-secondary mb-0.5">{t.new_history_session_date_label}</p>
-              <p className="text-sm font-medium text-foreground">
-                {parsedSession.startedAt.slice(0, 10)}
-              </p>
-            </div>
-            <div className="flex-1 rounded-xl bg-surface border border-border px-3 py-2.5">
-              <p className="text-xs text-secondary mb-0.5">
-                {t.new_history_session_duration_label}
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                {Math.round(
-                  (new Date(parsedSession.completedAt).getTime() -
-                    new Date(parsedSession.startedAt).getTime()) /
-                    60000,
-                )}{' '}
-                min
-              </p>
-            </div>
-          </div>
-
-          <p className="text-xs font-medium text-secondary uppercase tracking-wide mb-2 flex-shrink-0">
-            {t.new_history_exercises_label} ({parsedSession.exercises.length})
-          </p>
-
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pb-2">
-            {parsedSession.exercises.map((exercise) => (
-              <div
-                key={exercise.id}
-                className="flex items-center gap-3 rounded-xl bg-surface border border-border px-3 py-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-sm text-foreground">{exercise.name}</p>
-                    {exercise.category && <CategoryBadge category={exercise.category} />}
-                  </div>
-                  <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
-                </div>
-              </div>
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pb-2">
+            {draftSessions.map((session, idx) => (
+              <SessionDraftCard
+                key={session.id}
+                session={session}
+                index={idx}
+                onUpdateDate={(date) => updateDraftDate(idx, date)}
+                onUpdateDuration={(mins) => updateDraftDuration(idx, mins)}
+                onUpdateExercise={(exIdx, patch) => updateDraftExercise(idx, exIdx, patch)}
+                onRemoveExercise={(exIdx) => removeDraftExercise(idx, exIdx)}
+                onAddExercise={() => addDraftExercise(idx)}
+                onRemoveSession={() => removeDraftSession(idx)}
+              />
             ))}
+            {draftSessions.length === 0 && (
+              <p className="text-secondary text-sm text-center py-8">{t.ai_import_discard}</p>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4 flex-shrink-0">
             <Button variant="ghost" onClick={() => setView('input')} className="flex-1 py-3.5">
               {t.ai_import_discard}
             </Button>
-            <Button onClick={handleSave} className="flex-1 py-3.5">
-              {t.ai_import_save}
+            <Button onClick={handleSave} disabled={!canSave} className="flex-1 py-3.5">
+              {saveLabel}
             </Button>
           </div>
         </div>
