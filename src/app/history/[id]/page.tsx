@@ -12,6 +12,7 @@ import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import { Button, HeadingXL, IconButton, ListLabel, Page, PageHeader } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
+import HistoryExerciseEditor from '@/components/HistoryExerciseEditor';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
@@ -92,12 +93,12 @@ export default function SessionDetailPage() {
     setIsAddModalOpen(false);
   }
 
-  function handleEditExercise(updated: Omit<Exercise, 'id'>) {
+  function handleExecutionEdit(patch: Partial<Exercise>) {
     if (!draft || !editingExercise) return;
-    const id = editingExercise.id;
+    const exId = editingExercise.id;
     setDraft({
       ...draft,
-      exercises: draft.exercises.map((ex) => (ex.id === id ? { ...ex, ...updated, id } : ex)),
+      exercises: draft.exercises.map((ex) => (ex.id === exId ? { ...ex, ...patch } : ex)),
     });
     setEditingExercise(null);
   }
@@ -377,13 +378,15 @@ export default function SessionDetailPage() {
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExercise}
       />
-      <AddExerciseModal
-        isOpen={editingExercise !== null}
-        onClose={() => setEditingExercise(null)}
-        onAdd={handleAddExercise}
-        onEdit={handleEditExercise}
-        initialValues={editingExercise ?? undefined}
-      />
+
+      {editingExercise && (
+        <HistoryExerciseEditor
+          isOpen={editingExercise !== null}
+          exercise={editingExercise}
+          onConfirm={handleExecutionEdit}
+          onCancel={() => setEditingExercise(null)}
+        />
+      )}
     </Page>
   );
 }

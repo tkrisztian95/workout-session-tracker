@@ -285,5 +285,29 @@
   "exercise_restore_aria": "Restore {name}",
   "exercise_mark_complete_aria": "Mark {name} as complete",
   "exercise_unmark_complete_aria": "Unmark {name} as complete",
-  "exercise_dismiss_aria": "Dismiss {name}"
+  "exercise_dismiss_aria": "Dismiss {name}",
+
+  "new_history_session_title": "New Session",
+  "new_history_session_date_label": "Date",
+  "new_history_session_duration_label": "Duration (min)",
+  "history_exercise_editor_target_label": "Target:",
+  "history_exercise_editor_weight_label": "kg",
+  "history_exercise_editor_reps_label": "Reps",
+  "history_exercise_editor_add_set": "Add Set",
+  "history_exercise_editor_remove_set": "Remove set",
+  "history_exercise_editor_duration_label": "Duration (seconds)",
+  "history_exercise_editor_confirm": "Done",
+
+  "new_history_session_type_title": "Session Type",
+  "new_history_session_from_plan": "From a plan",
+  "new_history_session_free": "Free session",
+  "new_history_plan_pick_title": "Choose Plan",
+  "new_history_day_pick_title": "Choose Day",
+  "new_history_no_plans": "No plans yet. Create a plan first.",
+  "new_history_no_days": "This plan has no training days.",
+  "new_history_session_type_subtitle": "How do you want to log this session?",
+  "new_history_session_from_plan_desc": "Associate with a plan and pre-fill exercises",
+  "new_history_session_free_desc": "Log exercises manually without a plan",
+  "new_history_exercises_label": "Exercises",
+  "new_history_optional_label": "optional"
 }

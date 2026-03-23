@@ -285,5 +285,29 @@
   "exercise_restore_aria": "{name} wiederherstellen",
   "exercise_mark_complete_aria": "{name} als erledigt markieren",
   "exercise_unmark_complete_aria": "{name} als nicht erledigt markieren",
-  "exercise_dismiss_aria": "{name} überspringen"
+  "exercise_dismiss_aria": "{name} überspringen",
+
+  "new_history_session_title": "Neue Einheit",
+  "new_history_session_date_label": "Datum",
+  "new_history_session_duration_label": "Dauer (Min.)",
+  "history_exercise_editor_target_label": "Ziel:",
+  "history_exercise_editor_weight_label": "kg",
+  "history_exercise_editor_reps_label": "Wdh.",
+  "history_exercise_editor_add_set": "Satz hinzufügen",
+  "history_exercise_editor_remove_set": "Satz entfernen",
+  "history_exercise_editor_duration_label": "Dauer (Sekunden)",
+  "history_exercise_editor_confirm": "Fertig",
+
+  "new_history_session_type_title": "Einheitstyp",
+  "new_history_session_from_plan": "Aus einem Plan",
+  "new_history_session_free": "Freie Einheit",
+  "new_history_plan_pick_title": "Plan auswählen",
+  "new_history_day_pick_title": "Tag auswählen",
+  "new_history_no_plans": "Noch kein Plan vorhanden. Bitte zuerst einen Plan erstellen.",
+  "new_history_no_days": "Dieser Plan hat keine Trainingstage.",
+  "new_history_session_type_subtitle": "Wie möchtest du diese Einheit erfassen?",
+  "new_history_session_from_plan_desc": "Mit einem Plan verknüpfen und Übungen vorladen",
+  "new_history_session_free_desc": "Übungen manuell ohne Plan erfassen",
+  "new_history_exercises_label": "Übungen",
+  "new_history_optional_label": "optional"
 }
