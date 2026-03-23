@@ -2,31 +2,23 @@
 
 import { useState } from 'react';
 import { useParams, useRouter, notFound } from 'next/navigation';
-import Link from 'next/link';
-import { Check, ChevronLeft, Clock, Minus, X, Plus, Trash2, Pencil } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
+import { SessionDetailHeader } from '@/components/SessionDetailHeader';
+import { SessionExerciseItem } from '@/components/SessionExerciseItem';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
-import { useLocale, useTranslations } from '@/lib/locale-context';
-import CategoryBadge from '@/components/CategoryBadge';
-import SessionDateLabel from '@/components/SessionDateLabel';
-import { Button, HeadingXL, IconButton, ListLabel, Page, PageHeader } from '@/components/ui';
+import { useTranslations } from '@/lib/locale-context';
+import { Button, HeadingXL, ListLabel, Page, PageHeader } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import HistoryExerciseEditor from '@/components/HistoryExerciseEditor';
-import { formatExerciseDetail } from '@/lib/sessionUtils';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
 }
 
-function parseNum(value: string): number | undefined {
-  const n = Number(value);
-  return isNaN(n) || value === '' ? undefined : n;
-}
-
 export default function SessionDetailPage() {
   const t = useTranslations();
-  const { locale } = useLocale();
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
 
@@ -79,6 +71,14 @@ export default function SessionDetailPage() {
     setIsEditing(false);
   }
 
+  function handleDurationChange(mins: number) {
+    if (!draft) return;
+    setDraft({
+      ...draft,
+      completedAt: new Date(new Date(draft.startedAt).getTime() + mins * 60000).toISOString(),
+    });
+  }
+
   function removeDraftExercise(exerciseId: string) {
     if (!draft) return;
     setDraft({ ...draft, exercises: draft.exercises.filter((ex) => ex.id !== exerciseId) });
@@ -123,93 +123,20 @@ export default function SessionDetailPage() {
   return (
     <Page className="pb-20">
       <PageHeader>
-        <div className="flex items-center justify-between">
-          <Link
-            href="/history"
-            className="flex items-center gap-2 w-fit mb-2"
-            aria-label="Back to History"
-          >
-            <span className="w-9 h-9 rounded-full flex items-center justify-center bg-surface active:bg-elevated">
-              <ChevronLeft className="w-5 h-5 text-secondary" />
-            </span>
-            <span className="text-sm font-medium text-secondary">{t.history_title}</span>
-          </Link>
-          {!isEditing ? (
-            <button
-              onClick={handleEdit}
-              className="text-sm font-medium text-brand px-3 py-1.5 rounded-lg active:bg-surface"
-            >
-              {t.edit_label}
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCancel}
-                className="text-sm font-medium text-secondary px-3 py-1.5 rounded-lg active:bg-surface"
-              >
-                {t.cancel}
-              </button>
-              <button
-                onClick={handleSave}
-                className="text-sm font-medium text-brand px-3 py-1.5 rounded-lg active:bg-surface"
-              >
-                {t.save_label}
-              </button>
-            </div>
-          )}
-        </div>
-        <SessionDateLabel iso={session.completedAt} format="long" className="mt-3" />
-        <div className="flex items-center gap-2 mt-1">
-          <HeadingXL>{dayName ?? planName ?? t.free_session}</HeadingXL>
-          {isEditing && (
-            <IconButton
-              onClick={() => setShowDeleteConfirm(true)}
-              aria-label="Delete session"
-              className="flex-shrink-0"
-            >
-              <Trash2 className="w-4 h-4 text-muted" />
-            </IconButton>
-          )}
-        </div>
-        {planName && <p className="text-brand text-sm mt-1 font-medium">{planName}</p>}
-        <p className="text-muted text-sm mt-2">
-          {displaySession.exercises.length}{' '}
-          {displaySession.exercises.length !== 1 ? t.exercise_plural : t.exercise_singular}
-        </p>
-        <p className="text-muted text-sm mt-1 flex items-center gap-1.5">
-          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-          {t.session_started_at}{' '}
-          {new Date(displaySession.startedAt).toLocaleTimeString(locale, {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-          {' · '}
-          {isEditing && draft ? (
-            <>
-              <input
-                type="number"
-                min={1}
-                value={mins}
-                onChange={(e) => {
-                  const n = parseNum(e.target.value);
-                  if (n == null || n < 1) return;
-                  setDraft({
-                    ...draft,
-                    completedAt: new Date(
-                      new Date(draft.startedAt).getTime() + n * 60000,
-                    ).toISOString(),
-                  });
-                }}
-                className="w-14 rounded-md border border-border bg-base px-1.5 py-0.5 text-sm text-foreground text-center"
-              />{' '}
-              {t.min_label}
-            </>
-          ) : (
-            <>
-              {mins} {t.min_label}
-            </>
-          )}
-        </p>
+        <SessionDetailHeader
+          session={session}
+          displaySession={displaySession}
+          planName={planName}
+          dayName={dayName}
+          isEditing={isEditing}
+          draft={draft}
+          mins={mins}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          onDeleteRequest={() => setShowDeleteConfirm(true)}
+          onDurationChange={handleDurationChange}
+        />
       </PageHeader>
 
       <div className="flex-1 px-6 pb-6 space-y-3 overflow-y-auto">
@@ -218,120 +145,36 @@ export default function SessionDetailPage() {
         ) : (
           <>
             {[...displayCompleted, ...displayRemaining].map((exercise) => (
-              <div
+              <SessionExerciseItem
                 key={exercise.id}
-                className="flex items-center gap-3 rounded-xl bg-surface border border-border px-3 py-3"
-              >
-                <button
-                  onClick={
-                    isEditing
-                      ? () =>
-                          updateDraftExercise(exercise.id, {
-                            completed: !exercise.completed,
-                            dismissed: false,
-                          })
-                      : undefined
-                  }
-                  disabled={!isEditing}
-                  className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${
-                    exercise.completed ? 'bg-brand' : 'border-2 border-border-subtle'
-                  } ${isEditing ? 'cursor-pointer' : 'cursor-default'}`}
-                >
-                  {exercise.completed && (
-                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                  )}
-                </button>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p
-                      className={`font-medium text-sm ${exercise.completed ? 'text-foreground' : 'text-secondary'}`}
-                    >
-                      {exercise.name}
-                    </p>
-                    {exercise.category && <CategoryBadge category={exercise.category} />}
-                  </div>
-                  <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
-                  {exercise.loggedSets && exercise.loggedSets.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {exercise.loggedSets.map((s, i) => (
-                        <span
-                          key={i}
-                          className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
-                        >
-                          {s.weight}kg×{s.reps}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {isEditing && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <IconButton
-                      size="sm"
-                      onClick={() => setEditingExercise(exercise)}
-                      aria-label={`Edit ${exercise.name}`}
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-muted" />
-                    </IconButton>
-                    <button
-                      onClick={() => removeDraftExercise(exercise.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated"
-                    >
-                      <X className="w-4 h-4 text-dim" />
-                    </button>
-                  </div>
-                )}
-              </div>
+                exercise={exercise}
+                isEditing={isEditing}
+                onToggleComplete={() =>
+                  updateDraftExercise(exercise.id, {
+                    completed: !exercise.completed,
+                    dismissed: false,
+                  })
+                }
+                onEdit={() => setEditingExercise(exercise)}
+                onRemove={() => removeDraftExercise(exercise.id)}
+              />
             ))}
 
             {displaySkipped.length > 0 && (
               <>
                 <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
                 {displaySkipped.map((exercise) => (
-                  <div
+                  <SessionExerciseItem
                     key={exercise.id}
-                    className="flex items-center gap-3 rounded-xl bg-base border border-border px-3 py-3 opacity-50"
-                  >
-                    <button
-                      onClick={
-                        isEditing
-                          ? () =>
-                              updateDraftExercise(exercise.id, {
-                                dismissed: false,
-                                completed: false,
-                              })
-                          : undefined
-                      }
-                      disabled={!isEditing}
-                      className={`w-6 h-6 rounded-md border-2 border-border-subtle flex items-center justify-center flex-shrink-0 ${isEditing ? 'cursor-pointer' : 'cursor-default'}`}
-                    >
-                      <Minus className="w-3 h-3 text-dim" strokeWidth={2} />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-muted font-medium text-sm">{exercise.name}</p>
-                        {exercise.category && <CategoryBadge category={exercise.category} />}
-                      </div>
-                      <p className="text-dim text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
-                    </div>
-                    {isEditing && (
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <IconButton
-                          size="sm"
-                          onClick={() => setEditingExercise(exercise)}
-                          aria-label={`Edit ${exercise.name}`}
-                        >
-                          <Pencil className="w-3.5 h-3.5 text-muted" />
-                        </IconButton>
-                        <button
-                          onClick={() => removeDraftExercise(exercise.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-full active:bg-elevated"
-                        >
-                          <X className="w-4 h-4 text-dim" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                    exercise={exercise}
+                    isEditing={isEditing}
+                    dismissed
+                    onToggleComplete={() =>
+                      updateDraftExercise(exercise.id, { dismissed: false, completed: false })
+                    }
+                    onEdit={() => setEditingExercise(exercise)}
+                    onRemove={() => removeDraftExercise(exercise.id)}
+                  />
                 ))}
               </>
             )}
