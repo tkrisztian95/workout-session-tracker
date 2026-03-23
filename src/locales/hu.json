@@ -331,6 +331,11 @@
   "ai_import_submit": "Elemzés AI-jal",
   "ai_import_loading": "Elemzés folyamatban...",
   "ai_import_confirm_title": "Importálás ellenőrzése",
+  "ai_import_review_title": "Importálás ellenőrzése",
   "ai_import_save": "Edzés mentése",
-  "ai_import_discard": "Vissza"
+  "ai_import_save_n": "{{count}} edzés mentése",
+  "ai_import_discard": "Vissza",
+  "ai_import_add_exercise": "Gyakorlat hozzáadása",
+  "ai_import_remove_exercise": "Gyakorlat törlése",
+  "ai_import_remove_session": "Edzés törlése"
 }

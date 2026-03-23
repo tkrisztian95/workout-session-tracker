@@ -299,24 +299,30 @@ export async function suggestPlan(
 
 const IMPORT_SYSTEM_PROMPT = `You are a fitness assistant that parses free-form workout notes into structured JSON.
 
-Return a JSON object with this exact structure:
+The notes may describe one or multiple workout sessions. Return a JSON object with this exact structure:
 {
-  "date": string,        // ISO date "YYYY-MM-DD" inferred from the notes, or today's date if not mentioned
-  "durationMins": number, // total workout duration in minutes; infer from notes or use 60 as default
-  "exercises": Array<{
-    "name": string,      // exercise name in the requested language
-    "type": "sets-reps" | "sets-duration" | "duration",
-    "sets": number | undefined,
-    "reps": number | undefined,
-    "duration": number | undefined,  // seconds
-    "weightKg": number | undefined,
-    "category": string | undefined   // e.g. "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"
-  }>
+  "sessions": [
+    {
+      "date": string,        // ISO date "YYYY-MM-DD" inferred from the notes, or today's date if not mentioned
+      "durationMins": number, // total workout duration in minutes; infer from notes or use 60 as default
+      "exercises": Array<{
+        "name": string,      // exercise name in the requested language
+        "type": "sets-reps" | "sets-duration" | "duration",
+        "sets": number | undefined,
+        "reps": number | undefined,
+        "duration": number | undefined,  // seconds
+        "weightKg": number | undefined,
+        "category": string | undefined   // e.g. "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"
+      }>
+    }
+  ]
 }
 
 Rules:
+- If the notes describe multiple sessions (different dates, "Day 1 / Day 2", etc.), produce one element per session, ordered oldest to newest.
+- If the notes describe a single session, produce exactly one element in the array.
 - Translate ALL exercise names to the requested language. Use consistent, standard names.
-- If the same exercise appears under different names or spellings, merge into one entry.
+- If the same exercise appears under different names or spellings within a session, merge into one entry.
 - Prefer exact names from the "existing history names" list when there is a clear match.
 - Default type to "sets-reps" when ambiguous.
 - Do not invent exercises not present in the notes.
@@ -328,12 +334,12 @@ export type AiImportResult = {
   exercises: Omit<Exercise, 'id' | 'completed' | 'dismissed' | 'completedAt' | 'loggedSets'>[];
 };
 
-export async function importSession(
+export async function importSessions(
   notes: string,
   language: string,
   existingExerciseNames: string[],
   config: LlmConfig,
-): Promise<AiImportResult> {
+): Promise<AiImportResult[]> {
   const today = new Date().toISOString().slice(0, 10);
   const existingNamesText =
     existingExerciseNames.length > 0
@@ -389,20 +395,20 @@ ${notes}`;
     throw new Error('Unexpected response format from OpenAI API');
   }
 
-  let parsed: AiImportResult;
+  let parsed: { sessions: AiImportResult[] };
   try {
     parsed = JSON.parse(content);
   } catch {
     throw new Error('Failed to parse JSON response from OpenAI API');
   }
 
-  if (!parsed.date || !Array.isArray(parsed.exercises)) {
-    throw new Error('Response is missing required fields (date, exercises)');
+  if (!Array.isArray(parsed.sessions) || parsed.sessions.length === 0) {
+    throw new Error('Response is missing required fields (sessions array)');
   }
 
-  return {
-    date: parsed.date,
-    durationMins: typeof parsed.durationMins === 'number' ? parsed.durationMins : 60,
-    exercises: parsed.exercises,
-  };
+  return parsed.sessions.map((s) => ({
+    date: s.date,
+    durationMins: typeof s.durationMins === 'number' ? s.durationMins : 60,
+    exercises: s.exercises,
+  }));
 }
