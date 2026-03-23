@@ -1,22 +1,15 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Link from 'next/link';
-import { ChevronRight, Clock, Plus } from 'lucide-react';
+import { Clock, Plus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import ActivityTiles from '@/components/ActivityTiles';
 import NewHistorySessionSheet from '@/components/NewHistorySessionSheet';
+import { WorkoutHistoryDayGroup } from '@/components/WorkoutHistoryCard';
 import { getSessions, getPlans } from '@/lib/storage';
-import { RATING_EMOJIS } from '@/lib/sessionUtils';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
-import CategoryBadge from '@/components/CategoryBadge';
-import SessionDateLabel from '@/components/SessionDateLabel';
 import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
-
-function durationMinutes(startedAt: string, completedAt: string): number {
-  return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
-}
 
 function loadSessions(): WorkoutSession[] {
   return getSessions()
@@ -55,6 +48,20 @@ export default function HistoryPage() {
     return acc;
   }, {});
 
+  const grouped: { date: string; sessions: WorkoutSession[] }[] = [];
+  for (const session of sessions) {
+    const date = session.completedAt.slice(0, 10);
+    const last = grouped[grouped.length - 1];
+    if (last && last.date === date) {
+      last.sessions.push(session);
+    } else {
+      grouped.push({ date, sessions: [session] });
+    }
+  }
+  for (const group of grouped) {
+    group.sessions.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  }
+
   return (
     <Page className="pb-20">
       <PageHeader>
@@ -82,74 +89,15 @@ export default function HistoryPage() {
             subtitle={t.history_no_sessions_subtitle}
           />
         ) : (
-          (() => {
-            const grouped: { date: string; sessions: typeof sessions }[] = [];
-            for (const session of sessions) {
-              const date = session.completedAt.slice(0, 10);
-              const last = grouped[grouped.length - 1];
-              if (last && last.date === date) {
-                last.sessions.push(session);
-              } else {
-                grouped.push({ date, sessions: [session] });
-              }
-            }
-            return grouped.map(({ date, sessions: daySessions }) => (
-              <div key={date} className="mb-6">
-                <SessionDateLabel iso={daySessions[0].completedAt} className="mb-3" />
-                <div className="space-y-3">
-                  {daySessions.map((session) => {
-                    const planName = session.planId ? planMap[session.planId]?.name : undefined;
-                    const exerciseCount = session.exercises.length;
-                    const mins = durationMinutes(session.startedAt, session.completedAt);
-                    const label = planName ?? t.free_session;
-                    const isNew = session.id === newSessionId;
-                    const categories = [
-                      ...new Set(
-                        session.exercises
-                          .map((e) => e.category)
-                          .filter((c): c is string => Boolean(c)),
-                      ),
-                    ];
-                    return (
-                      <Link
-                        key={session.id}
-                        href={`/history/${session.id}`}
-                        className={`rounded-2xl bg-surface border border-border flex items-center justify-between px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150 ${isNew ? 'animate-flash-success' : ''}`}
-                      >
-                        <div className="text-left min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-foreground font-semibold text-base truncate">
-                              {label}
-                            </p>
-                            {session.rating != null && (
-                              <span className="text-base leading-none">
-                                {RATING_EMOJIS[session.rating - 1]}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-dim text-xs mt-1">
-                            {exerciseCount}{' '}
-                            {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular} · {mins}{' '}
-                            {t.min_label}
-                          </p>
-                          {categories.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1.5">
-                              {categories.map((cat) => (
-                                <CategoryBadge key={cat} category={cat} />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <span className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0">
-                          <ChevronRight className="w-4 h-4 text-muted" />
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ));
-          })()
+          grouped.map(({ date, sessions: daySessions }) => (
+            <WorkoutHistoryDayGroup
+              key={date}
+              date={date}
+              sessions={daySessions}
+              planMap={planMap}
+              newSessionId={newSessionId}
+            />
+          ))
         )}
       </div>
 
