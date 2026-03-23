@@ -56,7 +56,7 @@ The system SHALL navigate to the session detail view when the user taps a tile t
 #### Scenario: Tap on day with multiple sessions
 
 - **WHEN** user taps a tile with multiple sessions
-- **THEN** the app navigates to the history screen filtered to that date, or to the most recent session for that day
+- **THEN** the app navigates to `/history?date=YYYY-MM-DD` where `YYYY-MM-DD` is the ISO date of the tapped tile
 
 #### Scenario: Tap on rest day tile is no-op
 

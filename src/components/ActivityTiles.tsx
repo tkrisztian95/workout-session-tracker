@@ -42,7 +42,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
     if (sessions.length === 1) {
       router.push(`/history/${sessions[0]}`);
     } else {
-      router.push('/history');
+      router.push(`/history?date=${iso}`);
     }
   };
 
