@@ -11,9 +11,9 @@ import {
   Plus,
   X,
 } from 'lucide-react';
-import { BottomSheet, Button, FieldLabel } from '@/components/ui';
+import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
-import HistoryExerciseEditor from '@/components/HistoryExerciseEditor';
+import { HistoryExerciseEditorContent, formatTarget } from '@/components/HistoryExerciseEditor';
 import CategoryBadge from '@/components/CategoryBadge';
 import { getPlans, saveSession } from '@/lib/storage';
 import type { Exercise, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
@@ -52,7 +52,7 @@ function planExerciseToExercise(pe: PlanExercise): Exercise {
 
 function StepDots({ current, total }: { current: number; total: number }) {
   return (
-    <div className="flex items-center justify-center gap-1.5 mb-5">
+    <div className="flex items-center justify-center gap-1.5">
       {Array.from({ length: total }).map((_, i) => (
         <span
           key={i}
@@ -70,30 +70,29 @@ function StepDots({ current, total }: { current: number; total: number }) {
 }
 
 function StepHeader({
-  title,
   onBack,
   stepIndex,
   totalSteps,
 }: {
-  title: string;
   onBack: () => void;
   stepIndex: number;
   totalSteps: number;
 }) {
   return (
-    <>
-      <div className="flex items-center gap-3 mb-1">
-        <button
-          onClick={onBack}
-          aria-label="Back"
-          className="w-9 h-9 rounded-full flex items-center justify-center bg-elevated active:bg-border transition-colors duration-150 flex-shrink-0 cursor-pointer"
-        >
-          <ChevronLeft className="w-4 h-4 text-secondary" />
-        </button>
-        <p className="font-semibold text-foreground text-lg">{title}</p>
+    <div className="flex items-center mb-5">
+      <button
+        onClick={onBack}
+        aria-label="Back"
+        className="w-9 h-9 rounded-full flex items-center justify-center bg-elevated active:bg-border transition-colors duration-150 flex-shrink-0 cursor-pointer"
+      >
+        <ChevronLeft className="w-4 h-4 text-secondary" />
+      </button>
+      <div className="flex-1 flex justify-center">
+        <StepDots current={stepIndex} total={totalSteps} />
       </div>
-      <StepDots current={stepIndex} total={totalSteps} />
-    </>
+      {/* Spacer matches back button width so dots are truly centered */}
+      <div className="w-9 flex-shrink-0" />
+    </div>
   );
 }
 
@@ -202,15 +201,29 @@ export default function NewHistorySessionSheet({
   const editorExercise = pendingExercise ?? editingExercise;
   const selectedDay = selectedPlan?.days.find((d) => d.id === selectedDayId);
 
+  const stepTitle = editorExercise
+    ? editorExercise.name
+    : step === 'plan-pick'
+      ? t.new_history_plan_pick_title
+      : step === 'day-pick'
+        ? t.new_history_day_pick_title
+        : step === 'form'
+          ? t.new_history_session_title
+          : t.new_history_session_type_title;
+
+  const stepSubtitle = editorExercise ? (formatTarget(editorExercise) ?? undefined) : undefined;
+
   return (
     <>
-      <BottomSheet isOpen={isOpen} onClose={handleClose}>
+      <ModalSheet
+        isOpen={isOpen}
+        onClose={editorExercise ? handleExecutionCancel : handleClose}
+        title={stepTitle}
+        subtitle={stepSubtitle}
+      >
         {/* ── Step: type-select ─────────────────────────────────────────────── */}
         {step === 'type-select' && (
-          <div>
-            <p className="font-semibold text-foreground text-xl mb-1">
-              {t.new_history_session_type_title}
-            </p>
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <p className="text-secondary text-sm mb-5">{t.new_history_session_type_subtitle}</p>
 
             <div className="space-y-3">
@@ -254,13 +267,6 @@ export default function NewHistorySessionSheet({
                 <ChevronRight className="w-4 h-4 text-muted flex-shrink-0" />
               </button>
             </div>
-
-            <button
-              onClick={handleClose}
-              className="w-full mt-4 py-3 text-sm font-medium text-secondary cursor-pointer active:text-foreground transition-colors duration-150"
-            >
-              {t.cancel}
-            </button>
           </div>
         )}
 
@@ -295,146 +301,153 @@ export default function NewHistorySessionSheet({
 
         {/* ── Step: form ────────────────────────────────────────────────────── */}
         {step === 'form' && (
-          <>
-            <StepHeader
-              title={t.new_history_session_title}
-              onBack={() => {
-                setExercises([]);
-                setStep(isPlanFlow ? 'day-pick' : 'type-select');
-              }}
-              stepIndex={stepIndex}
-              totalSteps={totalSteps}
-            />
-
-            {/* Plan context pill */}
-            {selectedPlan && selectedDay && (
-              <div className="flex items-center gap-2 bg-brand/8 rounded-xl px-3 py-2 mb-4">
-                <Dumbbell className="w-3.5 h-3.5 text-brand flex-shrink-0" />
-                <p className="text-brand text-xs font-medium truncate">
-                  {selectedPlan.name} · {selectedDay.name}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-3 mb-5">
-              <div>
-                <FieldLabel htmlFor="session-date">{t.new_history_session_date_label}</FieldLabel>
-                <input
-                  id="session-date"
-                  type="date"
-                  value={date}
-                  max={todayIso()}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground"
+          <div className="flex-1 min-h-0 flex flex-col">
+            {editorExercise ? (
+              /* Inline editor — no second modal stacking on top */
+              <HistoryExerciseEditorContent
+                key={editorExercise.id}
+                exercise={editorExercise}
+                onConfirm={handleExecutionConfirm}
+                onCancel={handleExecutionCancel}
+              />
+            ) : (
+              <>
+                <StepHeader
+                  onBack={() => {
+                    setExercises([]);
+                    setStep(isPlanFlow ? 'day-pick' : 'type-select');
+                  }}
+                  stepIndex={stepIndex}
+                  totalSteps={totalSteps}
                 />
-              </div>
 
-              <div>
-                <FieldLabel htmlFor="session-duration">
-                  {t.new_history_session_duration_label}
-                </FieldLabel>
-                <input
-                  id="session-duration"
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  placeholder="60"
-                  value={durationMins}
-                  onChange={(e) => setDurationMins(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground"
-                />
-              </div>
-            </div>
-
-            {/* Exercise list */}
-            <div className="space-y-2">
-              {exercises.length > 0 && (
-                <p className="text-xs font-medium text-secondary uppercase tracking-wide mb-1">
-                  {t.new_history_exercises_label} ({exercises.length})
-                </p>
-              )}
-              {exercises.map((exercise) => (
-                <div
-                  key={exercise.id}
-                  className="flex items-center gap-3 rounded-xl bg-surface border border-border px-3 py-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-sm text-foreground">{exercise.name}</p>
-                      {exercise.category && <CategoryBadge category={exercise.category} />}
-                    </div>
-                    <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
-                    {exercise.loggedSets && exercise.loggedSets.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {exercise.loggedSets.map((s, i) => (
-                          <span
-                            key={i}
-                            className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
-                          >
-                            {s.weight}kg×{s.reps}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                {/* Plan context pill */}
+                {selectedPlan && selectedDay && (
+                  <div className="flex items-center gap-2 bg-brand/8 rounded-xl px-3 py-2 mb-4">
+                    <Dumbbell className="w-3.5 h-3.5 text-brand flex-shrink-0" />
+                    <p className="text-brand text-xs font-medium truncate">
+                      {selectedPlan.name} · {selectedDay.name}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <button
-                      onClick={() => setEditingExercise(exercise)}
-                      aria-label={`Edit ${exercise.name}`}
-                      className="w-10 h-10 flex items-center justify-center rounded-full active:bg-elevated cursor-pointer"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-muted" />
-                    </button>
-                    <button
-                      onClick={() => removeExercise(exercise.id)}
-                      aria-label={`Remove ${exercise.name}`}
-                      className="w-10 h-10 flex items-center justify-center rounded-full active:bg-elevated cursor-pointer"
-                    >
-                      <X className="w-4 h-4 text-dim" />
-                    </button>
+                )}
+
+                <div className="space-y-3 mb-5 flex-shrink-0">
+                  <div>
+                    <FieldLabel htmlFor="session-date">
+                      {t.new_history_session_date_label}
+                    </FieldLabel>
+                    <input
+                      id="session-date"
+                      type="date"
+                      value={date}
+                      max={todayIso()}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground"
+                    />
+                  </div>
+
+                  <div>
+                    <FieldLabel htmlFor="session-duration">
+                      {t.new_history_session_duration_label}
+                    </FieldLabel>
+                    <input
+                      id="session-duration"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      placeholder="60"
+                      value={durationMins}
+                      onChange={(e) => setDurationMins(e.target.value)}
+                      className="w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground"
+                    />
                   </div>
                 </div>
-              ))}
 
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer pt-1 active:opacity-70 transition-opacity duration-150"
-              >
-                <Plus className="w-4 h-4" />
-                {t.add_exercise_title}
-              </button>
-            </div>
+                {/* Exercise list — only this section scrolls */}
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pb-2">
+                  {exercises.length > 0 && (
+                    <p className="text-xs font-medium text-secondary uppercase tracking-wide mb-1">
+                      {t.new_history_exercises_label} ({exercises.length})
+                    </p>
+                  )}
+                  {exercises.map((exercise) => (
+                    <div
+                      key={exercise.id}
+                      className="flex items-center gap-3 rounded-xl bg-surface border border-border px-3 py-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-sm text-foreground">{exercise.name}</p>
+                          {exercise.category && <CategoryBadge category={exercise.category} />}
+                        </div>
+                        <p className="text-muted text-xs mt-0.5">
+                          {formatExerciseDetail(exercise)}
+                        </p>
+                        {exercise.loggedSets && exercise.loggedSets.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {exercise.loggedSets.map((s, i) => (
+                              <span
+                                key={i}
+                                className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
+                              >
+                                {s.weight}kg×{s.reps}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button
+                          onClick={() => setEditingExercise(exercise)}
+                          aria-label={`Edit ${exercise.name}`}
+                          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-elevated cursor-pointer"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-muted" />
+                        </button>
+                        <button
+                          onClick={() => removeExercise(exercise.id)}
+                          aria-label={`Remove ${exercise.name}`}
+                          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-elevated cursor-pointer"
+                        >
+                          <X className="w-4 h-4 text-dim" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
 
-            <div className="flex gap-3 mt-6">
-              <Button variant="ghost" onClick={handleClose} className="flex-1 py-3.5">
-                {t.cancel}
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={exercises.length === 0}
-                className="flex-1 py-3.5"
-              >
-                {t.save_label}
-              </Button>
-            </div>
-          </>
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer pt-1 active:opacity-70 transition-opacity duration-150"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t.add_exercise_title}
+                  </button>
+                </div>
+
+                {/* CTA buttons — always visible at the bottom */}
+                <div className="flex gap-3 pt-4 flex-shrink-0">
+                  <Button variant="ghost" onClick={handleClose} className="flex-1 py-3.5">
+                    {t.cancel}
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={exercises.length === 0}
+                    className="flex-1 py-3.5"
+                  >
+                    {t.save_label}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         )}
-      </BottomSheet>
+      </ModalSheet>
 
       <AddExerciseModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExercise}
       />
-
-      {editorExercise && (
-        <HistoryExerciseEditor
-          isOpen={editorExercise !== null}
-          exercise={editorExercise}
-          onConfirm={handleExecutionConfirm}
-          onCancel={handleExecutionCancel}
-        />
-      )}
     </>
   );
 }
@@ -459,13 +472,8 @@ function PlanPickStep({
   const [plans] = useState<WorkoutPlan[]>(() => getPlans());
 
   return (
-    <div>
-      <StepHeader
-        title={t.new_history_plan_pick_title}
-        onBack={onBack}
-        stepIndex={stepIndex}
-        totalSteps={totalSteps}
-      />
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <StepHeader onBack={onBack} stepIndex={stepIndex} totalSteps={totalSteps} />
 
       {plans.length === 0 ? (
         <div className="py-6 text-center">
@@ -523,13 +531,8 @@ function DayPickStep({
   t: TranslationProxy;
 }) {
   return (
-    <div>
-      <StepHeader
-        title={t.new_history_day_pick_title}
-        onBack={onBack}
-        stepIndex={stepIndex}
-        totalSteps={totalSteps}
-      />
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      <StepHeader onBack={onBack} stepIndex={stepIndex} totalSteps={totalSteps} />
 
       <div className="flex items-center gap-2 bg-brand/8 rounded-xl px-3 py-2 mb-4">
         <Dumbbell className="w-3.5 h-3.5 text-brand flex-shrink-0" />

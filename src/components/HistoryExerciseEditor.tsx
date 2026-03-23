@@ -2,18 +2,21 @@
 
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
-import { BottomSheet, Button, FieldLabel } from '@/components/ui';
+import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 
-interface HistoryExerciseEditorProps {
-  isOpen: boolean;
+interface EditorContentProps {
   exercise: Exercise;
   onConfirm: (patch: Partial<Exercise>) => void;
   onCancel: () => void;
 }
 
-function formatTarget(exercise: Exercise): string | null {
+interface HistoryExerciseEditorProps extends EditorContentProps {
+  isOpen: boolean;
+}
+
+export function formatTarget(exercise: Exercise): string | null {
   if (exercise.type === 'sets-reps' && exercise.sets && exercise.reps) {
     return `${exercise.sets}×${exercise.reps}`;
   }
@@ -26,12 +29,12 @@ function formatTarget(exercise: Exercise): string | null {
   return null;
 }
 
-export default function HistoryExerciseEditor({
-  isOpen,
+/** Renders editor UI only — no modal wrapper. Use inline inside an existing sheet. */
+export function HistoryExerciseEditorContent({
   exercise,
   onConfirm,
   onCancel,
-}: HistoryExerciseEditorProps) {
+}: EditorContentProps) {
   const t = useTranslations();
 
   const [rows, setRows] = useState<{ weight: string; reps: string }[]>(() => {
@@ -76,24 +79,10 @@ export default function HistoryExerciseEditor({
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));
   }
 
-  const target = formatTarget(exercise);
-
   return (
-    <BottomSheet isOpen={isOpen} onClose={onCancel}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <div className="min-w-0">
-          <p className="font-semibold text-foreground text-base leading-tight">{exercise.name}</p>
-          {target && (
-            <p className="text-xs text-secondary mt-0.5">
-              {t.history_exercise_editor_target_label} {target}
-            </p>
-          )}
-        </div>
-      </div>
-
+    <div className="flex-1 min-h-0 flex flex-col">
       {exercise.type === 'sets-reps' ? (
-        <div className="space-y-1">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-1">
           {/* Column headers */}
           <div className="flex items-center gap-2 px-1 mb-1">
             <span className="w-6 flex-shrink-0" />
@@ -174,7 +163,7 @@ export default function HistoryExerciseEditor({
         </div>
       )}
 
-      <div className="flex gap-3 mt-6">
+      <div className="flex gap-3 mt-6 flex-shrink-0">
         <Button variant="ghost" onClick={onCancel} className="flex-1 py-3.5 cursor-pointer">
           {t.cancel}
         </Button>
@@ -182,6 +171,27 @@ export default function HistoryExerciseEditor({
           {t.history_exercise_editor_confirm}
         </Button>
       </div>
-    </BottomSheet>
+    </div>
+  );
+}
+
+/** Standalone modal variant — wraps HistoryExerciseEditorContent in a ModalSheet. */
+export default function HistoryExerciseEditor({
+  isOpen,
+  exercise,
+  onConfirm,
+  onCancel,
+}: HistoryExerciseEditorProps) {
+  const t = useTranslations();
+  const target = formatTarget(exercise);
+  return (
+    <ModalSheet
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={exercise.name}
+      subtitle={target ? `${t.history_exercise_editor_target_label} ${target}` : undefined}
+    >
+      <HistoryExerciseEditorContent exercise={exercise} onConfirm={onConfirm} onCancel={onCancel} />
+    </ModalSheet>
   );
 }
