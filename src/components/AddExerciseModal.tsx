@@ -1,21 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import { useTranslations } from '@/lib/locale-context';
 import { WGER_CATEGORIES } from '@/lib/wgerClient';
-import {
-  BottomSheet,
-  Button,
-  FieldLabel,
-  HeadingXL,
-  IconButton,
-  Input,
-  Select,
-} from '@/components/ui';
+import { ModalSheet, Button, FieldLabel, Input, Select } from '@/components/ui';
 
 interface Props {
   isOpen: boolean;
@@ -107,23 +98,12 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   };
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={handleClose}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <HeadingXL as="h2" className="text-2xl">
-          {isEditMode ? 'Edit exercise' : t.add_exercise_title}
-        </HeadingXL>
-        <IconButton
-          size="sm"
-          onClick={handleClose}
-          aria-label={t.close}
-          className="bg-elevated hover:bg-border-subtle"
-        >
-          <X className="w-4 h-4 text-secondary" />
-        </IconButton>
-      </div>
-
-      <div className="space-y-5">
+    <ModalSheet
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? 'Edit exercise' : t.add_exercise_title}
+    >
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-5">
         {/* Name */}
         <div>
           <div className="relative">
@@ -280,6 +260,6 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
           {isEditMode ? 'Save changes' : t.add_exercise_title}
         </Button>
       </div>
-    </BottomSheet>
+    </ModalSheet>
   );
 }

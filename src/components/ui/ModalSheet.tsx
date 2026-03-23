@@ -86,13 +86,17 @@ export function ModalSheet({
 
       {/* Sheet */}
       <div
-        className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-surface rounded-t-3xl px-6 pt-6 pb-10 max-h-[90dvh] overflow-y-auto transition-transform duration-300 ease-out ${
+        className={`fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-surface rounded-t-3xl max-h-[90dvh] flex flex-col overflow-hidden transition-transform duration-300 ease-out ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {header}
-        {children}
+        {/* Header — always visible, never scrolls */}
+        <div className="px-6 pt-6 flex-shrink-0">{header}</div>
+        {/* Body — children manage their own scroll */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
+          {children}
+        </div>
       </div>
     </>
   );

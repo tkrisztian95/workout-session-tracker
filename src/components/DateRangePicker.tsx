@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { BottomSheet, Button } from '@/components/ui';
+import { ModalSheet, Button } from '@/components/ui';
 import type { WorkoutSession } from '@/lib/types';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 
@@ -263,10 +263,8 @@ export default function DateRangePicker({
       : `${fmtShort(from)} – ${fmtShort(to)}`;
 
   return (
-    <BottomSheet isOpen={isOpen} onClose={onClose}>
-      <div className="pb-2">
-        <h2 className="text-base font-semibold text-foreground mb-4">{t.date_filter_title}</h2>
-
+    <ModalSheet isOpen={isOpen} onClose={onClose} title={t.date_filter_title}>
+      <div className="flex-1 min-h-0 overflow-y-auto pb-2">
         {/* From / To tab selector */}
         <div className="flex rounded-xl bg-elevated p-1 mb-5">
           {(['from', 'to'] as const).map((tab_key) => {
@@ -356,6 +354,6 @@ export default function DateRangePicker({
           </Button>
         </div>
       </div>
-    </BottomSheet>
+    </ModalSheet>
   );
 }
