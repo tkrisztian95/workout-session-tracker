@@ -319,5 +319,18 @@
   "new_history_session_from_plan_desc": "Edzéstervhez kapcsolva, gyakorlatok előtöltésével",
   "new_history_session_free_desc": "Gyakorlatok manuális rögzítése terv nélkül",
   "new_history_exercises_label": "Gyakorlatok",
-  "new_history_optional_label": "opcionális"
+  "new_history_optional_label": "opcionális",
+
+  "new_history_session_ai_import": "Importálás jegyzetekből (AI)",
+  "new_history_session_ai_import_desc": "Az AI kielemzi az edzésjegyzeteidet",
+
+  "ai_import_title": "Importálás jegyzetekből",
+  "ai_import_subtitle": "Illeszd be az edzésjegyzeteidet, és az AI kinyeri a gyakorlatokat, sorozatokat és súlyokat.",
+  "ai_import_notes_label": "Edzésjegyzetek",
+  "ai_import_placeholder": "pl. Fekvenyomás 3x8 80kg, Guggolás 4x6 100kg...",
+  "ai_import_submit": "Elemzés AI-jal",
+  "ai_import_loading": "Elemzés folyamatban...",
+  "ai_import_confirm_title": "Importálás ellenőrzése",
+  "ai_import_save": "Edzés mentése",
+  "ai_import_discard": "Vissza"
 }

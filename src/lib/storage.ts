@@ -228,6 +228,24 @@ export function updateSession(session: WorkoutSession): void {
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }
 
+export function getRecentExerciseNames(): string[] {
+  const sessions = getSessions();
+  const sorted = [...sessions].sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const session of sorted) {
+    for (const exercise of session.exercises) {
+      const name = exercise.name.trim();
+      if (name && !seen.has(name)) {
+        seen.add(name);
+        names.push(name);
+        if (names.length >= 100) return names;
+      }
+    }
+  }
+  return names;
+}
+
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
 export type Theme = 'light' | 'dark' | 'system';
