@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Clock } from 'lucide-react';
+import { ChevronRight, Clock, Plus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import ActivityTiles from '@/components/ActivityTiles';
+import NewHistorySessionSheet from '@/components/NewHistorySessionSheet';
 import { getSessions, getPlans } from '@/lib/storage';
 import { RATING_EMOJIS } from '@/lib/sessionUtils';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
@@ -17,18 +18,34 @@ function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
 }
 
+function loadSessions(): WorkoutSession[] {
+  return getSessions()
+    .filter((s) => s.completedAt)
+    .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+}
+
 export default function HistoryPage() {
   const t = useTranslations();
-  const [sessions] = useState<WorkoutSession[]>(() =>
-    getSessions()
-      .filter((s) => s.completedAt)
-      .sort((a, b) => b.completedAt.localeCompare(a.completedAt)),
-  );
+  const [sessions, setSessions] = useState<WorkoutSession[]>(loadSessions);
 
   const [planMap] = useState<Record<string, WorkoutPlan>>(() => {
     const plans = getPlans();
     return Object.fromEntries(plans.map((p) => [p.id, p]));
   });
+
+  const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
+  const [newSessionId, setNewSessionId] = useState<string | null>(null);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleSessionSaved(sessionId: string) {
+    setSessions(loadSessions());
+    setIsNewSessionOpen(false);
+
+    // Clear any existing timer, then light up the card for 1.3s
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    setNewSessionId(sessionId);
+    flashTimerRef.current = setTimeout(() => setNewSessionId(null), 1300);
+  }
 
   const sessionsByDate = sessions.reduce<Record<string, string[]>>((acc, s) => {
     if (!s.completedAt) return acc;
@@ -41,7 +58,16 @@ export default function HistoryPage() {
   return (
     <Page className="pb-20">
       <PageHeader>
-        <HeadingXL>{t.history_title}</HeadingXL>
+        <div className="flex items-center justify-between">
+          <HeadingXL>{t.history_title}</HeadingXL>
+          <button
+            onClick={() => setIsNewSessionOpen(true)}
+            aria-label={t.new_history_session_title}
+            className="w-9 h-9 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
+          >
+            <Plus className="w-4 h-4 text-brand" />
+          </button>
+        </div>
       </PageHeader>
 
       <div className="px-6 pb-4">
@@ -76,6 +102,7 @@ export default function HistoryPage() {
                     const exerciseCount = session.exercises.length;
                     const mins = durationMinutes(session.startedAt, session.completedAt);
                     const label = planName ?? t.free_session;
+                    const isNew = session.id === newSessionId;
                     const categories = [
                       ...new Set(
                         session.exercises
@@ -87,7 +114,7 @@ export default function HistoryPage() {
                       <Link
                         key={session.id}
                         href={`/history/${session.id}`}
-                        className="rounded-2xl bg-surface border border-border flex items-center justify-between px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150"
+                        className={`rounded-2xl bg-surface border border-border flex items-center justify-between px-4 py-4 gap-3 active:scale-[0.98] transition-transform duration-150 ${isNew ? 'animate-flash-success' : ''}`}
                       >
                         <div className="text-left min-w-0">
                           <div className="flex items-center gap-2">
@@ -127,6 +154,12 @@ export default function HistoryPage() {
       </div>
 
       <BottomNav active="history" />
+
+      <NewHistorySessionSheet
+        isOpen={isNewSessionOpen}
+        onClose={() => setIsNewSessionOpen(false)}
+        onSaved={handleSessionSaved}
+      />
     </Page>
   );
 }

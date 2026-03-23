@@ -285,5 +285,29 @@
   "exercise_restore_aria": "{name} visszaállítása",
   "exercise_mark_complete_aria": "{name} befejezettnek jelölése",
   "exercise_unmark_complete_aria": "{name} befejezettség visszavonása",
-  "exercise_dismiss_aria": "{name} kihagyása"
+  "exercise_dismiss_aria": "{name} kihagyása",
+
+  "new_history_session_title": "Új edzés",
+  "new_history_session_date_label": "Dátum",
+  "new_history_session_duration_label": "Időtartam (perc)",
+  "history_exercise_editor_target_label": "Cél:",
+  "history_exercise_editor_weight_label": "kg",
+  "history_exercise_editor_reps_label": "Ism.",
+  "history_exercise_editor_add_set": "Sor hozzáadása",
+  "history_exercise_editor_remove_set": "Sor törlése",
+  "history_exercise_editor_duration_label": "Időtartam (mp)",
+  "history_exercise_editor_confirm": "Kész",
+
+  "new_history_session_type_title": "Edzés típusa",
+  "new_history_session_from_plan": "Edzéstervből",
+  "new_history_session_free": "Szabad edzés",
+  "new_history_plan_pick_title": "Terv választása",
+  "new_history_day_pick_title": "Nap választása",
+  "new_history_no_plans": "Még nincs edzésterv. Előbb hozz létre egyet.",
+  "new_history_no_days": "Ennek a tervnek nincs edzésnapja.",
+  "new_history_session_type_subtitle": "Hogyan szeretnéd rögzíteni az edzést?",
+  "new_history_session_from_plan_desc": "Edzéstervhez kapcsolva, gyakorlatok előtöltésével",
+  "new_history_session_free_desc": "Gyakorlatok manuális rögzítése terv nélkül",
+  "new_history_exercises_label": "Gyakorlatok",
+  "new_history_optional_label": "opcionális"
 }
