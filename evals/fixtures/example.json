@@ -1,0 +1,19 @@
+{
+  "description": "Simple push/pull session with weights",
+  "input": {
+    "notes": "Bench press 4x8 @80kg, Pull-ups 3x10, Squat 3x12 @100kg",
+    "language": "English",
+    "existingNames": []
+  },
+  "expected": [
+    {
+      "date": "2024-01-15",
+      "durationMins": 60,
+      "exercises": [
+        { "name": "Bench Press", "type": "sets-reps", "sets": 4, "reps": 8, "weightKg": 80 },
+        { "name": "Pull-ups", "type": "sets-reps", "sets": 3, "reps": 10 },
+        { "name": "Squat", "type": "sets-reps", "sets": 3, "reps": 12, "weightKg": 100 }
+      ]
+    }
+  ]
+}
