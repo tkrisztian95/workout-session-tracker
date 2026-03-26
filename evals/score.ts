@@ -1,4 +1,4 @@
-import type { AiImportResult } from '../src/lib/ai/import.ts';
+import type { AiImportResult } from '../src/lib/ai/import';
 
 export type ExpectedExercise = {
   name: string;
