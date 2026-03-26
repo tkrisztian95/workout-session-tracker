@@ -63,7 +63,17 @@ Guidelines:
 - weightKg: include whenever you can infer a reasonable starting weight from the user's history or their body metrics.
 - scalingNote: use for beginner modifications, equipment alternatives, or form cues when helpful.
 - category: one of "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio", or another standard muscle group.
-- omit id fields — they will be generated automatically.`;
+- scheduledWeeks: set for periodized programs with a clear end date (e.g. 8–12 week blocks); omit for open-ended plans.
+- sharedExercises: use only for exercises that appear identically on every training day (e.g. a daily mobility warmup or cooldown stretch). Leave the array empty when exercises differ by day.
+- Limit coreExercises to 4–6 per day. Move lower-priority work to optionalExercises or sharedExercises.
+- Omit any optional JSON field rather than setting it to null or undefined.
+- Omit id fields — they will be generated automatically.
+
+Avoid:
+- Training the same primary muscle group on consecutive days.
+- Suggesting weights more than 20% above the highest weight the user has logged for that exercise.
+- Including more than 6 core exercises in a single day.
+- Inventing exercises the user has never done when their history shows a clear preference for specific movements.`;
 
 function summariseSession(session: WorkoutSession): string {
   const date = session.completedAt.slice(0, 10);
@@ -167,33 +177,31 @@ export function buildPlanSuggestionPrompt(
       ? recentSessions.map(summariseSession).join('\n')
       : 'No completed sessions yet.';
 
-  let preferenceText = '';
-  if (preferences) {
-    const parts: string[] = [];
-    if (preferences.focus) parts.push(`focused on ${preferences.focus}`);
-    if (preferences.daysPerWeek) parts.push(`${preferences.daysPerWeek} days per week`);
-    if (preferences.goal) parts.push(`with the goal to ${preferences.goal.toLowerCase()}`);
-    if (parts.length > 0) {
-      preferenceText = ` Please create a plan ${parts.join(', ')}.`;
-    }
-  }
+  const goalParts: string[] = [];
+  if (preferences?.focus) goalParts.push(`Focus: ${preferences.focus}`);
+  if (preferences?.daysPerWeek)
+    goalParts.push(`Training days per week: ${preferences.daysPerWeek}`);
+  if (preferences?.goal) goalParts.push(`Goal: ${preferences.goal}`);
+
+  const goalSection =
+    goalParts.length > 0 ? `My goals for this plan:\n${goalParts.join('\n')}\n\n` : '';
 
   const languageInstruction = language
     ? `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${language}.`
     : '';
 
   const metricLines = [
-    sex ? `My biological sex: ${sex}.` : '',
-    age ? `My age: ${age} years.` : '',
-    heightCm ? `My height: ${heightCm} cm.` : '',
-    weightKg ? `My weight: ${weightKg} kg.` : '',
+    sex ? `Biological sex: ${sex}` : '',
+    age ? `Age: ${age} years` : '',
+    heightCm ? `Height: ${heightCm} cm` : '',
+    weightKg ? `Weight: ${weightKg} kg` : '',
   ]
     .filter(Boolean)
-    .join('\n');
+    .join(', ');
 
-  const metricsPreamble = metricLines ? `${metricLines}\n\n` : '';
+  const metricsPreamble = metricLines ? `About me: ${metricLines}.\n\n` : '';
 
-  return `${metricsPreamble}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${preferenceText}${languageInstruction}`;
+  return `${goalSection}${metricsPreamble}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${languageInstruction}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
@@ -321,15 +329,14 @@ The notes may describe one or multiple workout sessions. Return a JSON object wi
 }
 
 Rules:
-- If the notes describe multiple sessions (different dates, "Day 1 / Day 2", etc.), produce one element per session, ordered oldest to newest.
-- If the notes describe a single session, produce exactly one element in the array.
-- Translate ALL exercise names to the requested language. Use consistent, standard names.
-- If the same exercise appears under different names or spellings within a session, merge into one entry.
-- Prefer exact names from the "existing history names" list when there is a clear match.
-- Default type to "sets-reps" when ambiguous.
+- Multiple sessions: if the notes describe multiple sessions (different dates, "Day 1 / Day 2", etc.), produce one element per session, ordered oldest to newest. Otherwise produce exactly one element.
+- Exercise names: translate ALL exercise names to the requested language. Use consistent, standard names. If the same exercise appears under different names or spellings within a session, merge into one entry. Prefer exact names from the "existing history names" list when there is a clear match.
+- Type selection: default to "sets-reps" when ambiguous. Use "sets-duration" for timed sets (e.g. "3×30s planks"). Use "duration" for continuous cardio (e.g. "20 min run", "5km in 28min" → duration 1680).
 - Reps ranges (e.g. "8-12 reps"): use the lower bound.
-- Weight units: always output weightKg in kilograms. Convert lbs to kg (divide by 2.205, round to 1 decimal).
-- Ignore rest periods, warmup notes, and non-exercise annotations (e.g. "2 min rest", "foam rolling").
+- Weight units: always output weightKg in kilograms. Convert lbs to kg (divide by 2.205, round to 1 decimal place).
+- Supersets / circuits: treat each exercise individually. Assign the same set count to each exercise in the superset.
+- Missing information: omit any field you cannot determine from the notes (e.g. if weight is not mentioned, omit weightKg). Do not guess or default numeric fields.
+- Ignore rest periods, warmup notes, and non-exercise annotations (e.g. "2 min rest", "foam rolling", "stretched").
 - Do not invent exercises not present in the notes.
 - Return valid JSON only — no markdown, no explanation.`;
 
