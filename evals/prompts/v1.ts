@@ -1,7 +1,6 @@
-import type { LlmConfig, Exercise } from '../types';
-import { callOpenAI } from './client';
+export const description = 'Initial prompt';
 
-const SYSTEM_PROMPT = `You are a fitness assistant that parses free-form workout notes into structured JSON.
+export const prompt = `You are a fitness assistant that parses free-form workout notes into structured JSON.
 
 The notes may describe one or multiple workout sessions. Return a JSON object with this exact structure:
 {
@@ -33,48 +32,3 @@ Rules:
 - Ignore rest periods, warmup notes, and non-exercise annotations (e.g. "2 min rest", "foam rolling", "stretched").
 - Do not invent exercises not present in the notes.
 - Return valid JSON only — no markdown, no explanation.`;
-
-export type AiImportResult = {
-  date: string;
-  durationMins: number;
-  exercises: Omit<Exercise, 'id' | 'completed' | 'dismissed' | 'completedAt' | 'loggedSets'>[];
-};
-
-export async function importSessions(
-  notes: string,
-  language: string,
-  existingExerciseNames: string[],
-  config: LlmConfig,
-  systemPrompt = SYSTEM_PROMPT,
-): Promise<AiImportResult[]> {
-  const today = new Date().toISOString().slice(0, 10);
-  const existingNamesText =
-    existingExerciseNames.length > 0
-      ? `\n\nExisting exercise names from this user's history (prefer these when matching):\n${existingExerciseNames.join(', ')}`
-      : '';
-
-  const userMessage = `Today's date: ${today}
-Output language for exercise names: ${language}${existingNamesText}
-
-Workout notes to parse:
-${notes}`;
-
-  const content = await callOpenAI(config, systemPrompt, userMessage);
-
-  let parsed: { sessions: AiImportResult[] };
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    throw new Error('Failed to parse JSON response from OpenAI API');
-  }
-
-  if (!Array.isArray(parsed.sessions) || parsed.sessions.length === 0) {
-    throw new Error('Response is missing required fields (sessions array)');
-  }
-
-  return parsed.sessions.map((s) => ({
-    date: s.date,
-    durationMins: typeof s.durationMins === 'number' ? s.durationMins : 60,
-    exercises: s.exercises,
-  }));
-}

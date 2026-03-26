@@ -1,11 +1,12 @@
 import { readdirSync, readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { importSessions } from '../src/lib/ai/import.ts';
-import { scoreFixture, type FixtureResult, type ExpectedSession } from './score.ts';
+import { join, dirname, basename } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { importSessions } from '../src/lib/ai/import';
+import { scoreFixture, type FixtureResult, type ExpectedSession } from './score';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = join(__dirname, 'fixtures');
+const PROMPTS_DIR = join(__dirname, 'prompts');
 
 const apiKey = process.env.OPENAI_API_KEY;
 const model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
@@ -27,68 +28,129 @@ type Fixture = {
   expected: ExpectedSession[];
 };
 
-async function runFixture(file: string): Promise<FixtureResult> {
-  const raw = readFileSync(join(FIXTURES_DIR, file), 'utf-8');
-  const fixture: Fixture = JSON.parse(raw);
-  const { notes, language, existingNames } = fixture.input;
+type PromptVersion = {
+  name: string;
+  description: string;
+  prompt: string;
+};
 
-  console.log(`\nRunning: ${file}${fixture.description ? ` — ${fixture.description}` : ''}`);
+async function loadPrompts(): Promise<PromptVersion[]> {
+  const files = readdirSync(PROMPTS_DIR)
+    .filter((f) => f.endsWith('.ts'))
+    .sort();
+
+  const versions: PromptVersion[] = [];
+  for (const file of files) {
+    const url = pathToFileURL(join(PROMPTS_DIR, file)).href;
+    const mod = await import(url);
+    versions.push({
+      name: basename(file, '.ts'),
+      description: mod.description ?? '',
+      prompt: mod.prompt,
+    });
+  }
+  return versions;
+}
+
+async function runFixture(
+  file: string,
+  fixture: Fixture,
+  version: PromptVersion,
+): Promise<FixtureResult> {
+  const { notes, language, existingNames } = fixture.input;
 
   let actual;
   try {
-    actual = await importSessions(notes, language, existingNames, config);
+    actual = await importSessions(notes, language, existingNames, config, version.prompt);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { fixture: file, score: 0, sessions: [], errors: [`API error: ${msg}`] };
   }
 
-  const result = scoreFixture(file, fixture.expected, actual);
-
-  // Per-exercise detail
-  for (const session of result.sessions) {
-    for (const ex of session.exerciseResults) {
-      if (!ex.matched) continue;
-      const failing = Object.entries(ex.fields).filter(([, c]) => !c.pass);
-      if (failing.length > 0) {
-        console.log(`  "${ex.expectedName}" field mismatches:`);
-        for (const [field, check] of failing) {
-          console.log(
-            `    ${field}: expected ${JSON.stringify(check.expected)}, got ${JSON.stringify(check.actual)}`,
-          );
-        }
-      }
-    }
-  }
-
-  return result;
+  return scoreFixture(file, fixture.expected, actual);
 }
 
-const files = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith('.json'));
+const fixtureFiles = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith('.json'));
 
-if (files.length === 0) {
+if (fixtureFiles.length === 0) {
   console.log('No fixture files found in evals/fixtures/');
   process.exit(0);
 }
 
-const results: FixtureResult[] = [];
-for (const file of files) {
-  results.push(await runFixture(file));
+const fixtures = fixtureFiles.map((file) => ({
+  file,
+  data: JSON.parse(readFileSync(join(FIXTURES_DIR, file), 'utf-8')) as Fixture,
+}));
+
+const prompts = await loadPrompts();
+
+if (prompts.length === 0) {
+  console.log('No prompt files found in evals/prompts/');
+  process.exit(0);
 }
 
-// Summary
-console.log('\n' + '─'.repeat(60));
-console.log('RESULTS');
-console.log('─'.repeat(60));
+console.log(`Running ${fixtureFiles.length} fixture(s) × ${prompts.length} prompt version(s)\n`);
 
-for (const r of results) {
-  const filled = Math.round(r.score / 5);
-  const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
-  console.log(`${r.score.toString().padStart(3)}%  ${bar}  ${r.fixture}`);
-  for (const e of r.errors) {
-    console.log(`       ✗ ${e}`);
+// results[promptName][fixtureFile] = FixtureResult
+const results: Record<string, Record<string, FixtureResult>> = {};
+
+for (const version of prompts) {
+  results[version.name] = {};
+  console.log(`── ${version.name}${version.description ? `: ${version.description}` : ''}`);
+
+  for (const { file, data } of fixtures) {
+    process.stdout.write(`   ${file} ... `);
+    const result = await runFixture(file, data, version);
+    results[version.name][file] = result;
+    console.log(`${result.score}%`);
+
+    for (const session of result.sessions) {
+      for (const ex of session.exerciseResults) {
+        if (!ex.matched) continue;
+        const failing = Object.entries(ex.fields).filter(([, c]) => !c.pass);
+        if (failing.length > 0) {
+          console.log(`     "${ex.expectedName}" field mismatches:`);
+          for (const [field, check] of failing) {
+            console.log(
+              `       ${field}: expected ${JSON.stringify(check.expected)}, got ${JSON.stringify(check.actual)}`,
+            );
+          }
+        }
+      }
+    }
+    for (const e of result.errors) {
+      console.log(`     ✗ ${e}`);
+    }
   }
+  console.log();
 }
 
-const avg = Math.round(results.reduce((s, r) => s + r.score, 0) / results.length);
-console.log('─'.repeat(60));
-console.log(`Overall: ${avg}%  (${results.length} fixture${results.length !== 1 ? 's' : ''})`);
+// Comparison table
+const col = 12; // width per prompt column
+const labelWidth = Math.max(...fixtureFiles.map((f) => f.length), 'fixture'.length) + 2;
+const divider = '─'.repeat(labelWidth + prompts.length * col);
+
+console.log(divider);
+const header = 'fixture'.padEnd(labelWidth) + prompts.map((p) => p.name.padStart(col)).join('');
+console.log(header);
+console.log(divider);
+
+for (const file of fixtureFiles) {
+  const row =
+    file.padEnd(labelWidth) +
+    prompts.map((p) => `${results[p.name][file].score}%`.padStart(col)).join('');
+  console.log(row);
+}
+
+console.log(divider);
+
+const avgRow =
+  'average'.padEnd(labelWidth) +
+  prompts
+    .map((p) => {
+      const scores = fixtureFiles.map((f) => results[p.name][f].score);
+      const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      return `${avg}%`.padStart(col);
+    })
+    .join('');
+console.log(avgRow);
