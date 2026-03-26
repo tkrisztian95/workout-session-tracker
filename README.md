@@ -5,9 +5,10 @@ A mobile-first web app for tracking workout sessions and managing personalized f
 ## ✨ Features
 
 - 🏃 **Workout Sessions** — Start free-form or plan-based sessions with a real-time timer. Log sets, reps, and weights per exercise. Pause and resume anytime. Rate sessions on completion.
-- 📋 **Workout Plans** — Create multi-day plans with core and optional exercises. Schedule days by weekday and manage plan status (active/archived).
-- 📅 **Session History** — Browse completed sessions grouped by date, view an activity heatmap, and drill into session details.
-- 🤖 **AI Plan Suggestions** — Generate personalized workout plans using OpenAI based on your history and profile (requires your own API key).
+- 📋 **Workout Plans** — Create multi-day plans with core and optional exercises per day, plus shared exercises that apply to every day. Schedule days by weekday and manage plan status (active/archived).
+- 📅 **Session History** — Browse completed sessions grouped by date with an activity heatmap. Filter by date range, drill into session details, or manually log past sessions.
+- 📊 **Statistics** — Summary stats (total sessions, volume, average duration, weekly frequency). Exercise weight progression table with trend indicators and expandable line charts. Category distribution radar chart. Volume bar chart with time-range filters (today, week, month, 90 days, all time).
+- 🤖 **AI Plan Suggestions** — Generate personalized workout plans using OpenAI based on your history and profile. Review and import the suggestion before saving (requires your own API key).
 - ⚙️ **Profile & Settings** — Configure name, theme (light/dark/system), and language (English, Hungarian, German).
 
 ## 🛠 Tech Stack
