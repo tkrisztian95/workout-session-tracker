@@ -17,11 +17,9 @@ Return a JSON object with the following structure:
   "name": string,
   "scheduledWeeks": number | undefined,
   "days": Array<{
-    "id": string,
     "name": string,
     "weekdays": number[],
     "coreExercises": Array<{
-      "id": string,
       "name": string,
       "type": "sets-reps" | "sets-duration" | "duration",
       "sets": number | undefined,
@@ -33,7 +31,6 @@ Return a JSON object with the following structure:
       "category": string | undefined
     }>,
     "optionalExercises": Array<{
-      "id": string,
       "name": string,
       "type": "sets-reps" | "sets-duration" | "duration",
       "sets": number | undefined,
@@ -46,7 +43,6 @@ Return a JSON object with the following structure:
     }>
   }>,
   "sharedExercises": Array<{
-    "id": string,
     "name": string,
     "type": "sets-reps" | "sets-duration" | "duration",
     "sets": number | undefined,
@@ -56,12 +52,18 @@ Return a JSON object with the following structure:
     "role": "core" | "optional",
     "scalingNote": string | undefined,
     "category": string | undefined
-  }>,
-  "createdAt": string,
-  "updatedAt": string
+  }>
 }
 
-The "reasoning" field must always be included: 1–3 sentences explaining why this plan suits the user based on their history. Use crypto.randomUUID()-style UUIDs for all id fields. Set createdAt and updatedAt to the current ISO timestamp. weekdays uses 0=Sunday through 6=Saturday. Set weightKg when you know or can reasonably infer a starting weight for the exercise.`;
+Guidelines:
+- "reasoning": 1–3 sentences explaining why this plan suits the user based on their history and stated goals. Be specific — reference exercises, weights, or patterns you noticed.
+- weekdays: 0=Sunday through 6=Saturday. Schedule rest days between sessions that train the same muscle groups.
+- Apply progressive overload: if the user's history shows weights or volume, suggest a modest increase (5–10%) rather than repeating the same numbers.
+- Balance muscle groups across the week — avoid training the same primary muscles on consecutive days.
+- weightKg: include whenever you can infer a reasonable starting weight from the user's history or their body metrics.
+- scalingNote: use for beginner modifications, equipment alternatives, or form cues when helpful.
+- category: one of "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio", or another standard muscle group.
+- omit id fields — they will be generated automatically.`;
 
 function summariseSession(session: WorkoutSession): string {
   const date = session.completedAt.slice(0, 10);
@@ -325,6 +327,9 @@ Rules:
 - If the same exercise appears under different names or spellings within a session, merge into one entry.
 - Prefer exact names from the "existing history names" list when there is a clear match.
 - Default type to "sets-reps" when ambiguous.
+- Reps ranges (e.g. "8-12 reps"): use the lower bound.
+- Weight units: always output weightKg in kilograms. Convert lbs to kg (divide by 2.205, round to 1 decimal).
+- Ignore rest periods, warmup notes, and non-exercise annotations (e.g. "2 min rest", "foam rolling").
 - Do not invent exercises not present in the notes.
 - Return valid JSON only — no markdown, no explanation.`;
 
