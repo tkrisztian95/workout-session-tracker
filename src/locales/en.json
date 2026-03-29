@@ -69,6 +69,8 @@
   "profile_sex_male": "Male",
   "profile_sex_female": "Female",
   "profile_sex_not_specified": "Not specified",
+  "profile_export_label": "Export Data",
+  "profile_export_button": "Download as JSON",
   "profile_reset_label": "Clear Data & Reset",
   "profile_reset_warning": "This will permanently delete all your plans, sessions, and settings.",
   "profile_reset_confirm": "Yes, Reset Everything",

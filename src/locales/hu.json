@@ -69,6 +69,8 @@
   "profile_sex_male": "Férfi",
   "profile_sex_female": "Nő",
   "profile_sex_not_specified": "Nem megadott",
+  "profile_export_label": "Adatok exportálása",
+  "profile_export_button": "Letöltés JSON formátumban",
   "profile_reset_label": "Adatok törlése és visszaállítás",
   "profile_reset_warning": "Ez véglegesen törli az összes tervedet, edzésedet és beállításodat.",
   "profile_reset_confirm": "Igen, mindent törlök",

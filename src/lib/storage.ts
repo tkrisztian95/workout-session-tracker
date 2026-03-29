@@ -280,3 +280,35 @@ export function saveConsentAccepted(): void {
 export function saveConsentDeclined(): void {
   localStorage.setItem(KEYS.consentAccepted, 'false');
 }
+
+// ─── Data export ──────────────────────────────────────────────────────────────
+
+export interface ExportPayload {
+  schemaVersion: string;
+  exportedAt: string;
+  profile: {
+    name: string | null;
+    sex: Sex | null;
+    age: number | null;
+    heightCm: number | null;
+    weightKg: number | null;
+  };
+  plans: WorkoutPlan[];
+  sessions: WorkoutSession[];
+}
+
+export function exportAllData(): ExportPayload {
+  return {
+    schemaVersion: '1',
+    exportedAt: new Date().toISOString(),
+    profile: {
+      name: getUserName(),
+      sex: getSex(),
+      age: getAge(),
+      heightCm: getHeightCm(),
+      weightKg: getWeightKg(),
+    },
+    plans: getPlans(),
+    sessions: getSessions(),
+  };
+}
