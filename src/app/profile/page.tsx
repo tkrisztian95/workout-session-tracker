@@ -22,6 +22,7 @@ import LanguageCard from '@/components/LanguageCard';
 import ThemeCard from '@/components/ThemeCard';
 import AiConfigCard from '@/components/AiConfigCard';
 import { getInitials } from '@/utils';
+import ExportDataCard from '@/components/ExportDataCard';
 import DangerZoneCard from '@/components/DangerZoneCard';
 import AboutCard from '@/components/AboutCard';
 import type { Sex } from '@/lib/types';
@@ -322,6 +323,9 @@ function ProfilePageInner() {
 
         {/* ── AI Configuration ── */}
         <AiConfigCard open={openCard === 'ai'} onToggle={() => toggleCard('ai')} />
+
+        {/* ── Export data ── */}
+        <ExportDataCard />
 
         {/* ── Danger zone ── */}
         <DangerZoneCard />

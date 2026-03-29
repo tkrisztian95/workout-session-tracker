@@ -69,6 +69,8 @@
   "profile_sex_male": "Männlich",
   "profile_sex_female": "Weiblich",
   "profile_sex_not_specified": "Keine Angabe",
+  "profile_export_label": "Daten exportieren",
+  "profile_export_button": "Als JSON herunterladen",
   "profile_reset_label": "Daten löschen & Zurücksetzen",
   "profile_reset_warning": "Dies löscht dauerhaft alle deine Pläne, Trainings und Einstellungen.",
   "profile_reset_confirm": "Ja, alles zurücksetzen",
