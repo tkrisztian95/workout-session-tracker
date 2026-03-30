@@ -30,6 +30,7 @@ export function initPostHog() {
       return event;
     },
   });
+  posthog.register({ source: 'workout-sessions-tracker' });
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
