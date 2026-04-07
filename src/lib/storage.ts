@@ -1,4 +1,11 @@
-import type { WorkoutPlan, ActiveSession, WorkoutSession, LlmConfig, Sex } from './types';
+import type {
+  WorkoutPlan,
+  ActiveSession,
+  WorkoutSession,
+  LlmConfig,
+  Sex,
+  AchievementRecord,
+} from './types';
 import type { Locale } from './i18n';
 
 const KEYS = {
@@ -14,6 +21,8 @@ const KEYS = {
   userWeightKg: 'wst_user_weight_kg',
   theme: 'wst_theme',
   consentAccepted: 'wst_consent_accepted',
+  achievements: 'wst_achievements',
+  profileCreatedAt: 'wst_profile_created_at',
 } as const;
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -223,7 +232,7 @@ export function updateSession(session: WorkoutSession): void {
   const sessions = getSessions();
   const index = sessions.findIndex((s) => s.id === session.id);
   if (index >= 0) {
-    sessions[index] = session;
+    sessions[index] = { ...session, updatedAt: new Date().toISOString() };
   }
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }
@@ -259,6 +268,34 @@ export function getTheme(): Theme | null {
 
 export function saveTheme(theme: Theme): void {
   localStorage.setItem(KEYS.theme, theme);
+}
+
+// ─── Profile created at ───────────────────────────────────────────────────────
+
+export function getProfileCreatedAt(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(KEYS.profileCreatedAt);
+}
+
+export function saveProfileCreatedAt(date: string): void {
+  localStorage.setItem(KEYS.profileCreatedAt, date);
+}
+
+// ─── Achievements ─────────────────────────────────────────────────────────────
+
+export function getAchievements(): AchievementRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(KEYS.achievements);
+    if (!raw) return [];
+    return JSON.parse(raw) as AchievementRecord[];
+  } catch {
+    return [];
+  }
+}
+
+export function saveAchievements(records: AchievementRecord[]): void {
+  localStorage.setItem(KEYS.achievements, JSON.stringify(records));
 }
 
 // ─── Consent ──────────────────────────────────────────────────────────────────

@@ -1,8 +1,19 @@
 'use client';
 
 import { useState, useRef, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
-import { CalendarDays, Check, ChevronDown, Dumbbell, Pencil, Ruler, User } from 'lucide-react';
+import {
+  CalendarDays,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Dumbbell,
+  Pencil,
+  Ruler,
+  Trophy,
+  User,
+} from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { Page, PageHeader, HeadingXL } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
@@ -25,11 +36,17 @@ import { getInitials } from '@/utils';
 import ExportDataCard from '@/components/ExportDataCard';
 import DangerZoneCard from '@/components/DangerZoneCard';
 import AboutCard from '@/components/AboutCard';
+import { useAchievements } from '@/hooks/useAchievements';
+import { ACHIEVEMENTS } from '@/lib/achievementDefs';
 import type { Sex } from '@/lib/types';
 
 function ProfilePageInner() {
   const t = useTranslations();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { allRecords } = useAchievements();
+  const earnedCount = allRecords.length;
+  const totalCount = ACHIEVEMENTS.length;
   const expandAi = searchParams.get('expand') === 'ai';
   const [name, setName] = useState(() => getUserName() ?? '');
   const [nameSaved, setNameSaved] = useState(false);
@@ -313,6 +330,27 @@ function ProfilePageInner() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Achievements ── */}
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+          <button
+            onClick={() => router.push('/profile/achievements')}
+            className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <Trophy className="w-5 h-5 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-foreground text-sm font-semibold leading-tight">
+                {t.profile_achievements_label}
+              </p>
+              <p className="text-dim text-xs mt-0.5">
+                {earnedCount} / {totalCount}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted shrink-0" />
+          </button>
         </div>
 
         {/* ── Language ── */}

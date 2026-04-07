@@ -593,7 +593,7 @@ export default function NewHistorySessionSheet({
             setStep('ai-import');
           }}
           onConfirm={(sessions) => {
-            sessions.forEach((s) => saveSession(s));
+            sessions.forEach((s) => saveSession({ ...s, importedViaAi: true }));
             setReviewDrafts(null);
             reset();
             onSaved(sessions[sessions.length - 1].id);

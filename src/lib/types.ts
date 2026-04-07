@@ -84,6 +84,14 @@ export interface ActiveSession {
   totalPausedMs: number; // cumulative ms spent paused across all pause/resume cycles
 }
 
+// ─── Achievements ─────────────────────────────────────────────────────────────
+
+export interface AchievementRecord {
+  id: string;
+  unlockedAt: string; // ISO timestamp
+  seen: boolean;
+}
+
 /** A completed session (stored in the wst_sessions array). */
 export interface WorkoutSession {
   id: string;
@@ -93,4 +101,6 @@ export interface WorkoutSession {
   planId?: string;
   planDayId?: string;
   rating?: 1 | 2 | 3 | 4 | 5;
+  updatedAt?: string; // set when the session is edited after completion
+  importedViaAi?: boolean; // set when the session was created via AI import
 }

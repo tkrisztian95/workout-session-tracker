@@ -12,7 +12,16 @@ import PulsingButton from '@/components/PulsingButton';
 import FinishSessionConfirmSheet from '@/components/FinishSessionConfirmSheet';
 import DiscardSessionConfirmSheet from '@/components/DiscardSessionConfirmSheet';
 import { useLocale, useTranslations } from '@/lib/locale-context';
-import type { ActiveSession, Exercise } from '@/lib/types';
+import type { ActiveSession, AchievementRecord, Exercise } from '@/lib/types';
+import {
+  getSessions,
+  getPlans,
+  getProfileCreatedAt,
+  getAchievements,
+  saveAchievements,
+} from '@/lib/storage';
+import { syncAchievements } from '@/lib/achievementEngine';
+import AchievementCelebration from '@/components/AchievementCelebration';
 import {
   Button,
   CtaBar,
@@ -42,6 +51,7 @@ export function SessionView({
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
+  const [celebrationQueue, setCelebrationQueue] = useState<AchievementRecord[]>([]);
 
   const handleAdd = (exercise: Omit<Exercise, 'id'>) => {
     const updated: ActiveSession = {
@@ -324,6 +334,29 @@ export function SessionView({
           onDismiss={(rating) => {
             setShowCompleteOverlay(false);
             onFinish(rating);
+            // Check for newly unlocked achievements after session is saved
+            const updated = syncAchievements(
+              {
+                sessions: getSessions(),
+                plans: getPlans(),
+                profileCreatedAt: getProfileCreatedAt(),
+              },
+              false,
+            );
+            const newUnlocks = updated.filter((r) => !r.seen);
+            if (newUnlocks.length > 0) setCelebrationQueue(newUnlocks);
+          }}
+        />
+      )}
+      {celebrationQueue.length > 0 && (
+        <AchievementCelebration
+          queue={celebrationQueue}
+          onDismiss={(id) => {
+            const records = getAchievements().map((r: AchievementRecord) =>
+              r.id === id ? { ...r, seen: true } : r,
+            );
+            saveAchievements(records);
+            setCelebrationQueue((q) => q.filter((r) => r.id !== id));
           }}
         />
       )}
