@@ -19,7 +19,9 @@ The notes may describe one or multiple workout sessions. Return a JSON object wi
         "category": string | undefined   // e.g. "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"
       }>
     }
-  ]
+  ],
+  "valid": boolean, // true if the input is clearly fitness/workout related, false if not (e.g. recipe, shopping list, random text)
+  "validationError": string | undefined // if valid is false, a short human-readable reason for rejection (e.g. "This does not appear to describe a workout.")
 }
 
 Rules:
@@ -32,6 +34,7 @@ Rules:
 - Missing information: omit any field you cannot determine from the notes (e.g. if weight is not mentioned, omit weightKg). Do not guess or default numeric fields.
 - Ignore rest periods, warmup notes, and non-exercise annotations (e.g. "2 min rest", "foam rolling", "stretched").
 - Do not invent exercises not present in the notes.
+- If the input is clearly not fitness/workout related (e.g. a recipe, poem, or random text), set valid to false and provide a short validationError reason. Otherwise, set valid to true.
 - Return valid JSON only — no markdown, no explanation.`;
 
 export type AiImportResult = {
@@ -61,11 +64,19 @@ ${notes}`;
 
   const content = await callOpenAI(config, systemPrompt, userMessage);
 
-  let parsed: { sessions: AiImportResult[] };
+  let parsed: { sessions: AiImportResult[]; valid?: boolean; validationError?: string };
   try {
     parsed = JSON.parse(content);
   } catch {
     throw new Error('Failed to parse JSON response from OpenAI API');
+  }
+
+  // Guardrail: check for validation
+  if (parsed.valid === false) {
+    // Use model-provided reason or fallback locale string
+    throw new (await import('./index')).AiValidationError(
+      parsed.validationError || 'ai.validation.notWorkout',
+    );
   }
 
   if (!Array.isArray(parsed.sessions) || parsed.sessions.length === 0) {

@@ -1,4 +1,6 @@
 {
+  "ai.validation.notWorkout": "Der eingegebene Text scheint kein Workout zu beschreiben. Bitte gib Trainingsnotizen oder ein Fitnessziel ein.",
+  "ai.validation.notFitnessGoal": "Die angegebenen Präferenzen oder Ziele sind nicht fitnessbezogen. Bitte beschreibe deinen Trainingsfokus oder ein Fitnessziel.",
   "onboarding_title": "Wie heißt du?",
   "onboarding_subtitle": "Wir begrüßen dich damit.",
   "onboarding_mobile_note": "Diese App ist für Mobilgeräte optimiert. Für das beste Erlebnis, öffne sie auf deinem Handy.",
@@ -230,6 +232,7 @@
   "ai_shared_exercise": "gemeinsame Übung",
   "ai_shared_exercises": "gemeinsame Übungen",
   "ai_why_this_plan": "Warum dieser Plan",
+  "ai_validation_title": "Kein Fitness-Thema",
   "ai_regenerate_button": "Neu generieren",
   "ai_use_plan_button": "Diesen Plan verwenden",
 

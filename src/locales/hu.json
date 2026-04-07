@@ -1,4 +1,6 @@
 {
+  "ai.validation.notWorkout": "A megadott szöveg nem tűnik edzésnek. Kérlek, adj meg edzésjegyzeteket vagy fitneszcélt.",
+  "ai.validation.notFitnessGoal": "A megadott preferenciák vagy célok nem kapcsolódnak fitneszhez. Írd le az edzésfókuszt vagy fitneszcélt.",
   "onboarding_title": "Mi a neved?",
   "onboarding_subtitle": "Ezzel köszöntünk majd.",
   "onboarding_mobile_note": "Ez az alkalmazás mobilra van optimalizálva. A legjobb élményért nyisd meg telefonon.",
@@ -230,6 +232,7 @@
   "ai_shared_exercise": "közös gyakorlat",
   "ai_shared_exercises": "közös gyakorlat",
   "ai_why_this_plan": "Miért ez a terv",
+  "ai_validation_title": "Nem fitness témájú",
   "ai_regenerate_button": "Újragenerálás",
   "ai_use_plan_button": "Ezt a tervet választom",
 
