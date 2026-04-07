@@ -11,9 +11,13 @@ import {
   saveSession,
   getUserName,
   hasSeenConsent,
+  getProfileCreatedAt,
+  saveProfileCreatedAt,
 } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
 import ConsentModal from '@/components/ConsentModal';
+import AchievementCelebration from '@/components/AchievementCelebration';
+import { useAchievements } from '@/hooks/useAchievements';
 import { useTranslations } from '@/lib/locale-context';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { StartScreen } from './_views/StartScreen';
@@ -44,10 +48,14 @@ export default function HomePage() {
   const [userName, setUserName] = useState<string | null>(() => getUserName());
   const [consentSeen, setConsentSeen] = useState(() => hasSeenConsent());
   const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const { newUnlocks, markSeen } = useAchievements();
 
   const handleNameComplete = (name: string) => {
     setUserName(name);
     setIsFirstVisit(true);
+    if (getProfileCreatedAt() === null) {
+      saveProfileCreatedAt(new Date().toISOString());
+    }
   };
 
   const startFreeSession = () => {
@@ -240,6 +248,9 @@ export default function HomePage() {
         lastSessionInfo={lastSessionInfo}
       />
       {!consentSeen && <ConsentModal variant="modal" onComplete={() => setConsentSeen(true)} />}
+      {consentSeen && newUnlocks.length > 0 && (
+        <AchievementCelebration queue={newUnlocks} onDismiss={markSeen} />
+      )}
     </>
   );
 }
