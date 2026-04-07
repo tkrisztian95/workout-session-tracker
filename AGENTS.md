@@ -1,5 +1,45 @@
 # Agents
 
+## Feature Development with OpenSpec
+
+Use the OpenSpec (`/opsx`) workflow for any non-trivial feature or change. It keeps a structured paper trail — proposal, design, tasks — under `openspec/changes/<name>/`.
+
+### Typical flow
+
+**1. Explore** (optional) — think through the problem before committing to a direction:
+
+```
+/opsx:explore <idea or vague description>
+```
+
+Good for surfacing tradeoffs, mapping the codebase, or clarifying scope. No code is written here.
+
+**2. Propose** — create the change and generate all artifacts in one step:
+
+```
+/opsx:propose <change-name or description>
+```
+
+Produces `proposal.md`, `design.md`, and `tasks.md` under `openspec/changes/<name>/`. Review them before moving on.
+
+**3. Apply** — implement the tasks from the change:
+
+```
+/opsx:apply
+```
+
+Works through `tasks.md` sequentially, marking tasks complete as it goes. Pauses on blockers or ambiguity.
+
+**4. Archive** — finalize the change once all tasks are done:
+
+```
+/opsx:archive
+```
+
+Moves the change to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+
+---
+
 ## Development Workflow
 
 ### Visual Checks with Playwright MCP
