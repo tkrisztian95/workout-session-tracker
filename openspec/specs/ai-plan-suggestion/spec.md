@@ -30,7 +30,7 @@ The system SHALL render an "AI Suggest" button on the Plans tab, visually distin
 
 ### Requirement: System generates a plan suggestion using LLM
 
-The system SHALL collect existing plans and the last 20 completed workout sessions, construct a prompt, and call the OpenAI Chat Completions API with `response_format: { type: "json_object" }`. The returned JSON SHALL be parsed into a `WorkoutPlan` object.
+The system SHALL collect existing plans and the last 20 completed workout sessions, construct a prompt, and call the OpenAI Chat Completions API with `response_format: { type: "json_object" }`. The returned JSON SHALL include a `valid` boolean field; if `valid` is false the system SHALL display the model's rejection reason instead of a plan preview. If `valid` is true (or absent), the returned JSON SHALL be parsed into a `WorkoutPlan` object.
 
 #### Scenario: Successful plan generation with history
 
@@ -51,6 +51,13 @@ The system SHALL collect existing plans and the last 20 completed workout sessio
 
 - **WHEN** the user has more than 20 completed sessions
 - **THEN** the system SHALL include only the 20 most recent sessions in the prompt context
+
+#### Scenario: Validation rejection shown when preferences are irrelevant
+
+- **WHEN** the LLM returns `valid: false` in its response
+- **THEN** the plan modal SHALL display the model's rejection reason (or a fallback locale string) instead of a plan preview
+- **AND** the "Regenerate" action SHALL remain available so the user can update preferences and retry
+- **AND** no plan data SHALL be created or stored
 
 ### Requirement: User can preview and apply the suggested plan
 

@@ -35,7 +35,7 @@ When the AI import option is selected, the system SHALL open an import sheet wit
 
 ### Requirement: AI parses notes into a structured session with normalized exercise names
 
-On submit the system SHALL call the configured LLM with the user's notes, the active UI locale, and a list of exercise names already present in workout history, and return a structured session draft.
+On submit the system SHALL validate that the notes are fitness-related and then call the configured LLM with the user's notes, the active UI locale, and a list of exercise names already present in workout history, and return a structured session draft. If the notes are not fitness-related, the system SHALL display a rejection message and allow the user to edit their input.
 
 #### Scenario: Exercise names translated to active UI language
 
@@ -61,6 +61,13 @@ On submit the system SHALL call the configured LLM with the user's notes, the ac
 
 - **WHEN** the LLM call fails or returns unparseable JSON
 - **THEN** an error message SHALL be displayed and the user SHALL be able to edit their notes and retry
+
+#### Scenario: Validation rejection shown when input is not a workout
+
+- **WHEN** the LLM returns `valid: false` in its response
+- **THEN** the import sheet SHALL display the model's rejection reason (or a fallback locale string) instead of a session draft
+- **AND** the submit button SHALL be re-enabled so the user can edit their notes and resubmit
+- **AND** no session data SHALL be created or stored
 
 ### Requirement: User reviews a confirmation step before the session is saved
 
