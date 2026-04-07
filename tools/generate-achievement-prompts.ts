@@ -4,56 +4,180 @@
  *        npx tsx tools/generate-achievement-prompts.ts --json
  */
 
-const STYLE_BLOCK = `Create a single achievement badge icon for a fitness tracking app.
+const STYLE_BASE = `Create a single achievement badge icon for a dark athletic fitness tracking app.
 
-STYLE: 3D rendered, game-achievement badge style. Dark background (#1F2937), centered glowing icon element. Primary accent color orange (#F97316) with subtle warm glow/bloom. Metallic sheen on the badge shape. Cinematic lighting from above. Sharp and clean.
+STYLE: Bold geometric 3D render. Game-achievement badge aesthetic — energetic, high contrast, duotone. Background is deep charcoal #1F2937. Primary glow color orange #F97316, secondary warm orange #FB923C. No gradients except orange bloom. Stadium spotlight from directly above — hard light, sharp shadows. Metallic surface with subtle orange sheen.
 
-SHAPE: Rounded square badge silhouette, slight emboss/depth. Dark charcoal interior with orange rim glow.
+SHAPE: Bold hexagonal badge silhouette. Thick raised rim with orange #F97316 edge glow and inner shadow. Dark charcoal #1F2937 interior panel, slightly recessed. Geometric, block-based, athletic — not soft or decorative.
 
-FORMAT: Square 1:1, icon centered with padding, no text, no letters, no numbers. Isolated composition. Photorealistic 3D render.`;
+SUBJECT_ELEMENT: Centered 3D icon, large scale, bold and simple geometry. Orange #F97316 as primary material or light source. Strong contrast against dark interior.
 
-const SUBJECTS: Record<string, string> = {
-  session_first: 'A single dumbbell, glowing orange',
-  session_10: 'A flame, intense orange fire',
-  session_25: 'A lightning bolt, electric orange',
-  session_50: 'A glowing star, golden-orange',
-  session_100: 'A trophy, gold and orange',
-  session_250: 'A crown, regal gold with orange gems',
-  plan_first_created: 'A clipboard with a checklist',
-  plan_first_completed: 'A glowing checkmark inside a circle',
-  plan_3_completed: 'Three stacked checkmarks',
-  plan_5_completed: 'A laurel wreath award',
-  plan_10_completed: 'A gold trophy with flame',
-  plan_5_created: 'An open book, orange pages',
-  plan_10_created: 'A library bookshelf, glowing spines',
-  plan_first_edited: 'A pencil with spark',
-  session_first_edited: 'A pencil striking a line',
-  session_first_imported: 'A file with arrow/spark entering it',
-  weekly_2: 'A calendar with 2 highlighted days',
-  weekly_3: 'A calendar with 3 highlighted days',
-  weekly_4: 'A calendar with 4 highlighted days',
-  weekly_5: 'A calendar with 5 highlighted days, fire',
-  tenure_1month: 'A clock face, soft glow',
-  tenure_3months: 'A clock, stronger orange glow',
-  tenure_6months: 'A clock face with orbit ring',
-  tenure_1year: 'A gold medal with ribbon',
-  tenure_2years: 'A diamond medal, orange and white glow',
-  volume_1k: 'A weight plate, glowing edge',
-  volume_10k: 'A barbell loaded with plates',
-  volume_100k: 'A massive barbell, epic orange glow',
+FORMAT: Square 1:1 canvas, subject centered with 20% padding on each side. No background outside the badge shape. Isolated on white or transparent. Photorealistic 3D render, sharp details, 160x160px equivalent quality.`;
+
+const TEXT_RULE_NONE = 'No text, no letters, no numbers anywhere on the badge.';
+const TEXT_RULE_NUMBER = (n: string) =>
+  `The number "${n}" must appear as a bold 3D embossed numeral on the badge — large, centered or prominently placed, orange #F97316 with bright white highlight on raised edges. No other text or letters.`;
+
+type AchievementDef = {
+  subject: string;
+  /** Milestone number to emboss on the badge, if any. */
+  number?: string;
+};
+
+const ACHIEVEMENTS: Record<string, AchievementDef> = {
+  // Sessions track — intensity escalates with count
+  session_first: {
+    subject: 'A single chrome dumbbell with a warm orange glow at the center, bold and simple',
+  },
+  session_10: {
+    subject:
+      'A bold geometric flame made of solid orange #F97316 fire, aggressive and sharp, with the number embossed on its face',
+    number: '10',
+  },
+  session_25: {
+    subject:
+      'A thick electric lightning bolt, orange #F97316 core with white-hot edges, striking downward, number embossed on the bolt face',
+    number: '25',
+  },
+  session_50: {
+    subject:
+      'A bold 6-pointed star with glowing orange #F97316 facets, metallic gold center, sharp geometry, number embossed at center',
+    number: '50',
+  },
+  session_100: {
+    subject:
+      'A champion trophy, gold body with orange #F97316 glowing interior light, athletic and bold, number embossed on the base plate',
+    number: '100',
+  },
+  session_250: {
+    subject:
+      'A geometric crown with sharp angular points, orange #F97316 gemstones, dark gold metal body, number embossed on the front panel',
+    number: '250',
+  },
+
+  // Plans track — achievement and creation
+  plan_first_created: {
+    subject: 'A bold clipboard with thick orange #F97316 checklist lines, geometric and clean',
+  },
+  plan_first_completed: {
+    subject:
+      'A thick checkmark inside a bold circle ring, orange #F97316 with bright orange bloom',
+  },
+  plan_3_completed: {
+    subject:
+      'Three bold stacked checkmarks, orange #F97316, descending in size, high contrast, number embossed above them',
+    number: '3',
+  },
+  plan_5_completed: {
+    subject:
+      'A bold symmetrical laurel wreath, orange #F97316 leaves, geometric angular style, number embossed at center',
+    number: '5',
+  },
+  plan_10_completed: {
+    subject:
+      'A gold trophy with a bright orange #F97316 flame erupting from the top, bold and energetic, number embossed on the base',
+    number: '10',
+  },
+  plan_5_created: {
+    subject:
+      'An open book with thick bold pages, orange #F97316 light emanating from the spine, number embossed on the cover',
+    number: '5',
+  },
+  plan_10_created: {
+    subject:
+      'A row of bold upright books on a shelf, glowing orange #F97316 spines, geometric, number embossed on the front book',
+    number: '10',
+  },
+  plan_first_edited: {
+    subject: 'A bold pencil with a sharp orange #F97316 spark bursting from the tip, angular',
+  },
+  session_first_edited: {
+    subject:
+      'A pencil striking a bold horizontal line, orange #F97316 strike mark, dynamic angle',
+  },
+  session_first_imported: {
+    subject:
+      'A bold document with a thick orange #F97316 arrow entering from the right, glowing',
+  },
+
+  // Weekly track — calendar days light up progressively, count is visual
+  weekly_2: {
+    subject: 'A square calendar grid, 2 bold orange #F97316 glowing blocks, dark inactive blocks',
+    number: '2',
+  },
+  weekly_3: {
+    subject:
+      'A square calendar grid, 3 bold orange #F97316 glowing blocks in a row, dark inactive blocks',
+    number: '3',
+  },
+  weekly_4: {
+    subject:
+      'A square calendar grid, 4 bold orange #F97316 glowing blocks, one dark block remaining',
+    number: '4',
+  },
+  weekly_5: {
+    subject:
+      'A square calendar grid, 5 bold orange #F97316 glowing blocks fully lit, small flame above',
+    number: '5',
+  },
+
+  // Tenure track — time and dedication
+  tenure_1month: {
+    subject:
+      'A bold clock face, thick hour and minute hands pointing up, orange #F97316 glow on dial, number embossed below the hands',
+    number: '1M',
+  },
+  tenure_3months: {
+    subject:
+      'A bold clock face with thick hands, strong orange #F97316 rim glow, amber dial light, number embossed on the dial',
+    number: '3M',
+  },
+  tenure_6months: {
+    subject:
+      'A bold clock face with a glowing orange #F97316 orbit ring circling the exterior, number embossed on the dial face',
+    number: '6M',
+  },
+  tenure_1year: {
+    subject:
+      'A bold circular gold medal with thick orange #F97316 ribbon loops, athletic and geometric, number embossed on the medal face',
+    number: '1Y',
+  },
+  tenure_2years: {
+    subject:
+      'A bold diamond-shaped medal, faceted surfaces, orange #F97316 and bright white-gold glow, number embossed on the front facet',
+    number: '2Y',
+  },
+
+  // Volume track — weight and power escalates
+  volume_1k: {
+    subject:
+      'A single bold round weight plate, thick orange #F97316 glowing edge, chrome face, number embossed at center',
+    number: '1K',
+  },
+  volume_10k: {
+    subject:
+      'A straight barbell with two large weight plates, orange #F97316 glowing bar, powerful, number embossed on the plates',
+    number: '10K',
+  },
+  volume_100k: {
+    subject:
+      'A massive loaded barbell with multiple stacked plates, intense orange #F97316 bloom, epic scale, number embossed on the largest plate',
+    number: '100K',
+  },
 };
 
 type Output = { id: string; prompt: string };
 
 function buildPrompt(id: string): string {
-  const subject = SUBJECTS[id];
-  if (!subject) throw new Error(`No subject defined for achievement: ${id}`);
-  return `${STYLE_BLOCK}\n\nSUBJECT: ${subject}`;
+  const def = ACHIEVEMENTS[id];
+  if (!def) throw new Error(`No subject defined for achievement: ${id}`);
+  const textRule = def.number ? TEXT_RULE_NUMBER(def.number) : TEXT_RULE_NONE;
+  return `${STYLE_BASE}\n\nTEXT: ${textRule}\n\nSUBJECT: ${def.subject}`;
 }
 
 function run() {
   const isJson = process.argv.includes('--json');
-  const ids = Object.keys(SUBJECTS);
+  const ids = Object.keys(ACHIEVEMENTS);
 
   if (isJson) {
     const out: Output[] = ids.map((id) => ({ id, prompt: buildPrompt(id) }));
@@ -73,7 +197,8 @@ function run() {
   console.log(`\n${separator}`);
   console.log(`✓ ${ids.length} prompts generated`);
   console.log(
-    'Tip: after the first image, tell ChatGPT "Keep identical style, lighting, and badge shape"',
+    'Tip: after the first image, start each follow-up with:\n' +
+      '  "Keep identical style: bold hexagonal badge, dark #1F2937 background, orange #F97316 rim glow, stadium spotlight from above. Only change the SUBJECT."',
   );
 }
 

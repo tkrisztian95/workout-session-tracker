@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "eval": "OPENAI_API_KEY=$OPENAI_API_KEY tsx evals/run.ts",
+    "achievement-prompts": "tsx tools/generate-achievement-prompts.ts",
+    "achievement-prompts:json": "tsx tools/generate-achievement-prompts.ts --json",
     "lint:fix": "eslint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
