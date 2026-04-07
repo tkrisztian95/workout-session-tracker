@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Sparkles, RefreshCw, Loader2, ChevronDown } from 'lucide-react';
+import { Sparkles, RefreshCw, Loader2, ChevronDown, AlertTriangle } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
 import { getLlmConfig, getPlans, getSessions, getLocale } from '@/lib/storage';
-import { suggestPlan } from '@/lib/ai';
+import { suggestPlan, AiValidationError } from '@/lib/ai';
 import type { AiPlanPreferences } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
 import { Button, FieldLabel, ModalSheet } from '@/components/ui';
@@ -36,7 +36,7 @@ function ErrorMessage({ message, openLinkLabel }: { message: string; openLinkLab
   );
 }
 
-type View = 'no-config' | 'config' | 'loading' | 'preview';
+type View = 'no-config' | 'config' | 'loading' | 'preview' | 'rejected';
 
 interface AiPlanSuggestionModalProps {
   onApply: (plan: Omit<WorkoutPlan, 'id' | 'status'>) => void;
@@ -91,6 +91,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
   );
   const [reasoning, setReasoning] = useState<string | undefined>(undefined);
   const [reasoningOpen, setReasoningOpen] = useState(false);
+  const [validationReason, setValidationReason] = useState('');
   const [focus, setFocus] = useState('');
   const [daysPerWeek, setDaysPerWeek] = useState('');
   const [goal, setGoal] = useState('');
@@ -136,6 +137,16 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         day_count: result.days.length,
       });
     } catch (err) {
+      if (err instanceof AiValidationError) {
+        setValidationReason(err.reason);
+        setView('rejected');
+        posthog?.capture('ai_plan_generation_failed', {
+          model: config.model,
+          duration_ms: Date.now() - generationStartRef.current,
+          error_type: 'validation',
+        });
+        return;
+      }
       const message = err instanceof Error ? err.message : 'Failed to generate plan';
       setError(message);
       setView('config');
@@ -170,6 +181,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
     });
     setSuggestedPlan(null);
     setReasoning(undefined);
+    setValidationReason('');
     setFocus('');
     setDaysPerWeek('');
     setGoal('');
@@ -249,6 +261,23 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         <div className="flex flex-col items-center justify-center py-12 gap-4">
           <Loader2 className="w-8 h-8 text-brand animate-spin" />
           <p className="text-secondary text-sm">{t.ai_generating}</p>
+        </div>
+      )}
+
+      {/* Rejected view */}
+      {view === 'rejected' && (
+        <div className="space-y-4">
+          <div className="bg-warning/8 rounded-2xl px-4 py-4 flex gap-3">
+            <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="text-warning text-sm font-semibold">{t.ai_validation_title}</p>
+              <p className="text-warning/80 text-sm leading-relaxed">{validationReason}</p>
+            </div>
+          </div>
+          <Button variant="secondary" onClick={handleRegenerate} className="w-full gap-2">
+            <RefreshCw className="w-4 h-4" />
+            {t.ai_regenerate_button}
+          </Button>
         </div>
       )}
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import {
+  AlertTriangle,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -25,7 +26,7 @@ import {
   getLocale,
   getRecentExerciseNames,
 } from '@/lib/storage';
-import { importSessions, type AiImportResult } from '@/lib/ai';
+import { importSessions, AiValidationError, type AiImportResult } from '@/lib/ai';
 import type { Exercise, LlmConfig, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
@@ -140,6 +141,7 @@ export default function NewHistorySessionSheet({
   const [aiNotes, setAiNotes] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [aiValidationError, setAiValidationError] = useState<string | null>(null);
   const [pendingExercise, setPendingExercise] = useState<Exercise | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [llmConfig] = useState<LlmConfig | null>(() => getLlmConfig());
@@ -155,6 +157,7 @@ export default function NewHistorySessionSheet({
     setAiNotes('');
     setAiLoading(false);
     setAiError(null);
+    setAiValidationError(null);
   }
 
   async function handleAiSubmit() {
@@ -162,6 +165,7 @@ export default function NewHistorySessionSheet({
     if (!config) return;
     setAiLoading(true);
     setAiError(null);
+    setAiValidationError(null);
     try {
       const locale = getLocale() ?? 'en';
       const language = LOCALE_LANGUAGE[locale] ?? 'English';
@@ -169,7 +173,11 @@ export default function NewHistorySessionSheet({
       const results = await importSessions(aiNotes, language, existingNames, config);
       setReviewDrafts(results.map(buildSession));
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : 'Unknown error');
+      if (err instanceof AiValidationError) {
+        setAiValidationError(err.reason);
+      } else {
+        setAiError(err instanceof Error ? err.message : 'Unknown error');
+      }
     } finally {
       setAiLoading(false);
     }
@@ -526,9 +534,18 @@ export default function NewHistorySessionSheet({
                 value={aiNotes}
                 onChange={(e) => setAiNotes(e.target.value)}
                 placeholder={t.ai_import_placeholder}
-                className="flex-1 min-h-0 w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-brand/40"
+                className="flex-1 min-h-36 w-full rounded-lg border border-border bg-base px-3 py-2.5 text-sm text-foreground resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-brand/40"
               />
             </div>
+            {aiValidationError && (
+              <div className="flex gap-3 mb-4 rounded-lg bg-warning/8 px-3 py-2.5">
+                <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="text-warning text-sm font-semibold">{t.ai_validation_title}</p>
+                  <p className="text-warning/80 text-sm leading-relaxed">{aiValidationError}</p>
+                </div>
+              </div>
+            )}
             {aiError && (
               <p className="text-danger text-sm mb-4 rounded-lg bg-danger/8 px-3 py-2">{aiError}</p>
             )}

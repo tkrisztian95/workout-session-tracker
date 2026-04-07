@@ -6,6 +6,8 @@ const SYSTEM_PROMPT = `You are a personal fitness coach. Based on the user's exi
 
 Return a JSON object with the following structure:
 {
+  "valid": boolean,             // true if the user's goals and preferences are clearly fitness-related; false only if they are clearly irrelevant (e.g. a recipe, unrelated hobby goals, random text)
+  "validationError": string | undefined, // if valid is false, a short human-readable reason in the user's language (e.g. "The provided goals don't appear to be fitness-related.")
   "reasoning": string,
   "name": string,
   "scheduledWeeks": number | undefined,
@@ -56,6 +58,7 @@ Guidelines:
 - weightKg: include whenever you can infer a reasonable starting weight from the user's history or their body metrics.
 - scalingNote: use for beginner modifications, equipment alternatives, or form cues when helpful.
 - category: one of "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio", or another standard muscle group.
+- valid / validationError: set valid to false only when the user's stated goals are clearly not fitness-related (e.g. cooking, unrelated hobbies). When in doubt, set valid to true and generate a plan. Write validationError in the user's language.
 - scheduledWeeks: set for periodized programs with a clear end date (e.g. 8–12 week blocks); omit for open-ended plans.
 - sharedExercises: use only for exercises that appear identically on every training day (e.g. a daily mobility warmup or cooldown stretch). Leave the array empty when exercises differ by day.
 - Limit coreExercises to 4–6 per day. Move lower-priority work to optionalExercises or sharedExercises.
@@ -223,11 +226,16 @@ export async function suggestPlan(
 
   const content = await callOpenAI(config, SYSTEM_PROMPT, userMessage);
 
-  let parsed: AiPlanResult & { reasoning?: string };
+  let parsed: AiPlanResult & { reasoning?: string; valid?: boolean; validationError?: string };
   try {
     parsed = JSON.parse(content);
   } catch {
     throw new Error('Failed to parse JSON response from OpenAI API');
+  }
+
+  if (parsed.valid === false) {
+    const { AiValidationError } = await import('./index');
+    throw new AiValidationError(parsed.validationError || 'ai.validation.notFitnessGoal');
   }
 
   if (!parsed.name || !Array.isArray(parsed.days)) {
