@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Dumbbell, Timer, Trophy } from 'lucide-react';
+import { Dumbbell, Timer, Trophy, Star } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
-import { calcSessionStats, formatDuration, RATING_EMOJIS } from '@/lib/sessionUtils';
+import { calcSessionStats, formatDuration } from '@/lib/sessionUtils';
 import { useTranslations } from '@/lib/locale-context';
 import { Button, Card, HeadingXL } from '@/components/ui';
 
@@ -105,21 +105,19 @@ export default function SessionCompleteOverlay({
         >
           <HeadingXL>{t.session_rate_prompt}</HeadingXL>
 
-          {/* Emoji row — w-12 (48px) × 5 + gap-3 × 4 = 288px, fits 375px screen */}
+          {/* Star rating row — w-12 (48px) × 5 + gap-3 × 4 = 288px, fits 375px screen */}
           <div className="flex gap-3 justify-center">
-            {RATING_EMOJIS.map((emoji, i) => {
-              const value = (i + 1) as 1 | 2 | 3 | 4 | 5;
-              return (
-                <button
-                  key={value}
-                  onClick={() => onDismiss(value)}
-                  aria-label={`Rate ${value} out of 5`}
-                  className="text-3xl w-12 h-12 rounded-2xl bg-surface flex items-center justify-center transition-all duration-150 active:scale-90 active:bg-elevated cursor-pointer"
-                >
-                  {emoji}
-                </button>
-              );
-            })}
+            {([1, 2, 3, 4, 5] as const).map((value) => (
+              <button
+                key={value}
+                onClick={() => onDismiss(value)}
+                aria-label={`Rate ${value} out of 5`}
+                className="flex flex-col items-center justify-center gap-0.5 w-12 py-2.5 rounded-2xl bg-surface transition-all duration-150 active:scale-90 active:bg-elevated cursor-pointer"
+              >
+                <Star className="w-6 h-6 text-brand" />
+                <span className="text-[10px] text-muted font-medium">{value}</span>
+              </button>
+            ))}
           </div>
 
           {/* Skip — text style, but min-height 44px for easy tap */}

@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import CategoryBadge from '@/components/CategoryBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
-import { RATING_EMOJIS } from '@/lib/sessionUtils';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 
@@ -41,7 +40,10 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
         <div className="flex items-center gap-2">
           <p className="text-foreground font-semibold text-base truncate">{label}</p>
           {session.rating != null && (
-            <span className="text-base leading-none">{RATING_EMOJIS[session.rating - 1]}</span>
+            <span className="flex items-center gap-0.5 text-brand">
+              <Star className="w-3 h-3 fill-current" />
+              <span className="text-xs font-medium">{session.rating}</span>
+            </span>
           )}
         </div>
         <p className="text-dim text-xs mt-1">

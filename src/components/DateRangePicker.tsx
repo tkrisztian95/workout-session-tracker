@@ -276,7 +276,7 @@ export default function DateRangePicker({
                 onClick={() => setTab(tab_key)}
                 style={{ touchAction: 'manipulation' }}
                 className={[
-                  'flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-colors min-h-[52px] justify-center',
+                  'flex-1 flex flex-col items-center gap-0.5 py-2.5 rounded-xl transition-colors min-h-[52px] justify-center cursor-pointer',
                   active ? 'bg-surface' : '',
                 ].join(' ')}
               >

@@ -65,7 +65,6 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
               onClick={() => handleTileTap(iso)}
               disabled={!hasWorkout}
               aria-label={`${iso}${hasWorkout ? `, ${count} workout${count > 1 ? 's' : ''}` : ''}`}
-              style={!isToday && hasWorkout ? { backgroundColor: '#16a34a' } : undefined}
               className={[
                 'flex flex-col items-center gap-1 w-[52px] py-3 rounded-2xl transition-all duration-150',
                 hasWorkout ? 'cursor-pointer active:scale-95' : 'cursor-default',
@@ -73,18 +72,20 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                   ? 'bg-brand'
                   : isToday
                     ? 'bg-surface ring-2 ring-brand/60'
-                    : 'bg-surface',
+                    : hasWorkout
+                      ? 'bg-success'
+                      : 'bg-surface',
               ].join(' ')}
             >
               <span
                 className={[
                   'text-[10px] font-bold tracking-widest uppercase',
                   isToday && hasWorkout
-                    ? 'text-white/80'
+                    ? 'text-foreground/80'
                     : isToday
                       ? 'text-brand'
                       : hasWorkout
-                        ? 'text-white/80'
+                        ? 'text-foreground/80'
                         : 'text-muted',
                 ].join(' ')}
               >
@@ -94,7 +95,7 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
                 className={[
                   'text-2xl font-bold leading-none',
                   isToday && hasWorkout
-                    ? 'text-white'
+                    ? 'text-foreground'
                     : hasWorkout || isToday
                       ? 'text-foreground'
                       : 'text-border',
@@ -105,9 +106,9 @@ export default function ActivityTiles({ sessionsByDate }: Props) {
               </span>
               <span className="h-3 flex items-center justify-center">
                 {count > 1 ? (
-                  <span className="text-[10px] font-bold text-white/70">{`×${count}`}</span>
+                  <span className="text-[10px] font-bold text-foreground/70">{`×${count}`}</span>
                 ) : hasWorkout ? (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/70 block" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-foreground/70 block" />
                 ) : null}
               </span>
             </button>
