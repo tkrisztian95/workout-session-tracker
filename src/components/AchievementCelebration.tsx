@@ -70,7 +70,7 @@ export default function AchievementCelebration({ queue, onDismiss }: Achievement
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm px-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-base/90 backdrop-blur-sm px-6"
       onClick={handleDismiss}
     >
       <div

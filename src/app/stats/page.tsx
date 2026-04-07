@@ -54,7 +54,7 @@ function StatCard({ label, value, unit }: { label: string; value: string; unit?:
 const progressionChartConfig = {
   weight: {
     label: 'Weight (kg)',
-    theme: { light: '#f97316', dark: '#f97316' },
+    theme: { light: 'var(--color-brand)', dark: 'var(--color-brand)' },
   },
 } satisfies ChartConfig;
 
@@ -92,7 +92,7 @@ function ProgressionTable({
               <button
                 type="button"
                 onClick={() => setExpanded(isExpanded ? null : row.exerciseName)}
-                className="w-full flex items-center justify-between px-4 py-3 gap-3 text-left"
+                className="w-full flex items-center justify-between px-4 py-3 gap-3 text-left cursor-pointer"
               >
                 {/* Exercise name */}
                 <p className="text-foreground text-sm font-medium truncate flex-1 min-w-0">
@@ -177,7 +177,7 @@ function ProgressionTable({
 const radarChartConfig = {
   count: {
     label: 'Sessions',
-    theme: { light: '#f97316', dark: '#f97316' },
+    theme: { light: 'var(--color-brand)', dark: 'var(--color-brand)' },
   },
 } satisfies ChartConfig;
 
@@ -392,14 +392,14 @@ export default function StatsPage() {
                   <div className="flex items-center gap-1 mt-2 justify-end">
                     {volumeTrend === 'up' && (
                       <>
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                        <span className="text-xs text-green-500">{t.stats_volume_trend_up}</span>
+                        <TrendingUp className="w-4 h-4 text-success" />
+                        <span className="text-xs text-success">{t.stats_volume_trend_up}</span>
                       </>
                     )}
                     {volumeTrend === 'down' && (
                       <>
-                        <TrendingDown className="w-4 h-4 text-red-500" />
-                        <span className="text-xs text-red-500">{t.stats_volume_trend_down}</span>
+                        <TrendingDown className="w-4 h-4 text-danger" />
+                        <span className="text-xs text-danger">{t.stats_volume_trend_down}</span>
                       </>
                     )}
                     {volumeTrend === 'flat' && (
