@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { History } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
 import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
+import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
+import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { useTranslations } from '@/lib/locale-context';
 import { WGER_CATEGORIES } from '@/lib/wgerClient';
 import { ModalSheet, Button, FieldLabel, Input, Select } from '@/components/ui';
@@ -33,8 +36,12 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   const [weightKg, setWeightKg] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [manualCategory, setManualCategory] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [skipWgerForCurrentName, setSkipWgerForCurrentName] = useState(false);
 
-  const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(name);
+  const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(
+    skipWgerForCurrentName ? '' : name,
+  );
 
   const isEditMode = !!initialValues;
 
@@ -65,7 +72,24 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
     setWeightKg('');
     setSelectedCategory(null);
     setManualCategory('');
+    setSkipWgerForCurrentName(false);
     clearSuggestions();
+  };
+
+  const applyHistoryEntry = (entry: HistoryEntry) => {
+    setName(entry.name);
+    setType(entry.type);
+    setSets(String(entry.sets ?? 3));
+    setReps(String(entry.reps ?? 10));
+    const totalSecs = entry.duration ?? 0;
+    setDurationMins(String(Math.floor(totalSecs / 60)));
+    setDurationSecs(String(totalSecs % 60));
+    setWeightKg(entry.weightKg !== undefined ? String(entry.weightKg) : '');
+    setManualCategory(entry.category ?? '');
+    setSelectedCategory(entry.category ?? null);
+    setSkipWgerForCurrentName(true);
+    clearSuggestions();
+    setPickerOpen(false);
   };
 
   const handleSubmit = () => {
@@ -98,12 +122,23 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   };
 
   return (
+    <>
     <ModalSheet
-      isOpen={isOpen}
+      isOpen={isOpen && !pickerOpen}
       onClose={handleClose}
       title={isEditMode ? 'Edit exercise' : t.add_exercise_title}
     >
       <div className="flex-1 min-h-0 overflow-y-auto space-y-5">
+        {/* Pick from history */}
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
+        >
+          <History className="w-4 h-4" />
+          {t.history_picker_open_button}
+        </button>
+
         {/* Name */}
         <div>
           <div className="relative">
@@ -115,6 +150,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
               onChange={(e) => {
                 setName(e.target.value);
                 setSelectedCategory(null);
+                setSkipWgerForCurrentName(false);
               }}
               onBlur={() => setTimeout(clearSuggestions, 150)}
               placeholder={t.exercise_name_placeholder}
@@ -261,5 +297,11 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
         </Button>
       </div>
     </ModalSheet>
+    <ExerciseHistoryPicker
+      isOpen={pickerOpen}
+      onClose={() => setPickerOpen(false)}
+      onSelect={applyHistoryEntry}
+    />
+    </>
   );
 }
