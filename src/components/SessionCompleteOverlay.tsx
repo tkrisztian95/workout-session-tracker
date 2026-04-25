@@ -84,7 +84,11 @@ export default function SessionCompleteOverlay({
             <Card className="px-3 py-4 flex flex-col items-center gap-1">
               <Timer className="w-5 h-5 text-brand mb-1" />
               <HeadingXL as="span" className="text-2xl">
-                {formatDuration(stats.elapsedSeconds)}
+                {formatDuration(stats.elapsedSeconds, {
+                  h: t.duration_unit_hours_short,
+                  m: t.duration_unit_minutes_short,
+                  s: t.duration_unit_seconds_short,
+                })}
               </HeadingXL>
               <span className="text-muted text-xs">{t.session_complete_duration}</span>
             </Card>

@@ -59,11 +59,19 @@ export function calcSessionStats(
   };
 }
 
-export function formatDuration(seconds: number): string {
+export interface DurationUnits {
+  h: string;
+  m: string;
+  s: string;
+}
+
+const defaultUnits: DurationUnits = { h: 'h', m: 'm', s: 's' };
+
+export function formatDuration(seconds: number, units: DurationUnits = defaultUnits): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
+  if (h > 0) return `${h}${units.h} ${m}${units.m}`;
+  if (m > 0) return `${m}${units.m} ${s}${units.s}`;
+  return `${s}${units.s}`;
 }
