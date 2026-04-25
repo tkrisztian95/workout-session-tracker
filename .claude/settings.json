@@ -178,7 +178,18 @@
       "Bash(openspec new change \"active-exercise-highlight\")",
       "Bash(openspec status --change \"active-exercise-highlight\" --json)",
       "Bash(openspec instructions:*)",
-      "Bash(openspec status:*)"
+      "Bash(openspec status:*)",
+      "Bash(python3 /Users/toth/.claude/plugins/marketplaces/ui-ux-pro-max-skill/.claude/skills/ui-ux-pro-max/scripts/search.py \"fitness workout tracker mobile dark energetic orange\" --design-system --persist -p \"Workout Sessions Tracker\" -f markdown)",
+      "Read(//Users/toth/**)",
+      "Bash(mv /Users/toth/Git/Hobby/workout-sessions-tracker/design-system/workout-sessions-tracker/MASTER.md /Users/toth/Git/Hobby/workout-sessions-tracker/design-system/MASTER.md)",
+      "Bash(rmdir /Users/toth/Git/Hobby/workout-sessions-tracker/design-system/workout-sessions-tracker)",
+      "Bash(mv /Users/toth/Git/Hobby/workout-sessions-tracker/design-system/workout-sessions-tracker/pages /Users/toth/Git/Hobby/workout-sessions-tracker/design-system/pages)",
+      "Bash(git add:*)",
+      "Bash(python3 /Users/toth/.claude/plugins/marketplaces/ui-ux-pro-max-skill/.claude/skills/ui-ux-pro-max/scripts/search.py \"fitness gym achievement badge dark orange energetic athletic\" --design-system -f markdown)",
+      "Bash(python3 /Users/toth/.claude/plugins/marketplaces/ui-ux-pro-max-skill/.claude/skills/ui-ux-pro-max/scripts/search.py \"game achievement badge icon 3d render dark\" --domain style -n 5)",
+      "Bash(openspec new *)",
+      "Bash(openspec validate *)",
+      "Bash(openspec change *)"
     ],
     "additionalDirectories": [
       "/Users/toth/Git/Hobby/workout-sessions-tracker/src/app/history",
