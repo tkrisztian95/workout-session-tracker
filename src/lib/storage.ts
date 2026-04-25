@@ -23,7 +23,13 @@ const KEYS = {
   consentAccepted: 'wst_consent_accepted',
   achievements: 'wst_achievements',
   profileCreatedAt: 'wst_profile_created_at',
+  hiddenExercises: 'wst_hidden_exercises',
 } as const;
+
+export interface HiddenExerciseKey {
+  nameKey: string;
+  category?: string;
+}
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
 
@@ -296,6 +302,28 @@ export function getAchievements(): AchievementRecord[] {
 
 export function saveAchievements(records: AchievementRecord[]): void {
   localStorage.setItem(KEYS.achievements, JSON.stringify(records));
+}
+
+// ─── Hidden exercises ─────────────────────────────────────────────────────────
+
+export function getHiddenExercises(): HiddenExerciseKey[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(KEYS.hiddenExercises);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (entry): entry is HiddenExerciseKey =>
+        entry && typeof entry === 'object' && typeof entry.nameKey === 'string',
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function saveHiddenExercises(entries: HiddenExerciseKey[]): void {
+  localStorage.setItem(KEYS.hiddenExercises, JSON.stringify(entries));
 }
 
 // ─── Consent ──────────────────────────────────────────────────────────────────
