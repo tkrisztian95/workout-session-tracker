@@ -21,10 +21,10 @@
 
 ## 4. Update AI import & plan prompts
 
-- [ ] 4.1 Update `src/lib/ai/prompts/import/v1.ts` and `src/lib/ai/prompts/import/v2.ts` so the `muscle` field enumerates the 12 canonical keys (replace the old `"Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"` example)
-- [ ] 4.2 Update `src/lib/ai/prompts/plan/v1.ts` likewise (note the inline category list at line 59)
-- [ ] 4.3 In `src/lib/ai/plan.ts`, accept `muscle` instead of `category` from the parsed response and run `migrateLegacyCategory` defensively on any incoming value (transitional safety net)
-- [ ] 4.4 Update evals in `evals/score.ts` that reference the old `category` field
+- [x] 4.1 Update `src/lib/ai/prompts/import/v1.ts` and `src/lib/ai/prompts/import/v2.ts` so the `muscle` field enumerates the 12 canonical keys (replace the old `"Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"` example)
+- [x] 4.2 Update `src/lib/ai/prompts/plan/v1.ts` likewise (note the inline category list at line 59)
+- [x] 4.3 In `src/lib/ai/plan.ts`, accept `muscle` instead of `category` from the parsed response and run `migrateLegacyCategory` defensively on any incoming value (transitional safety net)
+- [x] 4.4 Update evals in `evals/score.ts` that reference the old `category` field
 
 ## 5. Update wger lookup
 
