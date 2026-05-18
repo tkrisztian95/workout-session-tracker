@@ -7,6 +7,56 @@ import type {
   AchievementRecord,
 } from './types';
 import type { Locale } from './i18n';
+import type { Muscle } from './muscles';
+import { migrateLegacyCategory } from './muscles';
+
+interface LegacyExercise {
+  category?: string;
+  muscle?: Muscle;
+  [k: string]: unknown;
+}
+
+/**
+ * Rewrites a single exercise-like record in place: if it has a legacy `category`
+ * string, convert it to the typed `muscle` field and drop `category`. Returns
+ * true when the record was changed. Records a pending-migration flag when the
+ * legacy value was `Legs` (the lossy mapping that triggers the user toast).
+ */
+function migrateExerciseInPlace(ex: LegacyExercise): boolean {
+  if (typeof ex.category !== 'string') return false;
+  const legacy = ex.category.trim().toLowerCase();
+  const migrated = migrateLegacyCategory(ex.category);
+  delete ex.category;
+  if (migrated) ex.muscle = migrated;
+  if (legacy === 'legs') {
+    try {
+      localStorage.setItem(KEYS.muscleMigrationPending, 'true');
+    } catch {
+      // localStorage may be unavailable (private mode, quota); migration still
+      // completes — the toast simply won't fire.
+    }
+  }
+  return true;
+}
+
+function migrateExerciseList(list: LegacyExercise[] | undefined): boolean {
+  if (!Array.isArray(list)) return false;
+  let mutated = false;
+  for (const ex of list) {
+    if (migrateExerciseInPlace(ex)) mutated = true;
+  }
+  return mutated;
+}
+
+function migratePlanExercises(plan: WorkoutPlan): boolean {
+  let mutated = false;
+  for (const day of plan.days ?? []) {
+    if (migrateExerciseList(day.coreExercises as unknown as LegacyExercise[])) mutated = true;
+    if (migrateExerciseList(day.optionalExercises as unknown as LegacyExercise[])) mutated = true;
+  }
+  if (migrateExerciseList(plan.sharedExercises as unknown as LegacyExercise[])) mutated = true;
+  return mutated;
+}
 
 const KEYS = {
   plans: 'wst_plans',
@@ -24,11 +74,13 @@ const KEYS = {
   achievements: 'wst_achievements',
   profileCreatedAt: 'wst_profile_created_at',
   hiddenExercises: 'wst_hidden_exercises',
+  muscleMigrationPending: 'wst_muscle_migration_pending',
+  muscleMigrationSeen: 'wst_muscle_migration_seen',
 } as const;
 
 export interface HiddenExerciseKey {
   nameKey: string;
-  category?: string;
+  muscle?: Muscle;
 }
 
 // ─── Plans ────────────────────────────────────────────────────────────────────
@@ -38,7 +90,10 @@ export function getPlans(): WorkoutPlan[] {
   try {
     const raw = localStorage.getItem(KEYS.plans);
     if (!raw) return [];
-    return JSON.parse(raw) as WorkoutPlan[];
+    const plans = JSON.parse(raw) as WorkoutPlan[];
+    const mutated = plans.reduce((acc, plan) => migratePlanExercises(plan) || acc, false);
+    if (mutated) localStorage.setItem(KEYS.plans, JSON.stringify(plans));
+    return plans;
   } catch {
     return [];
   }
@@ -100,7 +155,11 @@ export function getActiveSession(): ActiveSession | null {
   try {
     const raw = localStorage.getItem(KEYS.activeSession);
     if (!raw) return null;
-    return JSON.parse(raw) as ActiveSession;
+    const session = JSON.parse(raw) as ActiveSession;
+    if (migrateExerciseList(session.exercises as unknown as LegacyExercise[])) {
+      localStorage.setItem(KEYS.activeSession, JSON.stringify(session));
+    }
+    return session;
   } catch {
     return null;
   }
@@ -121,7 +180,13 @@ export function getSessions(): WorkoutSession[] {
   try {
     const raw = localStorage.getItem(KEYS.sessions);
     if (!raw) return [];
-    return JSON.parse(raw) as WorkoutSession[];
+    const sessions = JSON.parse(raw) as WorkoutSession[];
+    const mutated = sessions.reduce(
+      (acc, s) => migrateExerciseList(s.exercises as unknown as LegacyExercise[]) || acc,
+      false,
+    );
+    if (mutated) localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
+    return sessions;
   } catch {
     return [];
   }
@@ -313,10 +378,15 @@ export function getHiddenExercises(): HiddenExerciseKey[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (entry): entry is HiddenExerciseKey =>
-        entry && typeof entry === 'object' && typeof entry.nameKey === 'string',
-    );
+    let mutated = false;
+    const entries: HiddenExerciseKey[] = [];
+    for (const entry of parsed) {
+      if (!entry || typeof entry !== 'object' || typeof entry.nameKey !== 'string') continue;
+      if (migrateExerciseInPlace(entry as LegacyExercise)) mutated = true;
+      entries.push(entry as HiddenExerciseKey);
+    }
+    if (mutated) localStorage.setItem(KEYS.hiddenExercises, JSON.stringify(entries));
+    return entries;
   } catch {
     return [];
   }
@@ -324,6 +394,25 @@ export function getHiddenExercises(): HiddenExerciseKey[] {
 
 export function saveHiddenExercises(entries: HiddenExerciseKey[]): void {
   localStorage.setItem(KEYS.hiddenExercises, JSON.stringify(entries));
+}
+
+// ─── Muscle migration notice ──────────────────────────────────────────────────
+
+/**
+ * True when the storage layer rewrote at least one `Legs` category to `quads`
+ * during the most recent load and the user has not yet dismissed the notice.
+ */
+export function shouldShowMuscleMigrationNotice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const pending = localStorage.getItem(KEYS.muscleMigrationPending) === 'true';
+  const seen = localStorage.getItem(KEYS.muscleMigrationSeen) === 'true';
+  return pending && !seen;
+}
+
+export function dismissMuscleMigrationNotice(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(KEYS.muscleMigrationSeen, 'true');
+  localStorage.removeItem(KEYS.muscleMigrationPending);
 }
 
 // ─── Consent ──────────────────────────────────────────────────────────────────

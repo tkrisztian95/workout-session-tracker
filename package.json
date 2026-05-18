@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "eval": "OPENAI_API_KEY=$OPENAI_API_KEY tsx evals/run.ts",
     "achievement-prompts": "tsx tools/generate-achievement-prompts.ts",
     "achievement-prompts:json": "tsx tools/generate-achievement-prompts.ts --json",
@@ -32,11 +34,13 @@
     "eslint-config-next": "16.2.4",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import { History, X } from 'lucide-react';
 import type { PlanExercise } from '@/lib/types';
-import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
-import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
 import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { useTranslations } from '@/lib/locale-context';
-import { WGER_CATEGORIES } from '@/lib/wgerClient';
+import type { Muscle } from '@/lib/muscles';
+import { ALL_MUSCLE_GROUPS, MUSCLES_BY_GROUP, migrateLegacyCategory } from '@/lib/muscles';
 import {
   BottomSheet,
   Button,
@@ -52,20 +51,16 @@ export default function AddPlanExerciseModal({
   const [role, setRole] = useState<PlanExercise['role']>('core');
   const [weightKg, setWeightKg] = useState('');
   const [scalingNote, setScalingNote] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [manualCategory, setManualCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Muscle | null>(null);
+  const [manualCategory, setManualCategory] = useState<Muscle | ''>('');
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [skipWgerForCurrentName, setSkipWgerForCurrentName] = useState(false);
-
-  const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(
-    skipWgerForCurrentName ? '' : name,
-  );
 
   const isEditMode = !!initialValues;
 
   useEffect(() => {
     if (!isOpen) return;
     if (initialValues) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(initialValues.name);
       setType(initialValues.type);
       setSets(String(initialValues.sets ?? 3));
@@ -75,7 +70,7 @@ export default function AddPlanExerciseModal({
       setWeightKg(initialValues.weightKg !== undefined ? String(initialValues.weightKg) : '');
       setScalingNote(initialValues.scalingNote ?? '');
       setSelectedCategory(null);
-      setManualCategory(initialValues.category ?? '');
+      setManualCategory(initialValues.muscle ?? '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -91,8 +86,6 @@ export default function AddPlanExerciseModal({
     setScalingNote('');
     setSelectedCategory(null);
     setManualCategory('');
-    setSkipWgerForCurrentName(false);
-    clearSuggestions();
   };
 
   const applyHistoryEntry = (entry: HistoryEntry) => {
@@ -102,10 +95,8 @@ export default function AddPlanExerciseModal({
     setReps(String(entry.reps ?? 10));
     setDuration(String(entry.duration ?? 60));
     setWeightKg(entry.weightKg !== undefined ? String(entry.weightKg) : '');
-    setManualCategory(entry.category ?? '');
-    setSelectedCategory(entry.category ?? null);
-    setSkipWgerForCurrentName(true);
-    clearSuggestions();
+    setManualCategory(entry.muscle ?? '');
+    setSelectedCategory(entry.muscle ?? null);
     setPickerOpen(false);
   };
 
@@ -122,7 +113,7 @@ export default function AddPlanExerciseModal({
       weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
       role: showRole ? role : 'core',
       scalingNote: scalingNote.trim() || undefined,
-      category: (selectedCategory ?? manualCategory) || undefined,
+      muscle: migrateLegacyCategory(selectedCategory ?? manualCategory),
     };
     if (isEditMode && onEdit) {
       onEdit(exercise);
@@ -139,35 +130,34 @@ export default function AddPlanExerciseModal({
 
   return (
     <>
-    <BottomSheet isOpen={isOpen && !pickerOpen} onClose={handleClose}>
-      <div className="flex items-center justify-between mb-6">
-        <HeadingXL as="h2" className="text-2xl">
-          {isEditMode ? 'Edit exercise' : t.add_exercise_title}
-        </HeadingXL>
-        <IconButton
-          size="sm"
-          onClick={handleClose}
-          aria-label={t.close}
-          className="bg-elevated hover:bg-border-subtle"
-        >
-          <X className="w-4 h-4 text-secondary" />
-        </IconButton>
-      </div>
+      <BottomSheet isOpen={isOpen && !pickerOpen} onClose={handleClose}>
+        <div className="flex items-center justify-between mb-6">
+          <HeadingXL as="h2" className="text-2xl">
+            {isEditMode ? 'Edit exercise' : t.add_exercise_title}
+          </HeadingXL>
+          <IconButton
+            size="sm"
+            onClick={handleClose}
+            aria-label={t.close}
+            className="bg-elevated hover:bg-border-subtle"
+          >
+            <X className="w-4 h-4 text-secondary" />
+          </IconButton>
+        </div>
 
-      <div className="space-y-5">
-        {/* Pick from history */}
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
-        >
-          <History className="w-4 h-4" />
-          {t.history_picker_open_button}
-        </button>
+        <div className="space-y-5">
+          {/* Pick from history */}
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
+          >
+            <History className="w-4 h-4" />
+            {t.history_picker_open_button}
+          </button>
 
-        {/* Name */}
-        <div>
-          <div className="relative">
+          {/* Name */}
+          <div>
             <FieldLabel htmlFor="plan-exercise-name">{t.exercise_name_label}</FieldLabel>
             <Input
               id="plan-exercise-name"
@@ -176,176 +166,181 @@ export default function AddPlanExerciseModal({
               onChange={(e) => {
                 setName(e.target.value);
                 setSelectedCategory(null);
-                setSkipWgerForCurrentName(false);
               }}
-              onBlur={() => setTimeout(clearSuggestions, 150)}
               placeholder={t.exercise_name_placeholder}
               autoComplete="off"
             />
-            <ExerciseSuggestionList
-              suggestions={suggestions}
-              loading={loading}
-              onSelect={(n, cat) => {
-                setName(n);
-                setSelectedCategory(cat);
-                setManualCategory(cat ?? '');
-                clearSuggestions();
-              }}
-            />
+            <div className="mt-2">
+              {selectedCategory ? (
+                <p className="mb-1.5 text-xs text-muted">
+                  {t.exercise_category_prefix}{' '}
+                  <span className="text-secondary font-medium">
+                    {t.muscle_labels[selectedCategory] ?? selectedCategory}
+                  </span>
+                </p>
+              ) : (
+                <>
+                  <FieldLabel htmlFor="plan-exercise-category">
+                    {t.exercise_category_label}
+                  </FieldLabel>
+                  <Select
+                    id="plan-exercise-category"
+                    value={manualCategory}
+                    onChange={(e) => setManualCategory(e.target.value as Muscle | '')}
+                  >
+                    <option value="">{t.exercise_category_none}</option>
+                    {ALL_MUSCLE_GROUPS.map((group) => (
+                      <optgroup key={group} label={t.muscle_group_labels[group]}>
+                        {MUSCLES_BY_GROUP[group].map((m) => (
+                          <option key={m} value={m}>
+                            {t.muscle_labels[m] ?? m}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </Select>
+                </>
+              )}
+            </div>
           </div>
-          <div className="mt-2">
-            <FieldLabel htmlFor="plan-exercise-category">{t.exercise_category_label}</FieldLabel>
-            <Select
-              id="plan-exercise-category"
-              value={manualCategory}
-              onChange={(e) => setManualCategory(e.target.value)}
-            >
-              <option value="">{t.exercise_category_none}</option>
-              {WGER_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {t.category_labels[cat] ?? cat}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </div>
 
-        {/* Role toggle */}
-        {showRole && (
+          {/* Role toggle */}
+          {showRole && (
+            <div>
+              <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
+                {t.exercise_role_label}
+              </p>
+              <div className="flex rounded-xl border border-border overflow-hidden">
+                {(['core', 'optional'] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRole(r)}
+                    className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 capitalize ${
+                      role === r
+                        ? 'bg-brand text-white'
+                        : 'bg-transparent text-muted hover:text-secondary'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Type toggle */}
           <div>
             <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
-              {t.exercise_role_label}
+              {t.exercise_type_label}
             </p>
             <div className="flex rounded-xl border border-border overflow-hidden">
-              {(['core', 'optional'] as const).map((r) => (
+              {(['sets-reps', 'sets-duration', 'duration'] as const).map((typ) => (
                 <button
-                  key={r}
-                  onClick={() => setRole(r)}
-                  className={`flex-1 py-3 text-sm font-semibold cursor-pointer transition-colors duration-200 capitalize ${
-                    role === r
+                  key={typ}
+                  onClick={() => setType(typ)}
+                  className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                    type === typ
                       ? 'bg-brand text-white'
                       : 'bg-transparent text-muted hover:text-secondary'
                   }`}
                 >
-                  {r}
+                  {typeLabels[typ]}
                 </button>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Type toggle */}
-        <div>
-          <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">
-            {t.exercise_type_label}
-          </p>
-          <div className="flex rounded-xl border border-border overflow-hidden">
-            {(['sets-reps', 'sets-duration', 'duration'] as const).map((typ) => (
-              <button
-                key={typ}
-                onClick={() => setType(typ)}
-                className={`flex-1 py-3 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
-                  type === typ
-                    ? 'bg-brand text-white'
-                    : 'bg-transparent text-muted hover:text-secondary'
-                }`}
-              >
-                {typeLabels[typ]}
-              </button>
-            ))}
+          {/* Sets + Reps/Duration */}
+          <div className="flex gap-3">
+            {type !== 'duration' && (
+              <div className="flex-1">
+                <FieldLabel htmlFor="plan-sets">{t.exercise_sets_label}</FieldLabel>
+                <Input
+                  id="plan-sets"
+                  type="number"
+                  inputMode="numeric"
+                  value={sets}
+                  onChange={(e) => setSets(e.target.value)}
+                  min={1}
+                />
+              </div>
+            )}
+            {type === 'sets-reps' && (
+              <div className="flex-1">
+                <FieldLabel htmlFor="plan-reps">{t.exercise_reps_label}</FieldLabel>
+                <Input
+                  id="plan-reps"
+                  type="number"
+                  inputMode="numeric"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  min={1}
+                />
+              </div>
+            )}
+            {type !== 'sets-reps' && (
+              <div className="flex-1">
+                <FieldLabel htmlFor="plan-duration">{t.exercise_duration_label}</FieldLabel>
+                <Input
+                  id="plan-duration"
+                  type="number"
+                  inputMode="numeric"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  min={1}
+                />
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Sets + Reps/Duration */}
-        <div className="flex gap-3">
-          {type !== 'duration' && (
-            <div className="flex-1">
-              <FieldLabel htmlFor="plan-sets">{t.exercise_sets_label}</FieldLabel>
+          {/* Weight */}
+          {(type === 'sets-reps' || type === 'sets-duration') && (
+            <div>
+              <FieldLabel htmlFor="plan-weight">
+                {t.exercise_weight_label}{' '}
+                <span className="normal-case text-muted">{t.exercise_scaling_note_optional}</span>
+              </FieldLabel>
               <Input
-                id="plan-sets"
+                id="plan-weight"
                 type="number"
-                inputMode="numeric"
-                value={sets}
-                onChange={(e) => setSets(e.target.value)}
-                min={1}
+                inputMode="decimal"
+                value={weightKg}
+                onChange={(e) => setWeightKg(e.target.value)}
+                placeholder={t.exercise_weight_placeholder}
+                min={0}
               />
             </div>
           )}
-          {type === 'sets-reps' && (
-            <div className="flex-1">
-              <FieldLabel htmlFor="plan-reps">{t.exercise_reps_label}</FieldLabel>
-              <Input
-                id="plan-reps"
-                type="number"
-                inputMode="numeric"
-                value={reps}
-                onChange={(e) => setReps(e.target.value)}
-                min={1}
-              />
-            </div>
-          )}
-          {type !== 'sets-reps' && (
-            <div className="flex-1">
-              <FieldLabel htmlFor="plan-duration">{t.exercise_duration_label}</FieldLabel>
-              <Input
-                id="plan-duration"
-                type="number"
-                inputMode="numeric"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                min={1}
-              />
-            </div>
-          )}
-        </div>
 
-        {/* Weight */}
-        {(type === 'sets-reps' || type === 'sets-duration') && (
+          {/* Scaling note */}
           <div>
-            <FieldLabel htmlFor="plan-weight">
-              Weight (kg) <span className="normal-case text-muted">(optional)</span>
+            <FieldLabel htmlFor="scaling-note">
+              {t.exercise_scaling_note_label}{' '}
+              <span className="normal-case text-muted">{t.exercise_scaling_note_optional}</span>
             </FieldLabel>
             <Input
-              id="plan-weight"
-              type="number"
-              inputMode="decimal"
-              value={weightKg}
-              onChange={(e) => setWeightKg(e.target.value)}
-              placeholder="e.g. 80"
-              min={0}
+              id="scaling-note"
+              type="text"
+              value={scalingNote}
+              onChange={(e) => setScalingNote(e.target.value)}
+              placeholder={t.exercise_scaling_note_placeholder}
             />
           </div>
-        )}
 
-        {/* Scaling note */}
-        <div>
-          <FieldLabel htmlFor="scaling-note">
-            {t.exercise_scaling_note_label}{' '}
-            <span className="normal-case text-muted">{t.exercise_scaling_note_optional}</span>
-          </FieldLabel>
-          <Input
-            id="scaling-note"
-            type="text"
-            value={scalingNote}
-            onChange={(e) => setScalingNote(e.target.value)}
-            placeholder={t.exercise_scaling_note_placeholder}
-          />
+          <Button
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+            className="w-full mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isEditMode ? 'Save changes' : t.add_exercise_title}
+          </Button>
         </div>
-
-        <Button
-          onClick={handleSubmit}
-          disabled={!name.trim()}
-          className="w-full mt-1 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {isEditMode ? 'Save changes' : t.add_exercise_title}
-        </Button>
-      </div>
-    </BottomSheet>
-    <ExerciseHistoryPicker
-      isOpen={pickerOpen}
-      onClose={() => setPickerOpen(false)}
-      onSelect={applyHistoryEntry}
-    />
+      </BottomSheet>
+      <ExerciseHistoryPicker
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={applyHistoryEntry}
+      />
     </>
   );
 }

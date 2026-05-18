@@ -46,6 +46,11 @@
   "stats_unit_kg": "kg",
   "stats_unit_min": "min",
   "stats_category_radar_title": "Training Balance",
+  "stats_radar_view_groups": "Groups",
+  "stats_radar_view_muscles": "Muscles",
+  "muscle_migration_toast_title": "Categories updated",
+  "muscle_migration_toast_body": "We split \"Legs\" into Quads, Hamstrings and Glutes, and added Obliques and Lower back. Your existing \"Legs\" exercises were mapped to Quads — feel free to reclassify them via the edit button on any exercise.",
+  "muscle_migration_toast_dismiss": "Got it",
   "stats_category_other": "Other",
 
   "profile_title": "Profile",
@@ -157,19 +162,31 @@
   "exercise_category_prefix": "Category:",
   "exercise_category_label": "Category (optional)",
   "exercise_category_none": "None",
-  "category_labels": {
-    "Arms": "Arms",
-    "Legs": "Legs",
-    "Abs": "Abs",
-    "Chest": "Chest",
-    "Back": "Back",
-    "Shoulders": "Shoulders",
-    "Calves": "Calves",
-    "Cardio": "Cardio"
+  "muscle_labels": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "arms": "Arms",
+    "quads": "Quads",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Calves",
+    "abs": "Abs",
+    "obliques": "Obliques",
+    "lower_back": "Lower back",
+    "cardio": "Cardio"
+  },
+  "muscle_group_labels": {
+    "upper": "Upper body",
+    "lower": "Lower body",
+    "core": "Core",
+    "cardio": "Cardio"
   },
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
   "exercise_scaling_note_optional": "(optional)",
+  "exercise_weight_label": "Weight (kg)",
+  "exercise_weight_placeholder": "e.g. 80",
   "exercise_scaling_note_placeholder": "e.g. Add 2.5 kg when all reps complete",
   "exercise_suggestions_loading": "Loading suggestions…",
 

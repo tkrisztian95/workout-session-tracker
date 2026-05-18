@@ -1,6 +1,7 @@
 import type { LlmConfig, Exercise } from '../types';
 import { callOpenAI } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/import';
+import { migrateLegacyCategory } from '../muscles';
 
 export type AiImportResult = {
   date: string;
@@ -51,6 +52,21 @@ ${notes}`;
   return parsed.sessions.map((s) => ({
     date: s.date,
     durationMins: typeof s.durationMins === 'number' ? s.durationMins : 60,
-    exercises: s.exercises,
+    exercises: s.exercises.map(normalizeAiExerciseMuscle),
   }));
+}
+
+type AiExercise = AiImportResult['exercises'][number];
+
+/**
+ * Defensive: the LLM may still emit a legacy `category` field or a non-canonical
+ * muscle string. Coerce either into the typed `muscle` enum and drop `category`.
+ */
+function normalizeAiExerciseMuscle(ex: AiExercise & { category?: unknown }): AiExercise {
+  const candidate = typeof ex.muscle === 'string' ? ex.muscle : ex.category;
+  const muscle = migrateLegacyCategory(typeof candidate === 'string' ? candidate : undefined);
+  const rest: AiExercise & { category?: unknown } = { ...ex };
+  delete rest.category;
+  rest.muscle = muscle;
+  return rest;
 }

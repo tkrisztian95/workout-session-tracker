@@ -2,6 +2,20 @@ import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise, Sex
 import { getSex, getAge, getHeightCm, getWeightKg } from '../storage';
 import { callOpenAI } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/plan';
+import { migrateLegacyCategory } from '../muscles';
+
+/**
+ * Defensive: the LLM may still emit a legacy `category` field or a non-canonical
+ * muscle string. Coerce either into the typed `muscle` enum and drop `category`.
+ */
+function normalizePlanExerciseMuscle(ex: PlanExercise & { category?: unknown }): PlanExercise {
+  const candidate = typeof ex.muscle === 'string' ? ex.muscle : ex.category;
+  const muscle = migrateLegacyCategory(typeof candidate === 'string' ? candidate : undefined);
+  const rest: PlanExercise & { category?: unknown } = { ...ex };
+  delete rest.category;
+  rest.muscle = muscle;
+  return rest;
+}
 
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -17,7 +31,7 @@ function summariseExercise(e: PlanExercise): string {
     desc = `${e.name} ${e.duration}s`;
   }
   const tags: string[] = [];
-  if (e.category) tags.push(e.category);
+  if (e.muscle) tags.push(e.muscle);
   if (e.role === 'optional') tags.push('optional');
   if (e.scalingNote) tags.push(`note: ${e.scalingNote}`);
   if (tags.length > 0) desc += ` (${tags.join(', ')})`;
@@ -69,7 +83,7 @@ function summariseSession(session: WorkoutSession): string {
       } else {
         desc = `${e.name} ${e.duration}s`;
       }
-      if (e.category) desc += ` [${e.category}]`;
+      if (e.muscle) desc += ` [${e.muscle}]`;
       return desc;
     })
     .join(', ');
@@ -174,9 +188,9 @@ export async function suggestPlan(
     throw new Error('Response is missing required plan fields (name, days)');
   }
 
-  // Ensure all PlanExercise ids exist (LLM may omit them)
+  // Ensure all PlanExercise ids exist (LLM may omit them) + normalize muscle
   const ensureIds = (exercises: PlanExercise[]): PlanExercise[] =>
-    exercises.map((e) => ({ ...e, id: e.id || crypto.randomUUID() }));
+    exercises.map((e) => normalizePlanExerciseMuscle({ ...e, id: e.id || crypto.randomUUID() }));
 
   const days: PlanDay[] = (parsed.days ?? []).map((d) => ({
     ...d,

@@ -6,7 +6,7 @@ import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import DeletePlanConfirmSheet from '@/components/DeletePlanConfirmSheet';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
 import {
   Button,
@@ -177,7 +177,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
-                    {ex.category && <CategoryBadge category={ex.category} />}
+                    {ex.muscle && <MuscleBadge muscle={ex.muscle} />}
                   </div>
                   <p className="text-brand text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
                   {ex.scalingNote && (

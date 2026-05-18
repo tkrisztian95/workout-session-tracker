@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Stats page displays a training muscle radar chart with a group / muscle view toggle
 
 The system SHALL display a radar chart on the Statistics page showing the distribution of completed sessions across the user's training, giving a visual overview of balance. The chart SHALL support two views — a **Groups** view with up to four axes (Upper, Lower, Core, Cardio) and a **Muscles** view with up to twelve canonical muscle axes plus an `Other` axis for exercises without a muscle assignment. A toggle above the chart SHALL let the user switch between the two views.

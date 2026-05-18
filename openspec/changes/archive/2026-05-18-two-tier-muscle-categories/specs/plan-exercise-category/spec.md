@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Exercises carry an optional typed muscle classification
 
 The `Exercise` and `PlanExercise` data models SHALL each include an optional `muscle` field of a typed enum covering the 12 canonical muscle keys: `chest`, `back`, `shoulders`, `arms`, `quads`, `hamstrings`, `glutes`, `calves`, `abs`, `obliques`, `lower_back`, `cardio`. The field MAY be absent; its absence is valid and indicates no muscle was assigned. The previous free-form `category: string` field is REMOVED from both models.

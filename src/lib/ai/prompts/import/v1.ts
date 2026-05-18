@@ -15,7 +15,7 @@ The notes may describe one or multiple workout sessions. Return a JSON object wi
         "reps": number | undefined,
         "duration": number | undefined,  // seconds
         "weightKg": number | undefined,
-        "category": string | undefined   // e.g. "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"
+        "muscle": string | undefined   // one of: "chest", "back", "shoulders", "arms", "quads", "hamstrings", "glutes", "calves", "abs", "obliques", "lower_back", "cardio". Pick the primary muscle target; omit if none clearly applies.
       }>
     }
   ]
