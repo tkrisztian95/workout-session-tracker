@@ -187,10 +187,10 @@ export default function AddPlanExerciseModal({
               <ExerciseSuggestionList
                 suggestions={suggestions}
                 loading={loading}
-                onSelect={(n, cat) => {
+                onSelect={(n, m) => {
                   setName(n);
-                  setSelectedCategory(cat);
-                  setManualCategory(cat ?? '');
+                  setSelectedCategory(m ?? null);
+                  setManualCategory(m ?? '');
                   clearSuggestions();
                 }}
               />
@@ -205,7 +205,7 @@ export default function AddPlanExerciseModal({
                 <option value="">{t.exercise_category_none}</option>
                 {WGER_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
-                    {t.category_labels[cat] ?? cat}
+                    {(t.category_labels as Record<string, string>)[cat] ?? cat}
                   </option>
                 ))}
               </Select>
