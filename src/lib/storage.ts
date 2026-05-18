@@ -19,13 +19,23 @@ interface LegacyExercise {
 /**
  * Rewrites a single exercise-like record in place: if it has a legacy `category`
  * string, convert it to the typed `muscle` field and drop `category`. Returns
- * true when the record was changed.
+ * true when the record was changed. Records a pending-migration flag when the
+ * legacy value was `Legs` (the lossy mapping that triggers the user toast).
  */
 function migrateExerciseInPlace(ex: LegacyExercise): boolean {
   if (typeof ex.category !== 'string') return false;
+  const legacy = ex.category.trim().toLowerCase();
   const migrated = migrateLegacyCategory(ex.category);
   delete ex.category;
   if (migrated) ex.muscle = migrated;
+  if (legacy === 'legs') {
+    try {
+      localStorage.setItem(KEYS.muscleMigrationPending, 'true');
+    } catch {
+      // localStorage may be unavailable (private mode, quota); migration still
+      // completes — the toast simply won't fire.
+    }
+  }
   return true;
 }
 
@@ -64,6 +74,8 @@ const KEYS = {
   achievements: 'wst_achievements',
   profileCreatedAt: 'wst_profile_created_at',
   hiddenExercises: 'wst_hidden_exercises',
+  muscleMigrationPending: 'wst_muscle_migration_pending',
+  muscleMigrationSeen: 'wst_muscle_migration_seen',
 } as const;
 
 export interface HiddenExerciseKey {
@@ -382,6 +394,25 @@ export function getHiddenExercises(): HiddenExerciseKey[] {
 
 export function saveHiddenExercises(entries: HiddenExerciseKey[]): void {
   localStorage.setItem(KEYS.hiddenExercises, JSON.stringify(entries));
+}
+
+// ─── Muscle migration notice ──────────────────────────────────────────────────
+
+/**
+ * True when the storage layer rewrote at least one `Legs` category to `quads`
+ * during the most recent load and the user has not yet dismissed the notice.
+ */
+export function shouldShowMuscleMigrationNotice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const pending = localStorage.getItem(KEYS.muscleMigrationPending) === 'true';
+  const seen = localStorage.getItem(KEYS.muscleMigrationSeen) === 'true';
+  return pending && !seen;
+}
+
+export function dismissMuscleMigrationNotice(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(KEYS.muscleMigrationSeen, 'true');
+  localStorage.removeItem(KEYS.muscleMigrationPending);
 }
 
 // ─── Consent ──────────────────────────────────────────────────────────────────

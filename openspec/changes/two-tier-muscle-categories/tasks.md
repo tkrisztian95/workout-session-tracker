@@ -65,9 +65,9 @@
 
 ## 10. First-load migration notice
 
-- [ ] 10.1 Add a one-time toast / banner shown on first load after the update, informing the user that `Legs`-tagged exercises were mapped to `Quads` and can be reclassified via the edit flow
-- [ ] 10.2 Store the dismissed flag in localStorage (`wst_muscle_migration_seen` or similar) so the notice only appears once
-- [ ] 10.3 Add the toast copy to all three locales
+- [x] 10.1 Add a one-time toast / banner shown on first load after the update, informing the user that `Legs`-tagged exercises were mapped to `Quads` and can be reclassified via the edit flow
+- [x] 10.2 Store the dismissed flag in localStorage (`wst_muscle_migration_seen` or similar) so the notice only appears once
+- [x] 10.3 Add the toast copy to all three locales
 
 ## 11. Cleanup
 
