@@ -1,10 +1,10 @@
 ## 1. Define the muscle taxonomy
 
-- [ ] 1.1 Create `src/lib/muscles.ts` with `Muscle` and `MuscleGroup` union types
-- [ ] 1.2 Add the `MUSCLE_TO_GROUP` static map covering all 12 muscles
-- [ ] 1.3 Add `ALL_MUSCLES: Muscle[]` and `MUSCLES_BY_GROUP: Record<MuscleGroup, Muscle[]>` helpers used by the picker and radar
-- [ ] 1.4 Add `migrateLegacyCategory(value: string | undefined): Muscle | undefined` implementing the legacy mapping table from `design.md` §3
-- [ ] 1.5 Unit-test `migrateLegacyCategory` for every legacy label, `undefined`, unknown strings, and case-insensitive matches
+- [x] 1.1 Create `src/lib/muscles.ts` with `Muscle` and `MuscleGroup` union types
+- [x] 1.2 Add the `MUSCLE_TO_GROUP` static map covering all 12 muscles
+- [x] 1.3 Add `ALL_MUSCLES: Muscle[]` and `MUSCLES_BY_GROUP: Record<MuscleGroup, Muscle[]>` helpers used by the picker and radar
+- [x] 1.4 Add `migrateLegacyCategory(value: string | undefined): Muscle | undefined` implementing the legacy mapping table from `design.md` §3
+- [x] 1.5 Unit-test `migrateLegacyCategory` for every legacy label, `undefined`, unknown strings, and case-insensitive matches
 
 ## 2. Update the schema
 
