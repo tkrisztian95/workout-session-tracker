@@ -10,13 +10,11 @@
   "onboarding_body_metrics_title": "Mesélj magadról",
   "onboarding_body_metrics_subtitle": "Opcionális — segít személyre szabni az AI-generált terveket.",
   "onboarding_skip": "Kihagyás",
-
   "nav_home": "Főoldal",
   "nav_plans": "Tervek",
   "nav_history": "Előzmények",
   "nav_stats": "Statisztika",
   "nav_profile": "Profil",
-
   "stats_title": "Statisztikák",
   "stats_total_sessions": "Edzések",
   "stats_total_volume": "Összes súly",
@@ -47,7 +45,6 @@
   "stats_unit_min": "perc",
   "stats_category_radar_title": "Edzési egyensúly",
   "stats_category_other": "Egyéb",
-
   "profile_title": "Profil",
   "profile_name_label": "Megjelenítési név",
   "profile_save_name": "Név mentése",
@@ -77,7 +74,6 @@
   "profile_reset_warning": "Ez véglegesen törli az összes tervedet, edzésedet és beállításodat.",
   "profile_reset_confirm": "Igen, mindent törlök",
   "profile_reset_cancel": "Mégse",
-
   "back": "Vissza",
   "close": "Bezárás",
   "discard": "Elvetés",
@@ -87,31 +83,25 @@
   "save_label": "Mentés",
   "save_plan": "Terv mentése",
   "save_changes": "Mentés",
-
   "greeting_first": "Üdvözlünk, {name}!",
   "greeting_returning": "Üdvözlünk újra, {name}!",
-
   "home_title": "Edzés indítása",
   "home_follow_plan": "Terv követése",
   "home_free_session": "Szabad edzés",
   "home_start_free_session": "Szabad edzés indítása",
   "home_create_plan": "Terv létrehozása",
-
   "choose_plan_title": "Terv kiválasztása",
   "no_plans_title": "Még nincs terv",
   "no_plans_go_to_plans": "Menj a Tervekhez, és hozz létre egyet",
-
   "choose_day_title": "Nap kiválasztása",
   "next_badge": "Következő",
   "today_badge": "Ma",
-
   "optional_exercises_title": "Opcionális gyakorlatok",
   "optional_exercises_subtitle": "Az alap gyakorlatok előre kiválasztva. Adj hozzá opcionálisakat.",
   "core_always_included": "Alap (mindig szerepel)",
   "optional_label": "Opcionális",
   "no_optional_in_day": "Ebben a napban nincs opcionális gyakorlat.",
   "start_session": "Edzés indítása",
-
   "free_session": "Szabad edzés",
   "session_progress": "{remaining} hátra · {done} kész",
   "session_progress_skipped": "· {skipped} kihagyva",
@@ -130,7 +120,6 @@
   "finish_early_title": "Befejezed korán?",
   "finish_early_subtitle": "Még {count} gyakorlat van hátra.",
   "finish_anyway": "Mégis befejezem",
-
   "session_complete_title": "Edzés befejezve!",
   "session_complete_subtitle": "Szép munka! Íme az eredményed.",
   "session_complete_exercises": "gyakorlat",
@@ -143,7 +132,6 @@
   "session_rate_cta": "Edzés mentése",
   "session_rate_prompt": "Hogy érezted magad?",
   "session_rate_skip": "Mentés értékelés nélkül",
-
   "add_exercise_title": "Gyakorlat hozzáadása",
   "exercise_name_label": "Gyakorlat neve",
   "exercise_name_placeholder": "pl. Fekvenyomás",
@@ -164,7 +152,7 @@
     "Chest": "Mell",
     "Back": "Hát",
     "Shoulders": "Vállak",
-    "Calves": "Lábikra",
+    "Calves": "Vádli / Lábikra",
     "Cardio": "Kardió"
   },
   "exercise_role_label": "Szerep",
@@ -172,7 +160,6 @@
   "exercise_scaling_note_optional": "(opcionális)",
   "exercise_scaling_note_placeholder": "pl. Adj 2,5 kg-ot, ha az összes ismétlést elvégezted",
   "exercise_suggestions_loading": "Javaslatok betöltése…",
-
   "history_picker_open_button": "Választás az előzményekből",
   "history_picker_title": "Választás az előzményekből",
   "history_picker_search_placeholder": "Gyakorlat keresése…",
@@ -185,7 +172,6 @@
   "history_picker_show_hidden": "Rejtettek mutatása ({n})",
   "history_picker_hide_hidden": "Rejtettek elrejtése",
   "history_picker_unhide": "Visszaállítás",
-
   "plan_day_name_placeholder": "Nap neve (pl. A nap)",
   "plan_day_schedule": "Adott napok ütemezése",
   "plan_day_core_exercises": "Alap gyakorlatok",
@@ -194,7 +180,6 @@
   "plan_day_no_optional": "Nincs opcionális gyakorlat",
   "plan_day_add_exercise": "Gyakorlat hozzáadása",
   "weekday_abbr": ["V", "H", "K", "Sze", "Cs", "P", "Szo"],
-
   "plans_title": "Terveim",
   "plans_no_plans_title": "Még nincs terv",
   "plans_no_plans_subtitle": "Koppints az alábbi gombra az első terved létrehozásához",
@@ -227,7 +212,6 @@
   "plan_scheduled_duration_placeholder": "pl. 4",
   "plan_scheduled_duration_error": "Az időtartamnak 1 és 52 hét között kell lennie.",
   "delete_plan_body": "„{name}\" véglegesen törlődik. Ez a művelet nem vonható vissza.",
-
   "ai_modal_title": "AI Tervjavaslat",
   "ai_modal_subtitle": "Személyre szabott edzéstervet kapsz az edzési előzményeid és meglévő terveid alapján.",
   "ai_error_open_link": "Megnyitás ↗",
@@ -251,12 +235,10 @@
   "ai_validation_title": "Nem fitness témájú",
   "ai_regenerate_button": "Újragenerálás",
   "ai_use_plan_button": "Ezt a tervet választom",
-
   "last_workout_label": "Utolsó edzés",
   "last_session_today": "Ma",
   "last_session_yesterday": "Tegnap",
   "last_session_days_ago": "{n} napja",
-
   "history_activity_label": "Aktivitás",
   "history_title": "Előzmények",
   "history_no_sessions_title": "Még nincs edzés",
@@ -277,10 +259,8 @@
   "no_exercises_recorded": "Nem rögzítettek gyakorlatot.",
   "session_started_at": "Kezdés",
   "session_paused": "Szünet",
-
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",
-
   "consent_title": "A quick note on privacy",
   "consent_subtitle": "Átlátható összefoglaló arról, hogy milyen adatok hagyják el az eszközödet.",
   "consent_local_data_title": "Your data stays on your device",
@@ -295,17 +275,14 @@
   "analytics_description": "Help improve the app by sharing anonymous usage events with PostHog (EU).",
   "analytics_enabled": "Enabled",
   "analytics_disabled": "Disabled",
-
   "about_title": "About",
   "about_version": "Version",
   "about_license": "MIT License",
   "about_source_code": "Source Code",
   "about_privacy_policy": "Privacy Policy",
   "about_data_summary": "What data leaves your device",
-
   "privacy_policy_title": "Privacy Policy",
   "privacy_policy_close": "Close",
-
   "exercise_skip": "Kihagyás",
   "exercise_remove_set": "Törlés",
   "exercise_set_slot": "{n}. sor",
@@ -317,7 +294,6 @@
   "exercise_mark_complete_aria": "{name} befejezettnek jelölése",
   "exercise_unmark_complete_aria": "{name} befejezettség visszavonása",
   "exercise_dismiss_aria": "{name} kihagyása",
-
   "new_history_session_title": "Új edzés",
   "new_history_session_date_label": "Dátum",
   "new_history_session_duration_label": "Időtartam (perc)",
@@ -328,7 +304,6 @@
   "history_exercise_editor_remove_set": "Sor törlése",
   "history_exercise_editor_duration_label": "Időtartam (mp)",
   "history_exercise_editor_confirm": "Kész",
-
   "new_history_session_type_title": "Edzés típusa",
   "new_history_session_from_plan": "Edzéstervből",
   "new_history_session_free": "Szabad edzés",
@@ -341,10 +316,8 @@
   "new_history_session_free_desc": "Gyakorlatok manuális rögzítése terv nélkül",
   "new_history_exercises_label": "Gyakorlatok",
   "new_history_optional_label": "opcionális",
-
   "new_history_session_ai_import": "Importálás jegyzetekből (AI)",
   "new_history_session_ai_import_desc": "Az AI kielemzi az edzésjegyzeteidet",
-
   "ai_import_title": "Importálás jegyzetekből",
   "ai_import_subtitle": "Illeszd be az edzésjegyzeteidet, és az AI kinyeri a gyakorlatokat, sorozatokat és súlyokat.",
   "ai_import_notes_label": "Edzésjegyzetek",
@@ -361,19 +334,16 @@
   "ai_import_add_exercise": "Gyakorlat hozzáadása",
   "ai_import_remove_exercise": "Gyakorlat törlése",
   "ai_import_remove_session": "Edzés törlése",
-
   "profile_achievements_label": "Eredmények",
   "achievements_title": "Eredmények",
   "achievement_unlocked_on": "Feloldva: {date}",
   "achievement_celebration_label": "Eredmény feloldva!",
   "achievement_celebration_dismiss": "Tovább",
-
   "achievement_track_sessions": "Edzések",
   "achievement_track_plans": "Tervek",
   "achievement_track_weekly": "Heti",
   "achievement_track_tenure": "Időtartam",
   "achievement_track_volume": "Terhelés",
-
   "achievement_session_first_name": "Első ismétlés",
   "achievement_session_first_desc": "Teljesítetted az első edzésedet",
   "achievement_session_10_name": "10 edzés",
@@ -386,7 +356,6 @@
   "achievement_session_100_desc": "Teljesítettél 100 edzést",
   "achievement_session_250_name": "Legenda",
   "achievement_session_250_desc": "Teljesítettél 250 edzést",
-
   "achievement_plan_first_created_name": "Tervező",
   "achievement_plan_first_created_desc": "Létrehoztad az első edzéstervedet",
   "achievement_plan_first_completed_name": "Terv teljesítő",
@@ -403,7 +372,6 @@
   "achievement_plan_5_created_desc": "5 edzéstervet hoztál létre",
   "achievement_plan_10_created_name": "10 terv",
   "achievement_plan_10_created_desc": "10 edzéstervet hoztál létre",
-
   "achievement_weekly_2_name": "Heti 2 nap",
   "achievement_weekly_2_desc": "2 különböző napon edzettél az elmúlt 7 napban",
   "achievement_weekly_3_name": "Heti 3 nap",
@@ -412,7 +380,6 @@
   "achievement_weekly_4_desc": "4 különböző napon edzettél az elmúlt 7 napban",
   "achievement_weekly_5_name": "Heti 5 nap",
   "achievement_weekly_5_desc": "5 különböző napon edzettél az elmúlt 7 napban",
-
   "achievement_tenure_1month_name": "1 hónap",
   "achievement_tenure_1month_desc": "1 hónapja edzesz",
   "achievement_tenure_3months_name": "3 hónap",
@@ -423,14 +390,12 @@
   "achievement_tenure_1year_desc": "1 éve edzesz",
   "achievement_tenure_2years_name": "2 év erőben",
   "achievement_tenure_2years_desc": "2 éve edzesz",
-
   "achievement_volume_1k_name": "1 000 kg",
   "achievement_volume_1k_desc": "Összesen 1 000 kg-ot emelted",
   "achievement_volume_10k_name": "10 000 kg",
   "achievement_volume_10k_desc": "Összesen 10 000 kg-ot emelted",
   "achievement_volume_100k_name": "100 000 kg",
   "achievement_volume_100k_desc": "Összesen 100 000 kg-ot emelted",
-
   "achievement_session_first_edited_name": "Javítgató",
   "achievement_session_first_edited_desc": "Szerkesztettél egy befejezett edzést",
   "achievement_session_first_imported_name": "AI úttörő",
