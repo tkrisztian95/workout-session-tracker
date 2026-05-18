@@ -17,7 +17,7 @@ function summariseExercise(e: PlanExercise): string {
     desc = `${e.name} ${e.duration}s`;
   }
   const tags: string[] = [];
-  if (e.category) tags.push(e.category);
+  if (e.muscle) tags.push(e.muscle);
   if (e.role === 'optional') tags.push('optional');
   if (e.scalingNote) tags.push(`note: ${e.scalingNote}`);
   if (tags.length > 0) desc += ` (${tags.join(', ')})`;
@@ -69,7 +69,7 @@ function summariseSession(session: WorkoutSession): string {
       } else {
         desc = `${e.name} ${e.duration}s`;
       }
-      if (e.category) desc += ` [${e.category}]`;
+      if (e.muscle) desc += ` [${e.muscle}]`;
       return desc;
     })
     .join(', ');

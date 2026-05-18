@@ -69,7 +69,7 @@ function planExerciseToExercise(pe: PlanExercise): Exercise {
     reps: pe.reps,
     duration: pe.duration,
     weightKg: pe.weightKg,
-    category: pe.category,
+    muscle: pe.muscle,
     scalingNote: pe.scalingNote,
     completed: false,
   };
@@ -458,7 +458,7 @@ export default function NewHistorySessionSheet({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium text-sm text-foreground">{exercise.name}</p>
-                          {exercise.category && <CategoryBadge category={exercise.category} />}
+                          {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
                         </div>
                         <p className="text-muted text-xs mt-0.5">
                           {formatExerciseDetail(exercise)}

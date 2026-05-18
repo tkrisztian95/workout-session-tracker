@@ -177,7 +177,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
-                    {ex.category && <CategoryBadge category={ex.category} />}
+                    {ex.muscle && <CategoryBadge category={ex.muscle} />}
                   </div>
                   <p className="text-brand text-xs mt-0.5">{sharedExerciseDetail(ex)}</p>
                   {ex.scalingNote && (

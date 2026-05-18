@@ -8,9 +8,9 @@
 
 ## 2. Update the schema
 
-- [ ] 2.1 Rename `Exercise.category?: string` to `Exercise.muscle?: Muscle` in `src/lib/types.ts`
-- [ ] 2.2 Rename `PlanExercise.category?: string` to `PlanExercise.muscle?: Muscle` in `src/lib/types.ts`
-- [ ] 2.3 Run `tsc --noEmit` and fix every compile error surfaced by the rename (this is intentional — the rename is the cutover signal)
+- [x] 2.1 Rename `Exercise.category?: string` to `Exercise.muscle?: Muscle` in `src/lib/types.ts`
+- [x] 2.2 Rename `PlanExercise.category?: string` to `PlanExercise.muscle?: Muscle` in `src/lib/types.ts`
+- [x] 2.3 Run `tsc --noEmit` and fix every compile error surfaced by the rename (this is intentional — the rename is the cutover signal)
 
 ## 3. Migrate stored data lazily on read
 
