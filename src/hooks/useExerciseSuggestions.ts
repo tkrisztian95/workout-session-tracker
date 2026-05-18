@@ -1,3 +1,6 @@
+// TODO: Remove this hook entirely. It was unwired from the add-exercise
+// modals; no callers remain. Delete alongside `src/lib/wgerClient.ts` and
+// `src/components/ExerciseSuggestionList.tsx` in a follow-up commit.
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchExercises, type WgerExercise } from '@/lib/wgerClient';
 

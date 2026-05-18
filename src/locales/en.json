@@ -185,6 +185,8 @@
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
   "exercise_scaling_note_optional": "(optional)",
+  "exercise_weight_label": "Weight (kg)",
+  "exercise_weight_placeholder": "e.g. 80",
   "exercise_scaling_note_placeholder": "e.g. Add 2.5 kg when all reps complete",
   "exercise_suggestions_loading": "Loading suggestions…",
 

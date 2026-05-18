@@ -185,6 +185,8 @@
   "exercise_role_label": "Rolle",
   "exercise_scaling_note_label": "Skalierungsnotiz",
   "exercise_scaling_note_optional": "(optional)",
+  "exercise_weight_label": "Gewicht (kg)",
+  "exercise_weight_placeholder": "z. B. 80",
   "exercise_scaling_note_placeholder": "z.B. 2,5 kg hinzufügen, wenn alle Wdh. fertig",
   "exercise_suggestions_loading": "Vorschläge werden geladen…",
 

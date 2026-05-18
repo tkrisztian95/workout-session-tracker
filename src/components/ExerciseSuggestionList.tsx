@@ -1,5 +1,8 @@
 'use client';
 
+// TODO: Remove this component entirely. The add-exercise modals no longer
+// render it; delete alongside `src/lib/wgerClient.ts` and
+// `src/hooks/useExerciseSuggestions.ts` in a follow-up commit.
 import type { WgerExercise } from '@/lib/wgerClient';
 import type { Muscle } from '@/lib/muscles';
 import { useTranslations } from '@/lib/locale-context';

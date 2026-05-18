@@ -173,6 +173,8 @@
   "exercise_role_label": "Szerep",
   "exercise_scaling_note_label": "Megjegyzés",
   "exercise_scaling_note_optional": "(opcionális)",
+  "exercise_weight_label": "Súly (kg)",
+  "exercise_weight_placeholder": "pl. 80",
   "exercise_scaling_note_placeholder": "pl. Adj 2,5 kg-ot, ha az összes ismétlést elvégezted",
   "exercise_suggestions_loading": "Javaslatok betöltése…",
   "history_picker_open_button": "Választás az előzményekből",
