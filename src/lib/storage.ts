@@ -7,6 +7,7 @@ import type {
   AchievementRecord,
 } from './types';
 import type { Locale } from './i18n';
+import type { Muscle } from './muscles';
 
 const KEYS = {
   plans: 'wst_plans',
@@ -28,7 +29,7 @@ const KEYS = {
 
 export interface HiddenExerciseKey {
   nameKey: string;
-  category?: string;
+  muscle?: Muscle;
 }
 
 // ─── Plans ────────────────────────────────────────────────────────────────────

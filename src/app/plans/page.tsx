@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { getPlans, togglePlanStatus, savePlan, duplicatePlan } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
+import type { Muscle } from '@/lib/muscles';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
 import CategoryBadge from '@/components/CategoryBadge';
@@ -156,12 +157,12 @@ export default function PlansPage() {
   );
 }
 
-function getPlanCategories(plan: WorkoutPlan): string[] {
+function getPlanMuscles(plan: WorkoutPlan): Muscle[] {
   const all = [
     ...plan.sharedExercises,
     ...plan.days.flatMap((d) => [...d.coreExercises, ...d.optionalExercises]),
   ];
-  return [...new Set(all.map((e) => e.category).filter((c): c is string => Boolean(c)))];
+  return [...new Set(all.map((e) => e.muscle).filter((m): m is Muscle => Boolean(m)))];
 }
 
 function PlanCard({
@@ -175,7 +176,7 @@ function PlanCard({
 }) {
   const t = useTranslations();
   const isCompleted = plan.status === 'completed';
-  const categories = getPlanCategories(plan);
+  const muscles = getPlanMuscles(plan);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -207,10 +208,10 @@ function PlanCard({
           )}
           {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
         </p>
-        {categories.length > 0 && (
+        {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {categories.map((cat) => (
-              <CategoryBadge key={cat} category={cat} />
+            {muscles.map((m) => (
+              <CategoryBadge key={m} category={m} />
             ))}
           </div>
         )}

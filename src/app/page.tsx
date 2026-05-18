@@ -20,6 +20,7 @@ import AchievementCelebration from '@/components/AchievementCelebration';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useTranslations } from '@/lib/locale-context';
 import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
+import type { Muscle } from '@/lib/muscles';
 import { StartScreen } from './_views/StartScreen';
 import { PlanPickerScreen } from './_views/PlanPickerScreen';
 import { DayPickerScreen } from './_views/DayPickerScreen';
@@ -80,7 +81,7 @@ export default function HomePage() {
       duration?: number;
       weightKg?: number;
       scalingNote?: string;
-      category?: string;
+      muscle?: Muscle;
     }): Exercise => ({
       id: crypto.randomUUID(),
       name: ex.name,
@@ -90,7 +91,7 @@ export default function HomePage() {
       duration: ex.duration,
       weightKg: ex.weightKg,
       scalingNote: ex.scalingNote,
-      category: ex.category,
+      muscle: ex.muscle,
     });
     const sharedExercises: Exercise[] = (selectedPlan.sharedExercises ?? []).map(toExercise);
     const coreExercises: Exercise[] = selectedDay.coreExercises.map(toExercise);

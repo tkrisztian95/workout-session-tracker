@@ -7,7 +7,7 @@ export type ExpectedExercise = {
   reps?: number;
   duration?: number;
   weightKg?: number;
-  category?: string;
+  muscle?: string;
 };
 
 export type ExpectedSession = {
@@ -79,11 +79,11 @@ function scoreSession(expected: ExpectedSession, actual: AiImportResult): Sessio
         pass: match.weightKg !== undefined && Math.abs(exp.weightKg - match.weightKg) <= 0.5,
       };
     }
-    if (exp.category !== undefined) {
-      fields.category = {
-        expected: exp.category,
-        actual: match.category,
-        pass: match.category !== undefined && normalize(exp.category) === normalize(match.category),
+    if (exp.muscle !== undefined) {
+      fields.muscle = {
+        expected: exp.muscle,
+        actual: match.muscle,
+        pass: match.muscle !== undefined && normalize(exp.muscle) === normalize(match.muscle),
       };
     }
 

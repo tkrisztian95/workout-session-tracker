@@ -12,6 +12,8 @@ export interface LlmConfig {
 
 // ─── Exercise (used in sessions) ─────────────────────────────────────────────
 
+import type { Muscle } from './muscles';
+
 export interface LoggedSet {
   weight: number; // kg
   reps: number;
@@ -27,7 +29,7 @@ export interface Exercise {
   duration?: number; // seconds; present for sets-duration and duration
   weightKg?: number;
   scalingNote?: string;
-  category?: string;
+  muscle?: Muscle;
   completed?: boolean; // in-session tracking
   dismissed?: boolean; // in-session tracking
   completedAt?: string; // ISO timestamp set when exercise is marked complete
@@ -46,7 +48,7 @@ export interface PlanExercise {
   weightKg?: number;
   role: 'core' | 'optional';
   scalingNote?: string;
-  category?: string;
+  muscle?: Muscle;
 }
 
 export interface PlanDay {

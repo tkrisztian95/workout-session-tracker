@@ -17,16 +17,8 @@ interface Props {
 export default function ExerciseHistoryPicker({ isOpen, onClose, onSelect }: Props) {
   const t = useTranslations();
   const { locale } = useLocale();
-  const {
-    entries,
-    hiddenCount,
-    search,
-    setSearch,
-    showHidden,
-    setShowHidden,
-    hide,
-    unhide,
-  } = useExerciseHistory({ refreshKey: isOpen });
+  const { entries, hiddenCount, search, setSearch, showHidden, setShowHidden, hide, unhide } =
+    useExerciseHistory({ refreshKey: isOpen });
 
   const [openMenuKey, setOpenMenuKey] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -95,10 +87,10 @@ export default function ExerciseHistoryPicker({ isOpen, onClose, onSelect }: Pro
                         <span className="text-foreground text-sm font-medium truncate">
                           {entry.name}
                         </span>
-                        {entry.category && (
+                        {entry.muscle && (
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-elevated text-secondary shrink-0">
-                            {(t.category_labels as Record<string, string>)[entry.category] ??
-                              entry.category}
+                            {(t.category_labels as Record<string, string>)[entry.muscle] ??
+                              entry.muscle}
                           </span>
                         )}
                       </div>

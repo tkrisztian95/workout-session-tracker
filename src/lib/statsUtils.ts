@@ -311,7 +311,7 @@ export function getCategoryDistribution(sessions: WorkoutSession[]): CategoryDis
   for (const session of completed) {
     const seen = new Set<string>();
     for (const exercise of session.exercises) {
-      const cat = exercise.category?.trim() || 'Other';
+      const cat = exercise.muscle?.trim() || 'Other';
       if (!seen.has(cat)) {
         seen.add(cat);
         map.set(cat, (map.get(cat) ?? 0) + 1);

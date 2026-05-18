@@ -1,10 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  getHiddenExercises,
-  getPlans,
-  getSessions,
-  saveHiddenExercises,
-} from '@/lib/storage';
+import { getHiddenExercises, getPlans, getSessions, saveHiddenExercises } from '@/lib/storage';
 import {
   canonicalExerciseKey,
   deriveExerciseHistory,
@@ -40,10 +35,7 @@ export function useExerciseHistory(options: UseExerciseHistoryOptions = {}) {
     [snapshot],
   );
 
-  const hiddenCount = useMemo(
-    () => allEntries.filter((e) => e.isHidden).length,
-    [allEntries],
-  );
+  const hiddenCount = useMemo(() => allEntries.filter((e) => e.isHidden).length, [allEntries]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -53,9 +45,7 @@ export function useExerciseHistory(options: UseExerciseHistoryOptions = {}) {
     }
     if (q) {
       list = list.filter(
-        (e) =>
-          e.name.toLowerCase().includes(q) ||
-          (e.category ?? '').toLowerCase().includes(q),
+        (e) => e.name.toLowerCase().includes(q) || (e.muscle ?? '').toLowerCase().includes(q),
       );
     }
     return list;
@@ -63,20 +53,18 @@ export function useExerciseHistory(options: UseExerciseHistoryOptions = {}) {
 
   const hide = useCallback((entry: HistoryEntry) => {
     const current = getHiddenExercises();
-    const targetKey = canonicalExerciseKey(entry.name, entry.category);
-    if (current.some((h) => canonicalExerciseKey(h.nameKey, h.category) === targetKey)) {
+    const targetKey = canonicalExerciseKey(entry.name, entry.muscle);
+    if (current.some((h) => canonicalExerciseKey(h.nameKey, h.muscle) === targetKey)) {
       return;
     }
-    saveHiddenExercises([...current, { nameKey: entry.nameKey, category: entry.category }]);
+    saveHiddenExercises([...current, { nameKey: entry.nameKey, muscle: entry.muscle }]);
     setVersion((v) => v + 1);
   }, []);
 
   const unhide = useCallback((entry: HistoryEntry) => {
     const current = getHiddenExercises();
-    const targetKey = canonicalExerciseKey(entry.name, entry.category);
-    const next = current.filter(
-      (h) => canonicalExerciseKey(h.nameKey, h.category) !== targetKey,
-    );
+    const targetKey = canonicalExerciseKey(entry.name, entry.muscle);
+    const next = current.filter((h) => canonicalExerciseKey(h.nameKey, h.muscle) !== targetKey);
     if (next.length === current.length) return;
     saveHiddenExercises(next);
     setVersion((v) => v + 1);

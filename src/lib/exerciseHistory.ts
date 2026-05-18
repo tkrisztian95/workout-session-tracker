@@ -1,11 +1,12 @@
 import type { Exercise, PlanExercise, WorkoutPlan, WorkoutSession } from './types';
 import type { HiddenExerciseKey } from './storage';
+import type { Muscle } from './muscles';
 
 export interface HistoryEntry {
   key: string;
   nameKey: string;
   name: string;
-  category?: string;
+  muscle?: Muscle;
   type: Exercise['type'];
   sets?: number;
   reps?: number;
@@ -15,10 +16,10 @@ export interface HistoryEntry {
   isHidden: boolean;
 }
 
-export function canonicalExerciseKey(name: string, category?: string): string {
+export function canonicalExerciseKey(name: string, muscle?: string): string {
   const nameKey = name.trim().toLowerCase();
-  const cat = (category ?? '').trim().toLowerCase();
-  return cat ? `${nameKey}|${cat}` : nameKey;
+  const m = (muscle ?? '').trim().toLowerCase();
+  return m ? `${nameKey}|${m}` : nameKey;
 }
 
 function nameKeyOnly(name: string): string {
@@ -27,7 +28,7 @@ function nameKeyOnly(name: string): string {
 
 interface CandidateExercise {
   name: string;
-  category?: string;
+  muscle?: Muscle;
   type: Exercise['type'];
   sets?: number;
   reps?: number;
@@ -39,7 +40,7 @@ interface CandidateExercise {
 function fromSessionExercise(ex: Exercise, timestamp: string): CandidateExercise {
   return {
     name: ex.name,
-    category: ex.category,
+    muscle: ex.muscle,
     type: ex.type,
     sets: ex.sets,
     reps: ex.reps,
@@ -52,7 +53,7 @@ function fromSessionExercise(ex: Exercise, timestamp: string): CandidateExercise
 function fromPlanExercise(ex: PlanExercise, timestamp: string): CandidateExercise {
   return {
     name: ex.name,
-    category: ex.category,
+    muscle: ex.muscle,
     type: ex.type,
     sets: ex.sets,
     reps: ex.reps,
@@ -62,10 +63,7 @@ function fromPlanExercise(ex: PlanExercise, timestamp: string): CandidateExercis
   };
 }
 
-function collectCandidates(
-  sessions: WorkoutSession[],
-  plans: WorkoutPlan[],
-): CandidateExercise[] {
+function collectCandidates(sessions: WorkoutSession[], plans: WorkoutPlan[]): CandidateExercise[] {
   const out: CandidateExercise[] = [];
   for (const session of sessions) {
     const ts = session.completedAt;
@@ -109,16 +107,14 @@ export function deriveExerciseHistory(
 
   const map = new Map<string, CandidateExercise>();
   for (const c of candidates) {
-    const key = canonicalExerciseKey(c.name, c.category);
+    const key = canonicalExerciseKey(c.name, c.muscle);
     const prev = map.get(key);
     if (!prev || c.timestamp > prev.timestamp) {
       map.set(key, c);
     }
   }
 
-  const hiddenSet = new Set(
-    hidden.map((h) => canonicalExerciseKey(h.nameKey, h.category)),
-  );
+  const hiddenSet = new Set(hidden.map((h) => canonicalExerciseKey(h.nameKey, h.muscle)));
 
   const entries: HistoryEntry[] = [];
   for (const [key, c] of map) {
@@ -128,7 +124,7 @@ export function deriveExerciseHistory(
       key,
       nameKey: nameKeyOnly(c.name),
       name: c.name,
-      category: c.category,
+      muscle: c.muscle,
       type: c.type,
       sets: c.sets,
       reps: c.reps,

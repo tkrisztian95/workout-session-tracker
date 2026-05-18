@@ -36,7 +36,7 @@ export function SessionExerciseItem({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="text-muted font-medium text-sm">{exercise.name}</p>
-            {exercise.category && <CategoryBadge category={exercise.category} />}
+            {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
           </div>
           <p className="text-dim text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
         </div>
@@ -75,7 +75,7 @@ export function SessionExerciseItem({
           >
             {exercise.name}
           </p>
-          {exercise.category && <CategoryBadge category={exercise.category} />}
+          {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
         </div>
         <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
         {exercise.loggedSets && exercise.loggedSets.length > 0 && (
