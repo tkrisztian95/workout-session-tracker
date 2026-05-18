@@ -8,8 +8,8 @@ import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
 import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { useTranslations } from '@/lib/locale-context';
-import { WGER_CATEGORIES } from '@/lib/wgerClient';
-import { migrateLegacyCategory } from '@/lib/muscles';
+import type { Muscle } from '@/lib/muscles';
+import { ALL_MUSCLE_GROUPS, MUSCLES_BY_GROUP, migrateLegacyCategory } from '@/lib/muscles';
 import { ModalSheet, Button, FieldLabel, Input, Select } from '@/components/ui';
 
 interface Props {
@@ -35,8 +35,8 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   const [durationMins, setDurationMins] = useState('1');
   const [durationSecs, setDurationSecs] = useState('0');
   const [weightKg, setWeightKg] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [manualCategory, setManualCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<Muscle | null>(null);
+  const [manualCategory, setManualCategory] = useState<Muscle | ''>('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [skipWgerForCurrentName, setSkipWgerForCurrentName] = useState(false);
 
@@ -170,25 +170,34 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
               />
             </div>
             <div className="mt-2">
-              {selectedCategory && (
+              {selectedCategory ? (
                 <p className="mb-1.5 text-xs text-muted">
                   {t.exercise_category_prefix}{' '}
-                  <span className="text-secondary font-medium">{selectedCategory}</span>
+                  <span className="text-secondary font-medium">
+                    {t.muscle_labels[selectedCategory] ?? selectedCategory}
+                  </span>
                 </p>
+              ) : (
+                <>
+                  <FieldLabel htmlFor="exercise-category">{t.exercise_category_label}</FieldLabel>
+                  <Select
+                    id="exercise-category"
+                    value={manualCategory}
+                    onChange={(e) => setManualCategory(e.target.value as Muscle | '')}
+                  >
+                    <option value="">{t.exercise_category_none}</option>
+                    {ALL_MUSCLE_GROUPS.map((group) => (
+                      <optgroup key={group} label={t.muscle_group_labels[group]}>
+                        {MUSCLES_BY_GROUP[group].map((m) => (
+                          <option key={m} value={m}>
+                            {t.muscle_labels[m] ?? m}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </Select>
+                </>
               )}
-              <FieldLabel htmlFor="exercise-category">{t.exercise_category_label}</FieldLabel>
-              <Select
-                id="exercise-category"
-                value={manualCategory}
-                onChange={(e) => setManualCategory(e.target.value)}
-              >
-                <option value="">{t.exercise_category_none}</option>
-                {WGER_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {t.muscle_labels[cat] ?? cat}
-                  </option>
-                ))}
-              </Select>
             </div>
           </div>
 
