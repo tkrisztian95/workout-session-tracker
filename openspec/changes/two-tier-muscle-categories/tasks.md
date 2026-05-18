@@ -57,11 +57,11 @@
 
 ## 9. Localisation
 
-- [ ] 9.1 Replace the existing `category_labels` block in `src/locales/en.json` with a `muscle_labels` block covering all 12 keys (`chest`, `back`, `shoulders`, `arms`, `quads`, `hamstrings`, `glutes`, `calves`, `abs`, `obliques`, `lower_back`, `cardio`)
-- [ ] 9.2 Add a `muscle_group_labels` block in `en.json` covering `upper`, `lower`, `core`, `cardio`
-- [ ] 9.3 Mirror both blocks in `src/locales/hu.json` with Hungarian translations
-- [ ] 9.4 Mirror both blocks in `src/locales/de.json` with German translations
-- [ ] 9.5 Add i18n strings for the new radar toggle labels and the first-load migration toast
+- [x] 9.1 Replace the existing `category_labels` block in `src/locales/en.json` with a `muscle_labels` block covering all 12 keys (`chest`, `back`, `shoulders`, `arms`, `quads`, `hamstrings`, `glutes`, `calves`, `abs`, `obliques`, `lower_back`, `cardio`)
+- [x] 9.2 Add a `muscle_group_labels` block in `en.json` covering `upper`, `lower`, `core`, `cardio`
+- [x] 9.3 Mirror both blocks in `src/locales/hu.json` with Hungarian translations
+- [x] 9.4 Mirror both blocks in `src/locales/de.json` with German translations
+- [x] 9.5 Add i18n strings for the new radar toggle labels and the first-load migration toast
 
 ## 10. First-load migration notice
 
