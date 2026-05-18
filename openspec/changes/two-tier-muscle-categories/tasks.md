@@ -28,9 +28,9 @@
 
 ## 5. Update wger lookup
 
-- [ ] 5.1 In `src/lib/wgerClient.ts`, replace the `CATEGORIES` constant with the wger-category → `Muscle` mapping from `design.md` §5
-- [ ] 5.2 Update every consumer of the wger client so suggestions carry `muscle: Muscle` instead of `category: string`
-- [ ] 5.3 Ensure `ExerciseSuggestionList.tsx` displays the suggestion's muscle via the new `MuscleBadge` component
+- [x] 5.1 In `src/lib/wgerClient.ts`, replace the `CATEGORIES` constant with the wger-category → `Muscle` mapping from `design.md` §5
+- [x] 5.2 Update every consumer of the wger client so suggestions carry `muscle: Muscle` instead of `category: string`
+- [x] 5.3 Ensure `ExerciseSuggestionList.tsx` displays the suggestion's muscle via the new `MuscleBadge` component
 
 ## 6. Rename and reshape the badge
 

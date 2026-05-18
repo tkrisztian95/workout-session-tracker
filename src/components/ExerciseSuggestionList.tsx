@@ -1,12 +1,14 @@
 'use client';
 
 import type { WgerExercise } from '@/lib/wgerClient';
+import type { Muscle } from '@/lib/muscles';
 import { useTranslations } from '@/lib/locale-context';
+import CategoryBadge from '@/components/CategoryBadge';
 
 interface Props {
   suggestions: WgerExercise[];
   loading: boolean;
-  onSelect: (name: string, category: string) => void;
+  onSelect: (name: string, muscle: Muscle | undefined) => void;
 }
 
 export default function ExerciseSuggestionList({ suggestions, loading, onSelect }: Props) {
@@ -34,14 +36,16 @@ export default function ExerciseSuggestionList({ suggestions, loading, onSelect 
               onMouseDown={(e) => {
                 // Prevent blur from firing before click
                 e.preventDefault();
-                onSelect(ex.name, ex.category);
+                onSelect(ex.name, ex.muscle);
               }}
               className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-surface active:bg-elevated transition-colors duration-100 cursor-pointer min-h-[48px]"
             >
               <span className="text-foreground text-sm font-medium truncate">{ex.name}</span>
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-elevated text-secondary ml-3 shrink-0">
-                {ex.category}
-              </span>
+              {ex.muscle && (
+                <span className="ml-3 shrink-0">
+                  <CategoryBadge category={ex.muscle} />
+                </span>
+              )}
             </button>
           </li>
         ))}
