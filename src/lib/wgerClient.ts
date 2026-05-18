@@ -1,17 +1,28 @@
-export const WGER_CATEGORIES = [
-  'Arms',
-  'Legs',
-  'Abs',
-  'Chest',
-  'Back',
-  'Shoulders',
-  'Calves',
-  'Cardio',
-] as const;
+// TODO: Remove this file entirely. The wger lookup was unwired from the
+// AddExerciseModal / AddPlanExerciseModal name input — nothing imports
+// `searchExercises`, `WgerExercise`, or `WGER_CATEGORIES` anymore. Kept
+// in-tree temporarily to keep the unwire diff small; delete in a follow-up
+// commit together with `src/hooks/useExerciseSuggestions.ts` and
+// `src/components/ExerciseSuggestionList.tsx`.
+import type { Muscle } from './muscles';
+import { MUSCLES_BY_GROUP, migrateLegacyCategory } from './muscles';
+
+/**
+ * The 12 canonical muscle keys exposed through the wger manual picker, in
+ * display order (Upper → Lower → Core → Cardio). Existing UI surfaces import
+ * this as `WGER_CATEGORIES` for back-compat with the flat dropdown; the new
+ * grouped picker (section 7) consumes `MUSCLES_BY_GROUP` directly.
+ */
+export const WGER_CATEGORIES: readonly Muscle[] = [
+  ...MUSCLES_BY_GROUP.upper,
+  ...MUSCLES_BY_GROUP.lower,
+  ...MUSCLES_BY_GROUP.core,
+  ...MUSCLES_BY_GROUP.cardio,
+];
 
 export interface WgerExercise {
   name: string;
-  category: string;
+  muscle?: Muscle;
 }
 
 const cache = new Map<string, WgerExercise[]>();
@@ -33,7 +44,7 @@ export async function searchExercises(query: string): Promise<WgerExercise[]> {
       .slice(0, 8)
       .map((item: { data: { name: string; category: string } }) => ({
         name: item.data.name,
-        category: item.data.category ?? 'Other',
+        muscle: migrateLegacyCategory(item.data.category),
       }));
     cache.set(query, results);
     return results;

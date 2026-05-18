@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { ChevronRight, Star } from 'lucide-react';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
+import type { Muscle } from '@/lib/muscles';
 import { useTranslations } from '@/lib/locale-context';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
@@ -27,8 +28,8 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
   const label = planName ?? t.free_session;
   const exerciseCount = session.exercises.length;
   const mins = durationMinutes(session.startedAt, session.completedAt);
-  const categories = [
-    ...new Set(session.exercises.map((e) => e.category).filter((c): c is string => Boolean(c))),
+  const muscles = [
+    ...new Set(session.exercises.map((e) => e.muscle).filter((m): m is Muscle => Boolean(m))),
   ];
 
   return (
@@ -50,10 +51,10 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
           {formatStartTime(session.startedAt)} · {mins} {t.min_label} · {exerciseCount}{' '}
           {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular}
         </p>
-        {categories.length > 0 && (
+        {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
-            {categories.map((cat) => (
-              <CategoryBadge key={cat} category={cat} />
+            {muscles.map((m) => (
+              <MuscleBadge key={m} muscle={m} />
             ))}
           </div>
         )}

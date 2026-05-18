@@ -21,10 +21,12 @@ import {
   computeStats,
   getVolumeChartData,
   getExerciseWeightProgression,
-  getCategoryDistribution,
+  getGroupDistribution,
+  getMuscleDistribution,
   filterSessionsByRange,
   type TimeRange,
 } from '@/lib/statsUtils';
+import type { Muscle, MuscleGroup } from '@/lib/muscles';
 import type { WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
@@ -181,23 +183,56 @@ const radarChartConfig = {
   },
 } satisfies ChartConfig;
 
+type RadarView = 'groups' | 'muscles';
+
 function CategoryRadarChart({ sessions }: { sessions: WorkoutSession[] }) {
   const t = useTranslations();
-  const data = useMemo(() => getCategoryDistribution(sessions), [sessions]);
+  const [view, setView] = useState<RadarView>('groups');
 
-  const uniqueCategories = data.length;
-  if (sessions.filter((s) => s.completedAt).length < 2 || uniqueCategories <= 1) return null;
+  const data = useMemo(() => {
+    if (view === 'groups') {
+      return getGroupDistribution(sessions).map((p) => ({
+        axis: t.muscle_group_labels[p.group as MuscleGroup] ?? p.group,
+        count: p.count,
+      }));
+    }
+    return getMuscleDistribution(sessions).map((p) => ({
+      axis: t.muscle_labels[p.muscle as Muscle] ?? p.muscle,
+      count: p.count,
+    }));
+  }, [sessions, view, t]);
+
+  if (sessions.filter((s) => s.completedAt).length < 2) return null;
+  if (data.length <= 1) return null;
 
   return (
     <section>
-      <h2 className="text-foreground font-semibold text-base mb-3">
-        {t.stats_category_radar_title}
-      </h2>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-foreground font-semibold text-base">{t.stats_category_radar_title}</h2>
+        <div className="flex rounded-full bg-elevated p-0.5 text-xs font-medium">
+          <button
+            onClick={() => setView('groups')}
+            className={`px-3 py-1 rounded-full transition-colors ${
+              view === 'groups' ? 'bg-brand text-white' : 'text-secondary'
+            }`}
+          >
+            {t.stats_radar_view_groups}
+          </button>
+          <button
+            onClick={() => setView('muscles')}
+            className={`px-3 py-1 rounded-full transition-colors ${
+              view === 'muscles' ? 'bg-brand text-white' : 'text-secondary'
+            }`}
+          >
+            {t.stats_radar_view_muscles}
+          </button>
+        </div>
+      </div>
       <div className="rounded-2xl bg-surface border border-border p-4">
         <ChartContainer config={radarChartConfig} className="h-[220px] w-full">
           <RadarChart data={data}>
             <PolarGrid strokeOpacity={0.3} />
-            <PolarAngleAxis dataKey="category" tick={{ fontSize: 11 }} />
+            <PolarAngleAxis dataKey="axis" tick={{ fontSize: 11 }} />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel indicator="dot" />}
