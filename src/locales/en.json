@@ -48,6 +48,9 @@
   "stats_category_radar_title": "Training Balance",
   "stats_radar_view_groups": "Groups",
   "stats_radar_view_muscles": "Muscles",
+  "muscle_migration_toast_title": "Categories updated",
+  "muscle_migration_toast_body": "We split \"Legs\" into Quads, Hamstrings and Glutes, and added Obliques and Lower back. Your existing \"Legs\" exercises were mapped to Quads — feel free to reclassify them via the edit button on any exercise.",
+  "muscle_migration_toast_dismiss": "Got it",
   "stats_category_other": "Other",
 
   "profile_title": "Profile",
