@@ -205,7 +205,7 @@ export default function AddPlanExerciseModal({
                 <option value="">{t.exercise_category_none}</option>
                 {WGER_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
-                    {(t.category_labels as Record<string, string>)[cat] ?? cat}
+                    {t.muscle_labels[cat] ?? cat}
                   </option>
                 ))}
               </Select>

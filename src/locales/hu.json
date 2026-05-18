@@ -145,15 +145,25 @@
   "exercise_category_prefix": "Kategória:",
   "exercise_category_label": "Kategória (opcionális)",
   "exercise_category_none": "Nincs",
-  "category_labels": {
-    "Arms": "Karok",
-    "Legs": "Lábak",
-    "Abs": "Has",
-    "Chest": "Mell",
-    "Back": "Hát",
-    "Shoulders": "Vállak",
-    "Calves": "Vádli / Lábikra",
-    "Cardio": "Kardió"
+  "muscle_labels": {
+    "chest": "Mell",
+    "back": "Hát",
+    "shoulders": "Vállak",
+    "arms": "Karok",
+    "quads": "Quads",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Vádli",
+    "abs": "Has",
+    "obliques": "Obliques",
+    "lower_back": "Lower back",
+    "cardio": "Kardió"
+  },
+  "muscle_group_labels": {
+    "upper": "Upper body",
+    "lower": "Lower body",
+    "core": "Core",
+    "cardio": "Cardio"
   },
   "exercise_role_label": "Szerep",
   "exercise_scaling_note_label": "Megjegyzés",

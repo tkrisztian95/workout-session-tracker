@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, Minus, Pencil, X } from 'lucide-react';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import { IconButton } from '@/components/ui';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 import type { Exercise } from '@/lib/types';
@@ -36,7 +36,7 @@ export function SessionExerciseItem({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="text-muted font-medium text-sm">{exercise.name}</p>
-            {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
+            {exercise.muscle && <MuscleBadge muscle={exercise.muscle} />}
           </div>
           <p className="text-dim text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
         </div>
@@ -75,7 +75,7 @@ export function SessionExerciseItem({
           >
             {exercise.name}
           </p>
-          {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
+          {exercise.muscle && <MuscleBadge muscle={exercise.muscle} />}
         </div>
         <p className="text-muted text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
         {exercise.loggedSets && exercise.loggedSets.length > 0 && (

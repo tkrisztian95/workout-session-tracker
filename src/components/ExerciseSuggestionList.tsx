@@ -3,7 +3,7 @@
 import type { WgerExercise } from '@/lib/wgerClient';
 import type { Muscle } from '@/lib/muscles';
 import { useTranslations } from '@/lib/locale-context';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 
 interface Props {
   suggestions: WgerExercise[];
@@ -43,7 +43,7 @@ export default function ExerciseSuggestionList({ suggestions, loading, onSelect 
               <span className="text-foreground text-sm font-medium truncate">{ex.name}</span>
               {ex.muscle && (
                 <span className="ml-3 shrink-0">
-                  <CategoryBadge category={ex.muscle} />
+                  <MuscleBadge muscle={ex.muscle} />
                 </span>
               )}
             </button>

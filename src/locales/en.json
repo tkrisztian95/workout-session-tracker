@@ -157,15 +157,25 @@
   "exercise_category_prefix": "Category:",
   "exercise_category_label": "Category (optional)",
   "exercise_category_none": "None",
-  "category_labels": {
-    "Arms": "Arms",
-    "Legs": "Legs",
-    "Abs": "Abs",
-    "Chest": "Chest",
-    "Back": "Back",
-    "Shoulders": "Shoulders",
-    "Calves": "Calves",
-    "Cardio": "Cardio"
+  "muscle_labels": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "arms": "Arms",
+    "quads": "Quads",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Calves",
+    "abs": "Abs",
+    "obliques": "Obliques",
+    "lower_back": "Lower back",
+    "cardio": "Cardio"
+  },
+  "muscle_group_labels": {
+    "upper": "Upper body",
+    "lower": "Lower body",
+    "core": "Core",
+    "cardio": "Cardio"
   },
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
