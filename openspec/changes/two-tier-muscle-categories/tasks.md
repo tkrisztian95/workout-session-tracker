@@ -48,12 +48,12 @@
 
 ## 8. Stats: group / muscle distribution + view toggle
 
-- [ ] 8.1 In `src/lib/statsUtils.ts`, remove `getCategoryDistribution` and add `getGroupDistribution(sessions): GroupDistributionPoint[]` and `getMuscleDistribution(sessions): MuscleDistributionPoint[]`
-- [ ] 8.2 Each distribution function counts sessions-containing-at-least-one-exercise-of-that-axis, mirroring the existing logic
-- [ ] 8.3 Add unit tests for both functions (empty sessions, sessions with mixed/missing muscle, group aggregation correctness)
-- [ ] 8.4 Update `src/app/stats/page.tsx` (or the radar sub-component) to render a `Groups | Muscles` toggle above the radar; default to `Groups`
-- [ ] 8.5 Persist the toggle choice in the same component-local state used by other stats filters (no localStorage key needed in v1)
-- [ ] 8.6 Apply the "hide when fewer than 2 axes have data" rule per view, not globally
+- [x] 8.1 In `src/lib/statsUtils.ts`, remove `getCategoryDistribution` and add `getGroupDistribution(sessions): GroupDistributionPoint[]` and `getMuscleDistribution(sessions): MuscleDistributionPoint[]`
+- [x] 8.2 Each distribution function counts sessions-containing-at-least-one-exercise-of-that-axis, mirroring the existing logic
+- [x] 8.3 Add unit tests for both functions (empty sessions, sessions with mixed/missing muscle, group aggregation correctness)
+- [x] 8.4 Update `src/app/stats/page.tsx` (or the radar sub-component) to render a `Groups | Muscles` toggle above the radar; default to `Groups`
+- [x] 8.5 Persist the toggle choice in the same component-local state used by other stats filters (no localStorage key needed in v1)
+- [x] 8.6 Apply the "hide when fewer than 2 axes have data" rule per view, not globally
 
 ## 9. Localisation
 
