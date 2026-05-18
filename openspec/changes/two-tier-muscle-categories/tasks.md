@@ -41,10 +41,10 @@
 
 ## 7. Grouped picker in add-exercise modals
 
-- [ ] 7.1 In `AddExerciseModal.tsx`, replace the flat category `<select>` with a grouped `<select>` using `<optgroup>` per `MuscleGroup`; iterate `MUSCLES_BY_GROUP` to render
-- [ ] 7.2 Mirror the change in `AddPlanExerciseModal.tsx`
-- [ ] 7.3 Keep the "None" / empty-default option behaviour from `plan-exercise-category` (selector hidden when a wger suggestion's muscle is active)
-- [ ] 7.4 Update the manual `useState` typing from `string` to `Muscle | ''`
+- [x] 7.1 In `AddExerciseModal.tsx`, replace the flat category `<select>` with a grouped `<select>` using `<optgroup>` per `MuscleGroup`; iterate `MUSCLES_BY_GROUP` to render
+- [x] 7.2 Mirror the change in `AddPlanExerciseModal.tsx`
+- [x] 7.3 Keep the "None" / empty-default option behaviour from `plan-exercise-category` (selector hidden when a wger suggestion's muscle is active)
+- [x] 7.4 Update the manual `useState` typing from `string` to `Muscle | ''`
 
 ## 8. Stats: group / muscle distribution + view toggle
 
