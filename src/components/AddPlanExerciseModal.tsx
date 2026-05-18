@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { History, X } from 'lucide-react';
 import type { PlanExercise } from '@/lib/types';
-import { useExerciseSuggestions } from '@/hooks/useExerciseSuggestions';
-import ExerciseSuggestionList from '@/components/ExerciseSuggestionList';
 import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
 import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { useTranslations } from '@/lib/locale-context';
@@ -56,11 +54,6 @@ export default function AddPlanExerciseModal({
   const [selectedCategory, setSelectedCategory] = useState<Muscle | null>(null);
   const [manualCategory, setManualCategory] = useState<Muscle | ''>('');
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [skipWgerForCurrentName, setSkipWgerForCurrentName] = useState(false);
-
-  const { suggestions, loading, clearSuggestions } = useExerciseSuggestions(
-    skipWgerForCurrentName ? '' : name,
-  );
 
   const isEditMode = !!initialValues;
 
@@ -93,8 +86,6 @@ export default function AddPlanExerciseModal({
     setScalingNote('');
     setSelectedCategory(null);
     setManualCategory('');
-    setSkipWgerForCurrentName(false);
-    clearSuggestions();
   };
 
   const applyHistoryEntry = (entry: HistoryEntry) => {
@@ -106,8 +97,6 @@ export default function AddPlanExerciseModal({
     setWeightKg(entry.weightKg !== undefined ? String(entry.weightKg) : '');
     setManualCategory(entry.muscle ?? '');
     setSelectedCategory(entry.muscle ?? null);
-    setSkipWgerForCurrentName(true);
-    clearSuggestions();
     setPickerOpen(false);
   };
 
@@ -169,32 +158,18 @@ export default function AddPlanExerciseModal({
 
           {/* Name */}
           <div>
-            <div className="relative">
-              <FieldLabel htmlFor="plan-exercise-name">{t.exercise_name_label}</FieldLabel>
-              <Input
-                id="plan-exercise-name"
-                type="text"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setSelectedCategory(null);
-                  setSkipWgerForCurrentName(false);
-                }}
-                onBlur={() => setTimeout(clearSuggestions, 150)}
-                placeholder={t.exercise_name_placeholder}
-                autoComplete="off"
-              />
-              <ExerciseSuggestionList
-                suggestions={suggestions}
-                loading={loading}
-                onSelect={(n, m) => {
-                  setName(n);
-                  setSelectedCategory(m ?? null);
-                  setManualCategory(m ?? '');
-                  clearSuggestions();
-                }}
-              />
-            </div>
+            <FieldLabel htmlFor="plan-exercise-name">{t.exercise_name_label}</FieldLabel>
+            <Input
+              id="plan-exercise-name"
+              type="text"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setSelectedCategory(null);
+              }}
+              placeholder={t.exercise_name_placeholder}
+              autoComplete="off"
+            />
             <div className="mt-2">
               {selectedCategory ? (
                 <p className="mb-1.5 text-xs text-muted">
@@ -322,7 +297,8 @@ export default function AddPlanExerciseModal({
           {(type === 'sets-reps' || type === 'sets-duration') && (
             <div>
               <FieldLabel htmlFor="plan-weight">
-                Weight (kg) <span className="normal-case text-muted">(optional)</span>
+                {t.exercise_weight_label}{' '}
+                <span className="normal-case text-muted">{t.exercise_scaling_note_optional}</span>
               </FieldLabel>
               <Input
                 id="plan-weight"
@@ -330,7 +306,7 @@ export default function AddPlanExerciseModal({
                 inputMode="decimal"
                 value={weightKg}
                 onChange={(e) => setWeightKg(e.target.value)}
-                placeholder="e.g. 80"
+                placeholder={t.exercise_weight_placeholder}
                 min={0}
               />
             </div>

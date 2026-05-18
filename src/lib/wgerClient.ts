@@ -1,3 +1,9 @@
+// TODO: Remove this file entirely. The wger lookup was unwired from the
+// AddExerciseModal / AddPlanExerciseModal name input — nothing imports
+// `searchExercises`, `WgerExercise`, or `WGER_CATEGORIES` anymore. Kept
+// in-tree temporarily to keep the unwire diff small; delete in a follow-up
+// commit together with `src/hooks/useExerciseSuggestions.ts` and
+// `src/components/ExerciseSuggestionList.tsx`.
 import type { Muscle } from './muscles';
 import { MUSCLES_BY_GROUP, migrateLegacyCategory } from './muscles';
 
