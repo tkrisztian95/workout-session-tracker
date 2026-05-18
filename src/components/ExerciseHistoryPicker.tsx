@@ -89,8 +89,7 @@ export default function ExerciseHistoryPicker({ isOpen, onClose, onSelect }: Pro
                         </span>
                         {entry.muscle && (
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-elevated text-secondary shrink-0">
-                            {(t.category_labels as Record<string, string>)[entry.muscle] ??
-                              entry.muscle}
+                            {t.muscle_labels[entry.muscle] ?? entry.muscle}
                           </span>
                         )}
                       </div>

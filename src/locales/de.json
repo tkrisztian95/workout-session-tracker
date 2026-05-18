@@ -157,15 +157,25 @@
   "exercise_category_prefix": "Kategorie:",
   "exercise_category_label": "Kategorie (optional)",
   "exercise_category_none": "Keine",
-  "category_labels": {
-    "Arms": "Arme",
-    "Legs": "Beine",
-    "Abs": "Bauch",
-    "Chest": "Brust",
-    "Back": "Rücken",
-    "Shoulders": "Schultern",
-    "Calves": "Waden",
-    "Cardio": "Ausdauer"
+  "muscle_labels": {
+    "chest": "Brust",
+    "back": "Rücken",
+    "shoulders": "Schultern",
+    "arms": "Arme",
+    "quads": "Quads",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Waden",
+    "abs": "Bauch",
+    "obliques": "Obliques",
+    "lower_back": "Lower back",
+    "cardio": "Ausdauer"
+  },
+  "muscle_group_labels": {
+    "upper": "Upper body",
+    "lower": "Lower body",
+    "core": "Core",
+    "cardio": "Cardio"
   },
   "exercise_role_label": "Rolle",
   "exercise_scaling_note_label": "Skalierungsnotiz",

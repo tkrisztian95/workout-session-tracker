@@ -1,7 +1,8 @@
 import { X, Pencil } from 'lucide-react';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import { IconButton } from '@/components/ui';
+import type { Muscle } from '@/lib/muscles';
 
 interface ExerciseLike {
   name: string;
@@ -11,7 +12,7 @@ interface ExerciseLike {
   duration?: number;
   weightKg?: number;
   scalingNote?: string;
-  category?: string;
+  muscle?: Muscle;
 }
 
 interface Props {
@@ -29,7 +30,7 @@ export default function PlanExerciseRow({ ex, onRemove, onEdit, className = 'bg-
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
-          {ex.category && <CategoryBadge category={ex.category} />}
+          {ex.muscle && <MuscleBadge muscle={ex.muscle} />}
         </div>
         <p className="text-brand text-xs mt-0.5">{formatExerciseDetail(ex)}</p>
         {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}

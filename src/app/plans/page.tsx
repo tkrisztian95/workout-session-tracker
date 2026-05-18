@@ -19,7 +19,7 @@ import type { WorkoutPlan } from '@/lib/types';
 import type { Muscle } from '@/lib/muscles';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import { EmptyState, HeadingXL, IconButton, Page, PageHeader } from '@/components/ui';
 import AiPlanSuggestionModal from '@/components/AiPlanSuggestionModal';
 
@@ -211,7 +211,7 @@ function PlanCard({
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (
-              <CategoryBadge key={m} category={m} />
+              <MuscleBadge key={m} muscle={m} />
             ))}
           </div>
         )}

@@ -18,7 +18,7 @@ import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import AiImportReviewView from '@/components/AiImportReviewView';
 import { HistoryExerciseEditorContent, formatTarget } from '@/components/HistoryExerciseEditor';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import {
   getPlans,
   getLlmConfig,
@@ -458,7 +458,7 @@ export default function NewHistorySessionSheet({
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium text-sm text-foreground">{exercise.name}</p>
-                          {exercise.muscle && <CategoryBadge category={exercise.muscle} />}
+                          {exercise.muscle && <MuscleBadge muscle={exercise.muscle} />}
                         </div>
                         <p className="text-muted text-xs mt-0.5">
                           {formatExerciseDetail(exercise)}

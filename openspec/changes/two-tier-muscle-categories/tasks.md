@@ -34,10 +34,10 @@
 
 ## 6. Rename and reshape the badge
 
-- [ ] 6.1 Rename `src/components/CategoryBadge.tsx` to `src/components/MuscleBadge.tsx`
-- [ ] 6.2 Replace the `category` prop with `muscle: Muscle`; update the icon map (`MUSCLE_ICONS`) to cover all 12 muscles, picking sensible Lucide icons (e.g., `Heart` for chest, `Target` for quads, `Flame` for abs, etc.)
-- [ ] 6.3 Resolve the label via `t.muscle_labels[muscle]`
-- [ ] 6.4 Update every import site (`PlanExerciseRow`, `SessionExerciseItem`, `WorkoutHistoryCard`, `ExerciseSuggestionList`, `ExerciseHistoryPicker`, `NewHistorySessionSheet`, `AiPlanSuggestionModal`, `PlanForm`, etc.) — `tsc` will list them after step 2.3
+- [x] 6.1 Rename `src/components/CategoryBadge.tsx` to `src/components/MuscleBadge.tsx`
+- [x] 6.2 Replace the `category` prop with `muscle: Muscle`; update the icon map (`MUSCLE_ICONS`) to cover all 12 muscles, picking sensible Lucide icons (e.g., `Heart` for chest, `Target` for quads, `Flame` for abs, etc.)
+- [x] 6.3 Resolve the label via `t.muscle_labels[muscle]`
+- [x] 6.4 Update every import site (`PlanExerciseRow`, `SessionExerciseItem`, `WorkoutHistoryCard`, `ExerciseSuggestionList`, `ExerciseHistoryPicker`, `NewHistorySessionSheet`, `AiPlanSuggestionModal`, `PlanForm`, etc.) — `tsc` will list them after step 2.3
 
 ## 7. Grouped picker in add-exercise modals
 

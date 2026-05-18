@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ChevronRight, Star } from 'lucide-react';
-import CategoryBadge from '@/components/CategoryBadge';
+import MuscleBadge from '@/components/MuscleBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import type { Muscle } from '@/lib/muscles';
@@ -54,7 +54,7 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (
-              <CategoryBadge key={m} category={m} />
+              <MuscleBadge key={m} muscle={m} />
             ))}
           </div>
         )}
