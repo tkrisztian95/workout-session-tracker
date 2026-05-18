@@ -1,4 +1,6 @@
 import type { WorkoutSession } from './types';
+import type { Muscle, MuscleGroup } from './muscles';
+import { MUSCLE_TO_GROUP } from './muscles';
 
 export type TimeRange = '1day' | 'week' | 'month' | '90days' | 'all';
 
@@ -299,27 +301,65 @@ export function getExerciseWeightProgression(
   return results;
 }
 
-export interface CategoryDistributionPoint {
-  category: string;
+export interface MuscleDistributionPoint {
+  muscle: Muscle | 'other';
   count: number;
 }
 
-export function getCategoryDistribution(sessions: WorkoutSession[]): CategoryDistributionPoint[] {
+export interface GroupDistributionPoint {
+  group: MuscleGroup | 'other';
+  count: number;
+}
+
+/**
+ * Counts, per muscle axis, how many completed sessions contain at least one
+ * exercise tagged with that muscle. Exercises with no `muscle` field roll up
+ * into a single `'other'` axis.
+ */
+export function getMuscleDistribution(sessions: WorkoutSession[]): MuscleDistributionPoint[] {
   const completed = sessions.filter((s) => s.completedAt);
-  const map = new Map<string, number>();
+  const map = new Map<Muscle | 'other', number>();
 
   for (const session of completed) {
-    const seen = new Set<string>();
+    const seen = new Set<Muscle | 'other'>();
     for (const exercise of session.exercises) {
-      const cat = exercise.muscle?.trim() || 'Other';
-      if (!seen.has(cat)) {
-        seen.add(cat);
-        map.set(cat, (map.get(cat) ?? 0) + 1);
+      const key: Muscle | 'other' = exercise.muscle ?? 'other';
+      if (!seen.has(key)) {
+        seen.add(key);
+        map.set(key, (map.get(key) ?? 0) + 1);
       }
     }
   }
 
   return Array.from(map.entries())
-    .map(([category, count]) => ({ category, count }))
+    .map(([muscle, count]) => ({ muscle, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Counts, per muscle-group axis, how many completed sessions contain at least
+ * one exercise whose muscle resolves to that group. Exercises with no `muscle`
+ * field roll up into a single `'other'` axis — they are NOT distributed into
+ * Upper / Lower / Core / Cardio.
+ */
+export function getGroupDistribution(sessions: WorkoutSession[]): GroupDistributionPoint[] {
+  const completed = sessions.filter((s) => s.completedAt);
+  const map = new Map<MuscleGroup | 'other', number>();
+
+  for (const session of completed) {
+    const seen = new Set<MuscleGroup | 'other'>();
+    for (const exercise of session.exercises) {
+      const key: MuscleGroup | 'other' = exercise.muscle
+        ? MUSCLE_TO_GROUP[exercise.muscle]
+        : 'other';
+      if (!seen.has(key)) {
+        seen.add(key);
+        map.set(key, (map.get(key) ?? 0) + 1);
+      }
+    }
+  }
+
+  return Array.from(map.entries())
+    .map(([group, count]) => ({ group, count }))
     .sort((a, b) => b.count - a.count);
 }

@@ -46,6 +46,8 @@
   "stats_unit_kg": "kg",
   "stats_unit_min": "min",
   "stats_category_radar_title": "Training Balance",
+  "stats_radar_view_groups": "Groups",
+  "stats_radar_view_muscles": "Muscles",
   "stats_category_other": "Other",
 
   "profile_title": "Profile",

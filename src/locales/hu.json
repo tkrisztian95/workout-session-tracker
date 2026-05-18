@@ -44,6 +44,8 @@
   "stats_unit_kg": "kg",
   "stats_unit_min": "perc",
   "stats_category_radar_title": "Edzési egyensúly",
+  "stats_radar_view_groups": "Csoportok",
+  "stats_radar_view_muscles": "Izmok",
   "stats_category_other": "Egyéb",
   "profile_title": "Profil",
   "profile_name_label": "Megjelenítési név",
