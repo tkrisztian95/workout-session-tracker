@@ -14,10 +14,10 @@
 
 ## 3. Migrate stored data lazily on read
 
-- [ ] 3.1 In `src/lib/storage.ts`, add a migration pass inside `loadSessions` that walks every exercise in every session and replaces a legacy `category` field with a `muscle` field via `migrateLegacyCategory`
-- [ ] 3.2 Add the same pass inside `loadPlans` for plan days' core/optional exercises and shared exercises
-- [ ] 3.3 Persist the migrated array back to localStorage only if at least one record was rewritten (avoid noisy writes on already-migrated data)
-- [ ] 3.4 Cover the migration path in `src/lib/__tests__/storage.test.ts` (or equivalent) with sessions that mix legacy + migrated records
+- [x] 3.1 In `src/lib/storage.ts`, add a migration pass inside `loadSessions` that walks every exercise in every session and replaces a legacy `category` field with a `muscle` field via `migrateLegacyCategory`
+- [x] 3.2 Add the same pass inside `loadPlans` for plan days' core/optional exercises and shared exercises
+- [x] 3.3 Persist the migrated array back to localStorage only if at least one record was rewritten (avoid noisy writes on already-migrated data)
+- [x] 3.4 Cover the migration path in `src/lib/__tests__/storage.test.ts` (or equivalent) with sessions that mix legacy + migrated records
 
 ## 4. Update AI import & plan prompts
 
