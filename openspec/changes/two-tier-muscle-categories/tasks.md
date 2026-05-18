@@ -71,7 +71,7 @@
 
 ## 11. Cleanup
 
-- [ ] 11.1 Remove any dead imports/types referencing the old `category` field
-- [ ] 11.2 Confirm `grep -rn "category" src/` shows only intentional residual usages (e.g., unrelated `useTranslations` keys)
-- [ ] 11.3 Run the full test suite + `tsc --noEmit` + lint and fix any fallout
+- [x] 11.1 Remove any dead imports/types referencing the old `category` field
+- [x] 11.2 Confirm `grep -rn "category" src/` shows only intentional residual usages (e.g., unrelated `useTranslations` keys)
+- [x] 11.3 Run the full test suite + `tsc --noEmit` + lint and fix any fallout
 - [ ] 11.4 Manually verify in the browser: create a new exercise with a muscle, see the badge render, confirm the stats radar toggle works, confirm legacy sessions show migrated muscles

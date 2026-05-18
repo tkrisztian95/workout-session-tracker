@@ -33,7 +33,7 @@ Return a JSON object with the following structure:
       "weightKg": number | undefined,
       "role": "optional",
       "scalingNote": string | undefined,
-      "category": string | undefined
+      "muscle": string | undefined
     }>
   }>,
   "sharedExercises": Array<{
