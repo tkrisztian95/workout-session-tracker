@@ -22,7 +22,7 @@ Return a JSON object with the following structure:
       "weightKg": number | undefined,
       "role": "core",
       "scalingNote": string | undefined,
-      "category": string | undefined
+      "muscle": string | undefined
     }>,
     "optionalExercises": Array<{
       "name": string,
@@ -45,7 +45,7 @@ Return a JSON object with the following structure:
     "weightKg": number | undefined,
     "role": "core" | "optional",
     "scalingNote": string | undefined,
-    "category": string | undefined
+    "muscle": string | undefined
   }>
 }
 
@@ -56,7 +56,7 @@ Guidelines:
 - Balance muscle groups across the week — avoid training the same primary muscles on consecutive days.
 - weightKg: include whenever you can infer a reasonable starting weight from the user's history or their body metrics.
 - scalingNote: use for beginner modifications, equipment alternatives, or form cues when helpful.
-- category: one of "Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio", or another standard muscle group.
+- muscle: one of "chest", "back", "shoulders", "arms", "quads", "hamstrings", "glutes", "calves", "abs", "obliques", "lower_back", "cardio". Pick the primary muscle target; omit if none clearly applies.
 - valid / validationError: set valid to false only when the user's stated goals are clearly not fitness-related (e.g. cooking, unrelated hobbies). When in doubt, set valid to true and generate a plan. Write validationError in the user's language.
 - scheduledWeeks: set for periodized programs with a clear end date (e.g. 8–12 week blocks); omit for open-ended plans.
 - sharedExercises: use only for exercises that appear identically on every training day (e.g. a daily mobility warmup or cooldown stretch). Leave the array empty when exercises differ by day.
