@@ -1,8 +1,11 @@
-import type { Ref } from 'react';
-import { X, Pencil, Sparkles, GripVertical } from 'lucide-react';
+'use client';
+
+import { useState, type Ref } from 'react';
+import { Pencil, Sparkles, Trash2, MoreVertical, GripVertical } from 'lucide-react';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 import MuscleBadge from '@/components/MuscleBadge';
 import { IconButton } from '@/components/ui';
+import { useLocale } from '@/lib/locale-context';
 import type { Muscle } from '@/lib/muscles';
 
 interface ExerciseLike {
@@ -37,6 +40,10 @@ export default function PlanExerciseRow({
   dragHandleProps,
   isDragging = false,
 }: Props) {
+  const { t } = useLocale();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const hasActions = Boolean(onEdit || onAiSwap || onRemove);
+
   return (
     <div
       ref={ref}
@@ -64,35 +71,75 @@ export default function PlanExerciseRow({
         <p className="text-brand text-xs mt-0.5">{formatExerciseDetail(ex)}</p>
         {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}
       </div>
-      {onEdit && (
-        <IconButton
-          size="sm"
-          onClick={onEdit}
-          aria-label={`Edit ${ex.name}`}
-          className="flex-shrink-0"
-        >
-          <Pencil className="w-3.5 h-3.5 text-muted" />
-        </IconButton>
-      )}
-      {onAiSwap && (
-        <IconButton
-          size="sm"
-          onClick={onAiSwap}
-          aria-label={`Swap ${ex.name} with AI`}
-          className="flex-shrink-0"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-brand" />
-        </IconButton>
-      )}
-      {onRemove && (
-        <IconButton
-          size="sm"
-          onClick={onRemove}
-          aria-label={`Remove ${ex.name}`}
-          className="flex-shrink-0"
-        >
-          <X className="w-3.5 h-3.5 text-secondary" />
-        </IconButton>
+      {hasActions && (
+        <div className="relative flex-shrink-0">
+          <IconButton
+            size="sm"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={`${ex.name} actions`}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="active:scale-90"
+          >
+            <MoreVertical className="w-4 h-4 text-muted" />
+          </IconButton>
+
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]"
+              >
+                {onEdit && (
+                  <button
+                    role="menuitem"
+                    className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEdit();
+                    }}
+                  >
+                    <Pencil className="w-4 h-4 text-muted flex-shrink-0" />
+                    {t.exercise_action_edit}
+                  </button>
+                )}
+                {onAiSwap && (
+                  <>
+                    {onEdit && <div className="h-px bg-border/50 mx-3" />}
+                    <button
+                      role="menuitem"
+                      className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onAiSwap();
+                      }}
+                    >
+                      <Sparkles className="w-4 h-4 text-brand flex-shrink-0" />
+                      {t.exercise_action_ai_swap}
+                    </button>
+                  </>
+                )}
+                {onRemove && (
+                  <>
+                    {(onEdit || onAiSwap) && <div className="h-px bg-border/50 mx-3" />}
+                    <button
+                      role="menuitem"
+                      className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-danger active:bg-surface transition-colors cursor-pointer"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onRemove();
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-danger flex-shrink-0" />
+                      {t.exercise_action_remove}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       )}
     </div>
   );
