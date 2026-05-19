@@ -10,6 +10,7 @@ export interface HistoryEntry {
   type: Exercise['type'];
   sets?: number;
   reps?: number;
+  repsPerSet?: number[];
   duration?: number;
   weightKg?: number;
   lastUsedAt: string;
@@ -32,6 +33,7 @@ interface CandidateExercise {
   type: Exercise['type'];
   sets?: number;
   reps?: number;
+  repsPerSet?: number[];
   duration?: number;
   weightKg?: number;
   timestamp: string;
@@ -44,6 +46,7 @@ function fromSessionExercise(ex: Exercise, timestamp: string): CandidateExercise
     type: ex.type,
     sets: ex.sets,
     reps: ex.reps,
+    repsPerSet: ex.repsPerSet,
     duration: ex.duration,
     weightKg: ex.weightKg,
     timestamp,
@@ -57,6 +60,7 @@ function fromPlanExercise(ex: PlanExercise, timestamp: string): CandidateExercis
     type: ex.type,
     sets: ex.sets,
     reps: ex.reps,
+    repsPerSet: ex.repsPerSet,
     duration: ex.duration,
     weightKg: ex.weightKg,
     timestamp,
@@ -128,6 +132,7 @@ export function deriveExerciseHistory(
       type: c.type,
       sets: c.sets,
       reps: c.reps,
+      repsPerSet: c.repsPerSet,
       duration: c.duration,
       weightKg: c.weightKg,
       lastUsedAt: c.timestamp,

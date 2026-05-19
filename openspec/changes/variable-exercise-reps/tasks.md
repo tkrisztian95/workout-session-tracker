@@ -7,10 +7,11 @@
 
 ## 2. Authoring UI
 
-- [ ] 2.1 Add a Fixed / Per-set toggle to `AddPlanExerciseModal` for `sets-reps`; in per-set mode replace the Reps field with a scheme text field and hide the Sets field
-- [ ] 2.2 On submit in `AddPlanExerciseModal`, build `repsPerSet` (+ `sets = length`, omit `reps`) when per-set yields ≥2 numbers, else save fixed; open in per-set mode when `initialValues.repsPerSet` exists
-- [ ] 2.3 Apply the same toggle, fields, and submit logic to `AddExerciseModal`
-- [ ] 2.4 Carry `repsPerSet` through the history-picker prefill (`applyHistoryEntry`) in both modals
+- [x] 2.1 Add a Fixed / Per-set toggle to `AddPlanExerciseModal` for `sets-reps`; in per-set mode replace the Reps field with a scheme text field and hide the Sets field
+- [x] 2.2 On submit in `AddPlanExerciseModal`, build `repsPerSet` (+ `sets = length`, omit `reps`) when per-set yields ≥2 numbers, else save fixed; open in per-set mode when `initialValues.repsPerSet` exists
+- [x] 2.3 Apply the same toggle, fields, and submit logic to `AddExerciseModal`
+- [x] 2.4 Carry `repsPerSet` through the history-picker prefill (`applyHistoryEntry`) in both modals
+- [x] 2.5 Add `repsPerSet` to `HistoryEntry` / `CandidateExercise` and capture it in `src/lib/exerciseHistory.ts` (prereq for 2.4)
 
 ## 3. Display surfaces
 
@@ -25,13 +26,12 @@
 - [ ] 4.1 Update `summariseExercise` and `summariseSession` in `src/lib/ai/plan.ts` to render a scheme as `15/12/8/4`
 - [ ] 4.2 Normalise `repsPerSet` in `plan.ts` (`normalizePlanExerciseMuscle` path / `ensureIds`) and `import.ts` (`normalizeAiExerciseMuscle`): keep a valid array, set `sets`, drop `reps`
 - [ ] 4.3 Update the plan prompt (`src/lib/ai/prompts/plan/v1.ts`) and import prompts (`import/v1.ts`, `v2.ts`) to describe `repsPerSet` and when to use it
-- [ ] 4.4 Add `repsPerSet` to `HistoryEntry` / `ExerciseCandidate` and capture/restore it in `src/lib/exerciseHistory.ts`
-- [ ] 4.5 Carry `repsPerSet` in the `NewHistorySessionSheet` plan-exercise prefill
-- [ ] 4.6 Handle `repsPerSet` in the `AiImportReviewView` exercise editor
+- [ ] 4.4 Carry `repsPerSet` in the `NewHistorySessionSheet` plan-exercise prefill
+- [ ] 4.5 Handle `repsPerSet` in the `AiImportReviewView` exercise editor
 
 ## 5. Localization
 
-- [ ] 5.1 Add keys for the Fixed / Per-set toggle and the scheme field label/placeholder/hint to `en.json`, `de.json`, `hu.json`
+- [x] 5.1 Add keys for the Fixed / Per-set toggle and the scheme field label/placeholder/hint to `en.json`, `de.json`, `hu.json`
 
 ## 6. Verification
 

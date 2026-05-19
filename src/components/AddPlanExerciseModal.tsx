@@ -8,6 +8,7 @@ import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { useTranslations } from '@/lib/locale-context';
 import type { Muscle } from '@/lib/muscles';
 import { ALL_MUSCLE_GROUPS, MUSCLES_BY_GROUP, migrateLegacyCategory } from '@/lib/muscles';
+import { parseRepScheme } from '@/lib/sessionUtils';
 import {
   BottomSheet,
   Button,
@@ -47,6 +48,8 @@ export default function AddPlanExerciseModal({
   const [type, setType] = useState<PlanExercise['type']>('sets-reps');
   const [sets, setSets] = useState('3');
   const [reps, setReps] = useState('10');
+  const [repsMode, setRepsMode] = useState<'fixed' | 'variable'>('fixed');
+  const [repsScheme, setRepsScheme] = useState('15, 12, 8, 4');
   const [duration, setDuration] = useState('60');
   const [role, setRole] = useState<PlanExercise['role']>('core');
   const [weightKg, setWeightKg] = useState('');
@@ -65,6 +68,9 @@ export default function AddPlanExerciseModal({
       setType(initialValues.type);
       setSets(String(initialValues.sets ?? 3));
       setReps(String(initialValues.reps ?? 10));
+      const hasScheme = (initialValues.repsPerSet?.length ?? 0) > 0;
+      setRepsMode(hasScheme ? 'variable' : 'fixed');
+      setRepsScheme(hasScheme ? initialValues.repsPerSet!.join(', ') : '15, 12, 8, 4');
       setDuration(String(initialValues.duration ?? 60));
       setRole(initialValues.role);
       setWeightKg(initialValues.weightKg !== undefined ? String(initialValues.weightKg) : '');
@@ -80,6 +86,8 @@ export default function AddPlanExerciseModal({
     setType('sets-reps');
     setSets('3');
     setReps('10');
+    setRepsMode('fixed');
+    setRepsScheme('15, 12, 8, 4');
     setDuration('60');
     setRole('core');
     setWeightKg('');
@@ -93,6 +101,9 @@ export default function AddPlanExerciseModal({
     setType(entry.type);
     setSets(String(entry.sets ?? 3));
     setReps(String(entry.reps ?? 10));
+    const hasScheme = (entry.repsPerSet?.length ?? 0) > 0;
+    setRepsMode(hasScheme ? 'variable' : 'fixed');
+    setRepsScheme(hasScheme ? entry.repsPerSet!.join(', ') : '15, 12, 8, 4');
     setDuration(String(entry.duration ?? 60));
     setWeightKg(entry.weightKg !== undefined ? String(entry.weightKg) : '');
     setManualCategory(entry.muscle ?? '');
@@ -104,11 +115,23 @@ export default function AddPlanExerciseModal({
     const trimmed = name.trim();
     if (!trimmed) return;
     const parsedWeight = weightKg !== '' ? Number(weightKg) : undefined;
+    const parsedScheme =
+      type === 'sets-reps' && repsMode === 'variable' ? parseRepScheme(repsScheme) : [];
+    const useScheme = parsedScheme.length >= 2;
     const exercise: Omit<PlanExercise, 'id'> = {
       name: trimmed,
       type,
-      sets: type !== 'duration' ? Math.max(1, Number(sets) || 1) : undefined,
-      reps: type === 'sets-reps' ? Math.max(1, Number(reps) || 10) : undefined,
+      sets:
+        type === 'duration'
+          ? undefined
+          : useScheme
+            ? parsedScheme.length
+            : Math.max(1, Number(sets) || 1),
+      reps:
+        type === 'sets-reps' && !useScheme
+          ? Math.max(1, Number(parsedScheme[0] ?? reps) || 10)
+          : undefined,
+      repsPerSet: useScheme ? parsedScheme : undefined,
       duration: type !== 'sets-reps' ? Math.max(1, Number(duration) || 60) : undefined,
       weightKg: parsedWeight && parsedWeight > 0 ? parsedWeight : undefined,
       role: showRole ? role : 'core',
@@ -250,9 +273,28 @@ export default function AddPlanExerciseModal({
             </div>
           </div>
 
+          {/* Reps mode toggle (sets-reps only) */}
+          {type === 'sets-reps' && (
+            <div className="flex rounded-xl border border-border overflow-hidden">
+              {(['fixed', 'variable'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setRepsMode(m)}
+                  className={`flex-1 py-2.5 text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                    repsMode === m
+                      ? 'bg-brand text-white'
+                      : 'bg-transparent text-muted hover:text-secondary'
+                  }`}
+                >
+                  {m === 'fixed' ? t.exercise_reps_mode_fixed : t.exercise_reps_mode_variable}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Sets + Reps/Duration */}
           <div className="flex gap-3">
-            {type !== 'duration' && (
+            {type !== 'duration' && !(type === 'sets-reps' && repsMode === 'variable') && (
               <div className="flex-1">
                 <FieldLabel htmlFor="plan-sets">{t.exercise_sets_label}</FieldLabel>
                 <Input
@@ -265,7 +307,7 @@ export default function AddPlanExerciseModal({
                 />
               </div>
             )}
-            {type === 'sets-reps' && (
+            {type === 'sets-reps' && repsMode === 'fixed' && (
               <div className="flex-1">
                 <FieldLabel htmlFor="plan-reps">{t.exercise_reps_label}</FieldLabel>
                 <Input
@@ -292,6 +334,23 @@ export default function AddPlanExerciseModal({
               </div>
             )}
           </div>
+
+          {/* Per-set scheme input */}
+          {type === 'sets-reps' && repsMode === 'variable' && (
+            <div>
+              <FieldLabel htmlFor="plan-reps-scheme">{t.exercise_reps_scheme_label}</FieldLabel>
+              <Input
+                id="plan-reps-scheme"
+                type="text"
+                inputMode="numeric"
+                value={repsScheme}
+                onChange={(e) => setRepsScheme(e.target.value)}
+                placeholder={t.exercise_reps_scheme_placeholder}
+                autoComplete="off"
+              />
+              <p className="mt-1 text-xs text-muted">{t.exercise_reps_scheme_hint}</p>
+            </div>
+          )}
 
           {/* Weight */}
           {(type === 'sets-reps' || type === 'sets-duration') && (
