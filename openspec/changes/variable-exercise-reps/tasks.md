@@ -1,9 +1,9 @@
 ## 1. Types & formatting core
 
-- [ ] 1.1 Add `repsPerSet?: number[]` to `Exercise` and `PlanExercise` in `src/lib/types.ts`, documenting that it is mutually exclusive with `reps`
-- [ ] 1.2 Add `formatRepsTarget(ex)` to `src/lib/sessionUtils.ts` returning `"10"` for uniform reps or `"15/12/8/4"` for a scheme
-- [ ] 1.3 Update `formatExerciseDetail` to render `sets-reps` as the scheme (`15/12/8/4`) when `repsPerSet` is present, and `sets×reps` otherwise
-- [ ] 1.4 Add a `parseRepScheme(text)` helper (accepts comma/space/slash separators, returns a positive-integer array) — colocate in `sessionUtils.ts`
+- [x] 1.1 Add `repsPerSet?: number[]` to `Exercise` and `PlanExercise` in `src/lib/types.ts`, documenting that it is mutually exclusive with `reps`
+- [x] 1.2 Add `formatRepsTarget(ex)` to `src/lib/sessionUtils.ts` returning `"10"` for uniform reps or `"15/12/8/4"` for a scheme
+- [x] 1.3 Update `formatExerciseDetail` to render `sets-reps` as the scheme (`15/12/8/4`) when `repsPerSet` is present, and `sets×reps` otherwise
+- [x] 1.4 Add a `parseRepScheme(text)` helper (accepts comma/space/slash separators, returns a positive-integer array) — colocate in `sessionUtils.ts`
 
 ## 2. Authoring UI
 
