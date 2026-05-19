@@ -26,7 +26,8 @@ export interface Exercise {
   name: string;
   type: 'sets-reps' | 'sets-duration' | 'duration';
   sets?: number; // present for sets-reps / sets-duration; absent for duration
-  reps?: number; // present for sets-reps
+  reps?: number; // uniform rep target; mutually exclusive with repsPerSet
+  repsPerSet?: number[]; // per-set rep targets (e.g. [15, 12, 8, 4]); sets equals length when present
   duration?: number; // seconds; present for sets-duration and duration
   weightKg?: number;
   scalingNote?: string;
@@ -44,7 +45,8 @@ export interface PlanExercise {
   name: string;
   type: 'sets-reps' | 'sets-duration' | 'duration';
   sets?: number;
-  reps?: number;
+  reps?: number; // uniform rep target; mutually exclusive with repsPerSet
+  repsPerSet?: number[]; // per-set rep targets (e.g. [15, 12, 8, 4]); sets equals length when present
   duration?: number;
   weightKg?: number;
   role: 'core' | 'optional';
