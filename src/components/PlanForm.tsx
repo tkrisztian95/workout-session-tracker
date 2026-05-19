@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, Plus, RotateCcw, Trash2, X, Pencil } from 'lucide-react';
+import { CheckCircle, Plus, RotateCcw, Trash2, X, Pencil, Sparkles } from 'lucide-react';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import DeletePlanConfirmSheet from '@/components/DeletePlanConfirmSheet';
+import AiPlanAdjustModal from '@/components/AiPlanAdjustModal';
+import AiExerciseSwapModal from '@/components/AiExerciseSwapModal';
 import MuscleBadge from '@/components/MuscleBadge';
+import { getLlmConfig } from '@/lib/storage';
+import type { AiAdjustResult } from '@/lib/ai';
 import { useLocale } from '@/lib/locale-context';
 import {
   Button,
@@ -65,6 +69,49 @@ export default function PlanForm({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState('');
   const [weeksError, setWeeksError] = useState('');
+  const [aiEnabled] = useState(() => !!getLlmConfig()?.apiKey);
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [swapTarget, setSwapTarget] = useState<{
+    exercise: PlanExercise;
+    dayName: string | null;
+  } | null>(null);
+
+  const draftPlan: WorkoutPlan = {
+    id: initialPlan?.id ?? 'draft',
+    name: name.trim() || initialPlan?.name || 'Workout plan',
+    days,
+    sharedExercises,
+    createdAt: initialPlan?.createdAt ?? new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ...(scheduledWeeks !== '' && Number(scheduledWeeks)
+      ? { scheduledWeeks: Number(scheduledWeeks) }
+      : {}),
+  };
+
+  const handleAiAdjust = (result: AiAdjustResult) => {
+    setName(result.name);
+    setDays(result.days);
+    setSharedExercises(result.sharedExercises);
+    setScheduledWeeks(result.scheduledWeeks ? String(result.scheduledWeeks) : '');
+    setError('');
+    setWeeksError('');
+    setShowAdjustModal(false);
+  };
+
+  const handleAiSwap = (replacement: PlanExercise) => {
+    if (!swapTarget) return;
+    const oldId = swapTarget.exercise.id;
+    const swapIn = (e: PlanExercise) => (e.id === oldId ? { ...replacement, id: oldId } : e);
+    setDays((prev) =>
+      prev.map((d) => ({
+        ...d,
+        coreExercises: d.coreExercises.map(swapIn),
+        optionalExercises: d.optionalExercises.map(swapIn),
+      })),
+    );
+    setSharedExercises((prev) => prev.map(swapIn));
+    setSwapTarget(null);
+  };
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -214,6 +261,18 @@ export default function PlanForm({
           {weeksError && <p className="text-danger text-xs mt-1.5">{weeksError}</p>}
         </div>
 
+        {!readOnly && aiEnabled && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowAdjustModal(true)}
+            className="w-full gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-brand" />
+            {t.ai_adjust_button}
+          </Button>
+        )}
+
         <div>
           <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-1">
             {t.shared_exercises_label} ({sharedExercises.length})
@@ -245,6 +304,16 @@ export default function PlanForm({
                     >
                       <Pencil className="w-3.5 h-3.5 text-muted" />
                     </IconButton>
+                    {aiEnabled && (
+                      <IconButton
+                        size="sm"
+                        onClick={() => setSwapTarget({ exercise: ex, dayName: null })}
+                        aria-label={`Swap ${ex.name} with AI`}
+                        className="flex-shrink-0"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-brand" />
+                      </IconButton>
+                    )}
                     <IconButton
                       size="sm"
                       onClick={() => removeShared(ex.id)}
@@ -284,6 +353,12 @@ export default function PlanForm({
                 onChange={(d) => updateDay(i, d)}
                 onRemove={() => removeDay(i)}
                 readOnly={readOnly}
+                onAiSwap={
+                  aiEnabled
+                    ? (ex) =>
+                        setSwapTarget({ exercise: ex, dayName: day.name.trim() || 'Training day' })
+                    : undefined
+                }
               />
             ))}
           </div>
@@ -345,6 +420,23 @@ export default function PlanForm({
           onEdit={handleEditShared}
           initialValues={editingShared}
           showRole={false}
+        />
+      )}
+
+      {showAdjustModal && (
+        <AiPlanAdjustModal
+          plan={draftPlan}
+          onApply={handleAiAdjust}
+          onClose={() => setShowAdjustModal(false)}
+        />
+      )}
+      {swapTarget !== null && (
+        <AiExerciseSwapModal
+          plan={draftPlan}
+          exercise={swapTarget.exercise}
+          dayName={swapTarget.dayName}
+          onApply={handleAiSwap}
+          onClose={() => setSwapTarget(null)}
         />
       )}
     </Page>
