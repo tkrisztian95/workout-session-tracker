@@ -17,6 +17,7 @@ import type { Muscle } from './muscles';
 export interface LoggedSet {
   weight: number; // kg
   reps: number;
+  seconds?: number; // elapsed time for time-based sets (e.g. plank); weight/reps are 0
   loggedAt: string; // ISO timestamp
 }
 
