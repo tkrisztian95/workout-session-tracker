@@ -38,6 +38,13 @@ The Plans page SHALL let the user order the plan list by one of: recently create
 - **WHEN** the user selects the "name" sort
 - **THEN** plans SHALL be ordered alphabetically by name (case-insensitive, ascending)
 
+#### Scenario: Completed plans are grouped below active plans
+
+- **WHEN** the result list contains both active and completed plans
+- **THEN** all active plans SHALL appear before all completed plans
+- **AND** the chosen sort SHALL be applied within each group
+- **AND** a "Completed" separator SHALL mark the start of the completed plans
+
 ### Requirement: "Recently followed" ordering is derived from session history
 
 The "recently followed" sort SHALL rank each plan by the most recent completed workout session associated with that plan.
