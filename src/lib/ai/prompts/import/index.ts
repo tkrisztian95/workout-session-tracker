@@ -1,5 +1,6 @@
 export * as v1 from './v1';
 export * as v2 from './v2';
+export * as v3 from './v3';
 
 // current points to the active production version
-export { system as current } from './v2';
+export { system as current } from './v3';
