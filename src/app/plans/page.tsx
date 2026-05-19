@@ -100,40 +100,36 @@ export default function PlansPage() {
     <Page className="pb-24">
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <HeadingXL>{t.plans_title}</HeadingXL>
-            {hasPlans && (
-              <p className="text-muted text-sm mt-3">
-                {visiblePlans.length === plans.length
-                  ? t.plans_total_count.replace('{n}', String(plans.length))
-                  : t.plans_shown_of_total
-                      .replace('{shown}', String(visiblePlans.length))
-                      .replace('{total}', String(plans.length))}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-            {hasPlans && (
-              <IconButton
-                onClick={() => setShowControls(true)}
-                aria-label={t.plans_controls_open}
-                className="relative border border-border"
-              >
-                <SlidersHorizontal className="w-4 h-4 text-muted" />
-                {controlsActive && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
-                )}
-              </IconButton>
-            )}
-            <IconButton
-              onClick={() => setShowAiModal(true)}
-              aria-label="AI Suggest Plan"
-              className="border border-border"
-            >
-              <Sparkles className="w-4 h-4 text-brand" />
-            </IconButton>
-          </div>
+          <HeadingXL>{t.plans_title}</HeadingXL>
+          <IconButton
+            onClick={() => setShowAiModal(true)}
+            aria-label="AI Suggest Plan"
+            className="border border-border flex-shrink-0 mt-1"
+          >
+            <Sparkles className="w-4 h-4 text-brand" />
+          </IconButton>
         </div>
+        {hasPlans && (
+          <div className="flex items-center justify-between gap-3 mt-3">
+            <IconButton
+              onClick={() => setShowControls(true)}
+              aria-label={t.plans_controls_open}
+              className="relative border border-border flex-shrink-0"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-muted" />
+              {controlsActive && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
+              )}
+            </IconButton>
+            <p className="text-muted text-sm">
+              {visiblePlans.length === plans.length
+                ? t.plans_total_count.replace('{n}', String(plans.length))
+                : t.plans_shown_of_total
+                    .replace('{shown}', String(visiblePlans.length))
+                    .replace('{total}', String(plans.length))}
+            </p>
+          </div>
+        )}
       </PageHeader>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto pb-28">
