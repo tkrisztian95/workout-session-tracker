@@ -56,6 +56,8 @@ export default function PlansPage() {
     () => organizePlans(plans, sessions, { search, sort, filters }),
     [plans, sessions, search, sort, filters],
   );
+  const activeVisible = visiblePlans.filter((p) => p.status !== 'completed');
+  const completedVisible = visiblePlans.filter((p) => p.status === 'completed');
   const muscles = useMemo(() => availableMuscles(plans), [plans]);
   const dayCounts = useMemo(() => availableDayCounts(plans), [plans]);
   const filterCount = countActiveFilters(filters);
@@ -156,14 +158,33 @@ export default function PlansPage() {
             </button>
           </div>
         ) : (
-          visiblePlans.map((plan) => (
-            <PlanCard
-              key={plan.id}
-              plan={plan}
-              onToggleStatus={() => handleToggleStatus(plan.id)}
-              onDuplicate={() => handleDuplicate(plan.id)}
-            />
-          ))
+          <>
+            {activeVisible.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                onToggleStatus={() => handleToggleStatus(plan.id)}
+                onDuplicate={() => handleDuplicate(plan.id)}
+              />
+            ))}
+            {completedVisible.length > 0 && (
+              <>
+                {activeVisible.length > 0 && (
+                  <p className="text-muted text-xs font-medium tracking-widest uppercase pt-3">
+                    {t.plan_completed_count.replace('{n}', String(completedVisible.length))}
+                  </p>
+                )}
+                {completedVisible.map((plan) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    onToggleStatus={() => handleToggleStatus(plan.id)}
+                    onDuplicate={() => handleDuplicate(plan.id)}
+                  />
+                ))}
+              </>
+            )}
+          </>
         )}
       </div>
 
