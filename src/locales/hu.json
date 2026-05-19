@@ -423,6 +423,7 @@
   "ai_import_remove_session": "Edzés törlése",
   "profile_achievements_label": "Eredmények",
   "achievements_title": "Eredmények",
+  "achievements_progress": "{unlocked} / {total}",
   "achievement_unlocked_on": "Feloldva: {date}",
   "achievement_celebration_label": "Eredmény feloldva!",
   "achievement_celebration_dismiss": "Tovább",

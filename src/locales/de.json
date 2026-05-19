@@ -451,6 +451,7 @@
 
   "profile_achievements_label": "Erfolge",
   "achievements_title": "Erfolge",
+  "achievements_progress": "{unlocked} von {total}",
   "achievement_unlocked_on": "Freigeschaltet am {date}",
   "achievement_celebration_label": "Erfolg freigeschaltet!",
   "achievement_celebration_dismiss": "Weiter",
