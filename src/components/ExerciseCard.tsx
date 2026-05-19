@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, X, RotateCcw, Plus, Info } from 'lucide-react';
+import { Check, X, RotateCcw, Plus, Info, Timer } from 'lucide-react';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { IconButton } from '@/components/ui';
 import LoggedSetBadge from '@/components/LoggedSetBadge';
+import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
 
@@ -52,6 +53,7 @@ export default function ExerciseCard({
 }: Props) {
   const t = useTranslations();
   const [showSetForm, setShowSetForm] = useState(false);
+  const [showStopwatch, setShowStopwatch] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
@@ -61,7 +63,11 @@ export default function ExerciseCard({
   const isCompleted = exercise.completed === true;
   const isDone = isCompleted || isDismissed;
   const showActiveStyle = isActive && !isDone;
+  const isTimed = exercise.type === 'sets-duration' || exercise.type === 'duration';
   const canLogSets = exercise.type === 'sets-reps' && !isDone && !!onLogSet;
+  const canTimeSets = isTimed && !isDone && !!onLogSet;
+  const showSetSlots =
+    (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
 
   const loggedCount = exercise.loggedSets?.length ?? 0;
   const qualifyingSetCount =
@@ -69,7 +75,13 @@ export default function ExerciseCard({
       ? (exercise.loggedSets?.filter((s) => s.weight >= exercise.weightKg!).length ?? 0)
       : loggedCount;
   const setsGoalAchieved =
-    exercise.type === 'sets-reps' && exercise.sets != null && qualifyingSetCount >= exercise.sets;
+    exercise.type === 'sets-reps'
+      ? exercise.sets != null && qualifyingSetCount >= exercise.sets
+      : exercise.type === 'sets-duration'
+        ? exercise.sets != null && loggedCount >= exercise.sets
+        : exercise.type === 'duration'
+          ? loggedCount >= 1
+          : false;
   const weightGoalAchieved =
     exercise.weightKg != null &&
     loggedCount > 0 &&
@@ -145,11 +157,11 @@ export default function ExerciseCard({
             )}
           </div>
 
-          {/* Set progress slots — shown for sets-reps exercises */}
-          {exercise.type === 'sets-reps' && exercise.sets != null && (
+          {/* Set progress slots — shown for sets-reps and sets-duration exercises */}
+          {showSetSlots && (
             <div className="flex flex-wrap gap-1.5 px-4 pb-3">
               {Array.from({
-                length: Math.max(exercise.sets, exercise.loggedSets?.length ?? 0),
+                length: Math.max(exercise.sets ?? 0, exercise.loggedSets?.length ?? 0),
               }).map((_, i) => {
                 const logged = exercise.loggedSets?.[i];
                 return logged ? (
@@ -224,6 +236,15 @@ export default function ExerciseCard({
                   >
                     <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
                     {t.exercise_log_set}
+                  </button>
+                )}
+                {canTimeSets && (
+                  <button
+                    onClick={() => setShowStopwatch(true)}
+                    className="flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-elevated text-secondary text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150"
+                  >
+                    <Timer className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    {t.exercise_log_time}
                   </button>
                 )}
                 <div className={`relative flex-1${allTargetsAchieved ? '' : ''}`}>
@@ -324,6 +345,18 @@ export default function ExerciseCard({
             )}
           </div>
         </div>
+      )}
+
+      {showStopwatch && (
+        <ExerciseStopwatchOverlay
+          exerciseName={exercise.name}
+          targetSeconds={exercise.duration}
+          onCancel={() => setShowStopwatch(false)}
+          onSave={(seconds) => {
+            onLogSet?.({ weight: 0, reps: 0, seconds });
+            setShowStopwatch(false);
+          }}
+        />
       )}
     </div>
   );

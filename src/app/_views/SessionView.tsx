@@ -12,7 +12,7 @@ import PulsingButton from '@/components/PulsingButton';
 import FinishSessionConfirmSheet from '@/components/FinishSessionConfirmSheet';
 import DiscardSessionConfirmSheet from '@/components/DiscardSessionConfirmSheet';
 import { useLocale, useTranslations } from '@/lib/locale-context';
-import type { ActiveSession, AchievementRecord, Exercise } from '@/lib/types';
+import type { ActiveSession, AchievementRecord, Exercise, LoggedSet } from '@/lib/types';
 import {
   getSessions,
   getPlans,
@@ -111,17 +111,14 @@ export function SessionView({
     onUpdate(updated);
   };
 
-  const handleLogSet = (id: string, weight: number, reps: number) => {
+  const handleLogSet = (id: string, set: Omit<LoggedSet, 'loggedAt'>) => {
     const updated: ActiveSession = {
       ...session,
       exercises: session.exercises.map((e) =>
         e.id === id
           ? {
               ...e,
-              loggedSets: [
-                ...(e.loggedSets ?? []),
-                { weight, reps, loggedAt: new Date().toISOString() },
-              ],
+              loggedSets: [...(e.loggedSets ?? []), { ...set, loggedAt: new Date().toISOString() }],
             }
           : e,
       ),
@@ -205,7 +202,7 @@ export function SessionView({
               isActive
               onComplete={() => handleComplete(activeExercise.id)}
               onDismiss={() => handleDismiss(activeExercise.id)}
-              onLogSet={(s) => handleLogSet(activeExercise.id, s.weight, s.reps)}
+              onLogSet={(s) => handleLogSet(activeExercise.id, s)}
               onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
             />
           )}
@@ -240,7 +237,7 @@ export function SessionView({
                       onComplete={() => handleComplete(exercise.id)}
                       onDismiss={() => handleDismiss(exercise.id)}
                       onSetActive={() => handleSetActive(exercise.id)}
-                      onLogSet={(s) => handleLogSet(exercise.id, s.weight, s.reps)}
+                      onLogSet={(s) => handleLogSet(exercise.id, s)}
                     />
                   ))}
                 </>

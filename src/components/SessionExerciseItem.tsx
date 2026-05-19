@@ -3,7 +3,7 @@
 import { Check, Minus, Pencil, X } from 'lucide-react';
 import MuscleBadge from '@/components/MuscleBadge';
 import { IconButton } from '@/components/ui';
-import { formatExerciseDetail } from '@/lib/sessionUtils';
+import { formatExerciseDetail, formatLoggedSet } from '@/lib/sessionUtils';
 import type { Exercise } from '@/lib/types';
 
 interface SessionExerciseItemProps {
@@ -85,7 +85,7 @@ export function SessionExerciseItem({
                 key={i}
                 className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
               >
-                {s.weight}kg×{s.reps}
+                {formatLoggedSet(s)}
               </span>
             ))}
           </div>
