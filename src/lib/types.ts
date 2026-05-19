@@ -67,6 +67,7 @@ export interface WorkoutPlan {
   createdAt: string; // ISO date string
   updatedAt: string;
   status?: 'active' | 'completed';
+  completedAt?: string; // ISO timestamp set when the plan is marked completed
   aiGenerated?: boolean;
   scheduledWeeks?: number;
 }

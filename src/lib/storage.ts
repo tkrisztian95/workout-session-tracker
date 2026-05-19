@@ -125,6 +125,7 @@ export function duplicatePlan(id: string): WorkoutPlan {
     id: crypto.randomUUID(),
     name: `${original.name} (copy)`,
     status: 'active',
+    completedAt: undefined,
     createdAt: now,
     updatedAt: now,
     days: original.days.map((day) => ({
@@ -144,7 +145,17 @@ export function togglePlanStatus(id: string): void {
   const index = plans.findIndex((p) => p.id === id);
   if (index === -1) return;
   const current = plans[index].status ?? 'active';
-  plans[index] = { ...plans[index], status: current === 'active' ? 'completed' : 'active' };
+  if (current === 'active') {
+    plans[index] = {
+      ...plans[index],
+      status: 'completed',
+      completedAt: new Date().toISOString(),
+    };
+  } else {
+    const next = { ...plans[index], status: 'active' as const };
+    delete next.completedAt;
+    plans[index] = next;
+  }
   localStorage.setItem(KEYS.plans, JSON.stringify(plans));
 }
 
