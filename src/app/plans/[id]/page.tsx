@@ -34,7 +34,7 @@ export default function PlanDetailPage() {
     router.push('/plans');
   };
 
-  const handleReactivate = () => {
+  const handleToggleStatus = () => {
     togglePlanStatus(plan.id);
     setPlan(getPlans().find((p) => p.id === plan.id) ?? null);
   };
@@ -45,7 +45,7 @@ export default function PlanDetailPage() {
       onSave={handleSave}
       onCancel={() => router.back()}
       onDelete={handleDelete}
-      onReactivate={plan.status === 'completed' ? handleReactivate : undefined}
+      onToggleStatus={handleToggleStatus}
       readOnly={plan.status === 'completed'}
     />
   );

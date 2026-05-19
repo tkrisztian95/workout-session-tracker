@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, RotateCcw, Trash2, X, Pencil } from 'lucide-react';
+import { CheckCircle, Plus, RotateCcw, Trash2, X, Pencil } from 'lucide-react';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
@@ -41,7 +41,7 @@ interface PlanFormProps {
   onSave: (plan: WorkoutPlan) => void;
   onCancel: () => void;
   onDelete?: () => void;
-  onReactivate?: () => void;
+  onToggleStatus?: () => void;
   readOnly?: boolean;
 }
 
@@ -50,7 +50,7 @@ export default function PlanForm({
   onSave,
   onCancel,
   onDelete,
-  onReactivate,
+  onToggleStatus,
   readOnly = false,
 }: PlanFormProps) {
   const t = useTranslations();
@@ -120,6 +120,7 @@ export default function PlanForm({
   };
 
   const isEditing = !!initialPlan;
+  const isCompleted = initialPlan?.status === 'completed';
 
   return (
     <Page>
@@ -128,15 +129,19 @@ export default function PlanForm({
           <HeadingXL>
             {readOnly ? t.view_plan_title : isEditing ? t.edit_plan_title : t.new_plan}
           </HeadingXL>
-          {(onReactivate || onDelete) && (
+          {(onToggleStatus || onDelete) && (
             <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-              {onReactivate && (
+              {onToggleStatus && (
                 <IconButton
-                  onClick={onReactivate}
-                  aria-label={t.plan_action_reactivate}
+                  onClick={onToggleStatus}
+                  aria-label={isCompleted ? t.plan_action_reactivate : t.plan_action_mark_completed}
                   className="border border-border"
                 >
-                  <RotateCcw className="w-4 h-4 text-secondary" />
+                  {isCompleted ? (
+                    <RotateCcw className="w-4 h-4 text-secondary" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 text-muted" />
+                  )}
                 </IconButton>
               )}
               {onDelete && (
