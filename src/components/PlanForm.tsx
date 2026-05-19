@@ -41,9 +41,16 @@ interface PlanFormProps {
   onSave: (plan: WorkoutPlan) => void;
   onCancel: () => void;
   onDelete?: () => void;
+  readOnly?: boolean;
 }
 
-export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: PlanFormProps) {
+export default function PlanForm({
+  initialPlan,
+  onSave,
+  onCancel,
+  onDelete,
+  readOnly = false,
+}: PlanFormProps) {
   const t = useTranslations();
   const [name, setName] = useState(initialPlan?.name ?? '');
   const [days, setDays] = useState<PlanDay[]>(initialPlan?.days ?? [newDay()]);
@@ -115,7 +122,9 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
     <Page>
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
-          <HeadingXL>{isEditing ? t.edit_plan_title : t.new_plan}</HeadingXL>
+          <HeadingXL>
+            {readOnly ? t.view_plan_title : isEditing ? t.edit_plan_title : t.new_plan}
+          </HeadingXL>
           {onDelete && (
             <IconButton
               onClick={() => setShowDeleteConfirm(true)}
@@ -129,6 +138,11 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
       </PageHeader>
 
       <div className="flex-1 overflow-y-auto px-6 pb-36 space-y-6">
+        {readOnly && (
+          <p className="text-muted text-sm bg-surface border border-border rounded-xl px-4 py-3">
+            {t.view_plan_completed_note}
+          </p>
+        )}
         <div>
           <FieldLabel htmlFor="plan-name">{t.plan_name_label}</FieldLabel>
           <Input
@@ -141,6 +155,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
             }}
             placeholder={t.plan_name_placeholder}
             autoComplete="off"
+            readOnly={readOnly}
           />
           {error && <p className="text-danger text-xs mt-1.5">{error}</p>}
         </div>
@@ -159,6 +174,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
             placeholder={t.plan_scheduled_duration_placeholder}
             min={1}
             max={52}
+            readOnly={readOnly}
           />
           {weeksError && <p className="text-danger text-xs mt-1.5">{weeksError}</p>}
         </div>
@@ -184,35 +200,41 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                     <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>
                   )}
                 </div>
-                <IconButton
-                  size="sm"
-                  onClick={() => setEditingShared(ex)}
-                  aria-label={`Edit ${ex.name}`}
-                  className="flex-shrink-0"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-muted" />
-                </IconButton>
-                <IconButton
-                  size="sm"
-                  onClick={() => removeShared(ex.id)}
-                  aria-label={`Remove ${ex.name}`}
-                  className="flex-shrink-0"
-                >
-                  <X className="w-3.5 h-3.5 text-secondary" />
-                </IconButton>
+                {!readOnly && (
+                  <>
+                    <IconButton
+                      size="sm"
+                      onClick={() => setEditingShared(ex)}
+                      aria-label={`Edit ${ex.name}`}
+                      className="flex-shrink-0"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-muted" />
+                    </IconButton>
+                    <IconButton
+                      size="sm"
+                      onClick={() => removeShared(ex.id)}
+                      aria-label={`Remove ${ex.name}`}
+                      className="flex-shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5 text-secondary" />
+                    </IconButton>
+                  </>
+                )}
               </div>
             ))}
             {sharedExercises.length === 0 && (
               <p className="text-muted text-sm">{t.no_shared_exercises}</p>
             )}
           </div>
-          <button
-            onClick={() => setIsSharedModalOpen(true)}
-            className="flex items-center gap-2 text-brand text-sm font-semibold mt-3 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            {t.add_shared_exercise}
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setIsSharedModalOpen(true)}
+              className="flex items-center gap-2 text-brand text-sm font-semibold mt-3 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              {t.add_shared_exercise}
+            </button>
+          )}
         </div>
 
         <div>
@@ -226,33 +248,42 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                 day={day}
                 onChange={(d) => updateDay(i, d)}
                 onRemove={() => removeDay(i)}
+                readOnly={readOnly}
               />
             ))}
           </div>
-          <button
-            onClick={() => setDays((prev) => [...prev, newDay()])}
-            className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            {t.add_training_day}
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setDays((prev) => [...prev, newDay()])}
+              className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              {t.add_training_day}
+            </button>
+          )}
         </div>
       </div>
 
       <CtaBar slim>
-        <div className="flex gap-3">
-          <Button
-            variant={isEditing ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={onCancel}
-            className="flex-1 py-4"
-          >
-            {t.discard}
+        {readOnly ? (
+          <Button variant="secondary" size="sm" onClick={onCancel} className="w-full py-4">
+            {t.back}
           </Button>
-          <Button onClick={handleSave} className="flex-[2]">
-            {isEditing ? t.save_changes : t.save_plan}
-          </Button>
-        </div>
+        ) : (
+          <div className="flex gap-3">
+            <Button
+              variant={isEditing ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={onCancel}
+              className="flex-1 py-4"
+            >
+              {t.discard}
+            </Button>
+            <Button onClick={handleSave} className="flex-[2]">
+              {isEditing ? t.save_changes : t.save_plan}
+            </Button>
+          </div>
+        )}
       </CtaBar>
 
       {showDeleteConfirm && onDelete && (

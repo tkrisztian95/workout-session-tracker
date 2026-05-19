@@ -271,6 +271,8 @@
   "history_delete_body": "Diese Einheit wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
   "plan_not_found": "Plan nicht gefunden.",
   "edit_plan_title": "Plan bearbeiten",
+  "view_plan_title": "Plan",
+  "view_plan_completed_note": "Dieser Plan ist abgeschlossen und schreibgeschützt. Reaktiviere ihn, um Änderungen vorzunehmen.",
   "plan_scheduled_duration_label": "Geplante Dauer (Wochen)",
   "plan_scheduled_duration_placeholder": "z.B. 4",
   "plan_scheduled_duration_error": "Die Dauer muss zwischen 1 und 52 Wochen liegen.",
