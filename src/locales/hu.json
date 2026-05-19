@@ -258,6 +258,7 @@
   "edit_plan_title": "Terv szerkesztése",
   "view_plan_title": "Terv",
   "plan_completed_on_label": "Befejezve",
+  "plan_followed_aria": "{n} alkalommal követve",
   "view_plan_completed_note": "Ez a terv befejezett és csak olvasható. Aktiváld újra a módosításhoz.",
   "plan_scheduled_duration_label": "Tervezett időtartam (hetek)",
   "plan_scheduled_duration_placeholder": "pl. 4",

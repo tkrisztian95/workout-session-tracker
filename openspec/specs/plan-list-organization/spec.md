@@ -150,3 +150,23 @@ When the user has at least one plan but the active search and filters match none
 - **WHEN** the no-results state is shown
 - **AND** the user clears the search and filters
 - **THEN** the full plan list SHALL be shown again under the default sort
+
+### Requirement: Plan cards show how often each plan has been followed
+
+Each plan card SHALL display a relative bar indicating how many completed workout sessions have been logged against that plan, so plans can be compared at a glance.
+
+#### Scenario: Follow count reflects completed sessions
+
+- **WHEN** a plan has one or more completed sessions whose `planId` matches it
+- **THEN** its card SHALL show the count of those sessions alongside the bar
+
+#### Scenario: Bar length is relative to the most-followed plan
+
+- **WHEN** plan cards display their follow-frequency bars
+- **THEN** the plan with the most completed sessions SHALL have a full bar
+- **AND** other plans SHALL have proportionally shorter bars
+
+#### Scenario: Never-followed plans show no bar
+
+- **WHEN** a plan has no completed sessions
+- **THEN** no follow-frequency bar SHALL be shown on its card

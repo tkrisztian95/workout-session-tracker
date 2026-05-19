@@ -22,6 +22,7 @@ import {
   availableMuscles,
   countActiveFilters,
   DEFAULT_PLAN_FILTERS,
+  getPlanFollowCount,
   getPlanMuscles,
   organizePlans,
   type PlanFilters,
@@ -60,6 +61,12 @@ export default function PlansPage() {
   const completedVisible = visiblePlans.filter((p) => p.status === 'completed');
   const muscles = useMemo(() => availableMuscles(plans), [plans]);
   const dayCounts = useMemo(() => availableDayCounts(plans), [plans]);
+  const followCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of plans) counts.set(p.id, getPlanFollowCount(p.id, sessions));
+    return counts;
+  }, [plans, sessions]);
+  const maxFollowCount = Math.max(1, ...followCounts.values());
   const filterCount = countActiveFilters(filters);
   const hasPlans = plans.length > 0;
   const controlsActive = search.trim() !== '' || filterCount > 0 || sort !== 'created';
@@ -163,6 +170,8 @@ export default function PlansPage() {
               <PlanCard
                 key={plan.id}
                 plan={plan}
+                followCount={followCounts.get(plan.id) ?? 0}
+                maxFollowCount={maxFollowCount}
                 onToggleStatus={() => handleToggleStatus(plan.id)}
                 onDuplicate={() => handleDuplicate(plan.id)}
               />
@@ -178,6 +187,8 @@ export default function PlansPage() {
                   <PlanCard
                     key={plan.id}
                     plan={plan}
+                    followCount={followCounts.get(plan.id) ?? 0}
+                    maxFollowCount={maxFollowCount}
                     onToggleStatus={() => handleToggleStatus(plan.id)}
                     onDuplicate={() => handleDuplicate(plan.id)}
                   />
@@ -411,10 +422,14 @@ function PlanControlsSheet({
 
 function PlanCard({
   plan,
+  followCount,
+  maxFollowCount,
   onToggleStatus,
   onDuplicate,
 }: {
   plan: WorkoutPlan;
+  followCount: number;
+  maxFollowCount: number;
   onToggleStatus: () => void;
   onDuplicate: () => void;
 }) {
@@ -472,6 +487,20 @@ function PlanCard({
             </span>
           )}
         </p>
+        {followCount > 0 && (
+          <div
+            className="flex items-center gap-2 mt-2"
+            aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
+          >
+            <div className="flex-1 h-1.5 rounded-full bg-elevated overflow-hidden">
+              <div
+                className="h-full rounded-full bg-brand"
+                style={{ width: `${Math.max(8, (followCount / maxFollowCount) * 100)}%` }}
+              />
+            </div>
+            <span className="text-dim text-xs font-medium flex-shrink-0">{followCount}×</span>
+          </div>
+        )}
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (

@@ -273,6 +273,7 @@
   "edit_plan_title": "Edit Plan",
   "view_plan_title": "Plan",
   "plan_completed_on_label": "Completed on",
+  "plan_followed_aria": "Followed {n} times",
   "view_plan_completed_note": "This plan is completed and read-only. Reactivate it to make changes.",
   "plan_scheduled_duration_label": "Scheduled duration (weeks)",
   "plan_scheduled_duration_placeholder": "e.g. 4",
