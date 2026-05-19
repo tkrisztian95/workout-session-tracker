@@ -32,6 +32,7 @@ import BottomNav from '@/components/BottomNav';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
 import {
+  Badge,
   BottomSheet,
   Button,
   EmptyState,
@@ -487,20 +488,30 @@ function PlanCard({
             </span>
           )}
         </p>
-        {followCount > 0 && (
-          <div
-            className="flex items-center gap-2 mt-2"
-            aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
-          >
-            <div className="flex-1 h-1.5 rounded-full bg-elevated overflow-hidden">
-              <div
-                className="h-full rounded-full bg-brand"
-                style={{ width: `${Math.max(8, (followCount / maxFollowCount) * 100)}%` }}
-              />
+        {followCount > 0 &&
+          (isCompleted ? (
+            <div className="mt-2">
+              <Badge
+                variant="subtle"
+                aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
+              >
+                {t.plan_followed_badge.replace('{n}', String(followCount))}
+              </Badge>
             </div>
-            <span className="text-dim text-xs font-medium flex-shrink-0">{followCount}×</span>
-          </div>
-        )}
+          ) : (
+            <div
+              className="flex items-center gap-2 mt-2"
+              aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
+            >
+              <div className="flex-1 h-1.5 rounded-full bg-elevated overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-brand"
+                  style={{ width: `${Math.max(8, (followCount / maxFollowCount) * 100)}%` }}
+                />
+              </div>
+              <span className="text-dim text-xs font-medium flex-shrink-0">{followCount}×</span>
+            </div>
+          ))}
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (
