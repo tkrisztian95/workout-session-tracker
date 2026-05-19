@@ -48,10 +48,12 @@ function AchievementsContent() {
           >
             <ChevronLeft className="w-5 h-5 text-secondary" />
           </button>
-          <HeadingXL>{t.achievements_title}</HeadingXL>
-          <span className="ml-auto text-base font-semibold text-dim tabular-nums">
-            {progressLabel}
-          </span>
+          <HeadingXL className="flex-1 flex items-baseline gap-2">
+            {t.achievements_title}
+            <span className="ml-auto text-2xl text-dim tabular-nums">
+              ({progressLabel})
+            </span>
+          </HeadingXL>
         </div>
       </PageHeader>
 
