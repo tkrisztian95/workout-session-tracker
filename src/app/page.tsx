@@ -49,7 +49,7 @@ export default function HomePage() {
   const [userName, setUserName] = useState<string | null>(() => getUserName());
   const [consentSeen, setConsentSeen] = useState(() => hasSeenConsent());
   const [isFirstVisit, setIsFirstVisit] = useState(false);
-  const { newUnlocks, markSeen } = useAchievements();
+  const { newUnlocks, allRecords, markSeen } = useAchievements();
 
   const handleNameComplete = (name: string) => {
     setUserName(name);
@@ -247,6 +247,8 @@ export default function HomePage() {
         onCreatePlan={() => router.push('/plans/new')}
         greeting={greeting}
         lastSessionInfo={lastSessionInfo}
+        achievementCount={allRecords.length}
+        onOpenAchievements={() => router.push('/profile/achievements')}
       />
       {!consentSeen && <ConsentModal variant="modal" onComplete={() => setConsentSeen(true)} />}
       {consentSeen && newUnlocks.length > 0 && (
