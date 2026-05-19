@@ -451,6 +451,7 @@
 
   "profile_achievements_label": "Achievements",
   "achievements_title": "Achievements",
+  "achievements_progress": "{unlocked} of {total}",
   "achievement_unlocked_on": "Unlocked on {date}",
   "achievement_celebration_label": "Achievement Unlocked!",
   "achievement_celebration_dismiss": "Continue",

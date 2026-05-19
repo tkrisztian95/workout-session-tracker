@@ -248,7 +248,7 @@ export default function HomePage() {
         greeting={greeting}
         lastSessionInfo={lastSessionInfo}
         achievementCount={allRecords.length}
-        onOpenAchievements={() => router.push('/profile/achievements')}
+        onOpenAchievements={() => router.push('/profile/achievements?from=home')}
       />
       {!consentSeen && <ConsentModal variant="modal" onComplete={() => setConsentSeen(true)} />}
       {consentSeen && newUnlocks.length > 0 && (
