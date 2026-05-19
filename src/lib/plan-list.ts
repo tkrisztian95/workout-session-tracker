@@ -19,7 +19,7 @@ export interface PlanQuery {
 }
 
 export const DEFAULT_PLAN_FILTERS: PlanFilters = {
-  status: 'active',
+  status: 'all',
   aiGenerated: 'any',
   muscle: null,
   trainingDays: null,

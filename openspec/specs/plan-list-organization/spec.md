@@ -64,9 +64,14 @@ The "recently followed" sort SHALL rank each plan by the most recent completed w
 
 The Plans page SHALL let the user filter plans by status: active only, completed only, or all.
 
-#### Scenario: Active filter is the default
+#### Scenario: All statuses are shown by default
 
 - **WHEN** the Plans page is opened and no filter has been changed
+- **THEN** plans of every status SHALL be shown together
+
+#### Scenario: Active filter
+
+- **WHEN** the user sets the status filter to "active"
 - **THEN** only plans with status `active` (or no status) SHALL be shown
 
 #### Scenario: Completed filter
