@@ -1,7 +1,7 @@
 import type { WorkoutPlan, WorkoutSession } from './types';
 import { ALL_MUSCLES, type Muscle } from './muscles';
 
-export type PlanSort = 'created' | 'followed' | 'updated' | 'name';
+export type PlanSort = 'created' | 'followed' | 'mostFollowed' | 'updated' | 'name';
 export type StatusFilter = 'active' | 'completed' | 'all';
 export type AiFilter = 'any' | 'ai' | 'manual';
 
@@ -117,6 +117,12 @@ function compare(
       if (fa && fb) return fb.localeCompare(fa);
       if (fa) return -1;
       if (fb) return 1;
+      return b.createdAt.localeCompare(a.createdAt);
+    }
+    case 'mostFollowed': {
+      const ca = getPlanFollowCount(a.id, sessions);
+      const cb = getPlanFollowCount(b.id, sessions);
+      if (ca !== cb) return cb - ca;
       return b.createdAt.localeCompare(a.createdAt);
     }
   }
