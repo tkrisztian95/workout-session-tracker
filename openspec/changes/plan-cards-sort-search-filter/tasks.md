@@ -1,17 +1,17 @@
 ## 1. Plan-list helper module
 
-- [ ] 1.1 Create `src/lib/plan-list.ts` exporting `PlanSort` (`'created' | 'followed' | 'updated' | 'name'`), `StatusFilter` (`'active' | 'completed' | 'all'`), `AiFilter` (`'any' | 'ai' | 'manual'`), and a `PlanFilters` interface (`status`, `aiGenerated`, `muscle: Muscle | null`, `trainingDays: number | null`)
-- [ ] 1.2 Add `getPlanLastFollowedAt(planId, sessions): string | null` — the max `completedAt` over sessions whose `planId` matches; `null` when none
-- [ ] 1.3 Add `getPlanMuscles(plan): Muscle[]` (move the existing local helper out of `page.tsx`) and `availableMuscles(plans): Muscle[]` / `availableDayCounts(plans): number[]` returning sorted distinct filterable values
-- [ ] 1.4 Add `organizePlans(plans, sessions, { search, sort, filters }): WorkoutPlan[]` applying search → filters → sort; "followed" sort puts never-followed plans last with `createdAt`-desc tiebreak
-- [ ] 1.5 Add `DEFAULT_PLAN_FILTERS` constant and `countActiveFilters(filters): number` (non-default filter count)
+- [x] 1.1 Create `src/lib/plan-list.ts` exporting `PlanSort` (`'created' | 'followed' | 'updated' | 'name'`), `StatusFilter` (`'active' | 'completed' | 'all'`), `AiFilter` (`'any' | 'ai' | 'manual'`), and a `PlanFilters` interface (`status`, `aiGenerated`, `muscle: Muscle | null`, `trainingDays: number | null`)
+- [x] 1.2 Add `getPlanLastFollowedAt(planId, sessions): string | null` — the max `completedAt` over sessions whose `planId` matches; `null` when none
+- [x] 1.3 Add `getPlanMuscles(plan): Muscle[]` (move the existing local helper out of `page.tsx`) and `availableMuscles(plans): Muscle[]` / `availableDayCounts(plans): number[]` returning sorted distinct filterable values
+- [x] 1.4 Add `organizePlans(plans, sessions, { search, sort, filters }): WorkoutPlan[]` applying search → filters → sort; "followed" sort puts never-followed plans last with `createdAt`-desc tiebreak
+- [x] 1.5 Add `DEFAULT_PLAN_FILTERS` constant and `countActiveFilters(filters): number` (non-default filter count)
 
 ## 2. Helper module tests
 
-- [ ] 2.1 Create `src/lib/plan-list.test.ts` covering `getPlanLastFollowedAt` (no sessions, in-progress session ignored, latest of several)
-- [ ] 2.2 Test `organizePlans` sort branches: created, updated, name (case-insensitive), followed (never-followed last)
-- [ ] 2.3 Test `organizePlans` search (case-insensitive substring) and each filter dimension (status, aiGenerated, muscle, trainingDays)
-- [ ] 2.4 Test `availableMuscles` / `availableDayCounts` return sorted distinct values, and `countActiveFilters`
+- [x] 2.1 Create `src/lib/plan-list.test.ts` covering `getPlanLastFollowedAt` (no sessions, in-progress session ignored, latest of several)
+- [x] 2.2 Test `organizePlans` sort branches: created, updated, name (case-insensitive), followed (never-followed last)
+- [x] 2.3 Test `organizePlans` search (case-insensitive substring) and each filter dimension (status, aiGenerated, muscle, trainingDays)
+- [x] 2.4 Test `availableMuscles` / `availableDayCounts` return sorted distinct values, and `countActiveFilters`
 
 ## 3. Plans page — search and sort
 
