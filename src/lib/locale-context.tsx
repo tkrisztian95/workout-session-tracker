@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
-import { type Locale, type Translations, translations, defaultLocale } from './i18n';
+import { type Locale, type Translations, translations, defaultLocale, detectLocale } from './i18n';
 import { getLocale } from './storage';
 
 interface LocaleContextValue {
@@ -17,7 +17,7 @@ const LocaleContext = createContext<LocaleContextValue>({
 });
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => getLocale() ?? defaultLocale);
+  const [locale, setLocaleState] = useState<Locale>(() => getLocale() ?? detectLocale());
 
   const setLocale = (next: Locale) => {
     setLocaleState(next);

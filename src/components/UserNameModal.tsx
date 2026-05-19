@@ -36,9 +36,11 @@ const SEX_OPTIONS: {
 ];
 
 export default function UserNameModal({ onComplete }: UserNameModalProps) {
+  const { locale, setLocale } = useLocale();
+
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState('');
-  const [selectedLocale, setSelectedLocale] = useState<Locale>('en');
+  const [selectedLocale, setSelectedLocale] = useState<Locale>(locale);
   const [langOpen, setLangOpen] = useState(false);
 
   // Body metrics state
@@ -47,7 +49,6 @@ export default function UserNameModal({ onComplete }: UserNameModalProps) {
   const [weight, setWeight] = useState('');
   const [sex, setSex] = useState<Sex | null>(null);
 
-  const { setLocale } = useLocale();
   const t = useTranslations();
 
   const currentLang = LANGUAGES.find((l) => l.locale === selectedLocale)!;
