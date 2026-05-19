@@ -5,12 +5,19 @@ The system SHALL allow users to mark an active workout plan as completed. A comp
 #### Scenario: Mark active plan as completed
 
 - **WHEN** user selects "Mark as Completed" on an active plan
-- **THEN** the plan's status is set to `'completed'` in localStorage and the plan moves to the "Completed" section of the plans list
+- **THEN** the plan's status is set to `'completed'` in localStorage and the plan is grouped with the completed plans on the plans list
 
 #### Scenario: Completed plan cannot start a session
 
 - **WHEN** user views a completed plan
 - **THEN** the "Start Session" button SHALL be absent or disabled
+
+#### Scenario: Completed plan opens in a read-only review view
+
+- **WHEN** user opens a completed plan from the plans list
+- **THEN** the plan detail view SHALL open so the plan can be reviewed
+- **AND** all editing affordances (name, schedule, exercises, add/remove controls, save) SHALL be absent or disabled
+- **AND** a note SHALL explain that the plan must be reactivated to make changes
 
 ### Requirement: User can reactivate a completed plan
 
@@ -21,24 +28,19 @@ The system SHALL allow users to reactivate a completed plan back to active statu
 - **WHEN** user selects "Reactivate" on a completed plan
 - **THEN** the plan's status is set to `'active'` in localStorage and the plan moves back to the active plans section
 
-### Requirement: Plans list shows active and completed plans in separate sections
+### Requirement: Plans list groups completed plans below active plans
 
-The plans list SHALL display active plans first, followed by a collapsible "Completed" section containing completed plans.
+The plans list SHALL display active plans first, followed by completed plans under a "Completed" separator label.
 
-#### Scenario: Completed section is collapsed by default
+#### Scenario: Completed plans appear below active plans
 
-- **WHEN** user navigates to the plans list and there are completed plans
-- **THEN** the "Completed" section SHALL be collapsed by default
+- **WHEN** user navigates to the plans list and there are both active and completed plans
+- **THEN** completed plans SHALL appear below the active plans, under a "Completed" separator label
 
-#### Scenario: User can expand completed section
-
-- **WHEN** user taps the "Completed" section header
-- **THEN** the completed plans list expands and completed plans are shown
-
-#### Scenario: No completed section when no plans are completed
+#### Scenario: No completed separator when no plans are completed
 
 - **WHEN** user navigates to the plans list and no plans have status `'completed'`
-- **THEN** no "Completed" section is displayed
+- **THEN** no "Completed" separator is displayed
 
 ### Requirement: Plans without a status field are treated as active
 

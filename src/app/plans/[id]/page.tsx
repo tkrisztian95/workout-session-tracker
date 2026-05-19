@@ -40,6 +40,7 @@ export default function PlanDetailPage() {
       onSave={handleSave}
       onCancel={() => router.back()}
       onDelete={handleDelete}
+      readOnly={plan.status === 'completed'}
     />
   );
 }
