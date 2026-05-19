@@ -274,6 +274,7 @@
   "view_plan_title": "Plan",
   "plan_completed_on_label": "Abgeschlossen am",
   "plan_followed_aria": "{n}-mal befolgt",
+  "plan_followed_badge": "{n}× befolgt",
   "view_plan_completed_note": "Dieser Plan ist abgeschlossen und schreibgeschützt. Reaktiviere ihn, um Änderungen vorzunehmen.",
   "plan_scheduled_duration_label": "Geplante Dauer (Wochen)",
   "plan_scheduled_duration_placeholder": "z.B. 4",
