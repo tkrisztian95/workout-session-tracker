@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import {
   Plus,
   Dumbbell,
-  ChevronDown,
   CheckCircle,
   RotateCcw,
   Sparkles,
@@ -16,7 +15,6 @@ import {
   Search,
   X,
   SlidersHorizontal,
-  ArrowUpDown,
 } from 'lucide-react';
 import { getPlans, togglePlanStatus, savePlan, duplicatePlan, getSessions } from '@/lib/storage';
 import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
@@ -53,7 +51,7 @@ export default function PlansPage() {
   const [sort, setSort] = useState<PlanSort>('created');
   const [filters, setFilters] = useState<PlanFilters>(DEFAULT_PLAN_FILTERS);
   const [showAiModal, setShowAiModal] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
   const visiblePlans = useMemo(
     () => organizePlans(plans, sessions, { search, sort, filters }),
@@ -63,6 +61,7 @@ export default function PlansPage() {
   const dayCounts = useMemo(() => availableDayCounts(plans), [plans]);
   const filterCount = countActiveFilters(filters);
   const hasPlans = plans.length > 0;
+  const controlsActive = search.trim() !== '' || filterCount > 0 || sort !== 'created';
 
   const handleToggleStatus = (id: string) => {
     togglePlanStatus(id);
@@ -108,68 +107,29 @@ export default function PlansPage() {
               </p>
             )}
           </div>
-          <IconButton
-            onClick={() => setShowAiModal(true)}
-            aria-label="AI Suggest Plan"
-            className="mt-1 border border-border flex-shrink-0"
-          >
-            <Sparkles className="w-4 h-4 text-brand" />
-          </IconButton>
+          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+            {hasPlans && (
+              <IconButton
+                onClick={() => setShowControls(true)}
+                aria-label={t.plans_controls_open}
+                className="relative border border-border"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-muted" />
+                {controlsActive && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
+                )}
+              </IconButton>
+            )}
+            <IconButton
+              onClick={() => setShowAiModal(true)}
+              aria-label="AI Suggest Plan"
+              className="border border-border"
+            >
+              <Sparkles className="w-4 h-4 text-brand" />
+            </IconButton>
+          </div>
         </div>
       </PageHeader>
-
-      {hasPlans && (
-        <div className="px-6 pb-3 space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dim pointer-events-none" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t.plans_search_placeholder}
-              className="w-full bg-base text-foreground rounded-xl pl-10 pr-10 py-3 text-base outline-none border border-border placeholder-dim focus:ring-2 focus:ring-brand transition-shadow duration-150"
-            />
-            {search !== '' && (
-              <button
-                onClick={() => setSearch('')}
-                aria-label={t.plans_search_clear}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-muted active:bg-elevated transition-colors duration-150 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dim pointer-events-none" />
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as PlanSort)}
-                aria-label={t.plans_sort_aria}
-                className="w-full appearance-none bg-base text-foreground rounded-xl pl-9 pr-8 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-brand cursor-pointer"
-              >
-                <option value="created">{t.plans_sort_created}</option>
-                <option value="followed">{t.plans_sort_followed}</option>
-                <option value="updated">{t.plans_sort_updated}</option>
-                <option value="name">{t.plans_sort_name}</option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dim pointer-events-none" />
-            </div>
-            <button
-              onClick={() => setShowFilters(true)}
-              className="relative flex items-center gap-2 rounded-xl border border-border bg-base px-4 py-2.5 text-sm font-medium text-foreground active:bg-elevated transition-colors duration-150 cursor-pointer"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-muted" />
-              {t.plans_filters_button}
-              {filterCount > 0 && (
-                <span className="min-w-5 h-5 px-1 rounded-full bg-brand text-white text-[11px] font-bold flex items-center justify-center">
-                  {filterCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto pb-28">
         {!hasPlans ? (
@@ -222,11 +182,16 @@ export default function PlansPage() {
         <AiPlanSuggestionModal onApply={handleAiApply} onClose={() => setShowAiModal(false)} />
       )}
 
-      <PlanFilterSheet
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
+      <PlanControlsSheet
+        isOpen={showControls}
+        onClose={() => setShowControls(false)}
+        search={search}
+        onSearchChange={setSearch}
+        sort={sort}
+        onSortChange={setSort}
         filters={filters}
-        onChange={setFilters}
+        onFiltersChange={setFilters}
+        onClearAll={handleClearAll}
         muscles={muscles}
         dayCounts={dayCounts}
       />
@@ -259,7 +224,7 @@ function Chip({
   );
 }
 
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+function ControlRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <p className="text-secondary text-xs font-medium uppercase tracking-wide mb-2">{label}</p>
@@ -268,38 +233,82 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
   );
 }
 
-function PlanFilterSheet({
+function PlanControlsSheet({
   isOpen,
   onClose,
+  search,
+  onSearchChange,
+  sort,
+  onSortChange,
   filters,
-  onChange,
+  onFiltersChange,
+  onClearAll,
   muscles,
   dayCounts,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+  sort: PlanSort;
+  onSortChange: (sort: PlanSort) => void;
   filters: PlanFilters;
-  onChange: (filters: PlanFilters) => void;
+  onFiltersChange: (filters: PlanFilters) => void;
+  onClearAll: () => void;
   muscles: ReturnType<typeof availableMuscles>;
   dayCounts: number[];
 }) {
   const t = useTranslations();
-  const set = (patch: Partial<PlanFilters>) => onChange({ ...filters, ...patch });
+  const set = (patch: Partial<PlanFilters>) => onFiltersChange({ ...filters, ...patch });
+  const sortOptions: { value: PlanSort; label: string }[] = [
+    { value: 'created', label: t.plans_sort_created },
+    { value: 'followed', label: t.plans_sort_followed },
+    { value: 'updated', label: t.plans_sort_updated },
+    { value: 'name', label: t.plans_sort_name },
+  ];
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-bold text-foreground">{t.plans_filters_title}</h2>
-        <button
-          onClick={() => onChange(DEFAULT_PLAN_FILTERS)}
-          className="text-sm text-brand font-medium cursor-pointer"
-        >
+        <h2 className="text-lg font-bold text-foreground">{t.plans_controls_title}</h2>
+        <button onClick={onClearAll} className="text-sm text-brand font-medium cursor-pointer">
           {t.plans_filters_clear_all}
         </button>
       </div>
 
       <div className="space-y-5">
-        <FilterRow label={t.plans_filter_status_label}>
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dim pointer-events-none" />
+          <input
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder={t.plans_search_placeholder}
+            className="w-full bg-base text-foreground rounded-xl pl-10 pr-10 py-3 text-base outline-none border border-border placeholder-dim focus:ring-2 focus:ring-brand transition-shadow duration-150"
+          />
+          {search !== '' && (
+            <button
+              onClick={() => onSearchChange('')}
+              aria-label={t.plans_search_clear}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-muted active:bg-elevated transition-colors duration-150 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        <ControlRow label={t.plans_sort_label}>
+          {sortOptions.map((opt) => (
+            <Chip
+              key={opt.value}
+              active={sort === opt.value}
+              onClick={() => onSortChange(opt.value)}
+            >
+              {opt.label}
+            </Chip>
+          ))}
+        </ControlRow>
+
+        <ControlRow label={t.plans_filter_status_label}>
           <Chip active={filters.status === 'active'} onClick={() => set({ status: 'active' })}>
             {t.plans_filter_status_active}
           </Chip>
@@ -312,9 +321,9 @@ function PlanFilterSheet({
           <Chip active={filters.status === 'all'} onClick={() => set({ status: 'all' })}>
             {t.plans_filter_status_all}
           </Chip>
-        </FilterRow>
+        </ControlRow>
 
-        <FilterRow label={t.plans_filter_origin_label}>
+        <ControlRow label={t.plans_filter_origin_label}>
           <Chip active={filters.aiGenerated === 'any'} onClick={() => set({ aiGenerated: 'any' })}>
             {t.plans_filter_origin_any}
           </Chip>
@@ -327,10 +336,10 @@ function PlanFilterSheet({
           >
             {t.plans_filter_origin_manual}
           </Chip>
-        </FilterRow>
+        </ControlRow>
 
         {muscles.length > 0 && (
-          <FilterRow label={t.plans_filter_muscle_label}>
+          <ControlRow label={t.plans_filter_muscle_label}>
             <Chip active={filters.muscle === null} onClick={() => set({ muscle: null })}>
               {t.plans_filter_muscle_any}
             </Chip>
@@ -339,11 +348,11 @@ function PlanFilterSheet({
                 {t.muscle_labels[m] ?? m}
               </Chip>
             ))}
-          </FilterRow>
+          </ControlRow>
         )}
 
         {dayCounts.length > 0 && (
-          <FilterRow label={t.plans_filter_days_label}>
+          <ControlRow label={t.plans_filter_days_label}>
             <Chip
               active={filters.trainingDays === null}
               onClick={() => set({ trainingDays: null })}
@@ -359,7 +368,7 @@ function PlanFilterSheet({
                 {n} {n !== 1 ? t.training_days : t.training_day}
               </Chip>
             ))}
-          </FilterRow>
+          </ControlRow>
         )}
       </div>
 
