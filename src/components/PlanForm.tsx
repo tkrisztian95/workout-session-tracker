@@ -160,9 +160,10 @@ export default function PlanForm({
 
       <div className="flex-1 overflow-y-auto px-6 pb-36 space-y-6">
         {readOnly && (
-          <p className="text-muted text-sm bg-surface border border-border rounded-xl px-4 py-3">
-            {t.view_plan_completed_note}
-          </p>
+          <div className="flex items-start gap-2.5 text-muted text-sm bg-surface border border-border rounded-xl px-4 py-3">
+            <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
+            <p>{t.view_plan_completed_note}</p>
+          </div>
         )}
         {readOnly && initialPlan?.completedAt && (
           <div>
