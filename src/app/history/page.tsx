@@ -104,7 +104,7 @@ function HistoryContent() {
               onClick={() => setIsPickerOpen(true)}
               aria-label="Filter by date range"
               className={[
-                'w-9 h-9 rounded-full flex items-center justify-center border transition-colors',
+                'w-11 h-11 rounded-full flex items-center justify-center border transition-colors',
                 rangeLabel
                   ? 'bg-brand border-brand text-white'
                   : 'bg-surface border-border active:bg-elevated',
@@ -115,7 +115,7 @@ function HistoryContent() {
             <button
               onClick={() => setIsNewSessionOpen(true)}
               aria-label={t.new_history_session_title}
-              className="w-9 h-9 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
+              className="w-11 h-11 rounded-full flex items-center justify-center bg-surface border border-border active:bg-elevated"
             >
               <Plus className="w-4 h-4 text-brand" />
             </button>
