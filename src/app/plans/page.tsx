@@ -299,6 +299,7 @@ function PlanControlsSheet({
   const sortOptions: { value: PlanSort; label: string }[] = [
     { value: 'created', label: t.plans_sort_created },
     { value: 'followed', label: t.plans_sort_followed },
+    { value: 'mostFollowed', label: t.plans_sort_most_followed },
     { value: 'updated', label: t.plans_sort_updated },
     { value: 'name', label: t.plans_sort_name },
   ];
