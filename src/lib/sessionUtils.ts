@@ -1,4 +1,14 @@
-import type { Exercise } from './types';
+import type { Exercise, LoggedSet } from './types';
+
+/** Compact label for a logged set — time for stopwatch sets, weight×reps otherwise. */
+export function formatLoggedSet(set: LoggedSet): string {
+  if (set.seconds != null) {
+    const m = Math.floor(set.seconds / 60);
+    const s = set.seconds % 60;
+    return m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`;
+  }
+  return set.weight > 0 ? `${set.weight} kg × ${set.reps}` : `× ${set.reps}`;
+}
 
 export function formatExerciseDetail(ex: {
   type: 'sets-reps' | 'sets-duration' | 'duration';

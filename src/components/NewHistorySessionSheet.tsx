@@ -29,7 +29,7 @@ import {
 import { importSessions, AiValidationError, type AiImportResult } from '@/lib/ai';
 import type { Exercise, LlmConfig, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
-import { formatExerciseDetail } from '@/lib/sessionUtils';
+import { formatExerciseDetail, formatLoggedSet } from '@/lib/sessionUtils';
 
 const LOCALE_LANGUAGE: Record<string, string> = { en: 'English', hu: 'Hungarian', de: 'German' };
 
@@ -470,7 +470,7 @@ export default function NewHistorySessionSheet({
                                 key={i}
                                 className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium"
                               >
-                                {s.weight}kg×{s.reps}
+                                {formatLoggedSet(s)}
                               </span>
                             ))}
                           </div>
