@@ -1,6 +1,6 @@
 ## Context
 
-`Exercise` (used in sessions) and `PlanExercise` (used in plans) both model a `sets-reps` movement with a scalar `sets` and a scalar `reps`. A lot of code reads those two numbers directly: target formatting (`sessionUtils.formatExerciseDetail`, `ExerciseCard`, `HistoryExerciseEditor.formatTarget`, `OptionalPickerScreen`), set-slot rendering, the set-logging prefill, AI summaries, and the exercise-history picker. There is no per-set granularity for the *target* (actual logged sets already store per-set `weight`/`reps` in `loggedSets`).
+`Exercise` (used in sessions) and `PlanExercise` (used in plans) both model a `sets-reps` movement with a scalar `sets` and a scalar `reps`. A lot of code reads those two numbers directly: target formatting (`sessionUtils.formatExerciseDetail`, `ExerciseCard`, `HistoryExerciseEditor.formatTarget`, `OptionalPickerScreen`), set-slot rendering, the set-logging prefill, AI summaries, and the exercise-history picker. There is no per-set granularity for the _target_ (actual logged sets already store per-set `weight`/`reps` in `loggedSets`).
 
 ## Goals / Non-Goals
 
@@ -13,10 +13,10 @@
 
 **Non-Goals:**
 
-- Per-set *weight* targets — only reps vary. Weight stays a single optional `weightKg`.
+- Per-set _weight_ targets — only reps vary. Weight stays a single optional `weightKg`.
 - Variable schemes for `sets-duration` / `duration` exercises.
 - A storage migration — old sessions/plans are valid as-is.
-- Changing how *logged* sets work; `loggedSets` already captures actual per-set performance.
+- Changing how _logged_ sets work; `loggedSets` already captures actual per-set performance.
 
 ## Decisions
 
@@ -29,7 +29,7 @@ A new optional `repsPerSet: number[]` is added to `Exercise` and `PlanExercise`.
 
 In the variable case `sets` is still written and kept equal to `repsPerSet.length`, so every existing consumer of `sets` (set-slot count, `calcSessionStats`) keeps working without change. An exercise SHALL NOT carry both `reps` and `repsPerSet`.
 
-Rationale: an additive optional field needs no migration and no feature flag, and keeping `sets` populated means only code that renders the *rep target* needs to change — not code that counts sets.
+Rationale: an additive optional field needs no migration and no feature flag, and keeping `sets` populated means only code that renders the _rep target_ needs to change — not code that counts sets.
 
 ### One helper, `formatRepsTarget`
 

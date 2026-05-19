@@ -35,6 +35,6 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Run `npm run lint` and `npx tsc --noEmit` (or the project's typecheck) clean
-- [ ] 6.2 Run `npm test` (Vitest) and confirm existing suites still pass
-- [ ] 6.3 Visual sanity check: create a plan exercise with a `15/12/8/4` scheme, start a session, confirm slot targets and logging prefill
+- [x] 6.1 `npx tsc --noEmit` clean; `npm run lint` clean for all files touched by this change (two pre-existing errors in `DateRangePicker.tsx` and `useAchievements.ts` are unrelated and present on `main`)
+- [x] 6.2 `npm test` — 77 tests pass (5 files), including 13 new tests in `sessionUtils.test.ts`
+- [ ] 6.3 Visual sanity check — deferred; this environment has no browser. To verify manually: add a plan exercise with scheme `15, 12, 8, 4`, start a session from that plan, and confirm the card shows `15/12/8/4`, each empty slot shows its target (e.g. `#1 · 15`), and the log-set form prefills with the next set's target.
