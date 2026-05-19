@@ -275,7 +275,13 @@ function PlanControlsSheet({
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-bold text-foreground">{t.plans_controls_title}</h2>
-        <button onClick={onClearAll} className="text-sm text-brand font-medium cursor-pointer">
+        <button
+          onClick={() => {
+            onClearAll();
+            onClose();
+          }}
+          className="text-sm text-brand font-medium cursor-pointer"
+        >
           {t.plans_filters_clear_all}
         </button>
       </div>
