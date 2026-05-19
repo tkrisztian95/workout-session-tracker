@@ -128,6 +128,25 @@ describe('organizePlans sorting', () => {
     // a is followed; b and c never followed, tiebroken by createdAt desc (c newer than b)
     expect(result.map((p) => p.id)).toEqual(['a', 'c', 'b']);
   });
+
+  it('sorts by follow count, most followed first', () => {
+    const c = plan({ id: 'c', name: 'gamma', createdAt: '2026-06-01T00:00:00Z' });
+    const sessions = [
+      session({ id: 's1', planId: 'b', completedAt: '2026-02-01T09:00:00Z' }),
+      session({ id: 's2', planId: 'b', completedAt: '2026-03-01T09:00:00Z' }),
+      session({ id: 's3', planId: 'b', completedAt: '2026-04-01T09:00:00Z' }),
+      session({ id: 's4', planId: 'a', completedAt: '2026-02-01T09:00:00Z' }),
+      // c has no completed sessions; a has 1, b has 3
+    ];
+    const result = organizePlans([a, b, c], sessions, query({ sort: 'mostFollowed' }));
+    expect(result.map((p) => p.id)).toEqual(['b', 'a', 'c']);
+  });
+
+  it('tiebreaks equal follow counts by createdAt desc', () => {
+    const c = plan({ id: 'c', name: 'gamma', createdAt: '2026-06-01T00:00:00Z' });
+    const result = organizePlans([a, b, c], [], query({ sort: 'mostFollowed' }));
+    expect(result.map((p) => p.id)).toEqual(['c', 'b', 'a']);
+  });
 });
 
 describe('organizePlans search', () => {

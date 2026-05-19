@@ -223,6 +223,7 @@
   "plans_sort_aria": "Sort plans",
   "plans_sort_created": "Recently created",
   "plans_sort_followed": "Recently followed",
+  "plans_sort_most_followed": "Most followed",
   "plans_sort_updated": "Last updated",
   "plans_sort_name": "Name (A–Z)",
   "plans_filters_button": "Filters",
