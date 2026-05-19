@@ -12,9 +12,10 @@ interface Props {
   day: PlanDay;
   onChange: (day: PlanDay) => void;
   onRemove: () => void;
+  readOnly?: boolean;
 }
 
-export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
+export default function PlanDayEditor({ day, onChange, onRemove, readOnly = false }: Props) {
   const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<PlanExercise | null>(null);
@@ -73,60 +74,87 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
           onChange={(e) => onChange({ ...day, name: e.target.value })}
           placeholder={t.plan_day_name_placeholder}
           className="flex-1 py-2.5"
+          readOnly={readOnly}
         />
-        <IconButton
-          onClick={onRemove}
-          aria-label="Remove day"
-          className="hover:bg-danger/20 transition-colors"
-        >
-          <X className="w-4 h-4 text-secondary" />
-        </IconButton>
+        {!readOnly && (
+          <IconButton
+            onClick={onRemove}
+            aria-label="Remove day"
+            className="hover:bg-danger/20 transition-colors"
+          >
+            <X className="w-4 h-4 text-secondary" />
+          </IconButton>
+        )}
       </div>
 
       {/* Schedule toggle + weekday selector */}
-      <div>
-        <button
-          onClick={toggleSchedule}
-          className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none"
-        >
-          <span
-            className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-              showSchedule ? 'bg-brand border-brand' : 'bg-transparent border-muted'
-            }`}
-          >
-            {showSchedule && (
-              <svg viewBox="0 0 10 8" className="w-2.5 h-2.5 text-white fill-current">
-                <path
-                  d="M1 4l3 3 5-6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </span>
-          <span className={showSchedule ? 'text-foreground' : 'text-muted'}>
-            {t.plan_day_schedule}
-          </span>
-        </button>
-        {showSchedule && (
-          <div className="flex gap-1.5 flex-wrap mt-3">
-            {t.weekday_abbr.map((label, idx) => (
-              <button
-                key={idx}
-                onClick={() => toggleWeekday(idx)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
-                  day.weekdays.includes(idx) ? 'bg-brand text-white' : 'bg-elevated text-secondary'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+      {readOnly ? (
+        day.weekdays.length > 0 && (
+          <div>
+            <p className="text-sm font-medium text-foreground mb-3">{t.plan_day_schedule}</p>
+            <div className="flex gap-1.5 flex-wrap">
+              {t.weekday_abbr.map((label, idx) => (
+                <span
+                  key={idx}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                    day.weekdays.includes(idx)
+                      ? 'bg-brand text-white'
+                      : 'bg-elevated text-secondary'
+                  }`}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        )
+      ) : (
+        <div>
+          <button
+            onClick={toggleSchedule}
+            className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none"
+          >
+            <span
+              className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                showSchedule ? 'bg-brand border-brand' : 'bg-transparent border-muted'
+              }`}
+            >
+              {showSchedule && (
+                <svg viewBox="0 0 10 8" className="w-2.5 h-2.5 text-white fill-current">
+                  <path
+                    d="M1 4l3 3 5-6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </span>
+            <span className={showSchedule ? 'text-foreground' : 'text-muted'}>
+              {t.plan_day_schedule}
+            </span>
+          </button>
+          {showSchedule && (
+            <div className="flex gap-1.5 flex-wrap mt-3">
+              {t.weekday_abbr.map((label, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => toggleWeekday(idx)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors duration-150 ${
+                    day.weekdays.includes(idx)
+                      ? 'bg-brand text-white'
+                      : 'bg-elevated text-secondary'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Core exercises */}
       <div>
@@ -138,8 +166,8 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
             <PlanExerciseRow
               key={ex.id}
               ex={ex}
-              onEdit={() => setEditingExercise(ex)}
-              onRemove={() => removeExercise('core', ex.id)}
+              onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
+              onRemove={readOnly ? undefined : () => removeExercise('core', ex.id)}
             />
           ))}
           {day.coreExercises.length === 0 && (
@@ -158,8 +186,8 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
             <PlanExerciseRow
               key={ex.id}
               ex={ex}
-              onEdit={() => setEditingExercise(ex)}
-              onRemove={() => removeExercise('optional', ex.id)}
+              onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
+              onRemove={readOnly ? undefined : () => removeExercise('optional', ex.id)}
             />
           ))}
           {day.optionalExercises.length === 0 && (
@@ -169,13 +197,15 @@ export default function PlanDayEditor({ day, onChange, onRemove }: Props) {
       </div>
 
       {/* Add exercise button */}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer"
-      >
-        <Plus className="w-4 h-4" />
-        {t.plan_day_add_exercise}
-      </button>
+      {!readOnly && (
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          {t.plan_day_add_exercise}
+        </button>
+      )}
 
       {isModalOpen && (
         <AddPlanExerciseModal

@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, X, Pencil } from 'lucide-react';
+import { CheckCircle, Plus, RotateCcw, Trash2, X, Pencil } from 'lucide-react';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import DeletePlanConfirmSheet from '@/components/DeletePlanConfirmSheet';
 import MuscleBadge from '@/components/MuscleBadge';
-import { useTranslations } from '@/lib/locale-context';
+import { useLocale } from '@/lib/locale-context';
 import {
   Button,
   CtaBar,
@@ -41,10 +41,19 @@ interface PlanFormProps {
   onSave: (plan: WorkoutPlan) => void;
   onCancel: () => void;
   onDelete?: () => void;
+  onToggleStatus?: () => void;
+  readOnly?: boolean;
 }
 
-export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: PlanFormProps) {
-  const t = useTranslations();
+export default function PlanForm({
+  initialPlan,
+  onSave,
+  onCancel,
+  onDelete,
+  onToggleStatus,
+  readOnly = false,
+}: PlanFormProps) {
+  const { t, locale } = useLocale();
   const [name, setName] = useState(initialPlan?.name ?? '');
   const [days, setDays] = useState<PlanDay[]>(initialPlan?.days ?? [newDay()]);
   const [sharedExercises, setSharedExercises] = useState<PlanExercise[]>(
@@ -79,6 +88,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
       createdAt: initialPlan?.createdAt ?? now,
       updatedAt: now,
       ...(initialPlan?.status !== undefined ? { status: initialPlan.status } : {}),
+      ...(initialPlan?.completedAt !== undefined ? { completedAt: initialPlan.completedAt } : {}),
       ...(initialPlan?.aiGenerated !== undefined ? { aiGenerated: initialPlan.aiGenerated } : {}),
       ...(parsedWeeks !== undefined ? { scheduledWeeks: parsedWeeks } : {}),
     };
@@ -110,25 +120,64 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
   };
 
   const isEditing = !!initialPlan;
+  const isCompleted = initialPlan?.status === 'completed';
 
   return (
     <Page>
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
-          <HeadingXL>{isEditing ? t.edit_plan_title : t.new_plan}</HeadingXL>
-          {onDelete && (
-            <IconButton
-              onClick={() => setShowDeleteConfirm(true)}
-              aria-label="Delete plan"
-              className="mt-1 border border-border hover:border-danger/50"
-            >
-              <Trash2 className="w-4 h-4 text-muted" />
-            </IconButton>
+          <HeadingXL>
+            {readOnly ? t.view_plan_title : isEditing ? t.edit_plan_title : t.new_plan}
+          </HeadingXL>
+          {(onToggleStatus || onDelete) && (
+            <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+              {onToggleStatus && (
+                <IconButton
+                  onClick={onToggleStatus}
+                  aria-label={isCompleted ? t.plan_action_reactivate : t.plan_action_mark_completed}
+                  className="border border-border"
+                >
+                  {isCompleted ? (
+                    <RotateCcw className="w-4 h-4 text-secondary" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 text-muted" />
+                  )}
+                </IconButton>
+              )}
+              {onDelete && (
+                <IconButton
+                  onClick={() => setShowDeleteConfirm(true)}
+                  aria-label="Delete plan"
+                  className="border border-border hover:border-danger/50"
+                >
+                  <Trash2 className="w-4 h-4 text-muted" />
+                </IconButton>
+              )}
+            </div>
           )}
         </div>
       </PageHeader>
 
       <div className="flex-1 overflow-y-auto px-6 pb-36 space-y-6">
+        {readOnly && (
+          <div className="flex items-start gap-2.5 text-muted text-sm bg-surface border border-border rounded-xl px-4 py-3">
+            <CheckCircle className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
+            <p>{t.view_plan_completed_note}</p>
+          </div>
+        )}
+        {readOnly && initialPlan?.completedAt && (
+          <div>
+            <FieldLabel>{t.plan_completed_on_label}</FieldLabel>
+            <p className="text-foreground text-base">
+              {new Date(initialPlan.completedAt).toLocaleDateString(locale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
+        )}
         <div>
           <FieldLabel htmlFor="plan-name">{t.plan_name_label}</FieldLabel>
           <Input
@@ -141,6 +190,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
             }}
             placeholder={t.plan_name_placeholder}
             autoComplete="off"
+            readOnly={readOnly}
           />
           {error && <p className="text-danger text-xs mt-1.5">{error}</p>}
         </div>
@@ -159,6 +209,7 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
             placeholder={t.plan_scheduled_duration_placeholder}
             min={1}
             max={52}
+            readOnly={readOnly}
           />
           {weeksError && <p className="text-danger text-xs mt-1.5">{weeksError}</p>}
         </div>
@@ -184,35 +235,41 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                     <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>
                   )}
                 </div>
-                <IconButton
-                  size="sm"
-                  onClick={() => setEditingShared(ex)}
-                  aria-label={`Edit ${ex.name}`}
-                  className="flex-shrink-0"
-                >
-                  <Pencil className="w-3.5 h-3.5 text-muted" />
-                </IconButton>
-                <IconButton
-                  size="sm"
-                  onClick={() => removeShared(ex.id)}
-                  aria-label={`Remove ${ex.name}`}
-                  className="flex-shrink-0"
-                >
-                  <X className="w-3.5 h-3.5 text-secondary" />
-                </IconButton>
+                {!readOnly && (
+                  <>
+                    <IconButton
+                      size="sm"
+                      onClick={() => setEditingShared(ex)}
+                      aria-label={`Edit ${ex.name}`}
+                      className="flex-shrink-0"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-muted" />
+                    </IconButton>
+                    <IconButton
+                      size="sm"
+                      onClick={() => removeShared(ex.id)}
+                      aria-label={`Remove ${ex.name}`}
+                      className="flex-shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5 text-secondary" />
+                    </IconButton>
+                  </>
+                )}
               </div>
             ))}
             {sharedExercises.length === 0 && (
               <p className="text-muted text-sm">{t.no_shared_exercises}</p>
             )}
           </div>
-          <button
-            onClick={() => setIsSharedModalOpen(true)}
-            className="flex items-center gap-2 text-brand text-sm font-semibold mt-3 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            {t.add_shared_exercise}
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setIsSharedModalOpen(true)}
+              className="flex items-center gap-2 text-brand text-sm font-semibold mt-3 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              {t.add_shared_exercise}
+            </button>
+          )}
         </div>
 
         <div>
@@ -226,33 +283,42 @@ export default function PlanForm({ initialPlan, onSave, onCancel, onDelete }: Pl
                 day={day}
                 onChange={(d) => updateDay(i, d)}
                 onRemove={() => removeDay(i)}
+                readOnly={readOnly}
               />
             ))}
           </div>
-          <button
-            onClick={() => setDays((prev) => [...prev, newDay()])}
-            className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            {t.add_training_day}
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setDays((prev) => [...prev, newDay()])}
+              className="flex items-center gap-2 text-brand text-sm font-semibold mt-4 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              {t.add_training_day}
+            </button>
+          )}
         </div>
       </div>
 
       <CtaBar slim>
-        <div className="flex gap-3">
-          <Button
-            variant={isEditing ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={onCancel}
-            className="flex-1 py-4"
-          >
-            {t.discard}
+        {readOnly ? (
+          <Button variant="secondary" size="sm" onClick={onCancel} className="w-full py-4">
+            {t.back}
           </Button>
-          <Button onClick={handleSave} className="flex-[2]">
-            {isEditing ? t.save_changes : t.save_plan}
-          </Button>
-        </div>
+        ) : (
+          <div className="flex gap-3">
+            <Button
+              variant={isEditing ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={onCancel}
+              className="flex-1 py-4"
+            >
+              {t.discard}
+            </Button>
+            <Button onClick={handleSave} className="flex-[2]">
+              {isEditing ? t.save_changes : t.save_plan}
+            </Button>
+          </div>
+        )}
       </CtaBar>
 
       {showDeleteConfirm && onDelete && (
