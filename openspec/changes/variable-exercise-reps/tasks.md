@@ -15,11 +15,11 @@
 
 ## 3. Display surfaces
 
-- [ ] 3.1 Update `ExerciseCard` `exerciseDetail` to show the scheme for variable exercises
-- [ ] 3.2 In `ExerciseCard`, show each set slot's individual rep target when `repsPerSet` is present
-- [ ] 3.3 Prefill the set-logging form (`openSetForm`) with `repsPerSet[loggedCount]`, falling back to the last entry
-- [ ] 3.4 Update `OptionalPickerScreen` rep target rendering to use the scheme
-- [ ] 3.5 Update `HistoryExerciseEditor.formatTarget` to render the scheme; in `HistoryExerciseEditorContent` seed the rep rows from `repsPerSet` when there are no logged sets
+- [x] 3.1 Update `ExerciseCard` `exerciseDetail` to show the scheme for variable exercises
+- [x] 3.2 In `ExerciseCard`, show each set slot's individual rep target when `repsPerSet` is present
+- [x] 3.3 Prefill the set-logging form (`openSetForm`) with `repsPerSet[loggedCount]`, falling back to the last entry
+- [x] 3.4 Update `OptionalPickerScreen` rep target rendering to use the scheme
+- [x] 3.5 Update `HistoryExerciseEditor.formatTarget` to render the scheme; in `HistoryExerciseEditorContent` seed the rep rows from `repsPerSet` when there are no logged sets
 
 ## 4. AI & history round-trip
 

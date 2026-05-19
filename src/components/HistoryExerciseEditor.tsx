@@ -5,6 +5,7 @@ import { Minus, Plus } from 'lucide-react';
 import { ModalSheet, Button, FieldLabel } from '@/components/ui';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
+import { formatRepsTarget } from '@/lib/sessionUtils';
 
 interface EditorContentProps {
   exercise: Exercise;
@@ -17,8 +18,10 @@ interface HistoryExerciseEditorProps extends EditorContentProps {
 }
 
 export function formatTarget(exercise: Exercise): string | null {
-  if (exercise.type === 'sets-reps' && exercise.sets && exercise.reps) {
-    return `${exercise.sets}×${exercise.reps}`;
+  if (exercise.type === 'sets-reps') {
+    if (exercise.repsPerSet && exercise.repsPerSet.length > 0) return formatRepsTarget(exercise);
+    if (exercise.sets && exercise.reps) return `${exercise.sets}×${exercise.reps}`;
+    return null;
   }
   if (exercise.type === 'sets-duration' && exercise.sets && exercise.duration) {
     return `${exercise.sets} sets · ${exercise.duration}s`;
@@ -40,9 +43,14 @@ export function HistoryExerciseEditorContent({
   const [rows, setRows] = useState<{ weight: string; reps: string }[]>(() => {
     if (exercise.type === 'sets-reps') {
       const existing = exercise.loggedSets ?? [];
-      return existing.length > 0
-        ? existing.map((s) => ({ weight: String(s.weight), reps: String(s.reps) }))
-        : [{ weight: '', reps: String(exercise.reps ?? '') }];
+      if (existing.length > 0) {
+        return existing.map((s) => ({ weight: String(s.weight), reps: String(s.reps) }));
+      }
+      const scheme = exercise.repsPerSet;
+      if (scheme && scheme.length > 0) {
+        return scheme.map((r) => ({ weight: '', reps: String(r) }));
+      }
+      return [{ weight: '', reps: String(exercise.reps ?? '') }];
     }
     return [];
   });
