@@ -13,9 +13,16 @@ interface Props {
   onChange: (day: PlanDay) => void;
   onRemove: () => void;
   readOnly?: boolean;
+  onAiSwap?: (ex: PlanExercise) => void;
 }
 
-export default function PlanDayEditor({ day, onChange, onRemove, readOnly = false }: Props) {
+export default function PlanDayEditor({
+  day,
+  onChange,
+  onRemove,
+  readOnly = false,
+  onAiSwap,
+}: Props) {
   const t = useTranslations();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<PlanExercise | null>(null);
@@ -168,6 +175,7 @@ export default function PlanDayEditor({ day, onChange, onRemove, readOnly = fals
               ex={ex}
               onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
               onRemove={readOnly ? undefined : () => removeExercise('core', ex.id)}
+              onAiSwap={!readOnly && onAiSwap ? () => onAiSwap(ex) : undefined}
             />
           ))}
           {day.coreExercises.length === 0 && (
@@ -188,6 +196,7 @@ export default function PlanDayEditor({ day, onChange, onRemove, readOnly = fals
               ex={ex}
               onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
               onRemove={readOnly ? undefined : () => removeExercise('optional', ex.id)}
+              onAiSwap={!readOnly && onAiSwap ? () => onAiSwap(ex) : undefined}
             />
           ))}
           {day.optionalExercises.length === 0 && (
