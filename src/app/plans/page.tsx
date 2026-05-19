@@ -421,6 +421,9 @@ function PlanCard({
   const t = useTranslations();
   const isCompleted = plan.status === 'completed';
   const muscles = getPlanMuscles(plan);
+  const scheduledWeekdays = [...new Set(plan.days.flatMap((d) => d.weekdays))].sort(
+    (a, b) => a - b,
+  );
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -452,6 +455,11 @@ function PlanCard({
           )}
           {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
         </p>
+        {scheduledWeekdays.length > 0 && (
+          <p className="text-dim text-xs mt-1">
+            {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(' · ')}
+          </p>
+        )}
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (
