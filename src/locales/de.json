@@ -272,6 +272,7 @@
   "plan_not_found": "Plan nicht gefunden.",
   "edit_plan_title": "Plan bearbeiten",
   "view_plan_title": "Plan",
+  "plan_completed_on_label": "Abgeschlossen am",
   "view_plan_completed_note": "Dieser Plan ist abgeschlossen und schreibgeschützt. Reaktiviere ihn, um Änderungen vorzunehmen.",
   "plan_scheduled_duration_label": "Geplante Dauer (Wochen)",
   "plan_scheduled_duration_placeholder": "z.B. 4",
