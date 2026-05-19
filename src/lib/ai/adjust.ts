@@ -1,14 +1,21 @@
 import type { LlmConfig, WorkoutPlan, PlanDay, PlanExercise } from '../types';
 import { callOpenAI } from './client';
 import { adjustCurrent, swapCurrent } from './prompts/adjust';
-import { summarisePlan, summariseExercise, normalizePlanExerciseMuscle } from './plan';
+import {
+  summarisePlan,
+  summariseExercise,
+  normalizePlanExerciseMuscle,
+  normalizePlanExerciseReps,
+} from './plan';
 
 export type AiAdjustResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
 export type AiSwapResult = { exercise: PlanExercise; reasoning?: string };
 
 function ensureIds(exercises: PlanExercise[]): PlanExercise[] {
   return exercises.map((e) =>
-    normalizePlanExerciseMuscle({ ...e, id: e.id || crypto.randomUUID() }),
+    normalizePlanExerciseReps(
+      normalizePlanExerciseMuscle({ ...e, id: e.id || crypto.randomUUID() }),
+    ),
   );
 }
 
@@ -106,11 +113,13 @@ export async function swapExercise(
     throw new Error('Response is missing the replacement exercise');
   }
 
-  const exercise = normalizePlanExerciseMuscle({
-    ...parsed.exercise,
-    id: crypto.randomUUID(),
-    role: target.role,
-  } as PlanExercise);
+  const exercise = normalizePlanExerciseReps(
+    normalizePlanExerciseMuscle({
+      ...parsed.exercise,
+      id: crypto.randomUUID(),
+      role: target.role,
+    } as PlanExercise),
+  );
 
   return {
     exercise,

@@ -1,0 +1,40 @@
+## 1. Types & formatting core
+
+- [x] 1.1 Add `repsPerSet?: number[]` to `Exercise` and `PlanExercise` in `src/lib/types.ts`, documenting that it is mutually exclusive with `reps`
+- [x] 1.2 Add `formatRepsTarget(ex)` to `src/lib/sessionUtils.ts` returning `"10"` for uniform reps or `"15/12/8/4"` for a scheme
+- [x] 1.3 Update `formatExerciseDetail` to render `sets-reps` as the scheme (`15/12/8/4`) when `repsPerSet` is present, and `sets×reps` otherwise
+- [x] 1.4 Add a `parseRepScheme(text)` helper (accepts comma/space/slash separators, returns a positive-integer array) — colocate in `sessionUtils.ts`
+
+## 2. Authoring UI
+
+- [x] 2.1 Add a Fixed / Per-set toggle to `AddPlanExerciseModal` for `sets-reps`; in per-set mode replace the Reps field with a scheme text field and hide the Sets field
+- [x] 2.2 On submit in `AddPlanExerciseModal`, build `repsPerSet` (+ `sets = length`, omit `reps`) when per-set yields ≥2 numbers, else save fixed; open in per-set mode when `initialValues.repsPerSet` exists
+- [x] 2.3 Apply the same toggle, fields, and submit logic to `AddExerciseModal`
+- [x] 2.4 Carry `repsPerSet` through the history-picker prefill (`applyHistoryEntry`) in both modals
+- [x] 2.5 Add `repsPerSet` to `HistoryEntry` / `CandidateExercise` and capture it in `src/lib/exerciseHistory.ts` (prereq for 2.4)
+
+## 3. Display surfaces
+
+- [x] 3.1 Update `ExerciseCard` `exerciseDetail` to show the scheme for variable exercises
+- [x] 3.2 In `ExerciseCard`, show each set slot's individual rep target when `repsPerSet` is present
+- [x] 3.3 Prefill the set-logging form (`openSetForm`) with `repsPerSet[loggedCount]`, falling back to the last entry
+- [x] 3.4 Update `OptionalPickerScreen` rep target rendering to use the scheme
+- [x] 3.5 Update `HistoryExerciseEditor.formatTarget` to render the scheme; in `HistoryExerciseEditorContent` seed the rep rows from `repsPerSet` when there are no logged sets
+
+## 4. AI & history round-trip
+
+- [x] 4.1 Update `summariseExercise` and `summariseSession` in `src/lib/ai/plan.ts` to render a scheme as `15/12/8/4`
+- [x] 4.2 Normalise `repsPerSet` in `plan.ts` (`normalizePlanExerciseMuscle` path / `ensureIds`) and `import.ts` (`normalizeAiExerciseMuscle`): keep a valid array, set `sets`, drop `reps`
+- [x] 4.3 Update the plan prompt (`src/lib/ai/prompts/plan/v1.ts`) and import prompts (`import/v1.ts`, `v2.ts`) to describe `repsPerSet` and when to use it
+- [x] 4.4 Carry `repsPerSet` in the `NewHistorySessionSheet` plan-exercise prefill
+- [x] 4.5 Handle `repsPerSet` in the `AiImportReviewView` exercise editor
+
+## 5. Localization
+
+- [x] 5.1 Add keys for the Fixed / Per-set toggle and the scheme field label/placeholder/hint to `en.json`, `de.json`, `hu.json`
+
+## 6. Verification
+
+- [x] 6.1 `npx tsc --noEmit` clean; `npm run lint` clean for all files touched by this change (two pre-existing errors in `DateRangePicker.tsx` and `useAchievements.ts` are unrelated and present on `main`)
+- [x] 6.2 `npm test` — 77 tests pass (5 files), including 13 new tests in `sessionUtils.test.ts`
+- [ ] 6.3 Visual sanity check — deferred; this environment has no browser. To verify manually: add a plan exercise with scheme `15, 12, 8, 4`, start a session from that plan, and confirm the card shows `15/12/8/4`, each empty slot shows its target (e.g. `#1 · 15`), and the log-set form prefills with the next set's target.

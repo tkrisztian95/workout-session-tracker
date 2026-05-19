@@ -19,13 +19,39 @@ export function normalizePlanExerciseMuscle(
   return rest;
 }
 
+/**
+ * Defensive: keep a valid non-empty `repsPerSet` (filtered to positive integers)
+ * and enforce the `reps` / `repsPerSet` mutual-exclusion invariant. When a scheme
+ * is present, `sets` is set to its length and `reps` is dropped.
+ */
+export function normalizePlanExerciseReps(ex: PlanExercise): PlanExercise {
+  if (ex.type !== 'sets-reps') return ex;
+  const raw = Array.isArray(ex.repsPerSet) ? ex.repsPerSet : undefined;
+  const cleaned = raw
+    ?.map((n) => (typeof n === 'number' ? Math.floor(n) : NaN))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  if (cleaned && cleaned.length > 0) {
+    const out: PlanExercise = { ...ex, repsPerSet: cleaned, sets: cleaned.length };
+    delete out.reps;
+    return out;
+  }
+  if (ex.repsPerSet !== undefined) {
+    const out: PlanExercise = { ...ex };
+    delete out.repsPerSet;
+    return out;
+  }
+  return ex;
+}
+
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function summariseExercise(e: PlanExercise): string {
   let desc: string;
   if (e.type === 'sets-reps') {
     const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
-    desc = `${e.name} ${e.sets}×${e.reps}${weight}`;
+    const repsPart =
+      e.repsPerSet && e.repsPerSet.length > 0 ? e.repsPerSet.join('/') : `${e.sets}×${e.reps}`;
+    desc = `${e.name} ${repsPart}${weight}`;
   } else if (e.type === 'sets-duration') {
     const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
     desc = `${e.name} ${e.sets}×${e.duration}s${weight}`;
@@ -77,7 +103,11 @@ function summariseSession(session: WorkoutSession): string {
           const sets = e.loggedSets.map((s) => `${s.reps}r@${s.weight}kg`).join('+');
           desc = `${e.name} [${sets}]`;
         } else {
-          desc = `${e.name} ${e.sets}×${e.reps}${weight}`;
+          const repsPart =
+            e.repsPerSet && e.repsPerSet.length > 0
+              ? e.repsPerSet.join('/')
+              : `${e.sets}×${e.reps}`;
+          desc = `${e.name} ${repsPart}${weight}`;
         }
       } else if (e.type === 'sets-duration') {
         const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
@@ -190,9 +220,13 @@ export async function suggestPlan(
     throw new Error('Response is missing required plan fields (name, days)');
   }
 
-  // Ensure all PlanExercise ids exist (LLM may omit them) + normalize muscle
+  // Ensure all PlanExercise ids exist (LLM may omit them) + normalize muscle + reps scheme
   const ensureIds = (exercises: PlanExercise[]): PlanExercise[] =>
-    exercises.map((e) => normalizePlanExerciseMuscle({ ...e, id: e.id || crypto.randomUUID() }));
+    exercises.map((e) =>
+      normalizePlanExerciseReps(
+        normalizePlanExerciseMuscle({ ...e, id: e.id || crypto.randomUUID() }),
+      ),
+    );
 
   const days: PlanDay[] = (parsed.days ?? []).map((d) => ({
     ...d,

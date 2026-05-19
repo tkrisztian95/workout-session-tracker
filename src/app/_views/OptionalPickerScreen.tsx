@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Check, ChevronLeft } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
 import type { PlanDay, WorkoutPlan } from '@/lib/types';
+import { formatExerciseDetail } from '@/lib/sessionUtils';
 import {
   BackButton,
   Button,
@@ -70,15 +71,7 @@ export function OptionalPickerScreen({
                   </div>
                   <div>
                     <p className="text-foreground text-sm font-medium">{ex.name}</p>
-                    <p className="text-brand text-xs">
-                      {ex.type === 'sets-reps'
-                        ? `${ex.sets}×${ex.reps}`
-                        : ex.type === 'sets-duration'
-                          ? `${ex.sets}×${ex.duration}s`
-                          : (ex.duration ?? 0) >= 60
-                            ? `${Math.round((ex.duration ?? 0) / 60)} min`
-                            : `${ex.duration}s`}
-                    </p>
+                    <p className="text-brand text-xs">{formatExerciseDetail(ex)}</p>
                   </div>
                 </div>
               ))}
@@ -111,15 +104,7 @@ export function OptionalPickerScreen({
                     </div>
                     <div>
                       <p className="text-foreground text-sm font-medium">{ex.name}</p>
-                      <p className="text-muted text-xs">
-                        {ex.type === 'sets-reps'
-                          ? `${ex.sets}×${ex.reps}`
-                          : ex.type === 'sets-duration'
-                            ? `${ex.sets}×${ex.duration}s`
-                            : (ex.duration ?? 0) >= 60
-                              ? `${Math.round((ex.duration ?? 0) / 60)} min`
-                              : `${ex.duration}s`}
-                      </p>
+                      <p className="text-muted text-xs">{formatExerciseDetail(ex)}</p>
                     </div>
                   </button>
                 );
