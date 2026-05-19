@@ -7,7 +7,7 @@ import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
 import DeletePlanConfirmSheet from '@/components/DeletePlanConfirmSheet';
 import MuscleBadge from '@/components/MuscleBadge';
-import { useTranslations } from '@/lib/locale-context';
+import { useLocale } from '@/lib/locale-context';
 import {
   Button,
   CtaBar,
@@ -53,7 +53,7 @@ export default function PlanForm({
   onToggleStatus,
   readOnly = false,
 }: PlanFormProps) {
-  const t = useTranslations();
+  const { t, locale } = useLocale();
   const [name, setName] = useState(initialPlan?.name ?? '');
   const [days, setDays] = useState<PlanDay[]>(initialPlan?.days ?? [newDay()]);
   const [sharedExercises, setSharedExercises] = useState<PlanExercise[]>(
@@ -163,6 +163,19 @@ export default function PlanForm({
           <p className="text-muted text-sm bg-surface border border-border rounded-xl px-4 py-3">
             {t.view_plan_completed_note}
           </p>
+        )}
+        {readOnly && initialPlan?.completedAt && (
+          <div>
+            <FieldLabel>{t.plan_completed_on_label}</FieldLabel>
+            <p className="text-foreground text-base">
+              {new Date(initialPlan.completedAt).toLocaleDateString(locale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
         )}
         <div>
           <FieldLabel htmlFor="plan-name">{t.plan_name_label}</FieldLabel>
