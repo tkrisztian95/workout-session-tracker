@@ -7,7 +7,7 @@ Today a `sets-reps` exercise carries a single `reps` value, so every set of that
 - Add an optional `repsPerSet: number[]` field to `Exercise` and `PlanExercise`. When present it holds the per-set rep targets and is the source of truth for the set count; `reps` continues to cover the uniform case. The two are mutually exclusive.
 - Let the user choose between a fixed rep count and a per-set scheme when adding or editing an exercise — in the plan editor (`AddPlanExerciseModal`) and in an active session (`AddExerciseModal`).
 - Show the scheme wherever an exercise target is rendered: plan rows, the session exercise card (including per-set slot targets), the optional-exercise picker, and the history editors.
-- Prefill the in-session set-logging form with the target for the *next* set rather than a single fixed value.
+- Prefill the in-session set-logging form with the target for the _next_ set rather than a single fixed value.
 - Teach the AI plan-suggestion and notes-import flows to emit and parse `repsPerSet`, and include it in the human-readable summaries sent to the model.
 - Carry `repsPerSet` through the exercise-history picker and the "new history session" prefill so a varying scheme round-trips.
 
