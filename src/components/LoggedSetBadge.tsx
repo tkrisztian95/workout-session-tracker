@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import type { LoggedSet } from '@/lib/types';
+import { formatLoggedSet } from '@/lib/sessionUtils';
 
 interface Props {
   set: LoggedSet;
@@ -10,10 +11,6 @@ interface Props {
   isPendingDelete?: boolean;
   onBlur?: () => void;
   removeLabel?: string;
-}
-
-function formatSet(set: LoggedSet): string {
-  return set.weight > 0 ? `${set.weight} kg × ${set.reps}` : `× ${set.reps}`;
 }
 
 export default function LoggedSetBadge({
@@ -40,7 +37,7 @@ export default function LoggedSetBadge({
             {removeLabel}
           </>
         ) : (
-          formatSet(set)
+          formatLoggedSet(set)
         )}
       </button>
     );
@@ -48,7 +45,7 @@ export default function LoggedSetBadge({
 
   return (
     <span className="text-xs bg-elevated rounded-md px-1.5 py-0.5 text-secondary font-medium">
-      {formatSet(set)}
+      {formatLoggedSet(set)}
     </span>
   );
 }
