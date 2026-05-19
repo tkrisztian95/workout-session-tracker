@@ -11,7 +11,6 @@ import {
   Sparkles,
   Copy,
   MoreVertical,
-  ChevronRight,
   Search,
   X,
   SlidersHorizontal,
@@ -442,7 +441,6 @@ function PlanCard({
       </Link>
 
       <div className="relative flex items-center gap-2 flex-shrink-0">
-        <ChevronRight className="w-4 h-4 text-muted/40 pointer-events-none" />
         <IconButton
           size="sm"
           onClick={() => setMenuOpen((o) => !o)}
