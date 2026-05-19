@@ -100,36 +100,40 @@ export default function PlansPage() {
     <Page className="pb-24">
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
-          <HeadingXL>{t.plans_title}</HeadingXL>
-          <IconButton
-            onClick={() => setShowAiModal(true)}
-            aria-label="AI Suggest Plan"
-            className="border border-border flex-shrink-0 mt-1"
-          >
-            <Sparkles className="w-4 h-4 text-brand" />
-          </IconButton>
-        </div>
-        {hasPlans && (
-          <div className="flex items-center justify-between gap-3 mt-3">
-            <IconButton
-              onClick={() => setShowControls(true)}
-              aria-label={t.plans_controls_open}
-              className="relative border border-border flex-shrink-0"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-muted" />
-              {controlsActive && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
-              )}
-            </IconButton>
-            <p className="text-muted text-sm">
-              {visiblePlans.length === plans.length
-                ? t.plans_total_count.replace('{n}', String(plans.length))
-                : t.plans_shown_of_total
-                    .replace('{shown}', String(visiblePlans.length))
-                    .replace('{total}', String(plans.length))}
-            </p>
+          <div>
+            <HeadingXL>{t.plans_title}</HeadingXL>
+            {hasPlans && (
+              <p className="text-muted text-sm mt-3">
+                {visiblePlans.length === plans.length
+                  ? t.plans_total_count.replace('{n}', String(plans.length))
+                  : t.plans_shown_of_total
+                      .replace('{shown}', String(visiblePlans.length))
+                      .replace('{total}', String(plans.length))}
+              </p>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+            {hasPlans && (
+              <IconButton
+                onClick={() => setShowControls(true)}
+                aria-label={t.plans_controls_open}
+                className="relative border border-border"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-muted" />
+                {controlsActive && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand" />
+                )}
+              </IconButton>
+            )}
+            <IconButton
+              onClick={() => setShowAiModal(true)}
+              aria-label="AI Suggest Plan"
+              className="border border-border"
+            >
+              <Sparkles className="w-4 h-4 text-brand" />
+            </IconButton>
+          </div>
+        </div>
       </PageHeader>
 
       <div className="flex-1 px-6 space-y-3 overflow-y-auto pb-28">
@@ -439,9 +443,16 @@ function PlanCard({
         href={`/plans/${plan.id}`}
         className="flex-1 min-w-0 active:opacity-70 transition-opacity duration-150"
       >
-        <p className={`font-semibold text-base ${isCompleted ? 'text-muted' : 'text-foreground'}`}>
-          {plan.name}
-        </p>
+        <div className="flex items-center gap-2">
+          <p
+            className={`font-semibold text-base truncate ${isCompleted ? 'text-muted' : 'text-foreground'}`}
+          >
+            {plan.name}
+          </p>
+          {isCompleted && (
+            <span className="text-dim text-xs flex-shrink-0">{t.plan_completed_label}</span>
+          )}
+        </div>
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {plan.scheduledWeeks && (
@@ -449,13 +460,12 @@ function PlanCard({
               · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
             </span>
           )}
-          {isCompleted && <span className="ml-2 text-dim text-xs">· {t.plan_completed_label}</span>}
+          {scheduledWeekdays.length > 0 && (
+            <span className="ml-2 text-dim">
+              · {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(', ')}
+            </span>
+          )}
         </p>
-        {scheduledWeekdays.length > 0 && (
-          <p className="text-dim text-xs mt-1">
-            {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(' · ')}
-          </p>
-        )}
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {muscles.map((m) => (
