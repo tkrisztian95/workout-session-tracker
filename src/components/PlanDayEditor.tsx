@@ -6,6 +6,7 @@ import type { PlanDay, PlanExercise } from '@/lib/types';
 import AddPlanExerciseModal from './AddPlanExerciseModal';
 import { useTranslations } from '@/lib/locale-context';
 import PlanExerciseRow from '@/components/PlanExerciseRow';
+import ReorderableExerciseList from '@/components/ReorderableExerciseList';
 import { Card, IconButton, Input } from '@/components/ui';
 
 interface Props {
@@ -168,20 +169,23 @@ export default function PlanDayEditor({
         <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
           {t.plan_day_core_exercises} ({day.coreExercises.length})
         </p>
-        <div className="space-y-2">
-          {day.coreExercises.map((ex) => (
-            <PlanExerciseRow
-              key={ex.id}
-              ex={ex}
-              onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
-              onRemove={readOnly ? undefined : () => removeExercise('core', ex.id)}
-              onAiSwap={!readOnly && onAiSwap ? () => onAiSwap(ex) : undefined}
-            />
-          ))}
-          {day.coreExercises.length === 0 && (
-            <p className="text-muted text-sm">{t.plan_day_no_core}</p>
-          )}
-        </div>
+        {day.coreExercises.length === 0 ? (
+          <p className="text-muted text-sm">{t.plan_day_no_core}</p>
+        ) : readOnly ? (
+          <div className="space-y-2">
+            {day.coreExercises.map((ex) => (
+              <PlanExerciseRow key={ex.id} ex={ex} />
+            ))}
+          </div>
+        ) : (
+          <ReorderableExerciseList
+            exercises={day.coreExercises}
+            onReorder={(next) => onChange({ ...day, coreExercises: next })}
+            onEdit={(ex) => setEditingExercise(ex)}
+            onRemove={(ex) => removeExercise('core', ex.id)}
+            onAiSwap={onAiSwap}
+          />
+        )}
       </div>
 
       {/* Optional exercises */}
@@ -189,20 +193,23 @@ export default function PlanDayEditor({
         <p className="block text-secondary text-xs font-medium uppercase tracking-wide mb-2">
           {t.plan_day_optional_exercises} ({day.optionalExercises.length})
         </p>
-        <div className="space-y-2">
-          {day.optionalExercises.map((ex) => (
-            <PlanExerciseRow
-              key={ex.id}
-              ex={ex}
-              onEdit={readOnly ? undefined : () => setEditingExercise(ex)}
-              onRemove={readOnly ? undefined : () => removeExercise('optional', ex.id)}
-              onAiSwap={!readOnly && onAiSwap ? () => onAiSwap(ex) : undefined}
-            />
-          ))}
-          {day.optionalExercises.length === 0 && (
-            <p className="text-muted text-sm">{t.plan_day_no_optional}</p>
-          )}
-        </div>
+        {day.optionalExercises.length === 0 ? (
+          <p className="text-muted text-sm">{t.plan_day_no_optional}</p>
+        ) : readOnly ? (
+          <div className="space-y-2">
+            {day.optionalExercises.map((ex) => (
+              <PlanExerciseRow key={ex.id} ex={ex} />
+            ))}
+          </div>
+        ) : (
+          <ReorderableExerciseList
+            exercises={day.optionalExercises}
+            onReorder={(next) => onChange({ ...day, optionalExercises: next })}
+            onEdit={(ex) => setEditingExercise(ex)}
+            onRemove={(ex) => removeExercise('optional', ex.id)}
+            onAiSwap={onAiSwap}
+          />
+        )}
       </div>
 
       {/* Add exercise button */}
