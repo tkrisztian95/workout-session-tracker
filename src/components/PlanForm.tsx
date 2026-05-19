@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, X, Pencil } from 'lucide-react';
+import { Plus, RotateCcw, Trash2, X, Pencil } from 'lucide-react';
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/lib/types';
 import PlanDayEditor from '@/components/PlanDayEditor';
 import AddPlanExerciseModal from '@/components/AddPlanExerciseModal';
@@ -41,6 +41,7 @@ interface PlanFormProps {
   onSave: (plan: WorkoutPlan) => void;
   onCancel: () => void;
   onDelete?: () => void;
+  onReactivate?: () => void;
   readOnly?: boolean;
 }
 
@@ -49,6 +50,7 @@ export default function PlanForm({
   onSave,
   onCancel,
   onDelete,
+  onReactivate,
   readOnly = false,
 }: PlanFormProps) {
   const t = useTranslations();
@@ -126,14 +128,27 @@ export default function PlanForm({
           <HeadingXL>
             {readOnly ? t.view_plan_title : isEditing ? t.edit_plan_title : t.new_plan}
           </HeadingXL>
-          {onDelete && (
-            <IconButton
-              onClick={() => setShowDeleteConfirm(true)}
-              aria-label="Delete plan"
-              className="mt-1 border border-border hover:border-danger/50"
-            >
-              <Trash2 className="w-4 h-4 text-muted" />
-            </IconButton>
+          {(onReactivate || onDelete) && (
+            <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+              {onReactivate && (
+                <IconButton
+                  onClick={onReactivate}
+                  aria-label={t.plan_action_reactivate}
+                  className="border border-border"
+                >
+                  <RotateCcw className="w-4 h-4 text-secondary" />
+                </IconButton>
+              )}
+              {onDelete && (
+                <IconButton
+                  onClick={() => setShowDeleteConfirm(true)}
+                  aria-label="Delete plan"
+                  className="border border-border hover:border-danger/50"
+                >
+                  <Trash2 className="w-4 h-4 text-muted" />
+                </IconButton>
+              )}
+            </div>
           )}
         </div>
       </PageHeader>
