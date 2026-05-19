@@ -112,10 +112,15 @@ The Plans page SHALL let the user filter plans by a muscle the plan trains and b
 - **WHEN** the user opens the filter controls
 - **THEN** the muscle and training-day options SHALL list only values present in at least one of the user's plans
 
-#### Scenario: Active filter count is indicated
+#### Scenario: Search, sort, and filter controls open from a single trigger
 
-- **WHEN** one or more filters are set away from their default value
-- **THEN** the filter control SHALL display the number of non-default filters in effect
+- **WHEN** the user has at least one plan
+- **THEN** a single control on the Plans page SHALL open a popover containing the search input, sort options, and all filters
+
+#### Scenario: Active controls are indicated on the trigger
+
+- **WHEN** the search text, sort, or any filter is set away from its default value
+- **THEN** the popover trigger SHALL show an indicator that controls are in effect
 
 ### Requirement: A no-results state is shown when search or filters exclude every plan
 
