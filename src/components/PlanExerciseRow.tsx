@@ -1,4 +1,5 @@
-import { X, Pencil, Sparkles } from 'lucide-react';
+import type { Ref } from 'react';
+import { X, Pencil, Sparkles, GripVertical } from 'lucide-react';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 import MuscleBadge from '@/components/MuscleBadge';
 import { IconButton } from '@/components/ui';
@@ -21,6 +22,9 @@ interface Props {
   onEdit?: () => void;
   onAiSwap?: () => void;
   className?: string;
+  ref?: Ref<HTMLDivElement>;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  isDragging?: boolean;
 }
 
 export default function PlanExerciseRow({
@@ -29,11 +33,29 @@ export default function PlanExerciseRow({
   onEdit,
   onAiSwap,
   className = 'bg-base',
+  ref,
+  dragHandleProps,
+  isDragging = false,
 }: Props) {
   return (
     <div
-      className={`flex items-center gap-2 border border-border rounded-xl px-3 py-2.5 ${className}`}
+      ref={ref}
+      className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 transition-shadow ${className} ${
+        isDragging
+          ? 'border-brand shadow-lg scale-[1.02] relative z-10 opacity-95'
+          : 'border-border'
+      }`}
     >
+      {dragHandleProps && (
+        <div
+          {...dragHandleProps}
+          role="button"
+          tabIndex={0}
+          className="flex-shrink-0 -ml-1 flex items-center text-muted hover:text-secondary touch-none cursor-grab active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-brand rounded"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
