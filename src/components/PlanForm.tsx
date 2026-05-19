@@ -86,6 +86,7 @@ export default function PlanForm({
       createdAt: initialPlan?.createdAt ?? now,
       updatedAt: now,
       ...(initialPlan?.status !== undefined ? { status: initialPlan.status } : {}),
+      ...(initialPlan?.completedAt !== undefined ? { completedAt: initialPlan.completedAt } : {}),
       ...(initialPlan?.aiGenerated !== undefined ? { aiGenerated: initialPlan.aiGenerated } : {}),
       ...(parsedWeeks !== undefined ? { scheduledWeeks: parsedWeeks } : {}),
     };

@@ -7,6 +7,12 @@ The system SHALL allow users to mark an active workout plan as completed. A comp
 - **WHEN** user selects "Mark as Completed" on an active plan
 - **THEN** the plan's status is set to `'completed'` in localStorage and the plan is grouped with the completed plans on the plans list
 
+#### Scenario: Completion date is recorded and shown
+
+- **WHEN** user marks an active plan as completed
+- **THEN** the current date SHALL be stored as the plan's `completedAt` timestamp
+- **AND** the completion date SHALL be shown on the plan's card
+
 #### Scenario: Completed plan cannot start a session
 
 - **WHEN** user views a completed plan
@@ -27,6 +33,7 @@ The system SHALL allow users to reactivate a completed plan back to active statu
 
 - **WHEN** user selects "Reactivate" on a completed plan
 - **THEN** the plan's status is set to `'active'` in localStorage and the plan moves back to the active plans section
+- **AND** the plan's `completedAt` timestamp SHALL be removed
 
 ### Requirement: Plans list groups completed plans below active plans
 

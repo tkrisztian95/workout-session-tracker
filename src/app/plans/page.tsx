@@ -28,7 +28,7 @@ import {
   type PlanSort,
 } from '@/lib/plan-list';
 import BottomNav from '@/components/BottomNav';
-import { useTranslations } from '@/lib/locale-context';
+import { useLocale, useTranslations } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
 import {
   BottomSheet,
@@ -418,8 +418,16 @@ function PlanCard({
   onToggleStatus: () => void;
   onDuplicate: () => void;
 }) {
-  const t = useTranslations();
+  const { t, locale } = useLocale();
   const isCompleted = plan.status === 'completed';
+  const completedLabel =
+    isCompleted && plan.completedAt
+      ? `${t.plan_completed_label} · ${new Date(plan.completedAt).toLocaleDateString(locale, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })}`
+      : t.plan_completed_label;
   const muscles = getPlanMuscles(plan);
   const scheduledWeekdays = [...new Set(plan.days.flatMap((d) => d.weekdays))].sort(
     (a, b) => a - b,
@@ -449,9 +457,7 @@ function PlanCard({
           >
             {plan.name}
           </p>
-          {isCompleted && (
-            <span className="text-dim text-xs flex-shrink-0">{t.plan_completed_label}</span>
-          )}
+          {isCompleted && <span className="text-dim text-xs flex-shrink-0">{completedLabel}</span>}
         </div>
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
