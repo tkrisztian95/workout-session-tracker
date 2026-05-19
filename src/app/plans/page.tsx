@@ -103,7 +103,11 @@ export default function PlansPage() {
             <HeadingXL>{t.plans_title}</HeadingXL>
             {hasPlans && (
               <p className="text-muted text-sm mt-3">
-                {t.plans_shown_count.replace('{n}', String(visiblePlans.length))}
+                {visiblePlans.length === plans.length
+                  ? t.plans_total_count.replace('{n}', String(plans.length))
+                  : t.plans_shown_of_total
+                      .replace('{shown}', String(visiblePlans.length))
+                      .replace('{total}', String(plans.length))}
               </p>
             )}
           </div>
