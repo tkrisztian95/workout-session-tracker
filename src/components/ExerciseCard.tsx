@@ -8,6 +8,7 @@ import LoggedSetBadge from '@/components/LoggedSetBadge';
 import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
+import { formatRepsTarget } from '@/lib/sessionUtils';
 
 interface Props {
   exercise: Exercise;
@@ -21,10 +22,12 @@ interface Props {
 }
 
 function exerciseDetail(ex: Exercise, t: Translations): string {
-  if (ex.type === 'sets-reps')
+  if (ex.type === 'sets-reps') {
+    if (ex.repsPerSet && ex.repsPerSet.length > 0) return formatRepsTarget(ex);
     return t.exercise_detail_sets_reps
       .replace('{sets}', String(ex.sets ?? 0))
       .replace('{reps}', String(ex.reps ?? 0));
+  }
   if (ex.type === 'sets-duration')
     return t.exercise_detail_sets_duration
       .replace('{sets}', String(ex.sets ?? 0))
@@ -90,7 +93,13 @@ export default function ExerciseCard({
 
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
-    setRepsInput(exercise.reps != null ? String(exercise.reps) : '');
+    const scheme = exercise.repsPerSet;
+    if (scheme && scheme.length > 0) {
+      const idx = Math.min(loggedCount, scheme.length - 1);
+      setRepsInput(String(scheme[idx]));
+    } else {
+      setRepsInput(exercise.reps != null ? String(exercise.reps) : '');
+    }
     setShowSetForm(true);
   };
 
@@ -187,6 +196,9 @@ export default function ExerciseCard({
                     className="text-xs rounded-lg px-2.5 py-1 font-medium border border-dashed border-border text-dim"
                   >
                     {t.exercise_set_slot.replace('{n}', String(i + 1))}
+                    {exercise.repsPerSet?.[i] != null && (
+                      <span className="ml-1">· {exercise.repsPerSet[i]}</span>
+                    )}
                   </span>
                 );
               })}
