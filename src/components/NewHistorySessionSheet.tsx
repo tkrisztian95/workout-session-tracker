@@ -67,6 +67,7 @@ function planExerciseToExercise(pe: PlanExercise): Exercise {
     type: pe.type,
     sets: pe.sets,
     reps: pe.reps,
+    repsPerSet: pe.repsPerSet,
     duration: pe.duration,
     weightKg: pe.weightKg,
     muscle: pe.muscle,

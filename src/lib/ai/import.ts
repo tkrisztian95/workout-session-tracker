@@ -52,7 +52,7 @@ ${notes}`;
   return parsed.sessions.map((s) => ({
     date: s.date,
     durationMins: typeof s.durationMins === 'number' ? s.durationMins : 60,
-    exercises: s.exercises.map(normalizeAiExerciseMuscle),
+    exercises: s.exercises.map((ex) => normalizeAiExerciseReps(normalizeAiExerciseMuscle(ex))),
   }));
 }
 
@@ -69,4 +69,28 @@ function normalizeAiExerciseMuscle(ex: AiExercise & { category?: unknown }): AiE
   delete rest.category;
   rest.muscle = muscle;
   return rest;
+}
+
+/**
+ * Defensive: keep a valid non-empty `repsPerSet` (positive integers only),
+ * set `sets` to its length, and drop `reps` to preserve the
+ * `reps` / `repsPerSet` mutual-exclusion invariant.
+ */
+function normalizeAiExerciseReps(ex: AiExercise): AiExercise {
+  if (ex.type !== 'sets-reps') return ex;
+  const raw = Array.isArray(ex.repsPerSet) ? ex.repsPerSet : undefined;
+  const cleaned = raw
+    ?.map((n) => (typeof n === 'number' ? Math.floor(n) : NaN))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  if (cleaned && cleaned.length > 0) {
+    const out: AiExercise = { ...ex, repsPerSet: cleaned, sets: cleaned.length };
+    delete out.reps;
+    return out;
+  }
+  if (ex.repsPerSet !== undefined) {
+    const out: AiExercise = { ...ex };
+    delete out.repsPerSet;
+    return out;
+  }
+  return ex;
 }

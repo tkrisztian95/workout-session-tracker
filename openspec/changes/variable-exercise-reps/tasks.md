@@ -23,11 +23,11 @@
 
 ## 4. AI & history round-trip
 
-- [ ] 4.1 Update `summariseExercise` and `summariseSession` in `src/lib/ai/plan.ts` to render a scheme as `15/12/8/4`
-- [ ] 4.2 Normalise `repsPerSet` in `plan.ts` (`normalizePlanExerciseMuscle` path / `ensureIds`) and `import.ts` (`normalizeAiExerciseMuscle`): keep a valid array, set `sets`, drop `reps`
-- [ ] 4.3 Update the plan prompt (`src/lib/ai/prompts/plan/v1.ts`) and import prompts (`import/v1.ts`, `v2.ts`) to describe `repsPerSet` and when to use it
-- [ ] 4.4 Carry `repsPerSet` in the `NewHistorySessionSheet` plan-exercise prefill
-- [ ] 4.5 Handle `repsPerSet` in the `AiImportReviewView` exercise editor
+- [x] 4.1 Update `summariseExercise` and `summariseSession` in `src/lib/ai/plan.ts` to render a scheme as `15/12/8/4`
+- [x] 4.2 Normalise `repsPerSet` in `plan.ts` (`normalizePlanExerciseMuscle` path / `ensureIds`) and `import.ts` (`normalizeAiExerciseMuscle`): keep a valid array, set `sets`, drop `reps`
+- [x] 4.3 Update the plan prompt (`src/lib/ai/prompts/plan/v1.ts`) and import prompts (`import/v1.ts`, `v2.ts`) to describe `repsPerSet` and when to use it
+- [x] 4.4 Carry `repsPerSet` in the `NewHistorySessionSheet` plan-exercise prefill
+- [x] 4.5 Handle `repsPerSet` in the `AiImportReviewView` exercise editor
 
 ## 5. Localization
 
