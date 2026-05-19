@@ -8,7 +8,9 @@ import { migrateLegacyCategory } from '../muscles';
  * Defensive: the LLM may still emit a legacy `category` field or a non-canonical
  * muscle string. Coerce either into the typed `muscle` enum and drop `category`.
  */
-function normalizePlanExerciseMuscle(ex: PlanExercise & { category?: unknown }): PlanExercise {
+export function normalizePlanExerciseMuscle(
+  ex: PlanExercise & { category?: unknown },
+): PlanExercise {
   const candidate = typeof ex.muscle === 'string' ? ex.muscle : ex.category;
   const muscle = migrateLegacyCategory(typeof candidate === 'string' ? candidate : undefined);
   const rest: PlanExercise & { category?: unknown } = { ...ex };
@@ -19,7 +21,7 @@ function normalizePlanExerciseMuscle(ex: PlanExercise & { category?: unknown }):
 
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function summariseExercise(e: PlanExercise): string {
+export function summariseExercise(e: PlanExercise): string {
   let desc: string;
   if (e.type === 'sets-reps') {
     const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
@@ -38,7 +40,7 @@ function summariseExercise(e: PlanExercise): string {
   return desc;
 }
 
-function summarisePlan(plan: WorkoutPlan): string {
+export function summarisePlan(plan: WorkoutPlan): string {
   const meta: string[] = [`"${plan.name}"`];
   if (plan.status) meta.push(`status: ${plan.status}`);
   if (plan.scheduledWeeks) meta.push(`${plan.scheduledWeeks} weeks`);
