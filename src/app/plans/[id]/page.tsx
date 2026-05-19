@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getPlans, savePlan, deletePlan } from '@/lib/storage';
+import { getPlans, savePlan, deletePlan, togglePlanStatus } from '@/lib/storage';
 import type { WorkoutPlan } from '@/lib/types';
 import PlanForm from '@/components/PlanForm';
 import { useTranslations } from '@/lib/locale-context';
@@ -12,7 +12,7 @@ export default function PlanDetailPage() {
   const t = useTranslations();
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const [plan] = useState<WorkoutPlan | null>(
+  const [plan, setPlan] = useState<WorkoutPlan | null>(
     () => getPlans().find((p) => p.id === params.id) ?? null,
   );
 
@@ -34,12 +34,18 @@ export default function PlanDetailPage() {
     router.push('/plans');
   };
 
+  const handleReactivate = () => {
+    togglePlanStatus(plan.id);
+    setPlan(getPlans().find((p) => p.id === plan.id) ?? null);
+  };
+
   return (
     <PlanForm
       initialPlan={plan}
       onSave={handleSave}
       onCancel={() => router.back()}
       onDelete={handleDelete}
+      onReactivate={plan.status === 'completed' ? handleReactivate : undefined}
       readOnly={plan.status === 'completed'}
     />
   );
