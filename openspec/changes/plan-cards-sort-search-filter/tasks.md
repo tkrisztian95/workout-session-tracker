@@ -15,25 +15,25 @@
 
 ## 3. Plans page — search and sort
 
-- [ ] 3.1 In `src/app/plans/page.tsx` load sessions via `getSessions()` and add `useState` for `search`, `sort`, and `filters` (seeded from `DEFAULT_PLAN_FILTERS`)
-- [ ] 3.2 Add a search `<input>` under the page header with a leading search icon and a clear (×) button shown when non-empty
-- [ ] 3.3 Add an inline sort control next to the search row with the four sort options
-- [ ] 3.4 Compute the displayed list with `useMemo` over `organizePlans(plans, sessions, { search, sort, filters })`
+- [x] 3.1 In `src/app/plans/page.tsx` load sessions via `getSessions()` and add `useState` for `search`, `sort`, and `filters` (seeded from `DEFAULT_PLAN_FILTERS`)
+- [x] 3.2 Add a search `<input>` under the page header with a leading search icon and a clear (×) button shown when non-empty
+- [x] 3.3 Add an inline sort control next to the search row with the four sort options
+- [x] 3.4 Compute the displayed list with `useMemo` over `organizePlans(plans, sessions, { search, sort, filters })`
 
 ## 4. Plans page — filters
 
-- [ ] 4.1 Add a "Filters" trigger button next to the sort control showing a badge with `countActiveFilters(filters)` when greater than zero
-- [ ] 4.2 Build a filter `BottomSheet` with controls for status, AI-generated, muscle (from `availableMuscles`), and training days (from `availableDayCounts`), plus a "Clear all" action
-- [ ] 4.3 Replace the active-list + collapsible `Completed (N)` section with the single `organizePlans` result list; remove `completedOpen` state and the related markup
+- [x] 4.1 Add a "Filters" trigger button next to the sort control showing a badge with `countActiveFilters(filters)` when greater than zero
+- [x] 4.2 Build a filter `BottomSheet` with controls for status, AI-generated, muscle (from `availableMuscles`), and training days (from `availableDayCounts`), plus a "Clear all" action
+- [x] 4.3 Replace the active-list + collapsible `Completed (N)` section with the single `organizePlans` result list; remove `completedOpen` state and the related markup
 
 ## 5. Empty state and integration
 
-- [ ] 5.1 Keep the existing "no plans yet" `EmptyState` for when the user has zero plans
-- [ ] 5.2 Add a distinct no-results `EmptyState` (with a clear-search/filters action) shown when plans exist but the organized result is empty
-- [ ] 5.3 Update the header subtitle to reflect the count of plans currently shown
-- [ ] 5.4 Verify `PlanCard` still renders correctly for both active and completed plans in the unified list
+- [x] 5.1 Keep the existing "no plans yet" `EmptyState` for when the user has zero plans
+- [x] 5.2 Add a distinct no-results `EmptyState` (with a clear-search/filters action) shown when plans exist but the organized result is empty
+- [x] 5.3 Update the header subtitle to reflect the count of plans currently shown
+- [x] 5.4 Verify `PlanCard` still renders correctly for both active and completed plans in the unified list
 
 ## 6. Localization
 
-- [ ] 6.1 Add i18n keys for all new UI strings (search placeholder, clear, sort label + four option labels, filters label, status/AI/muscle/training-day labels, clear-all, no-results title + subtitle)
-- [ ] 6.2 Add translations for every key in `en`, `hu`, and `de`
+- [x] 6.1 Add i18n keys for all new UI strings (search placeholder, clear, sort label + four option labels, filters label, status/AI/muscle/training-day labels, clear-all, no-results title + subtitle)
+- [x] 6.2 Add translations for every key in `en`, `hu`, and `de`
