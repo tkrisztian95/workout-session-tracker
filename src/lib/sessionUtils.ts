@@ -10,16 +10,33 @@ export function formatLoggedSet(set: LoggedSet): string {
   return set.weight > 0 ? `${set.weight} kg × ${set.reps}` : `× ${set.reps}`;
 }
 
+/** Rep portion of a target: "10" for uniform, "15/12/8/4" for a per-set scheme. */
+export function formatRepsTarget(ex: { reps?: number; repsPerSet?: number[] }): string {
+  if (ex.repsPerSet && ex.repsPerSet.length > 0) return ex.repsPerSet.join('/');
+  return String(ex.reps ?? 0);
+}
+
+/** Parse a free-text rep scheme ("15, 12, 8, 4" / "15 12 8 4" / "15/12/8/4") into positive integers. */
+export function parseRepScheme(text: string): number[] {
+  return text
+    .split(/[\s,/]+/)
+    .map((s) => parseInt(s, 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+}
+
 export function formatExerciseDetail(ex: {
   type: 'sets-reps' | 'sets-duration' | 'duration';
   sets?: number;
   reps?: number;
+  repsPerSet?: number[];
   duration?: number;
   weightKg?: number;
 }): string {
   let base: string;
-  if (ex.type === 'sets-reps') base = `${ex.sets}×${ex.reps}`;
-  else if (ex.type === 'sets-duration') base = `${ex.sets}×${ex.duration}s`;
+  if (ex.type === 'sets-reps') {
+    base =
+      ex.repsPerSet && ex.repsPerSet.length > 0 ? formatRepsTarget(ex) : `${ex.sets}×${ex.reps}`;
+  } else if (ex.type === 'sets-duration') base = `${ex.sets}×${ex.duration}s`;
   else {
     const d = ex.duration ?? 0;
     base = d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
