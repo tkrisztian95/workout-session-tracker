@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Dumbbell, ClipboardList, CalendarCheck, Clock, Weight, ChevronLeft } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { Page, PageHeader, HeadingXL } from '@/components/ui';
@@ -19,26 +20,38 @@ const TRACK_ICONS: Record<AchievementTrack, React.ReactNode> = {
   volume: <Weight className="w-4 h-4" />,
 };
 
-export default function AchievementsPage() {
+function AchievementsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations();
   const { allRecords } = useAchievements();
 
   const unlockedIds = new Set(allRecords.map((r) => r.id));
   const unlockedMap = new Map(allRecords.map((r) => [r.id, r]));
 
+  const backPath = searchParams.get('from') === 'home' ? '/' : '/profile';
+
+  const unlockedCount = ACHIEVEMENTS.filter((a) => unlockedIds.has(a.id)).length;
+  const totalCount = ACHIEVEMENTS.length;
+  const progressLabel = t.achievements_progress
+    .replace('{unlocked}', String(unlockedCount))
+    .replace('{total}', String(totalCount));
+
   return (
     <Page className="pb-24">
       <PageHeader>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push(backPath)}
             className="w-8 h-8 rounded-xl flex items-center justify-center active:bg-elevated transition-colors"
             aria-label={t.back}
           >
             <ChevronLeft className="w-5 h-5 text-secondary" />
           </button>
           <HeadingXL>{t.achievements_title}</HeadingXL>
+          <span className="ml-auto text-xs font-semibold text-dim tabular-nums">
+            {progressLabel}
+          </span>
         </div>
       </PageHeader>
 
@@ -81,5 +94,13 @@ export default function AchievementsPage() {
 
       <BottomNav active="profile" />
     </Page>
+  );
+}
+
+export default function AchievementsPage() {
+  return (
+    <Suspense>
+      <AchievementsContent />
+    </Suspense>
   );
 }
