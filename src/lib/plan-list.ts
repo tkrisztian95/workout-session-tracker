@@ -35,6 +35,15 @@ export function getPlanLastFollowedAt(planId: string, sessions: WorkoutSession[]
   return latest;
 }
 
+/** Number of completed sessions logged against a plan. */
+export function getPlanFollowCount(planId: string, sessions: WorkoutSession[]): number {
+  let count = 0;
+  for (const s of sessions) {
+    if (s.planId === planId && s.completedAt) count++;
+  }
+  return count;
+}
+
 /** Distinct muscles trained across a plan's shared and per-day exercises. */
 export function getPlanMuscles(plan: WorkoutPlan): Muscle[] {
   const all = [

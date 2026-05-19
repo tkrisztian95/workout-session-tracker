@@ -4,6 +4,7 @@ import {
   availableMuscles,
   countActiveFilters,
   DEFAULT_PLAN_FILTERS,
+  getPlanFollowCount,
   getPlanLastFollowedAt,
   organizePlans,
   type PlanFilters,
@@ -74,6 +75,19 @@ describe('getPlanLastFollowedAt', () => {
       session({ id: 's3', planId: 'p1', completedAt: '2026-01-10T09:00:00Z' }),
     ];
     expect(getPlanLastFollowedAt('p1', sessions)).toBe('2026-03-15T09:00:00Z');
+  });
+});
+
+describe('getPlanFollowCount', () => {
+  it('counts only completed sessions matching the plan', () => {
+    const sessions = [
+      session({ id: 's1', planId: 'p1' }),
+      session({ id: 's2', planId: 'p1' }),
+      session({ id: 's3', planId: 'other' }),
+      { ...session({ id: 's4', planId: 'p1' }), completedAt: undefined as unknown as string },
+    ];
+    expect(getPlanFollowCount('p1', sessions)).toBe(2);
+    expect(getPlanFollowCount('none', sessions)).toBe(0);
   });
 });
 
