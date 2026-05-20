@@ -5,12 +5,13 @@ import { PostHogProvider as PHProvider } from 'posthog-js/react';
 import { useEffect } from 'react';
 import { getConsentAccepted } from '@/lib/storage';
 
-const POSTHOG_KEY = 'phc_6ijDAoR6hSveVX79OAuDy5ogb4j36vyvi0nqjTp1VQD';
-const POSTHOG_HOST = 'https://eu.i.posthog.com';
+const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
 
 export function initPostHog() {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY ?? POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? POSTHOG_HOST,
+  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  if (!key) return;
+  posthog.init(key, {
+    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? DEFAULT_POSTHOG_HOST,
     capture_pageview: 'history_change',
     before_send: (event) => {
       if (!event) return event;

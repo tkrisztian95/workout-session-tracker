@@ -225,13 +225,14 @@ export default function DateRangePicker({
   const [to, setTo] = useState<DateValue>(todayValue());
 
   // Reset internal state each time the sheet opens
+  /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!isOpen) return;
     setTab('from');
     setFrom(value.from ? dateValueFromISO(value.from) : daysAgoValue(30));
     setTo(value.to ? dateValueFromISO(value.to) : todayValue());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+  /* eslint-enable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 
   function handleFromChange(v: DateValue) {
     setFrom(v);

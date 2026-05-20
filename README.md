@@ -24,10 +24,23 @@ A mobile-first web app for tracking workout sessions and managing personalized f
 
 ```bash
 npm install
+cp .env.example .env.local   # optional — only needed for analytics / evals
 npm run dev
 ```
 
 The app runs at [http://localhost:3000](http://localhost:3000).
+
+### Environment variables
+
+All env vars are optional — the app works fully offline without any of them.
+
+| Variable                   | Purpose                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_POSTHOG_KEY`  | Enables PostHog analytics. Leave unset to disable PostHog entirely.                                     |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingest host (defaults to `https://eu.i.posthog.com`).                                           |
+| `OPENAI_API_KEY`           | Only used by `npm run eval`. The app itself reads the user's OpenAI key from `localStorage` at runtime. |
+
+See [.env.example](.env.example) for the full template.
 
 ## 📜 Scripts
 
@@ -45,9 +58,15 @@ The app runs at [http://localhost:3000](http://localhost:3000).
 
 All user data (plans, sessions, profile) is stored exclusively in `localStorage` under `wst_*` keys. Nothing is sent to any server except:
 
-- **PostHog** — anonymous usage analytics
-- **OpenAI** — only when you explicitly use the AI plan suggestion feature with your own API key
+- **PostHog** — anonymous usage analytics, only when `NEXT_PUBLIC_POSTHOG_KEY` is configured and the user has accepted the consent prompt
+- **OpenAI** — only when you explicitly use an AI feature with your own API key (stored in `localStorage`, sent directly from the browser to `api.openai.com`)
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branching, commit style, and the OpenSpec change workflow used in this repo.
+
+To report a security issue, see [SECURITY.md](SECURITY.md).
 
 ## 📄 License
 
-MIT
+[MIT](LICENSE)
