@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronUp, Equal, Minus, Plus, Target } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Equal, Minus, Plus, Sparkles, Target } from 'lucide-react';
 import { useMemo } from 'react';
 import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
@@ -108,14 +108,6 @@ function buildRows(session: WorkoutSession, planDay: PlanDay | undefined): Compa
   return rows;
 }
 
-const STATUS_ORDER: Record<Status, number> = {
-  overdone: 0,
-  underperformed: 1,
-  missed: 2,
-  extra: 3,
-  matched: 4,
-};
-
 interface SessionPlanComparisonProps {
   session: WorkoutSession;
   planDay: PlanDay | undefined;
@@ -127,11 +119,12 @@ export function SessionPlanComparison({ session, planDay, planName }: SessionPla
 
   const rows = useMemo(() => {
     const built = buildRows(session, planDay);
-    return built.sort(
-      (a, b) =>
-        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
-        b.actualSets - b.plannedSets - (a.actualSets - a.plannedSets),
-    );
+    return built.sort((a, b) => {
+      const deltaA = a.actualSets - a.plannedSets;
+      const deltaB = b.actualSets - b.plannedSets;
+      if (deltaA !== deltaB) return deltaB - deltaA;
+      return b.actualSets - a.actualSets;
+    });
   }, [session, planDay]);
 
   if (!planDay) {
@@ -173,24 +166,30 @@ export function SessionPlanComparison({ session, planDay, planName }: SessionPla
         </p>
       )}
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <SummaryStat
-          label={t.comparison_overdone}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] mb-3">
+        <LegendChip
+          icon={<ChevronUp className="w-3 h-3" />}
           value={counts.overdone}
+          label={t.comparison_overdone}
           tone="success"
-          icon={<ChevronUp className="w-3.5 h-3.5" />}
         />
-        <SummaryStat
-          label={t.comparison_underperformed}
-          value={counts.underperformed + counts.missed}
-          tone="warning"
-          icon={<ChevronDown className="w-3.5 h-3.5" />}
-        />
-        <SummaryStat
-          label={t.comparison_on_target}
+        <span className="text-dim" aria-hidden>
+          ·
+        </span>
+        <LegendChip
+          icon={<Equal className="w-3 h-3" />}
           value={counts.matched}
+          label={t.comparison_on_target}
           tone="neutral"
-          icon={<Equal className="w-3.5 h-3.5" />}
+        />
+        <span className="text-dim" aria-hidden>
+          ·
+        </span>
+        <LegendChip
+          icon={<ChevronDown className="w-3 h-3" />}
+          value={counts.underperformed + counts.missed}
+          label={t.comparison_underperformed}
+          tone="warning"
         />
       </div>
 
@@ -207,33 +206,45 @@ export function SessionPlanComparison({ session, planDay, planName }: SessionPla
   );
 }
 
-interface SummaryStatProps {
+interface LegendChipProps {
   label: string;
   value: number;
   tone: 'success' | 'warning' | 'neutral';
   icon: React.ReactNode;
 }
 
-function SummaryStat({ label, value, tone, icon }: SummaryStatProps) {
+function LegendChip({ label, value, tone, icon }: LegendChipProps) {
   const toneClass =
     tone === 'success' ? 'text-success' : tone === 'warning' ? 'text-warning' : 'text-secondary';
   return (
-    <div className="rounded-lg bg-base border border-border px-2 py-2 text-center">
-      <div className={cn('flex items-center justify-center gap-0.5', toneClass)}>
-        {icon}
-        <span className="text-base font-bold tabular-nums">{value}</span>
-      </div>
-      <p className="text-[10px] uppercase tracking-wider text-muted mt-0.5">{label}</p>
-    </div>
+    <span className="inline-flex items-center gap-1">
+      <span className={cn('inline-flex items-center', toneClass)}>{icon}</span>
+      <span className="font-semibold tabular-nums text-foreground">{value}</span>
+      <span className="text-muted">{label}</span>
+    </span>
   );
+}
+
+function maxLoggedWeight(ex: Exercise | undefined): number {
+  if (!ex) return 0;
+  const sets = ex.loggedSets;
+  if (sets && sets.length > 0) {
+    let max = 0;
+    for (const s of sets) if (s.weight > max) max = s.weight;
+    return max;
+  }
+  return ex.weightKg ?? 0;
 }
 
 function ComparisonRowItem({ row }: { row: ComparisonRow }) {
   const t = useTranslations();
   const delta = row.actualSets - row.plannedSets;
+  const isExtra = row.status === 'extra';
   const denominator = Math.max(row.plannedSets, row.actualSets, 1);
-  const plannedPct = (Math.min(row.plannedSets, denominator) / denominator) * 100;
+  const plannedPct = (row.plannedSets / denominator) * 100;
   const actualPct = (row.actualSets / denominator) * 100;
+  const achievedPct = (Math.min(row.plannedSets, row.actualSets) / denominator) * 100;
+  const overPct = Math.max(0, actualPct - plannedPct);
 
   const statusLabel =
     row.status === 'overdone'
@@ -242,35 +253,48 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
         ? t.comparison_underperformed
         : row.status === 'missed'
           ? t.comparison_missed
-          : row.status === 'extra'
+          : isExtra
             ? t.comparison_extra
             : t.comparison_on_target;
 
   const pillClass =
     row.status === 'overdone'
-      ? 'bg-success/10 text-success'
+      ? 'bg-success/15 text-success'
       : row.status === 'underperformed' || row.status === 'missed'
-        ? 'bg-warning/10 text-warning'
-        : row.status === 'extra'
-          ? 'bg-brand/10 text-brand'
+        ? 'bg-warning/15 text-warning'
+        : isExtra
+          ? 'bg-brand/15 text-brand'
           : 'bg-elevated text-secondary';
 
-  const actualBarClass =
+  const achievedBarClass =
     row.status === 'overdone'
-      ? 'bg-success'
+      ? 'bg-success/45'
       : row.status === 'underperformed' || row.status === 'missed'
         ? 'bg-warning'
-        : row.status === 'extra'
+        : isExtra
           ? 'bg-brand'
-          : 'bg-secondary';
+          : 'bg-success';
+
+  const overBarClass = 'bg-success';
+
+  const plannedWeight = row.planned?.weightKg;
+  const actualWeight = maxLoggedWeight(row.actual);
+  const showWeight = (plannedWeight ?? 0) > 0 || (isExtra && actualWeight > 0);
+  const weightAchieved = plannedWeight ? actualWeight >= plannedWeight : null;
 
   const detail = row.planned ?? row.actual;
 
   return (
-    <li className="rounded-lg bg-base border border-border px-3 py-2.5">
+    <li
+      className={cn(
+        'rounded-lg bg-base border border-border px-3 py-2.5 relative',
+        isExtra && 'border-l-2 border-l-brand bg-brand/[0.03]',
+      )}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
+            {isExtra && <Sparkles className="w-3.5 h-3.5 text-brand flex-shrink-0" aria-hidden />}
             <span className="text-sm font-medium text-foreground truncate">{row.name}</span>
             {row.muscle && <MuscleBadge muscle={row.muscle} />}
           </div>
@@ -291,44 +315,103 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
       </div>
 
       <div className="mt-2 flex items-center gap-2">
-        <div className="flex-1 h-1.5 rounded-full bg-elevated relative overflow-hidden">
-          <div
-            className="absolute inset-y-0 left-0 bg-border-subtle"
-            style={{ width: `${plannedPct}%` }}
-            aria-hidden
-          />
-          <div
-            className={cn('absolute inset-y-0 left-0', actualBarClass)}
-            style={{ width: `${actualPct}%` }}
-            aria-hidden
-          />
+        <div className="flex-1 h-2 rounded-full bg-elevated relative overflow-hidden">
+          {achievedPct > 0 && (
+            <div
+              className={cn('absolute inset-y-0 left-0', achievedBarClass)}
+              style={{ width: `${achievedPct}%` }}
+              aria-hidden
+            />
+          )}
+          {overPct > 0 && (
+            <div
+              className={cn('absolute inset-y-0', overBarClass)}
+              style={{ left: `${plannedPct}%`, width: `${overPct}%` }}
+              aria-hidden
+            />
+          )}
+          {!isExtra && row.plannedSets > 0 && plannedPct < 100 && (
+            <div
+              className="absolute top-0 bottom-0 w-px bg-foreground/60"
+              style={{ left: `calc(${plannedPct}% - 0.5px)` }}
+              aria-hidden
+            />
+          )}
         </div>
         <span className="text-[11px] text-muted tabular-nums whitespace-nowrap">
           {row.actualSets}
           <span className="text-dim">/</span>
-          {row.plannedSets} <span className="text-dim">{t.comparison_sets_short}</span>
+          {isExtra ? '—' : row.plannedSets}{' '}
+          <span className="text-dim">{t.comparison_sets_short}</span>
         </span>
       </div>
 
-      {delta !== 0 && (
-        <p className="mt-1 text-[11px] text-muted flex items-center gap-1 tabular-nums">
-          {delta > 0 ? (
-            <>
-              <Plus className="w-3 h-3 text-success" />
-              <span className="text-success font-medium">{delta}</span>
-            </>
-          ) : (
-            <>
-              <Minus className="w-3 h-3 text-warning" />
-              <span className="text-warning font-medium">{Math.abs(delta)}</span>
-            </>
+      {(delta !== 0 || showWeight) && (
+        <div className="mt-1.5 flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px] tabular-nums">
+          {delta !== 0 && (
+            <span className="flex items-center gap-1 text-muted">
+              {delta > 0 ? (
+                <>
+                  <Plus className="w-3 h-3 text-success" />
+                  <span className="text-success font-medium">{delta}</span>
+                </>
+              ) : (
+                <>
+                  <Minus className="w-3 h-3 text-warning" />
+                  <span className="text-warning font-medium">{Math.abs(delta)}</span>
+                </>
+              )}
+              <span>
+                {Math.abs(delta) === 1 ? t.comparison_set_singular : t.comparison_set_plural}{' '}
+                {delta > 0 ? t.comparison_delta_more : t.comparison_delta_less}
+              </span>
+            </span>
           )}
-          <span>
-            {Math.abs(delta) === 1 ? t.comparison_set_singular : t.comparison_set_plural}{' '}
-            {delta > 0 ? t.comparison_delta_more : t.comparison_delta_less}
-          </span>
-        </p>
+          {showWeight && (
+            <WeightIndicator
+              actualWeight={actualWeight}
+              plannedWeight={plannedWeight}
+              achieved={weightAchieved}
+              isExtra={isExtra}
+            />
+          )}
+        </div>
       )}
     </li>
+  );
+}
+
+interface WeightIndicatorProps {
+  actualWeight: number;
+  plannedWeight?: number;
+  achieved: boolean | null;
+  isExtra: boolean;
+}
+
+function WeightIndicator({ actualWeight, plannedWeight, achieved, isExtra }: WeightIndicatorProps) {
+  if (isExtra || plannedWeight == null) {
+    return (
+      <span className="inline-flex items-center gap-1 text-muted">
+        <Target className="w-3 h-3" aria-hidden />
+        <span className="font-medium text-foreground">{actualWeight}</span>
+        <span className="text-dim">kg</span>
+      </span>
+    );
+  }
+  const toneClass = achieved ? 'text-success' : 'text-warning';
+  return (
+    <span className={cn('inline-flex items-center gap-1', toneClass)}>
+      {achieved ? (
+        <Check className="w-3 h-3" aria-hidden />
+      ) : (
+        <Target className="w-3 h-3" aria-hidden />
+      )}
+      <span className="font-medium tabular-nums">
+        {actualWeight}
+        <span className="text-dim">/</span>
+        {plannedWeight}
+      </span>
+      <span className="text-dim">kg</span>
+    </span>
   );
 }
