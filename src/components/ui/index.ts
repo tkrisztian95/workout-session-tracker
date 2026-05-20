@@ -8,3 +8,4 @@ export { LabelOverline, HeadingXL, ListLabel } from './Typography';
 export { Page, PageHeader } from './PageShell';
 export { CtaBar } from './CtaBar';
 export { EmptyState } from './EmptyState';
+export { Tabs, type TabItem } from './Tabs';
