@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getActiveSession,
@@ -37,19 +37,35 @@ type Step = 'start' | 'pick-plan' | 'pick-day' | 'pick-optionals' | 'session';
 export default function HomePage() {
   const router = useRouter();
   const t = useTranslations();
-  const [activeSession, setActive] = useState<ActiveSession | null>(() => getActiveSession());
-  const [step, setStep] = useState<Step>(() => (getActiveSession() ? 'session' : 'start'));
-  const [plans, setPlans] = useState<WorkoutPlan[]>(() =>
-    getPlans().filter((p) => (p.status ?? 'active') === 'active'),
-  );
-  const [sessions] = useState<WorkoutSession[]>(() => getSessions());
+  const [mounted, setMounted] = useState(false);
+  const [activeSession, setActive] = useState<ActiveSession | null>(null);
+  const [step, setStep] = useState<Step>('start');
+  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
+  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
 
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
-  const [userName, setUserName] = useState<string | null>(() => getUserName());
-  const [consentSeen, setConsentSeen] = useState(() => hasSeenConsent());
+  const [userName, setUserName] = useState<string | null>(null);
+  const [consentSeen, setConsentSeen] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
   const { newUnlocks, allRecords, markSeen } = useAchievements();
+
+  // Hydrate persisted state from localStorage after mount. Doing this in an
+  // effect (rather than via useState lazy init) is required because the server
+  // cannot read localStorage and would otherwise produce a different tree than
+  // the client, causing a hydration mismatch.
+  useEffect(() => {
+    const active = getActiveSession();
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setActive(active);
+    setStep(active ? 'session' : 'start');
+    setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active'));
+    setSessions(getSessions());
+    setUserName(getUserName());
+    setConsentSeen(hasSeenConsent());
+    setMounted(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
 
   const handleNameComplete = (name: string) => {
     setUserName(name);
@@ -143,6 +159,8 @@ export default function HomePage() {
     setSelectedDay(null);
     setStep('start');
   };
+
+  if (!mounted) return null;
 
   if (step === 'session' && activeSession) {
     return (
