@@ -1,5 +1,9 @@
 # Agents
 
+This file is the **single source of truth** for agent guidance in this repo. [CLAUDE.md](CLAUDE.md) is a thin pointer that imports this file via `@AGENTS.md`, so Claude Code loads its full contents automatically.
+
+**Don't duplicate sections into CLAUDE.md.** Add or edit them here — they'll flow through to Claude.
+
 ## Feature Development with OpenSpec
 
 Use the OpenSpec (`/opsx`) workflow for any non-trivial feature or change. It keeps a structured paper trail — proposal, design, tasks — under `openspec/changes/<name>/`.
@@ -40,13 +44,62 @@ Moves the change to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
 
 ### Best practices
 
-- **Branch per change with a Conventional Commits prefix.** Every `/opsx:propose` SHALL start by creating a new branch off the current base (usually `main`) named `<type>/<change-name>`, where `<type>` is one of `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`, `build`, `ci`, `style`. Use the same kebab-case `<change-name>` as the `openspec/changes/<name>/` directory. Examples: `feat/two-tier-muscle-categories`, `fix/session-pause-resume-drift`, `chore/bump-next-16`. One change per branch. If the user is already on a non-`main` branch when `/opsx:propose` runs, ask before branching off it.
+- **Branch per change with a Conventional Commits prefix.** Every `/opsx:propose` SHALL start by creating a new branch off the current base (usually `main`) named `<type>/<change-name>`. `<type>` comes from the allowed list in [Commit style](#commit-style); use the same kebab-case `<change-name>` as the `openspec/changes/<name>/` directory. Examples: `feat/two-tier-muscle-categories`, `fix/session-pause-resume-drift`, `chore/bump-next-16`. One change per branch. If the user is already on a non-`main` branch when `/opsx:propose` runs, ask before branching off it.
 - **Commit the proposal artifacts as the first commit on the branch.** Immediately after `/opsx:propose` finishes generating `proposal.md`, `design.md`, `specs/**`, and `tasks.md`, create one clean commit that contains **only** those artifacts under `openspec/changes/<name>/` — no source-code edits, no doc edits outside the change directory. Subject line: `<type>(<change-name>): propose <one-line summary>`. Body lists the new + modified capabilities from `proposal.md`. This makes the proposal reviewable on its own and gives a stable base for the implementation commits that follow.
 - **Validate specs before applying.** Run `openspec validate --strict` after propose and before apply to catch JSON/Markdown formatting errors early.
 - **Commit after each task section during `/opsx:apply`.** When working through `tasks.md`, create a git commit at the end of every numbered task group (each `## N. <Group Name>` section) — once every checkbox in that group is marked `[x]` and the work is verified. Subject line should reference the section, e.g. `feat(two-tier-muscle-categories): taxonomy + storage migration (tasks 1.x–3.x)`. This keeps the branch reviewable in slices that match the spec, makes bisecting easy, and prevents one giant end-of-change commit. Do **not** commit mid-section unless the user asks — wait until a section is fully done.
 - **Archive on the change branch before the PR merges.** Run `/opsx:archive <change-name>` on the same `<type>/<change-name>` branch as the implementation, **before** opening or merging the PR. The archive move (spec deltas folded into `openspec/specs/`, change directory relocated under `openspec/changes/archive/YYYY-MM-DD-<name>/`) lands as the final commit on the same PR rather than as a separate post-merge cleanup. This keeps the spec history aligned with the merge SHA and avoids drift if multiple changes archive against the same capability. Exception: if the change is one of several in flight that all touch the same capability, archive in dependency order so each PR rebases onto the latest archived spec.
 - **Commit after archiving.** After `/opsx:archive`, create a git commit that includes both the spec artifacts and any leftover doc edits. Creates a traceable history linking specs to implementation.
 - **Split complex tasks.** If a task is too large or ambiguous, break it into smaller steps — propose first, then apply, then archive. Avoids context overload and implementation drift.
+
+---
+
+## Commit style
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/). Subject line: `<type>(<scope>)?: <imperative summary>` — keep under ~72 chars.
+
+**Allowed types:** `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`, `build`, `ci`, `style`.
+
+**Scope** is optional and kebab-case. Prefer the OpenSpec change name when one applies (e.g. `feat(variable-exercise-reps): …`). Other recurring scopes seen in this repo: `claude` (settings/agent config), `dev` (dev-only tooling), `plans`, `achievements`. Omit the scope when the change is broad or doesn't fit one cleanly.
+
+**Subject rules:**
+
+- Imperative mood ("add X", not "added X" or "adds X").
+- Lowercase first word after the colon.
+- No trailing period.
+
+**Body** (optional, separated by a blank line): explain _why_ the change exists, not what the diff already shows. Wrap at ~72 chars. Reference issue / PR / openspec change directory when relevant.
+
+**Trailers:**
+
+- When committing as Claude on the user's behalf, include `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`.
+- Identity: every commit under `~/Git/Hobby/` must be authored as `Krisztian Toth <ktothdev@gmail.com>` (enforced via the conditional `includeIf` in `~/.gitconfig` — verify with `git config user.email`).
+
+**One change per branch.** Don't bundle unrelated work. For the OpenSpec-specific commit cadence (proposal commit, per-section commits during apply, archive commit before PR merge), see [Best practices](#best-practices) above.
+
+**Examples** (taken from recent history):
+
+- `feat(variable-exercise-reps): AI + history round-trip (tasks 4.x)`
+- `fix: consolidate exercise card actions into three-dots menu`
+- `chore(claude): add npm scripts to settings allowlist`
+- `docs: document persisted data structure and require sync on schema changes`
+
+---
+
+## Data structure docs
+
+Persisted data shapes (localStorage keys, TypeScript types, migrations, export payload) are documented in [docs/data-structure.md](docs/data-structure.md).
+
+**Keep that doc in sync** in the same commit whenever you change any of:
+
+- A `localStorage` key — the `KEYS` const in [src/lib/storage.ts](src/lib/storage.ts).
+- A persisted type in [src/lib/types.ts](src/lib/types.ts) (`WorkoutPlan`, `PlanDay`, `PlanExercise`, `Exercise`, `LoggedSet`, `ActiveSession`, `WorkoutSession`, `AchievementRecord`, `LlmConfig`, `Sex`).
+- The `Muscle` / `MuscleGroup` taxonomy or legacy-category mapping in [src/lib/muscles.ts](src/lib/muscles.ts).
+- `HiddenExerciseKey` or any new persisted shape declared in [src/lib/storage.ts](src/lib/storage.ts).
+- A storage migration (any function called from a getter that rewrites old data).
+- The `ExportPayload` shape or `schemaVersion` in [src/lib/storage.ts](src/lib/storage.ts).
+
+If you're unsure whether a change qualifies: if it affects what is written to or read from `localStorage`, update the doc.
 
 ---
 
