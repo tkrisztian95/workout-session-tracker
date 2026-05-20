@@ -84,7 +84,7 @@ See [.env.example](.env.example) for the full template.
 
 This is a fully static-friendly Next.js app — no database, no server-side state. You can host it anywhere:
 
-- **One-click deploy to Vercel:** use the button at the top of this README. Set `NEXT_PUBLIC_POSTHOG_KEY` only if you want analytics; everything else is optional.
+- **Fork & deploy to Vercel:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tkrisztian95/workout-session-tracker) — clones the repo and provisions a new project. Set `NEXT_PUBLIC_POSTHOG_KEY` only if you want analytics; everything else is optional.
 - **Any Node host:** `npm run build && npm start`.
 - **Static export:** the app degrades gracefully — only `/history/[id]` and `/plans/[id]` are dynamic (they read from `localStorage` on the client).
 
