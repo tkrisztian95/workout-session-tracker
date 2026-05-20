@@ -4,6 +4,7 @@ import { LocaleProvider } from '@/lib/locale-context';
 import { ThemeProvider } from '@/lib/theme-context';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import MuscleMigrationToast from '@/components/MuscleMigrationToast';
+import DevSeed from '@/components/DevSeed';
 import './globals.css';
 
 const barlow = Barlow({
@@ -57,6 +58,7 @@ export default function RootLayout({
             <LocaleProvider>
               {children}
               <MuscleMigrationToast />
+              {process.env.NODE_ENV === 'development' && <DevSeed />}
             </LocaleProvider>
           </ThemeProvider>
         </PostHogProvider>
