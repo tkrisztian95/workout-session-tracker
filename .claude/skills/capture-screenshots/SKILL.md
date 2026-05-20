@@ -111,6 +111,7 @@ The README's screenshot gallery covers these. Refresh them in this order when do
 | `06-ai-suggest-prefs.png`     | `/plans` → AI Suggest Plan                  | Pick Hypertrophy / 4 days / Build muscle for visual interest |
 | `07-ai-loading.png`           | same, after Generate                        | Grab quickly while "Generating your plan…" is on screen      |
 | `08-ai-preview.png`           | same, after generation finishes             | The full preview before clicking **Use this plan**           |
+| `09-session-active.png`       | `/` after starting a plan-based session     | Click `Follow a Plan` → pick plan → pick day → Start Session, log 1–2 sets, then screenshot. See tip below. |
 
 ### Tip: AI marker on the plans page
 
@@ -127,6 +128,18 @@ navigate_page({ type: 'reload' });
 ```
 
 This is a per-browser-session tweak; the seed JSON on disk is untouched.
+
+### Tip: capturing the active session
+
+The active session is rendered on the home route (`/`) when `localStorage.wst_active_session` is set — there's no separate URL. To capture it:
+
+1. Navigate to `/`, click **Follow a Plan**.
+2. Pick a plan (e.g. PPL), pick a day (e.g. Push).
+3. Skip the Optional Exercises step or pick none, click **Start Session**.
+4. The home route now renders the in-progress UI. Click **Log set** on the focused exercise, accept the default target weight/reps, **Save**. Repeat once or twice so the screenshot shows logged sets instead of empty slots.
+5. Screenshot.
+
+Don't `clearActiveSession` / `Discard` after capturing — leaving the session active is harmless and the user can resume from home.
 
 ### Tip: AI screens need an OpenAI key
 

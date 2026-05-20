@@ -19,6 +19,7 @@ To regenerate them, follow the [`capture-screenshots` skill](../../.claude/skill
 | [`06-ai-suggest-prefs.png`](06-ai-suggest-prefs.png) | `/plans` → AI modal | AI Plan Suggestion sheet with selected preferences: training focus (Hypertrophy), days per week (4), and fitness goal (Build muscle). |
 | [`07-ai-loading.png`](07-ai-loading.png) | `/plans` → AI modal | Loading state while the OpenAI request is in flight. |
 | [`08-ai-preview.png`](08-ai-preview.png) | `/plans` → AI modal | Generated plan preview ("4-Day Hypertrophy Split") with per-day exercise counts, a collapsible **WHY THIS PLAN** rationale, plus **Regenerate** and **Use this plan** actions. |
+| [`09-session-active.png`](09-session-active.png) | `/` (with `wst_active_session` set) | Plan-based session in progress: header with elapsed timer + remaining/done counts, the focused exercise card with two logged sets (`70 kg × 8`) of four planned, the **Up Next** queue with quick-complete and dismiss actions per exercise, and the bottom **Discard / Finish Session** bar. |
 
 ## Notes
 

@@ -1,10 +1,10 @@
 # 🏋️ Workout Sessions Tracker
 
-> A mobile-first, privacy-first workout tracker. Plan training, log sessions, visualize progress — all data stays in your browser. Generate AI-tailored plans using your own OpenAI key.
+> An **AI-augmented**, mobile-first, privacy-first workout tracker. Log sessions, follow plans, and visualize progress — then let AI use your **full training history, plans, and progression** to suggest the next plan, swap an exercise, or parse a free-form workout into structured sets. All data stays in your browser; AI runs through your own OpenAI key.
 
 [![CI](https://github.com/tkrisztian95/workout-session-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/tkrisztian95/workout-session-tracker/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tkrisztian95_workout-session-tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=tkrisztian95_workout-session-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](LICENSE)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tkrisztian95/workout-session-tracker)
 
 **[🚀 Live Demo](https://workout-session-tracker.vercel.app)** · **[Contributing](CONTRIBUTING.md)** · **[Security](SECURITY.md)**
 
@@ -16,22 +16,22 @@
 | --------------------------------------- | ----------------------------------------- | --------------------------------------------- |
 | ![Home](public/screenshots/01-home.png) | ![Plans](public/screenshots/02-plans.png) | ![History](public/screenshots/03-history.png) |
 
-| Statistics — summary                              | Statistics — charts                                      | Session — exercises                                         |
-| ------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------- |
-| ![Stats summary](public/screenshots/04-stats.png) | ![Stats charts](public/screenshots/04b-stats-charts.png) | ![Session detail](public/screenshots/05-session-detail.png) |
+| Session in progress                                         | Session — exercises (review)                                | AI plan generation                                       |
+| ----------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| ![Session active](public/screenshots/09-session-active.png) | ![Session detail](public/screenshots/05-session-detail.png) | ![AI plan preview](public/screenshots/08-ai-preview.png) |
 
-| Session — timeline                                               | Session — vs Plan                                              | AI plan generation                                       |
-| ---------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------- |
-| ![Session timeline](public/screenshots/05b-session-timeline.png) | ![Session vs plan](public/screenshots/05c-session-vs-plan.png) | ![AI plan preview](public/screenshots/08-ai-preview.png) |
+| Statistics — summary                              | Statistics — charts                                      | Session — Timeline & vs Plan                                     |
+| ------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![Stats summary](public/screenshots/04-stats.png) | ![Stats charts](public/screenshots/04b-stats-charts.png) | ![Session timeline](public/screenshots/05b-session-timeline.png) |
 
-See [public/screenshots/README.md](public/screenshots/README.md) for the full index and what each screenshot is meant to show.
+See [public/screenshots/README.md](public/screenshots/README.md) for the full index — including the AI preferences sheet, loading state, and session vs-plan comparison.
 
 ## ✨ Why this app
 
-- **Privacy-first.** No account, no backend, no database. Every plan, session, and stat lives in `localStorage`.
+- **Context-aware AI, not generic prompts.** Every AI feature receives your full training context — completed sessions, weight progression per exercise, active plans, profile, and preferences. Plan suggestions, exercise swaps, and free-form workout parsing are grounded in **what you actually did**, not a blank-slate prompt. You bring your own OpenAI key; the app works fully without one.
+- **Privacy-first.** No account, no backend, no database. Every plan, session, and stat lives in `localStorage`. The OpenAI key is stored in your browser, and AI requests go directly from your browser to `api.openai.com` — the app never proxies them.
 - **Mobile-first.** Built for the phone, not for a desktop with a phone view bolted on. Bottom nav, drum pickers, modal sheets, large tap targets.
-- **AI-assisted, not AI-locked.** Bring your own OpenAI key. The app works fully without it — AI is an opt-in upgrade for plan suggestions, exercise swaps, and "import workout from notes."
-- **Open, hackable, forkable.** MIT-licensed Next.js app. Deploy your own copy on Vercel in a click, or run it locally and never touch the network.
+- **Open, hackable, forkable.** MIT-licensed Next.js app. Deploy your own copy or run it locally and never touch the network.
 
 ## 🎯 Features
 
@@ -39,9 +39,9 @@ See [public/screenshots/README.md](public/screenshots/README.md) for the full in
 - 📋 **Workout Plans** — Multi-day plans with core and optional exercises per day, plus shared exercises that apply to every day. Schedule days by weekday. Search, filter, and sort across active and completed plans.
 - 📅 **Session History** — Browse completed sessions on a weekday strip and a date-range timeline. Drill into any session for sets, durations, plan-vs-actual comparison, and a per-exercise timeline. Manually log past sessions.
 - 📊 **Statistics** — Volume, frequency, average duration, plans completed. Exercise weight progression with trend indicators and line charts. Muscle-group distribution radar. Volume bar chart with time-range filters.
-- 🤖 **AI Plan Suggestions** — Generate personalized plans (`gpt-4o-mini` or `gpt-4o`) based on your training history and preferences. Review the suggestion in full before importing.
-- 🔄 **AI Exercise Swap** — Replace any exercise in an active plan with an AI-suggested alternative that matches the same muscle group and equipment profile.
-- 📝 **Import Workout from Notes** — Paste a free-form session description and have it parsed into structured exercises and sets.
+- 🤖 **AI Plan Suggestions** — Personalized plans (`gpt-4o-mini` or `gpt-4o`) generated with the full corpus of your past sessions, weight progression, existing plans, and stated preferences sent as context. Each suggestion comes with a "why this plan" rationale you can read before importing.
+- 🔄 **AI Exercise Swap** — Replace any exercise in an active plan with an AI-suggested alternative that matches the muscle group, equipment, and your prior performance on similar movements.
+- 📝 **Import Workout from Notes** — Paste a free-form session description ("did 5×5 squats at 100, then 3 sets of pull-ups…") and have it parsed into structured exercises and sets, using your exercise history to disambiguate names.
 - 🏆 **Achievements** — Earned milestones (first session, weight PRs, streaks, plan completions) with a celebration overlay.
 - ⚙️ **Profile & Settings** — Name, sex, age, height, weight. Theme (light / dark / system). Language (English, Hungarian, German). Data export / import.
 
