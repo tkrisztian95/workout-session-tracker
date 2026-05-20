@@ -371,6 +371,25 @@
   "timeline_title": "Zeitachse",
   "timeline_session_started": "Training gestartet",
 
+  "tab_exercises_label": "Übungen",
+  "tab_timeline_label": "Zeitachse",
+  "tab_comparison_label": "Plan vs. Ist",
+
+  "comparison_title": "Geplant vs. tatsächlich",
+  "comparison_against_plan": "Verglichen mit",
+  "comparison_no_plan": "Diese Sitzung basierte nicht auf einem Plan, es gibt nichts zu vergleichen.",
+  "comparison_empty": "Noch keine Übungen zum Vergleichen.",
+  "comparison_overdone": "Übererfüllt",
+  "comparison_underperformed": "Untererfüllt",
+  "comparison_on_target": "Im Soll",
+  "comparison_missed": "Verpasst",
+  "comparison_extra": "Extra",
+  "comparison_sets_short": "Sätze",
+  "comparison_set_singular": "Satz",
+  "comparison_set_plural": "Sätze",
+  "comparison_delta_more": "mehr als geplant",
+  "comparison_delta_less": "weniger als geplant",
+
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",
 

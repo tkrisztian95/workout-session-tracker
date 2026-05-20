@@ -7,12 +7,100 @@ import BottomNav from '@/components/BottomNav';
 import { SessionDetailHeader } from '@/components/SessionDetailHeader';
 import { SessionExerciseItem } from '@/components/SessionExerciseItem';
 import { SessionTimeline } from '@/components/SessionTimeline';
+import { SessionPlanComparison } from '@/components/SessionPlanComparison';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
-import { Button, HeadingXL, ListLabel, Page, PageHeader } from '@/components/ui';
+import {
+  Button,
+  HeadingXL,
+  ListLabel,
+  Page,
+  PageHeader,
+  Tabs,
+  type TabItem,
+} from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import HistoryExerciseEditor from '@/components/HistoryExerciseEditor';
+
+type DetailTab = 'exercises' | 'timeline' | 'comparison';
+
+interface ExercisesTabContentProps {
+  displaySession: WorkoutSession;
+  displayCompleted: Exercise[];
+  displayRemaining: Exercise[];
+  displaySkipped: Exercise[];
+  isEditing: boolean;
+  updateDraftExercise: (id: string, patch: Partial<Exercise>) => void;
+  removeDraftExercise: (id: string) => void;
+  setEditingExercise: (ex: Exercise) => void;
+  setIsAddModalOpen: (open: boolean) => void;
+}
+
+function ExercisesTabContent({
+  displaySession,
+  displayCompleted,
+  displayRemaining,
+  displaySkipped,
+  isEditing,
+  updateDraftExercise,
+  removeDraftExercise,
+  setEditingExercise,
+  setIsAddModalOpen,
+}: ExercisesTabContentProps) {
+  const t = useTranslations();
+  if (displaySession.exercises.length === 0 && !isEditing) {
+    return <p className="text-muted text-sm">{t.no_exercises_recorded}</p>;
+  }
+  return (
+    <div className="space-y-3">
+      {[...displayCompleted, ...displayRemaining].map((exercise) => (
+        <SessionExerciseItem
+          key={exercise.id}
+          exercise={exercise}
+          isEditing={isEditing}
+          onToggleComplete={() =>
+            updateDraftExercise(exercise.id, {
+              completed: !exercise.completed,
+              dismissed: false,
+            })
+          }
+          onEdit={() => setEditingExercise(exercise)}
+          onRemove={() => removeDraftExercise(exercise.id)}
+        />
+      ))}
+
+      {displaySkipped.length > 0 && (
+        <>
+          <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
+          {displaySkipped.map((exercise) => (
+            <SessionExerciseItem
+              key={exercise.id}
+              exercise={exercise}
+              isEditing={isEditing}
+              dismissed
+              onToggleComplete={() =>
+                updateDraftExercise(exercise.id, { dismissed: false, completed: false })
+              }
+              onEdit={() => setEditingExercise(exercise)}
+              onRemove={() => removeDraftExercise(exercise.id)}
+            />
+          ))}
+        </>
+      )}
+
+      {isEditing && (
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer pt-1"
+        >
+          <Plus className="w-4 h-4" />
+          {t.add_exercise_title}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
@@ -38,6 +126,7 @@ export default function SessionDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<DetailTab>('exercises');
 
   if (!session) {
     notFound();
@@ -140,58 +229,62 @@ export default function SessionDetailPage() {
         />
       </PageHeader>
 
-      <div className="flex-1 px-6 pb-6 space-y-3 overflow-y-auto">
-        {displaySession.exercises.length === 0 ? (
-          <p className="text-muted text-sm">{t.no_exercises_recorded}</p>
+      <div className="flex-1 px-6 pb-6 overflow-y-auto">
+        {isEditing ? (
+          <ExercisesTabContent
+            displaySession={displaySession}
+            displayCompleted={displayCompleted}
+            displayRemaining={displayRemaining}
+            displaySkipped={displaySkipped}
+            isEditing={isEditing}
+            updateDraftExercise={updateDraftExercise}
+            removeDraftExercise={removeDraftExercise}
+            setEditingExercise={setEditingExercise}
+            setIsAddModalOpen={setIsAddModalOpen}
+          />
         ) : (
-          <>
-            {[...displayCompleted, ...displayRemaining].map((exercise) => (
-              <SessionExerciseItem
-                key={exercise.id}
-                exercise={exercise}
-                isEditing={isEditing}
-                onToggleComplete={() =>
-                  updateDraftExercise(exercise.id, {
-                    completed: !exercise.completed,
-                    dismissed: false,
-                  })
-                }
-                onEdit={() => setEditingExercise(exercise)}
-                onRemove={() => removeDraftExercise(exercise.id)}
-              />
-            ))}
-
-            {displaySkipped.length > 0 && (
-              <>
-                <ListLabel className="text-dim">{t.skipped_section}</ListLabel>
-                {displaySkipped.map((exercise) => (
-                  <SessionExerciseItem
-                    key={exercise.id}
-                    exercise={exercise}
-                    isEditing={isEditing}
-                    dismissed
-                    onToggleComplete={() =>
-                      updateDraftExercise(exercise.id, { dismissed: false, completed: false })
-                    }
-                    onEdit={() => setEditingExercise(exercise)}
-                    onRemove={() => removeDraftExercise(exercise.id)}
-                  />
-                ))}
-              </>
-            )}
-          </>
+          <Tabs
+            activeId={activeTab}
+            onChange={(id) => setActiveTab(id as DetailTab)}
+            tabs={
+              [
+                {
+                  id: 'exercises',
+                  label: t.tab_exercises_label,
+                  content: (
+                    <ExercisesTabContent
+                      displaySession={displaySession}
+                      displayCompleted={displayCompleted}
+                      displayRemaining={displayRemaining}
+                      displaySkipped={displaySkipped}
+                      isEditing={false}
+                      updateDraftExercise={updateDraftExercise}
+                      removeDraftExercise={removeDraftExercise}
+                      setEditingExercise={setEditingExercise}
+                      setIsAddModalOpen={setIsAddModalOpen}
+                    />
+                  ),
+                },
+                {
+                  id: 'timeline',
+                  label: t.tab_timeline_label,
+                  content: <SessionTimeline session={displaySession} />,
+                },
+                {
+                  id: 'comparison',
+                  label: t.tab_comparison_label,
+                  content: (
+                    <SessionPlanComparison
+                      session={displaySession}
+                      planDay={planDay}
+                      planName={planName}
+                    />
+                  ),
+                },
+              ] satisfies TabItem[]
+            }
+          />
         )}
-        {isEditing && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 text-brand text-sm font-semibold cursor-pointer pt-1"
-          >
-            <Plus className="w-4 h-4" />
-            {t.add_exercise_title}
-          </button>
-        )}
-
-        {!isEditing && <SessionTimeline session={displaySession} />}
       </div>
 
       <BottomNav active="history" />
