@@ -42,12 +42,6 @@
       "mcp__gitnexus__route_map",
       "mcp__gitnexus__shape_check",
       "mcp__gitnexus__tool_map"
-    ],
-    "additionalDirectories": [
-      "/Users/toth/Git/Hobby/workout-sessions-tracker/src/app/history",
-      "/Users/toth/Git/Hobby/workout-sessions-tracker/openspec/changes/archive",
-      "/Users/toth/Git/Hobby/workout-sessions-tracker/openspec/specs",
-      "/Users/toth/Git/Hobby/workout-sessions-tracker/openspec/changes/session-feedback"
     ]
   }
 }
