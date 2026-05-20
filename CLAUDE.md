@@ -9,6 +9,21 @@ This project's agent guidelines live in [AGENTS.md](AGENTS.md). It covers:
 
 Read `AGENTS.md` before starting work.
 
+# Data structure docs
+
+Persisted data shapes (localStorage keys, TypeScript types, migrations, export payload) are documented in [docs/data-structure.md](docs/data-structure.md).
+
+**Keep that doc in sync** in the same commit whenever you change any of:
+
+- A `localStorage` key — the `KEYS` const in [src/lib/storage.ts](src/lib/storage.ts).
+- A persisted type in [src/lib/types.ts](src/lib/types.ts) (`WorkoutPlan`, `PlanDay`, `PlanExercise`, `Exercise`, `LoggedSet`, `ActiveSession`, `WorkoutSession`, `AchievementRecord`, `LlmConfig`, `Sex`).
+- The `Muscle` / `MuscleGroup` taxonomy or legacy-category mapping in [src/lib/muscles.ts](src/lib/muscles.ts).
+- `HiddenExerciseKey` or any new persisted shape declared in [src/lib/storage.ts](src/lib/storage.ts).
+- A storage migration (any function called from a getter that rewrites old data).
+- The `ExportPayload` shape or `schemaVersion` in [src/lib/storage.ts](src/lib/storage.ts).
+
+If you're unsure whether a change qualifies: if it affects what is written to or read from `localStorage`, update the doc.
+
 <!-- gitnexus:start -->
 
 # GitNexus — Code Intelligence
