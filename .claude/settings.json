@@ -3,6 +3,9 @@
     "allow": [
       "Bash(openspec:*)",
       "Bash(npx gitnexus:*)",
+      "Bash(npx prettier:*)",
+      "Bash(prettier:*)",
+      "Bash(pnpm prettier:*)",
       "Bash(git add:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
