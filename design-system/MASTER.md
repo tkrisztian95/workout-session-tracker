@@ -21,39 +21,39 @@ The app uses **semantic CSS tokens** defined in `src/app/tokens.css` and exposed
 
 #### Dark theme (default, `:root`)
 
-| Semantic token | Tailwind utility | Hex | Usage |
-|---|---|---|---|
-| `--color-base` | `bg-base` | `#111827` | Page background |
-| `--color-surface` | `bg-surface` | `#1F2937` | Cards, panels |
-| `--color-elevated` | `bg-elevated` | `#374151` | Hover states, inputs |
-| `--color-border` | `border-border` | `#374151` | Default borders |
-| `--color-border-subtle` | `border-border-subtle` | `#4B5563` | Subtle dividers |
-| `--color-foreground` | `text-foreground` | `#F9FAFB` | Primary text |
-| `--color-secondary` | `text-secondary` | `#9CA3AF` | Secondary text |
-| `--color-muted` | `text-muted` | `#6B7280` | Muted / hints |
-| `--color-dim` | `text-dim` | `#4B5563` | Very subtle text |
-| `--color-brand` | `text-brand` / `bg-brand` | `#F97316` | Orange brand accent |
-| `--color-brand-alt` | `text-brand-alt` | `#FB923C` | Hover brand tint |
-| `--color-success` | `text-success` | `#22C55E` | Success states |
-| `--color-danger` | `text-danger` | `#EF4444` | Error / destructive |
+| Semantic token          | Tailwind utility          | Hex       | Usage                |
+| ----------------------- | ------------------------- | --------- | -------------------- |
+| `--color-base`          | `bg-base`                 | `#111827` | Page background      |
+| `--color-surface`       | `bg-surface`              | `#1F2937` | Cards, panels        |
+| `--color-elevated`      | `bg-elevated`             | `#374151` | Hover states, inputs |
+| `--color-border`        | `border-border`           | `#374151` | Default borders      |
+| `--color-border-subtle` | `border-border-subtle`    | `#4B5563` | Subtle dividers      |
+| `--color-foreground`    | `text-foreground`         | `#F9FAFB` | Primary text         |
+| `--color-secondary`     | `text-secondary`          | `#9CA3AF` | Secondary text       |
+| `--color-muted`         | `text-muted`              | `#6B7280` | Muted / hints        |
+| `--color-dim`           | `text-dim`                | `#4B5563` | Very subtle text     |
+| `--color-brand`         | `text-brand` / `bg-brand` | `#F97316` | Orange brand accent  |
+| `--color-brand-alt`     | `text-brand-alt`          | `#FB923C` | Hover brand tint     |
+| `--color-success`       | `text-success`            | `#22C55E` | Success states       |
+| `--color-danger`        | `text-danger`             | `#EF4444` | Error / destructive  |
 
 #### Light theme (`[data-theme="light"]`)
 
-| Semantic token | Hex |
-|---|---|
-| `--color-base` | `#FFFFFF` |
-| `--color-surface` | `#F9FAFB` |
-| `--color-elevated` | `#E5E7EB` |
-| `--color-border` | `#E5E7EB` |
-| `--color-border-subtle` | `#D1D5DB` |
-| `--color-foreground` | `#111827` |
-| `--color-secondary` | `#4B5563` |
-| `--color-muted` | `#6B7280` |
-| `--color-dim` | `#9CA3AF` |
-| `--color-brand` | `#F97316` *(same)* |
-| `--color-brand-alt` | `#FB923C` *(same)* |
-| `--color-success` | `#22C55E` *(same)* |
-| `--color-danger` | `#EF4444` *(same)* |
+| Semantic token          | Hex                |
+| ----------------------- | ------------------ |
+| `--color-base`          | `#FFFFFF`          |
+| `--color-surface`       | `#F9FAFB`          |
+| `--color-elevated`      | `#E5E7EB`          |
+| `--color-border`        | `#E5E7EB`          |
+| `--color-border-subtle` | `#D1D5DB`          |
+| `--color-foreground`    | `#111827`          |
+| `--color-secondary`     | `#4B5563`          |
+| `--color-muted`         | `#6B7280`          |
+| `--color-dim`           | `#9CA3AF`          |
+| `--color-brand`         | `#F97316` _(same)_ |
+| `--color-brand-alt`     | `#FB923C` _(same)_ |
+| `--color-success`       | `#22C55E` _(same)_ |
+| `--color-danger`        | `#EF4444` _(same)_ |
 
 **Theme is toggled via `data-theme` attribute on `<html>`. System preference is respected.**
 
@@ -99,9 +99,11 @@ Use **Tailwind semantic utility classes** — not raw hex values. Classes map to
 ### Cards
 
 ```tsx
-<div className="bg-surface border border-border rounded-xl p-4
+<div
+  className="bg-surface border border-border rounded-xl p-4
                 transition-colors duration-200 cursor-pointer
-                hover:bg-elevated">
+                hover:bg-elevated"
+>
   {/* content */}
 </div>
 ```
@@ -109,23 +111,31 @@ Use **Tailwind semantic utility classes** — not raw hex values. Classes map to
 ### Inputs
 
 ```tsx
-<input className="w-full bg-elevated border border-border text-foreground
+<input
+  className="w-full bg-elevated border border-border text-foreground
                   placeholder:text-muted rounded-lg px-4 py-3 text-base
                   focus:outline-none focus:ring-2 focus:ring-brand
-                  transition-colors duration-200" />
+                  transition-colors duration-200"
+/>
 ```
 
 ### Modals / Sheets
 
 ```tsx
-{/* Overlay */}
-<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+{
+  /* Overlay */
+}
+<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />;
 
-{/* Sheet (bottom) */}
-<div className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl
-                border-t border-border p-6 z-50">
+{
+  /* Sheet (bottom) */
+}
+<div
+  className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl
+                border-t border-border p-6 z-50"
+>
   {/* content */}
-</div>
+</div>;
 ```
 
 ### Status / Badge
@@ -145,12 +155,13 @@ Use **Tailwind semantic utility classes** — not raw hex values. Classes map to
 
 Defined in `src/app/globals.css`:
 
-| Utility | Duration | Use case |
-|---|---|---|
-| `animate-ping-sm` | 1.2s infinite | Pulsing indicator (e.g. active session button) |
-| `animate-flash-success` | 1.3s forwards | Success flash on a card after action |
+| Utility                 | Duration      | Use case                                       |
+| ----------------------- | ------------- | ---------------------------------------------- |
+| `animate-ping-sm`       | 1.2s infinite | Pulsing indicator (e.g. active session button) |
+| `animate-flash-success` | 1.3s forwards | Success flash on a card after action           |
 
 **Rules:**
+
 - Micro-interactions: 150–300ms `transition-colors` / `transition-opacity`
 - Use `transform` and `opacity` only — never animate `width`/`height`
 - Always add `@media (prefers-reduced-motion: reduce)` guard for non-essential animations

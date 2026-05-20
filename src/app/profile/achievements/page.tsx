@@ -50,9 +50,7 @@ function AchievementsContent() {
           </button>
           <HeadingXL className="flex-1 flex items-baseline gap-2">
             {t.achievements_title}
-            <span className="ml-auto text-2xl text-dim tabular-nums">
-              ({progressLabel})
-            </span>
+            <span className="ml-auto text-2xl text-dim tabular-nums">({progressLabel})</span>
           </HeadingXL>
         </div>
       </PageHeader>

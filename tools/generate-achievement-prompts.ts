@@ -60,8 +60,7 @@ const ACHIEVEMENTS: Record<string, AchievementDef> = {
     subject: 'A bold clipboard with thick orange #F97316 checklist lines, geometric and clean',
   },
   plan_first_completed: {
-    subject:
-      'A thick checkmark inside a bold circle ring, orange #F97316 with bright orange bloom',
+    subject: 'A thick checkmark inside a bold circle ring, orange #F97316 with bright orange bloom',
   },
   plan_3_completed: {
     subject:
@@ -92,12 +91,10 @@ const ACHIEVEMENTS: Record<string, AchievementDef> = {
     subject: 'A bold pencil with a sharp orange #F97316 spark bursting from the tip, angular',
   },
   session_first_edited: {
-    subject:
-      'A pencil striking a bold horizontal line, orange #F97316 strike mark, dynamic angle',
+    subject: 'A pencil striking a bold horizontal line, orange #F97316 strike mark, dynamic angle',
   },
   session_first_imported: {
-    subject:
-      'A bold document with a thick orange #F97316 arrow entering from the right, glowing',
+    subject: 'A bold document with a thick orange #F97316 arrow entering from the right, glowing',
   },
 
   // Weekly track — calendar days light up progressively, count is visual

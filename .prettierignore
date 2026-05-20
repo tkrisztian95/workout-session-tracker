@@ -6,3 +6,6 @@ public
 *.min.js
 package-lock.json
 .claude/skills
+.gitnexus
+.next
+openspec/changes/archive
