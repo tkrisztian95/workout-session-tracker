@@ -371,6 +371,25 @@
   "timeline_title": "Timeline",
   "timeline_session_started": "Session started",
 
+  "tab_exercises_label": "Exercises",
+  "tab_timeline_label": "Timeline",
+  "tab_comparison_label": "vs Plan",
+
+  "comparison_title": "Planned vs actual",
+  "comparison_against_plan": "Compared to",
+  "comparison_no_plan": "This session wasn't based on a plan, so there's nothing to compare.",
+  "comparison_empty": "No exercises to compare yet.",
+  "comparison_overdone": "Overdone",
+  "comparison_underperformed": "Underperformed",
+  "comparison_on_target": "On target",
+  "comparison_missed": "Missed",
+  "comparison_extra": "Extra",
+  "comparison_sets_short": "sets",
+  "comparison_set_singular": "set",
+  "comparison_set_plural": "sets",
+  "comparison_delta_more": "more than planned",
+  "comparison_delta_less": "short of plan",
+
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",
 
