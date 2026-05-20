@@ -70,3 +70,64 @@ If your change touches `localStorage` keys, persisted TypeScript types, the musc
 - Keep PRs scoped to one OpenSpec change (or one isolated fix).
 - Reference the change directory (`openspec/changes/<name>/`) in the PR description when applicable.
 - Visual changes: include a before/after screenshot or a short note on how to reproduce.
+
+## Issue & PR labels
+
+The label taxonomy is small on purpose. Apply at least one **type** label and one **area** label to every issue; cross-cutting and workflow labels are optional but useful.
+
+**Type** (default GitHub labels, what kind of work)
+
+| Label              | When to apply                                                                   |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `bug`              | Existing behavior is broken or surprising.                                      |
+| `enhancement`      | New feature, new UI, new AI capability, new export, etc.                        |
+| `documentation`    | README, AGENTS.md, OpenSpec specs, code comments — no runtime behavior changes. |
+| `question`         | Discussion / clarification, no clear action yet.                                |
+| `good first issue` | Small, well-scoped, no deep context needed. Use sparingly so it stays useful.   |
+| `help wanted`      | Maintainer is happy to accept a PR from anyone for this.                        |
+
+**Area** (orange, prefixed `area:` — which part of the app the change touches)
+
+| Label           | What's in it                                                               |
+| --------------- | -------------------------------------------------------------------------- |
+| `area:sessions` | Active session UI, set logging, pause/resume, finish flow                  |
+| `area:plans`    | Plan CRUD, plan day editor, plan scheduling, plan list                     |
+| `area:history`  | Past sessions list, session detail, timeline, vs-plan comparison           |
+| `area:stats`    | Statistics page, progression table, radar / volume charts                  |
+| `area:ai`       | AI plan suggestions, exercise swap, import-from-notes, prompt construction |
+| `area:profile`  | Profile, theme, language, achievements, AI config card                     |
+| `area:storage`  | `localStorage` keys, persisted types, migrations, export/import payload    |
+
+**Cross-cutting** (apply when relevant, even if an area label is already on)
+
+| Label         | When to apply                                                                   |
+| ------------- | ------------------------------------------------------------------------------- |
+| `a11y`        | Keyboard navigation, screen-reader output, focus order, color contrast          |
+| `i18n`        | Translations (en, hu, de), new locale strings, locale-aware formatting          |
+| `performance` | Bundle size, render perf, slow interactions, long tasks                         |
+| `security`    | XSS, prototype pollution, dependency CVEs, OpenAI key handling                  |
+| `privacy`     | What leaves the device — telemetry, third-party scripts, external network calls |
+
+**Workflow** (optional process hints)
+
+| Label        | When to apply                                                                          |
+| ------------ | -------------------------------------------------------------------------------------- |
+| `needs-spec` | Scope is fuzzy enough that it should go through `/opsx:propose` before implementation. |
+
+**Triage** (default GitHub labels, used to close issues without merging)
+
+`duplicate`, `invalid`, `wontfix`.
+
+**Automation** (don't apply manually)
+
+`dependencies`, `javascript` — set by Dependabot on its own PRs.
+
+### Examples
+
+- A bug where the focused exercise card mis-renders on iPhone SE: `bug`, `area:sessions`.
+- A new "rest timer" feature: `enhancement`, `area:sessions`.
+- An XSS in the AI import preview: `bug`, `area:ai`, `security`.
+- A new Hungarian translation for the stats page: `i18n`, `area:stats`.
+- A fuzzy idea like "mark exercises as liked/disliked": `enhancement`, `area:sessions`, `area:ai`, `needs-spec`.
+
+Don't add `priority:` labels — they age badly on a hobby project. Promote things by working on them.
