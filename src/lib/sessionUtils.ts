@@ -1,5 +1,8 @@
 import type { Exercise, LoggedSet } from './types';
 
+/** Emoji for each 1–5 session rating, in ascending order. Index 0 = rating 1. */
+export const RATING_EMOJI = ['😩', '😕', '😐', '💪', '🔥'] as const;
+
 /** Compact label for a logged set — time for stopwatch sets, weight×reps otherwise. */
 export function formatLoggedSet(set: LoggedSet): string {
   if (set.seconds != null) {

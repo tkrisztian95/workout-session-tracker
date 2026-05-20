@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Dumbbell, Timer, Trophy } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
-import { calcSessionStats, formatDuration } from '@/lib/sessionUtils';
+import { RATING_EMOJI, calcSessionStats, formatDuration } from '@/lib/sessionUtils';
 import { useTranslations } from '@/lib/locale-context';
 import { Button, Card, HeadingXL } from '@/components/ui';
 
@@ -111,7 +111,7 @@ export default function SessionCompleteOverlay({
 
           {/* Emoji row — w-12 (48px) × 5 + gap-3 × 4 = 288px, fits 375px screen */}
           <div className="flex gap-3 justify-center">
-            {(['😩', '😕', '😐', '💪', '🔥'] as const).map((emoji, i) => {
+            {RATING_EMOJI.map((emoji, i) => {
               const value = (i + 1) as 1 | 2 | 3 | 4 | 5;
               return (
                 <button
