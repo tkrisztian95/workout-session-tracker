@@ -1,0 +1,138 @@
+{
+  "id": "seed-plan-ul",
+  "name": "Upper / Lower Split",
+  "status": "completed",
+  "createdAtDaysAgo": 180,
+  "updatedAtDaysAgo": 95,
+  "completedAtDaysAgo": 95,
+  "sharedExercises": [],
+  "days": [
+    {
+      "id": "seed-day-upper",
+      "name": "Upper",
+      "weekdays": [1, 4],
+      "coreExercises": [
+        {
+          "id": "seed-ex-up-1",
+          "name": "Incline Bench Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 8,
+          "weightKg": 55,
+          "muscle": "chest"
+        },
+        {
+          "id": "seed-ex-up-2",
+          "name": "Lat Pulldown",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 10,
+          "weightKg": 55,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-up-3",
+          "name": "Seated Dumbbell Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 18,
+          "muscle": "shoulders"
+        },
+        {
+          "id": "seed-ex-up-4",
+          "name": "Cable Row",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 50,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-up-5",
+          "name": "Skullcrusher",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 22,
+          "muscle": "arms"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-up-opt-1",
+          "name": "Reverse Pec Deck",
+          "role": "optional",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 15,
+          "weightKg": 25,
+          "muscle": "shoulders"
+        }
+      ]
+    },
+    {
+      "id": "seed-day-lower",
+      "name": "Lower",
+      "weekdays": [2, 5],
+      "coreExercises": [
+        {
+          "id": "seed-ex-lo-1",
+          "name": "Front Squat",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 6,
+          "weightKg": 70,
+          "muscle": "quads"
+        },
+        {
+          "id": "seed-ex-lo-2",
+          "name": "Hip Thrust",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 10,
+          "weightKg": 90,
+          "muscle": "glutes"
+        },
+        {
+          "id": "seed-ex-lo-3",
+          "name": "Leg Curl",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 35,
+          "muscle": "hamstrings"
+        },
+        {
+          "id": "seed-ex-lo-4",
+          "name": "Bulgarian Split Squat",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 18,
+          "muscle": "quads"
+        },
+        {
+          "id": "seed-ex-lo-5",
+          "name": "Seated Calf Raise",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 15,
+          "weightKg": 35,
+          "muscle": "calves"
+        }
+      ],
+      "optionalExercises": []
+    }
+  ]
+}

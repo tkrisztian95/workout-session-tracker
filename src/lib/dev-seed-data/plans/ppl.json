@@ -1,0 +1,231 @@
+{
+  "id": "seed-plan-ppl",
+  "name": "Push / Pull / Legs",
+  "status": "active",
+  "createdAtDaysAgo": 90,
+  "updatedAtDaysAgo": 0,
+  "sharedExercises": [],
+  "days": [
+    {
+      "id": "seed-day-push",
+      "name": "Push",
+      "weekdays": [1],
+      "coreExercises": [
+        {
+          "id": "seed-ex-push-1",
+          "name": "Bench Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 8,
+          "weightKg": 70,
+          "muscle": "chest"
+        },
+        {
+          "id": "seed-ex-push-2",
+          "name": "Overhead Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 40,
+          "muscle": "shoulders"
+        },
+        {
+          "id": "seed-ex-push-3",
+          "name": "Incline Dumbbell Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 24,
+          "muscle": "chest"
+        },
+        {
+          "id": "seed-ex-push-4",
+          "name": "Triceps Pushdown",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 30,
+          "muscle": "arms"
+        },
+        {
+          "id": "seed-ex-push-5",
+          "name": "Lateral Raise",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 15,
+          "weightKg": 8,
+          "muscle": "shoulders"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-push-opt-1",
+          "name": "Plank",
+          "role": "optional",
+          "type": "duration",
+          "duration": 60,
+          "muscle": "abs"
+        },
+        {
+          "id": "seed-ex-push-opt-2",
+          "name": "Cable Crossover",
+          "role": "optional",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 12,
+          "muscle": "chest"
+        }
+      ]
+    },
+    {
+      "id": "seed-day-pull",
+      "name": "Pull",
+      "weekdays": [3],
+      "coreExercises": [
+        {
+          "id": "seed-ex-pull-1",
+          "name": "Deadlift",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "repsPerSet": [8, 6, 4, 4],
+          "weightKg": 110,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-pull-2",
+          "name": "Pull-Up",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 8,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-pull-3",
+          "name": "Barbell Row",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 60,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-pull-4",
+          "name": "Face Pull",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 15,
+          "weightKg": 18,
+          "muscle": "shoulders"
+        },
+        {
+          "id": "seed-ex-pull-5",
+          "name": "Bicep Curl",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 14,
+          "muscle": "arms"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-pull-opt-1",
+          "name": "Hammer Curl",
+          "role": "optional",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 12,
+          "muscle": "arms"
+        }
+      ]
+    },
+    {
+      "id": "seed-day-legs",
+      "name": "Legs",
+      "weekdays": [5],
+      "coreExercises": [
+        {
+          "id": "seed-ex-legs-1",
+          "name": "Back Squat",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 8,
+          "weightKg": 90,
+          "muscle": "quads"
+        },
+        {
+          "id": "seed-ex-legs-2",
+          "name": "Romanian Deadlift",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 75,
+          "muscle": "hamstrings"
+        },
+        {
+          "id": "seed-ex-legs-3",
+          "name": "Walking Lunge",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 22,
+          "muscle": "glutes"
+        },
+        {
+          "id": "seed-ex-legs-4",
+          "name": "Leg Press",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "weightKg": 140,
+          "muscle": "quads"
+        },
+        {
+          "id": "seed-ex-legs-5",
+          "name": "Standing Calf Raise",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 15,
+          "weightKg": 45,
+          "muscle": "calves"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-legs-opt-1",
+          "name": "Easy Cardio",
+          "role": "optional",
+          "type": "duration",
+          "duration": 600,
+          "muscle": "cardio"
+        },
+        {
+          "id": "seed-ex-legs-opt-2",
+          "name": "Hanging Leg Raise",
+          "role": "optional",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "muscle": "abs"
+        }
+      ]
+    }
+  ]
+}

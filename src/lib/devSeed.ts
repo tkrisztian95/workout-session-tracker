@@ -6,801 +6,229 @@ import type {
   WorkoutPlan,
   WorkoutSession,
 } from './types';
+import type { Muscle } from './muscles';
+
+// The corpus is checked in under `src/lib/dev-seed-data/` as JSON validated
+// against the schemas in `src/lib/dev-seed-data/schemas/`. Timestamps are
+// stored as relative day offsets so the corpus stays evergreen. This module
+// loads the JSON, expands offsets to ISO strings anchored at "now", and
+// writes the result to localStorage.
 
 const SEED_FLAG = 'wst_dev_seeded';
-const SEED_VERSION = '2';
-const PLAN_ID_PPL = 'seed-plan-ppl';
-const PLAN_ID_UL = 'seed-plan-ul';
-const PLAN_ID_FB = 'seed-plan-fb';
+const SEED_VERSION = '3';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── JSON shapes (mirror the schemas) ────────────────────────────────────────
 
-function isoDaysAgo(days: number, hour = 18, minute = 0): string {
-  const d = new Date();
-  d.setDate(d.getDate() - days);
-  d.setHours(hour, minute, 0, 0);
+interface TimeOffset {
+  daysAgo: number;
+  hour: number;
+  minute: number;
+}
+
+type ExerciseType = 'sets-reps' | 'sets-duration' | 'duration';
+
+interface JsonPlanExercise {
+  id: string;
+  name: string;
+  type: ExerciseType;
+  role: 'core' | 'optional';
+  sets?: number;
+  reps?: number;
+  repsPerSet?: number[];
+  duration?: number;
+  weightKg?: number;
+  scalingNote?: string;
+  muscle?: Muscle;
+}
+
+interface JsonPlanDay {
+  id: string;
+  name: string;
+  weekdays: number[];
+  coreExercises: JsonPlanExercise[];
+  optionalExercises: JsonPlanExercise[];
+}
+
+interface JsonPlan {
+  id: string;
+  name: string;
+  status?: 'active' | 'completed';
+  createdAtDaysAgo: number;
+  updatedAtDaysAgo: number;
+  completedAtDaysAgo?: number;
+  sharedExercises: JsonPlanExercise[];
+  days: JsonPlanDay[];
+}
+
+interface JsonLoggedSet {
+  weight: number;
+  reps: number;
+  seconds?: number;
+  loggedAt: TimeOffset;
+}
+
+interface JsonExercise {
+  id: string;
+  name: string;
+  type: ExerciseType;
+  sets?: number;
+  reps?: number;
+  repsPerSet?: number[];
+  duration?: number;
+  weightKg?: number;
+  scalingNote?: string;
+  muscle?: Muscle;
+  completed?: boolean;
+  completedAt?: TimeOffset;
+  loggedSets: JsonLoggedSet[];
+}
+
+interface JsonSession {
+  id: string;
+  startedAt: TimeOffset;
+  completedAt: TimeOffset;
+  planId?: string;
+  planDayId?: string;
+  rating?: 1 | 2 | 3 | 4 | 5;
+  exercises: JsonExercise[];
+}
+
+interface JsonProfile {
+  userName: string;
+  sex: 'male' | 'female';
+  age: number;
+  heightCm: number;
+  weightKg: number;
+  profileCreatedAtDaysAgo: number;
+  consentAccepted: boolean;
+}
+
+// ─── Offset expansion ────────────────────────────────────────────────────────
+
+function expandOffset(o: TimeOffset, anchor: Date): string {
+  const d = new Date(anchor);
+  d.setDate(d.getDate() - o.daysAgo);
+  d.setHours(o.hour, o.minute, 0, 0);
   return d.toISOString();
 }
 
-function loggedSet(weight: number, reps: number, loggedAt: string): LoggedSet {
-  return { weight, reps, loggedAt };
+function expandFromDaysAgo(daysAgo: number, hour: number, minute: number, anchor: Date): string {
+  return expandOffset({ daysAgo, hour, minute }, anchor);
 }
 
-function planExercise(
-  id: string,
-  name: string,
-  partial: Omit<PlanExercise, 'id' | 'name' | 'role'> & { role?: PlanExercise['role'] },
-): PlanExercise {
-  return { id, name, role: partial.role ?? 'core', ...partial };
-}
-
-function exerciseFromPlan(planEx: PlanExercise, sets: LoggedSet[]): Exercise {
-  const completedAt = sets.at(-1)?.loggedAt;
+function expandPlanExercise(ex: JsonPlanExercise): PlanExercise {
   return {
-    id: `${planEx.id}-${sets[0]?.loggedAt ?? 'logged'}`,
-    name: planEx.name,
-    type: planEx.type,
-    sets: planEx.sets,
-    reps: planEx.reps,
-    repsPerSet: planEx.repsPerSet,
-    duration: planEx.duration,
-    weightKg: planEx.weightKg,
-    muscle: planEx.muscle,
-    completed: true,
-    completedAt,
-    loggedSets: sets,
+    id: ex.id,
+    name: ex.name,
+    type: ex.type,
+    role: ex.role,
+    sets: ex.sets,
+    reps: ex.reps,
+    repsPerSet: ex.repsPerSet,
+    duration: ex.duration,
+    weightKg: ex.weightKg,
+    scalingNote: ex.scalingNote,
+    muscle: ex.muscle,
   };
 }
 
-function adHocExercise(
-  id: string,
-  name: string,
-  type: Exercise['type'],
-  muscle: Exercise['muscle'],
-  sets: LoggedSet[],
-  extra: Partial<Exercise> = {},
-): Exercise {
-  const completedAt = sets.at(-1)?.loggedAt;
+function expandPlanDay(day: JsonPlanDay): PlanDay {
   return {
-    id,
-    name,
-    type,
-    muscle,
-    completed: true,
-    completedAt,
-    loggedSets: sets,
-    ...extra,
+    id: day.id,
+    name: day.name,
+    weekdays: day.weekdays,
+    coreExercises: day.coreExercises.map(expandPlanExercise),
+    optionalExercises: day.optionalExercises.map(expandPlanExercise),
   };
 }
 
-// Deterministic PRNG so each fresh seed run produces a consistent timeline.
-// Seeded with a fixed value; values drift between runs only if SEED_VERSION
-// changes, which is intentional.
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const rand = mulberry32(0xc0ffee);
-
-function jitter(base: number, fraction: number): number {
-  const delta = base * fraction * (rand() * 2 - 1);
-  return Math.max(0, base + delta);
-}
-
-function roundWeight(value: number, step = 2.5): number {
-  return Math.round(value / step) * step;
-}
-
-function pickWeighted<T>(items: ReadonlyArray<[T, number]>): T {
-  const total = items.reduce((s, [, w]) => s + w, 0);
-  let r = rand() * total;
-  for (const [item, weight] of items) {
-    r -= weight;
-    if (r <= 0) return item;
-  }
-  return items[items.length - 1][0];
-}
-
-// ─── Plans ────────────────────────────────────────────────────────────────────
-
-function buildPplPlan(now: string): WorkoutPlan {
-  const days: PlanDay[] = [
-    {
-      id: 'seed-day-push',
-      name: 'Push',
-      weekdays: [1],
-      coreExercises: [
-        planExercise('seed-ex-push-1', 'Bench Press', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 8,
-          weightKg: 70,
-          muscle: 'chest',
-          role: 'core',
-        }),
-        planExercise('seed-ex-push-2', 'Overhead Press', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 40,
-          muscle: 'shoulders',
-          role: 'core',
-        }),
-        planExercise('seed-ex-push-3', 'Incline Dumbbell Press', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 24,
-          muscle: 'chest',
-          role: 'core',
-        }),
-        planExercise('seed-ex-push-4', 'Triceps Pushdown', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 30,
-          muscle: 'arms',
-          role: 'core',
-        }),
-        planExercise('seed-ex-push-5', 'Lateral Raise', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 15,
-          weightKg: 8,
-          muscle: 'shoulders',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-push-opt-1', 'Plank', {
-          type: 'duration',
-          duration: 60,
-          muscle: 'abs',
-          role: 'optional',
-        }),
-        planExercise('seed-ex-push-opt-2', 'Cable Crossover', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 12,
-          muscle: 'chest',
-          role: 'optional',
-        }),
-      ],
-    },
-    {
-      id: 'seed-day-pull',
-      name: 'Pull',
-      weekdays: [3],
-      coreExercises: [
-        planExercise('seed-ex-pull-1', 'Deadlift', {
-          type: 'sets-reps',
-          sets: 4,
-          repsPerSet: [8, 6, 4, 4],
-          weightKg: 110,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-pull-2', 'Pull-Up', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 8,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-pull-3', 'Barbell Row', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 60,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-pull-4', 'Face Pull', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 15,
-          weightKg: 18,
-          muscle: 'shoulders',
-          role: 'core',
-        }),
-        planExercise('seed-ex-pull-5', 'Bicep Curl', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 14,
-          muscle: 'arms',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-pull-opt-1', 'Hammer Curl', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 12,
-          muscle: 'arms',
-          role: 'optional',
-        }),
-      ],
-    },
-    {
-      id: 'seed-day-legs',
-      name: 'Legs',
-      weekdays: [5],
-      coreExercises: [
-        planExercise('seed-ex-legs-1', 'Back Squat', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 8,
-          weightKg: 90,
-          muscle: 'quads',
-          role: 'core',
-        }),
-        planExercise('seed-ex-legs-2', 'Romanian Deadlift', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 75,
-          muscle: 'hamstrings',
-          role: 'core',
-        }),
-        planExercise('seed-ex-legs-3', 'Walking Lunge', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 22,
-          muscle: 'glutes',
-          role: 'core',
-        }),
-        planExercise('seed-ex-legs-4', 'Leg Press', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 140,
-          muscle: 'quads',
-          role: 'core',
-        }),
-        planExercise('seed-ex-legs-5', 'Standing Calf Raise', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 15,
-          weightKg: 45,
-          muscle: 'calves',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-legs-opt-1', 'Easy Cardio', {
-          type: 'duration',
-          duration: 600,
-          muscle: 'cardio',
-          role: 'optional',
-        }),
-        planExercise('seed-ex-legs-opt-2', 'Hanging Leg Raise', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          muscle: 'abs',
-          role: 'optional',
-        }),
-      ],
-    },
-  ];
-
+function expandPlan(plan: JsonPlan, anchor: Date): WorkoutPlan {
+  // Plan-level timestamps in the corpus only carry day precision; pin them to
+  // 12:00 noon on the offset day for stability across regenerations.
   return {
-    id: PLAN_ID_PPL,
-    name: 'Push / Pull / Legs',
-    days,
-    sharedExercises: [],
-    createdAt: isoDaysAgo(90, 9, 0),
-    updatedAt: now,
-    status: 'active',
+    id: plan.id,
+    name: plan.name,
+    days: plan.days.map(expandPlanDay),
+    sharedExercises: plan.sharedExercises.map(expandPlanExercise),
+    createdAt: expandFromDaysAgo(plan.createdAtDaysAgo, 12, 0, anchor),
+    updatedAt: expandFromDaysAgo(plan.updatedAtDaysAgo, 12, 0, anchor),
+    status: plan.status,
+    completedAt:
+      plan.completedAtDaysAgo !== undefined
+        ? expandFromDaysAgo(plan.completedAtDaysAgo, 20, 0, anchor)
+        : undefined,
   };
 }
 
-function buildUpperLowerPlan(): WorkoutPlan {
-  const completedAt = isoDaysAgo(95, 20, 0);
-  const days: PlanDay[] = [
-    {
-      id: 'seed-day-upper',
-      name: 'Upper',
-      weekdays: [1, 4],
-      coreExercises: [
-        planExercise('seed-ex-up-1', 'Incline Bench Press', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 8,
-          weightKg: 55,
-          muscle: 'chest',
-          role: 'core',
-        }),
-        planExercise('seed-ex-up-2', 'Lat Pulldown', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 10,
-          weightKg: 55,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-up-3', 'Seated Dumbbell Press', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 18,
-          muscle: 'shoulders',
-          role: 'core',
-        }),
-        planExercise('seed-ex-up-4', 'Cable Row', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 50,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-up-5', 'Skullcrusher', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 22,
-          muscle: 'arms',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-up-opt-1', 'Reverse Pec Deck', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 15,
-          weightKg: 25,
-          muscle: 'shoulders',
-          role: 'optional',
-        }),
-      ],
-    },
-    {
-      id: 'seed-day-lower',
-      name: 'Lower',
-      weekdays: [2, 5],
-      coreExercises: [
-        planExercise('seed-ex-lo-1', 'Front Squat', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 6,
-          weightKg: 70,
-          muscle: 'quads',
-          role: 'core',
-        }),
-        planExercise('seed-ex-lo-2', 'Hip Thrust', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 10,
-          weightKg: 90,
-          muscle: 'glutes',
-          role: 'core',
-        }),
-        planExercise('seed-ex-lo-3', 'Leg Curl', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          weightKg: 35,
-          muscle: 'hamstrings',
-          role: 'core',
-        }),
-        planExercise('seed-ex-lo-4', 'Bulgarian Split Squat', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 18,
-          muscle: 'quads',
-          role: 'core',
-        }),
-        planExercise('seed-ex-lo-5', 'Seated Calf Raise', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 15,
-          weightKg: 35,
-          muscle: 'calves',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [],
-    },
-  ];
-
+function expandLoggedSet(set: JsonLoggedSet, anchor: Date): LoggedSet {
   return {
-    id: PLAN_ID_UL,
-    name: 'Upper / Lower Split',
-    days,
-    sharedExercises: [],
-    createdAt: isoDaysAgo(180, 9, 0),
-    updatedAt: completedAt,
-    status: 'completed',
-    completedAt,
+    weight: set.weight,
+    reps: set.reps,
+    seconds: set.seconds,
+    loggedAt: expandOffset(set.loggedAt, anchor),
   };
 }
 
-function buildFullBodyPlan(now: string): WorkoutPlan {
-  const days: PlanDay[] = [
-    {
-      id: 'seed-day-fb-a',
-      name: 'Full Body A',
-      weekdays: [1],
-      coreExercises: [
-        planExercise('seed-ex-fb-a-1', 'Goblet Squat', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 20,
-          muscle: 'quads',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-a-2', 'Push-Up', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          muscle: 'chest',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-a-3', 'Dumbbell Row', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          weightKg: 16,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-a-4', 'Plank', {
-          type: 'duration',
-          duration: 45,
-          muscle: 'abs',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-fb-a-opt-1', 'Glute Bridge', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 15,
-          muscle: 'glutes',
-          role: 'optional',
-        }),
-      ],
-    },
-    {
-      id: 'seed-day-fb-b',
-      name: 'Full Body B',
-      weekdays: [4],
-      coreExercises: [
-        planExercise('seed-ex-fb-b-1', 'Kettlebell Swing', {
-          type: 'sets-reps',
-          sets: 4,
-          reps: 15,
-          weightKg: 16,
-          muscle: 'glutes',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-b-2', 'Incline Push-Up', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 12,
-          muscle: 'chest',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-b-3', 'Inverted Row', {
-          type: 'sets-reps',
-          sets: 3,
-          reps: 10,
-          muscle: 'back',
-          role: 'core',
-        }),
-        planExercise('seed-ex-fb-b-4', 'Side Plank', {
-          type: 'duration',
-          duration: 30,
-          muscle: 'obliques',
-          role: 'core',
-        }),
-      ],
-      optionalExercises: [
-        planExercise('seed-ex-fb-b-opt-1', 'Easy Walk', {
-          type: 'duration',
-          duration: 900,
-          muscle: 'cardio',
-          role: 'optional',
-        }),
-      ],
-    },
-  ];
-
+function expandExercise(ex: JsonExercise, anchor: Date): Exercise {
   return {
-    id: PLAN_ID_FB,
-    name: 'Full Body Beginner',
-    days,
-    sharedExercises: [],
-    createdAt: isoDaysAgo(150, 9, 0),
-    updatedAt: now,
-    status: 'active',
+    id: ex.id,
+    name: ex.name,
+    type: ex.type,
+    sets: ex.sets,
+    reps: ex.reps,
+    repsPerSet: ex.repsPerSet,
+    duration: ex.duration,
+    weightKg: ex.weightKg,
+    scalingNote: ex.scalingNote,
+    muscle: ex.muscle,
+    completed: ex.completed,
+    completedAt: ex.completedAt ? expandOffset(ex.completedAt, anchor) : undefined,
+    loggedSets: ex.loggedSets.map((s) => expandLoggedSet(s, anchor)),
   };
 }
 
-// ─── Session generation ──────────────────────────────────────────────────────
-
-// Realistic rating distribution: mostly 3-4, occasional 5, rare 1-2.
-const RATING_WEIGHTS: ReadonlyArray<[1 | 2 | 3 | 4 | 5, number]> = [
-  [1, 4],
-  [2, 12],
-  [3, 30],
-  [4, 36],
-  [5, 18],
-];
-
-function pickRating(): 1 | 2 | 3 | 4 | 5 {
-  return pickWeighted(RATING_WEIGHTS);
-}
-
-interface ProgressionContext {
-  /** 0..1 — how far through the timeline the session falls (0 = oldest). */
-  progress: number;
-  daysAgo: number;
-  hour: number;
-}
-
-function progressedWeight(baseKg: number, ctx: ProgressionContext): number {
-  // ~12% linear gain over the full timeline, with ±4% jitter.
-  const gain = 1 + 0.12 * ctx.progress;
-  return roundWeight(jitter(baseKg * gain, 0.04));
-}
-
-function progressedReps(baseReps: number, ctx: ProgressionContext): number {
-  // Slight rep increase late in the timeline plus noise. Some sessions
-  // intentionally fall short on the last set.
-  const drift = baseReps + (ctx.progress > 0.6 ? 1 : 0);
-  const noise = Math.round((rand() * 2 - 1) * 1.4);
-  return Math.max(1, drift + noise);
-}
-
-function setsForExercise(planEx: PlanExercise, ctx: ProgressionContext): LoggedSet[] {
-  if (planEx.type === 'duration') {
-    // Duration-only exercises are recorded as a single completion stamp.
-    return [
-      {
-        weight: 0,
-        reps: 0,
-        seconds: planEx.duration,
-        loggedAt: isoDaysAgo(ctx.daysAgo, ctx.hour, 30 + Math.floor(rand() * 10)),
-      },
-    ];
-  }
-
-  const sets = planEx.sets ?? 3;
-  const baseWeight = planEx.weightKg ?? 0;
-  const weight = progressedWeight(baseWeight, ctx);
-  const repsPerSet = planEx.repsPerSet ?? Array(sets).fill(planEx.reps ?? 10);
-
-  return repsPerSet.map((targetReps, i) => {
-    // Last set tends to drop reps when fatigue stacks.
-    const fatigueLoss = i >= sets - 1 ? 1 : 0;
-    const reps = Math.max(1, progressedReps(targetReps, ctx) - fatigueLoss);
-    return loggedSet(
-      weight,
-      reps,
-      isoDaysAgo(ctx.daysAgo, ctx.hour, i * 4 + Math.floor(rand() * 3)),
-    );
-  });
-}
-
-function sessionFromPlanDay(
-  plan: WorkoutPlan,
-  day: PlanDay,
-  daysAgo: number,
-  index: number,
-): WorkoutSession {
-  const hour = rand() < 0.55 ? 18 : 7;
-  const ctx: ProgressionContext = {
-    progress: 1 - daysAgo / 180,
-    daysAgo,
-    hour,
-  };
-  // Always include all core; pull in 0-1 optional ~30% of the time.
-  const exercises: Exercise[] = day.coreExercises.map((ex) =>
-    exerciseFromPlan(ex, setsForExercise(ex, ctx)),
-  );
-  if (day.optionalExercises.length && rand() < 0.3) {
-    const opt = day.optionalExercises[Math.floor(rand() * day.optionalExercises.length)];
-    exercises.push(exerciseFromPlan(opt, setsForExercise(opt, ctx)));
-  }
-  const startMinute = Math.floor(rand() * 30);
-  const endMinute = startMinute + 45 + Math.floor(rand() * 30);
+function expandSession(session: JsonSession, anchor: Date): WorkoutSession {
   return {
-    id: `seed-session-${plan.id}-${index}`,
-    startedAt: isoDaysAgo(daysAgo, hour, startMinute),
-    completedAt: isoDaysAgo(daysAgo, hour, endMinute),
-    planId: plan.id,
-    planDayId: day.id,
-    rating: pickRating(),
-    exercises,
+    id: session.id,
+    startedAt: expandOffset(session.startedAt, anchor),
+    completedAt: expandOffset(session.completedAt, anchor),
+    planId: session.planId,
+    planDayId: session.planDayId,
+    rating: session.rating,
+    exercises: session.exercises.map((ex) => expandExercise(ex, anchor)),
   };
 }
 
-// Pool of free-session exercise templates — drawn on demand.
-interface FreeTemplate {
-  name: string;
-  type: Exercise['type'];
-  muscle: Exercise['muscle'];
-  baseWeight?: number;
-  baseReps?: number;
-  sets?: number;
-  duration?: number;
+// ─── Corpus loader ───────────────────────────────────────────────────────────
+
+interface Corpus {
+  plans: JsonPlan[];
+  sessions: JsonSession[];
+  profile: JsonProfile;
 }
 
-const FREE_POOL: FreeTemplate[] = [
-  { name: 'Treadmill Run', type: 'duration', muscle: 'cardio', duration: 1800 },
-  { name: 'Cycling', type: 'duration', muscle: 'cardio', duration: 2400 },
-  { name: 'Jump Rope', type: 'duration', muscle: 'cardio', duration: 600 },
-  { name: 'Bench Press', type: 'sets-reps', muscle: 'chest', baseWeight: 60, baseReps: 8, sets: 3 },
-  { name: 'Push-Up', type: 'sets-reps', muscle: 'chest', baseReps: 15, sets: 3 },
-  {
-    name: 'Dumbbell Curl',
-    type: 'sets-reps',
-    muscle: 'arms',
-    baseWeight: 14,
-    baseReps: 12,
-    sets: 3,
-  },
-  {
-    name: 'Lateral Raise',
-    type: 'sets-reps',
-    muscle: 'shoulders',
-    baseWeight: 8,
-    baseReps: 15,
-    sets: 3,
-  },
-  { name: 'Plank', type: 'duration', muscle: 'abs', duration: 60 },
-  {
-    name: 'Goblet Squat',
-    type: 'sets-reps',
-    muscle: 'quads',
-    baseWeight: 20,
-    baseReps: 12,
-    sets: 3,
-  },
-  {
-    name: 'Kettlebell Swing',
-    type: 'sets-reps',
-    muscle: 'glutes',
-    baseWeight: 16,
-    baseReps: 20,
-    sets: 4,
-  },
-  {
-    name: 'Pull-Up',
-    type: 'sets-reps',
-    muscle: 'back',
-    baseReps: 6,
-    sets: 3,
-  },
-  { name: 'Stretching', type: 'duration', muscle: 'cardio', duration: 600 },
-];
-
-function freeSession(daysAgo: number, index: number): WorkoutSession {
-  const hour = rand() < 0.5 ? 18 : 8;
-  const ctx: ProgressionContext = {
-    progress: 1 - daysAgo / 180,
-    daysAgo,
-    hour,
-  };
-  const count = 2 + Math.floor(rand() * 3); // 2-4 exercises
-  const picks: FreeTemplate[] = [];
-  const pool = [...FREE_POOL];
-  for (let i = 0; i < count && pool.length; i++) {
-    const idx = Math.floor(rand() * pool.length);
-    picks.push(pool.splice(idx, 1)[0]);
-  }
-  const exercises: Exercise[] = picks.map((tpl, i) => {
-    const exId = `seed-free-${daysAgo}-${i}`;
-    if (tpl.type === 'duration') {
-      return adHocExercise(
-        exId,
-        tpl.name,
-        tpl.type,
-        tpl.muscle,
-        [
-          {
-            weight: 0,
-            reps: 0,
-            seconds: tpl.duration,
-            loggedAt: isoDaysAgo(daysAgo, hour, 20 + i * 8),
-          },
-        ],
-        { duration: tpl.duration },
-      );
-    }
-    const sets = tpl.sets ?? 3;
-    const weight = tpl.baseWeight ? progressedWeight(tpl.baseWeight, ctx) : 0;
-    const repsTarget = tpl.baseReps ?? 10;
-    const loggedSets = Array.from({ length: sets }, (_, k) => {
-      const reps = Math.max(1, progressedReps(repsTarget, ctx) - (k === sets - 1 ? 1 : 0));
-      return loggedSet(weight, reps, isoDaysAgo(daysAgo, hour, 20 + i * 8 + k * 3));
-    });
-    return adHocExercise(exId, tpl.name, tpl.type, tpl.muscle, loggedSets, {
-      sets,
-      reps: repsTarget,
-      weightKg: tpl.baseWeight,
-    });
-  });
-
-  const startMinute = Math.floor(rand() * 30);
-  const endMinute = startMinute + 35 + Math.floor(rand() * 30);
+// Dynamic imports keep the JSON corpus out of the production bundle. DevSeed
+// is only rendered in development (gated in `layout.tsx`), so the loader is
+// only ever exercised at dev time.
+async function loadCorpus(): Promise<Corpus> {
+  const [ppl, ul, fb, sessions, profile] = await Promise.all([
+    import('./dev-seed-data/plans/ppl.json'),
+    import('./dev-seed-data/plans/upper-lower.json'),
+    import('./dev-seed-data/plans/full-body.json'),
+    import('./dev-seed-data/sessions.json'),
+    import('./dev-seed-data/profile.json'),
+  ]);
   return {
-    id: `seed-free-session-${index}`,
-    startedAt: isoDaysAgo(daysAgo, hour, startMinute),
-    completedAt: isoDaysAgo(daysAgo, hour, endMinute),
-    rating: pickRating(),
-    exercises,
+    plans: [ppl.default as JsonPlan, ul.default as JsonPlan, fb.default as JsonPlan],
+    sessions: sessions.default as JsonSession[],
+    profile: profile.default as JsonProfile,
   };
-}
-
-/**
- * Walks roughly 180 days backward, allocating workouts across the three
- * timeline phases:
- *   - Days 180–120: Full Body Beginner + a few free sessions
- *   - Days 119–60:  Upper / Lower split
- *   - Days  59–0:   Push / Pull / Legs (current)
- * Each week has a ~85% chance to contain workouts; missed weeks model
- * vacations / illness. Free sessions sprinkle throughout (~15% of all
- * workouts).
- */
-function buildSessions(
-  ppl: WorkoutPlan,
-  upperLower: WorkoutPlan,
-  fullBody: WorkoutPlan,
-): WorkoutSession[] {
-  const sessions: WorkoutSession[] = [];
-  let sessionIndex = 0;
-  let freeIndex = 0;
-
-  for (let daysAgo = 180; daysAgo >= 1; daysAgo--) {
-    // Pick the plan for this point in the timeline.
-    let plan: WorkoutPlan;
-    if (daysAgo > 120) plan = fullBody;
-    else if (daysAgo > 60) plan = upperLower;
-    else plan = ppl;
-
-    // ~85% of weekdays count; full week off is rare. We use a per-day
-    // probability that scales by the day-of-week to roughly target 3-4
-    // sessions per week.
-    const date = new Date();
-    date.setDate(date.getDate() - daysAgo);
-    const weekday = date.getDay(); // 0 Sun .. 6 Sat
-    // Skip Sunday and Wednesday more often (rest days).
-    const restBias = weekday === 0 ? 0.85 : weekday === 3 ? 0.55 : 0.4;
-    if (rand() < restBias) continue;
-
-    // ~12% chance of a free session instead of plan day.
-    if (rand() < 0.12) {
-      sessions.push(freeSession(daysAgo, freeIndex++));
-      continue;
-    }
-
-    const day = plan.days[Math.floor(rand() * plan.days.length)];
-    sessions.push(sessionFromPlanDay(plan, day, daysAgo, sessionIndex++));
-  }
-
-  return sessions.sort((a, b) => a.startedAt.localeCompare(b.startedAt));
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 export type SeedResult =
-  | { seeded: true }
+  | { seeded: true; sessionCount: number }
   | { seeded: false; reason: 'ssr' | 'already-seeded' | 'user-data-present' };
 
 function looksLikeOurSeed(plans: WorkoutPlan[], sessions: WorkoutSession[]): boolean {
@@ -810,7 +238,7 @@ function looksLikeOurSeed(plans: WorkoutPlan[], sessions: WorkoutSession[]): boo
   return planHit || sessionHit;
 }
 
-export function seedDevDataIfEmpty(): SeedResult {
+export async function seedDevDataIfEmpty(): Promise<SeedResult> {
   if (typeof window === 'undefined') return { seeded: false, reason: 'ssr' };
 
   const flag = localStorage.getItem(SEED_FLAG);
@@ -824,31 +252,33 @@ export function seedDevDataIfEmpty(): SeedResult {
   const parsedSessions: WorkoutSession[] = existingSessions ? JSON.parse(existingSessions) : [];
   const hasAnyData = parsedPlans.length > 0 || parsedSessions.length > 0;
 
-  // If the user has real data we did not seed, leave it alone but record the
-  // current seed version so we don't keep checking on every load.
+  // Leave real user data alone; only overwrite our own previous seed output.
   if (hasAnyData && !looksLikeOurSeed(parsedPlans, parsedSessions)) {
     localStorage.setItem(SEED_FLAG, SEED_VERSION);
     return { seeded: false, reason: 'user-data-present' };
   }
 
-  const now = new Date().toISOString();
-  const ppl = buildPplPlan(now);
-  const upperLower = buildUpperLowerPlan();
-  const fullBody = buildFullBodyPlan(now);
-  const sessions = buildSessions(ppl, upperLower, fullBody);
+  const corpus = await loadCorpus();
+  const anchor = new Date();
+  const plans = corpus.plans.map((p) => expandPlan(p, anchor));
+  const sessions = corpus.sessions.map((s) => expandSession(s, anchor));
+  const profile = corpus.profile;
 
-  localStorage.setItem('wst_plans', JSON.stringify([ppl, upperLower, fullBody]));
+  localStorage.setItem('wst_plans', JSON.stringify(plans));
   localStorage.setItem('wst_sessions', JSON.stringify(sessions));
-  localStorage.setItem('wst_user_name', 'Dev User');
-  localStorage.setItem('wst_user_sex', 'male');
-  localStorage.setItem('wst_user_age', '30');
-  localStorage.setItem('wst_user_height_cm', '180');
-  localStorage.setItem('wst_user_weight_kg', '80');
-  localStorage.setItem('wst_profile_created_at', isoDaysAgo(200, 12, 0));
-  localStorage.setItem('wst_consent_accepted', 'true');
+  localStorage.setItem('wst_user_name', profile.userName);
+  localStorage.setItem('wst_user_sex', profile.sex);
+  localStorage.setItem('wst_user_age', String(profile.age));
+  localStorage.setItem('wst_user_height_cm', String(profile.heightCm));
+  localStorage.setItem('wst_user_weight_kg', String(profile.weightKg));
+  localStorage.setItem(
+    'wst_profile_created_at',
+    expandFromDaysAgo(profile.profileCreatedAtDaysAgo, 12, 0, anchor),
+  );
+  localStorage.setItem('wst_consent_accepted', profile.consentAccepted ? 'true' : 'false');
   localStorage.setItem(SEED_FLAG, SEED_VERSION);
 
-  return { seeded: true };
+  return { seeded: true, sessionCount: sessions.length };
 }
 
 export function clearDevSeed(): void {
