@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workout-sessions-tracker/schemas/plan.schema.json",
+  "title": "DevSeedPlan",
+  "description": "A workout plan in the dev seed corpus. Timestamps use relative day offsets so the file does not age.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "createdAtDaysAgo", "updatedAtDaysAgo", "sharedExercises", "days"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["active", "completed"] },
+    "createdAtDaysAgo": { "type": "integer", "minimum": 0 },
+    "updatedAtDaysAgo": { "type": "integer", "minimum": 0 },
+    "completedAtDaysAgo": { "type": "integer", "minimum": 0 },
+    "sharedExercises": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/planExercise" }
+    },
+    "days": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/planDay" }
+    }
+  },
+  "$defs": {
+    "muscle": {
+      "enum": [
+        "chest",
+        "back",
+        "shoulders",
+        "arms",
+        "quads",
+        "hamstrings",
+        "glutes",
+        "calves",
+        "abs",
+        "obliques",
+        "lower_back",
+        "cardio"
+      ]
+    },
+    "exerciseType": { "enum": ["sets-reps", "sets-duration", "duration"] },
+    "planExercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "role"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/exerciseType" },
+        "role": { "enum": ["core", "optional"] },
+        "sets": { "type": "integer", "minimum": 1 },
+        "reps": { "type": "integer", "minimum": 1 },
+        "repsPerSet": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "duration": { "type": "integer", "minimum": 1 },
+        "weightKg": { "type": "number", "minimum": 0 },
+        "scalingNote": { "type": "string" },
+        "muscle": { "$ref": "#/$defs/muscle" }
+      }
+    },
+    "planDay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "weekdays", "coreExercises", "optionalExercises"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "weekdays": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "coreExercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/planExercise" }
+        },
+        "optionalExercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/planExercise" }
+        }
+      }
+    }
+  }
+}

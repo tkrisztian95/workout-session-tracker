@@ -1,0 +1,9 @@
+{
+  "userName": "Dev User",
+  "sex": "male",
+  "age": 30,
+  "heightCm": 180,
+  "weightKg": 80,
+  "profileCreatedAtDaysAgo": 200,
+  "consentAccepted": true
+}

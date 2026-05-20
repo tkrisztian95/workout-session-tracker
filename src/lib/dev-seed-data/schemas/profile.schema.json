@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workout-sessions-tracker/schemas/profile.schema.json",
+  "title": "DevSeedProfile",
+  "description": "Profile defaults applied alongside the dev seed plans and sessions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "userName",
+    "sex",
+    "age",
+    "heightCm",
+    "weightKg",
+    "profileCreatedAtDaysAgo",
+    "consentAccepted"
+  ],
+  "properties": {
+    "userName": { "type": "string", "minLength": 1 },
+    "sex": { "enum": ["male", "female"] },
+    "age": { "type": "integer", "minimum": 1, "maximum": 120 },
+    "heightCm": { "type": "integer", "minimum": 50, "maximum": 250 },
+    "weightKg": { "type": "number", "minimum": 20, "maximum": 300 },
+    "profileCreatedAtDaysAgo": { "type": "integer", "minimum": 0 },
+    "consentAccepted": { "type": "boolean" }
+  }
+}

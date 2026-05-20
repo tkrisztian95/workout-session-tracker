@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workout-sessions-tracker/schemas/sessions.schema.json",
+  "title": "DevSeedSessions",
+  "description": "Array of completed workout sessions in the dev seed corpus. Timestamps use relative day offsets so the file does not age.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/session" },
+  "$defs": {
+    "muscle": {
+      "enum": [
+        "chest",
+        "back",
+        "shoulders",
+        "arms",
+        "quads",
+        "hamstrings",
+        "glutes",
+        "calves",
+        "abs",
+        "obliques",
+        "lower_back",
+        "cardio"
+      ]
+    },
+    "exerciseType": { "enum": ["sets-reps", "sets-duration", "duration"] },
+    "timestamp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["daysAgo", "hour", "minute"],
+      "properties": {
+        "daysAgo": { "type": "integer", "minimum": 0 },
+        "hour": { "type": "integer", "minimum": 0, "maximum": 23 },
+        "minute": { "type": "integer", "minimum": 0, "maximum": 59 }
+      }
+    },
+    "loggedSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weight", "reps", "loggedAt"],
+      "properties": {
+        "weight": { "type": "number", "minimum": 0 },
+        "reps": { "type": "integer", "minimum": 0 },
+        "seconds": { "type": "integer", "minimum": 0 },
+        "loggedAt": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "type", "loggedSets"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/exerciseType" },
+        "sets": { "type": "integer", "minimum": 1 },
+        "reps": { "type": "integer", "minimum": 1 },
+        "repsPerSet": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "duration": { "type": "integer", "minimum": 1 },
+        "weightKg": { "type": "number", "minimum": 0 },
+        "scalingNote": { "type": "string" },
+        "muscle": { "$ref": "#/$defs/muscle" },
+        "completed": { "type": "boolean" },
+        "completedAt": { "$ref": "#/$defs/timestamp" },
+        "loggedSets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/loggedSet" }
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "startedAt", "completedAt", "exercises"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "startedAt": { "$ref": "#/$defs/timestamp" },
+        "completedAt": { "$ref": "#/$defs/timestamp" },
+        "planId": { "type": "string", "minLength": 1 },
+        "planDayId": { "type": "string", "minLength": 1 },
+        "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "exercises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/exercise" }
+        }
+      }
+    }
+  }
+}

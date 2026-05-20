@@ -1,0 +1,118 @@
+{
+  "id": "seed-plan-fb",
+  "name": "Full Body Beginner",
+  "status": "active",
+  "createdAtDaysAgo": 150,
+  "updatedAtDaysAgo": 0,
+  "sharedExercises": [],
+  "days": [
+    {
+      "id": "seed-day-fb-a",
+      "name": "Full Body A",
+      "weekdays": [1],
+      "coreExercises": [
+        {
+          "id": "seed-ex-fb-a-1",
+          "name": "Goblet Squat",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 20,
+          "muscle": "quads"
+        },
+        {
+          "id": "seed-ex-fb-a-2",
+          "name": "Push-Up",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "muscle": "chest"
+        },
+        {
+          "id": "seed-ex-fb-a-3",
+          "name": "Dumbbell Row",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "weightKg": 16,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-fb-a-4",
+          "name": "Plank",
+          "role": "core",
+          "type": "duration",
+          "duration": 45,
+          "muscle": "abs"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-fb-a-opt-1",
+          "name": "Glute Bridge",
+          "role": "optional",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 15,
+          "muscle": "glutes"
+        }
+      ]
+    },
+    {
+      "id": "seed-day-fb-b",
+      "name": "Full Body B",
+      "weekdays": [4],
+      "coreExercises": [
+        {
+          "id": "seed-ex-fb-b-1",
+          "name": "Kettlebell Swing",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 4,
+          "reps": 15,
+          "weightKg": 16,
+          "muscle": "glutes"
+        },
+        {
+          "id": "seed-ex-fb-b-2",
+          "name": "Incline Push-Up",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 12,
+          "muscle": "chest"
+        },
+        {
+          "id": "seed-ex-fb-b-3",
+          "name": "Inverted Row",
+          "role": "core",
+          "type": "sets-reps",
+          "sets": 3,
+          "reps": 10,
+          "muscle": "back"
+        },
+        {
+          "id": "seed-ex-fb-b-4",
+          "name": "Side Plank",
+          "role": "core",
+          "type": "duration",
+          "duration": 30,
+          "muscle": "obliques"
+        }
+      ],
+      "optionalExercises": [
+        {
+          "id": "seed-ex-fb-b-opt-1",
+          "name": "Easy Walk",
+          "role": "optional",
+          "type": "duration",
+          "duration": 900,
+          "muscle": "cardio"
+        }
+      ]
+    }
+  ]
+}
