@@ -368,6 +368,8 @@
   "no_exercises_recorded": "Keine Übungen aufgezeichnet.",
   "session_started_at": "Beginn",
   "session_paused": "Sitzung pausiert",
+  "timeline_title": "Zeitachse",
+  "timeline_session_started": "Training gestartet",
 
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",

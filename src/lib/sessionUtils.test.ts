@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatExerciseDetail, formatRepsTarget, parseRepScheme } from './sessionUtils';
+import {
+  buildSessionTimeline,
+  formatExerciseDetail,
+  formatRepsTarget,
+  parseRepScheme,
+} from './sessionUtils';
+import type { Exercise, WorkoutSession } from './types';
 
 describe('formatRepsTarget', () => {
   it('returns the uniform rep count as a string', () => {
@@ -65,5 +71,96 @@ describe('formatExerciseDetail', () => {
         weightKg: 60,
       }),
     ).toBe('15/12/8/4 · 60 kg');
+  });
+});
+
+describe('buildSessionTimeline', () => {
+  const baseExercise = (overrides: Partial<Exercise>): Exercise => ({
+    id: overrides.id ?? 'ex',
+    name: overrides.name ?? 'Exercise',
+    type: 'sets-reps',
+    sets: 3,
+    reps: 10,
+    ...overrides,
+  });
+
+  const session = (exercises: Exercise[]): WorkoutSession => ({
+    id: 's1',
+    startedAt: '2025-01-01T09:00:00.000Z',
+    completedAt: '2025-01-01T10:00:00.000Z',
+    exercises,
+  });
+
+  it('derives duration from previous exercise end when only completedAt is present', () => {
+    const result = buildSessionTimeline(
+      session([
+        baseExercise({ id: 'a', completed: true, completedAt: '2025-01-01T09:05:00.000Z' }),
+        baseExercise({ id: 'b', completed: true, completedAt: '2025-01-01T09:12:00.000Z' }),
+      ]),
+    );
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({ exerciseId: 'a', durationSec: 300 });
+    expect(result[0].startedAt).toBe('2025-01-01T09:00:00.000Z');
+    expect(result[1]).toMatchObject({ exerciseId: 'b', durationSec: 420 });
+    expect(result[1].startedAt).toBe('2025-01-01T09:05:00.000Z');
+  });
+
+  it('uses the first logged set as the exercise start when available', () => {
+    const result = buildSessionTimeline(
+      session([
+        baseExercise({
+          id: 'a',
+          completed: true,
+          completedAt: '2025-01-01T09:15:00.000Z',
+          loggedSets: [
+            { weight: 0, reps: 5, loggedAt: '2025-01-01T09:10:00.000Z' },
+            { weight: 0, reps: 5, loggedAt: '2025-01-01T09:14:00.000Z' },
+          ],
+        }),
+      ]),
+    );
+    expect(result[0].startedAt).toBe('2025-01-01T09:10:00.000Z');
+    expect(result[0].durationSec).toBe(300);
+  });
+
+  it('omits dismissed exercises and exercises with no timing data', () => {
+    const result = buildSessionTimeline(
+      session([
+        baseExercise({ id: 'a', dismissed: true, completedAt: '2025-01-01T09:05:00.000Z' }),
+        baseExercise({ id: 'b' }),
+        baseExercise({ id: 'c', completed: true, completedAt: '2025-01-01T09:20:00.000Z' }),
+      ]),
+    );
+    expect(result.map((e) => e.exerciseId)).toEqual(['c']);
+  });
+
+  it('sorts entries by completion time when stored out of order', () => {
+    const result = buildSessionTimeline(
+      session([
+        baseExercise({ id: 'second', completed: true, completedAt: '2025-01-01T09:20:00.000Z' }),
+        baseExercise({ id: 'first', completed: true, completedAt: '2025-01-01T09:10:00.000Z' }),
+      ]),
+    );
+    expect(result.map((e) => e.exerciseId)).toEqual(['first', 'second']);
+  });
+
+  it('clamps overlapping starts to the previous exercise end', () => {
+    const result = buildSessionTimeline(
+      session([
+        baseExercise({ id: 'a', completed: true, completedAt: '2025-01-01T09:10:00.000Z' }),
+        baseExercise({
+          id: 'b',
+          completed: true,
+          completedAt: '2025-01-01T09:20:00.000Z',
+          loggedSets: [{ weight: 0, reps: 5, loggedAt: '2025-01-01T09:05:00.000Z' }],
+        }),
+      ]),
+    );
+    expect(result[1].startedAt).toBe('2025-01-01T09:10:00.000Z');
+    expect(result[1].durationSec).toBe(600);
+  });
+
+  it('returns an empty array when no exercises have timing data', () => {
+    expect(buildSessionTimeline(session([baseExercise({ id: 'a' })]))).toEqual([]);
   });
 });

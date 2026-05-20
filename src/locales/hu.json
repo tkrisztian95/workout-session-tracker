@@ -350,6 +350,8 @@
   "no_exercises_recorded": "Nem rögzítettek gyakorlatot.",
   "session_started_at": "Kezdés",
   "session_paused": "Szünet",
+  "timeline_title": "Idővonal",
+  "timeline_session_started": "Edzés elkezdődött",
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",
   "consent_title": "A quick note on privacy",

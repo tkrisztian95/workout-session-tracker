@@ -368,6 +368,8 @@
   "no_exercises_recorded": "No exercises recorded.",
   "session_started_at": "Started",
   "session_paused": "Session paused",
+  "timeline_title": "Timeline",
+  "timeline_session_started": "Session started",
 
   "onboarding_consent_label": "I understand that anonymous usage data is collected to improve this app. See the",
   "onboarding_privacy_link": "Privacy Policy",

@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { SessionDetailHeader } from '@/components/SessionDetailHeader';
 import { SessionExerciseItem } from '@/components/SessionExerciseItem';
+import { SessionTimeline } from '@/components/SessionTimeline';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
@@ -189,6 +190,8 @@ export default function SessionDetailPage() {
             {t.add_exercise_title}
           </button>
         )}
+
+        {!isEditing && <SessionTimeline session={displaySession} />}
       </div>
 
       <BottomNav active="history" />
