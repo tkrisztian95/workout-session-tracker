@@ -9,6 +9,36 @@ This project's agent guidelines live in [AGENTS.md](AGENTS.md). It covers:
 
 Read `AGENTS.md` before starting work.
 
+# Commit style
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/). Subject line: `<type>(<scope>)?: <imperative summary>` — keep under ~72 chars.
+
+**Allowed types:** `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`, `build`, `ci`, `style`.
+
+**Scope** is optional and kebab-case. Prefer the OpenSpec change name when one applies (e.g. `feat(variable-exercise-reps): …`). Other recurring scopes seen in this repo: `claude` (settings/agent config), `dev` (dev-only tooling), `plans`, `achievements`, `variable-exercise-reps`. Omit the scope when the change is broad or doesn't fit one cleanly.
+
+**Subject rules:**
+
+- Imperative mood ("add X", not "added X" or "adds X").
+- Lowercase first word after the colon.
+- No trailing period.
+
+**Body** (optional, separated by a blank line): explain _why_ the change exists, not what the diff already shows. Wrap at ~72 chars. Reference issue / PR / openspec change directory when relevant.
+
+**Trailers:**
+
+- When committing as Claude on the user's behalf, include `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`.
+- Identity: every commit under `~/Git/Hobby/` must be authored as `Krisztian Toth <ktothdev@gmail.com>` (enforced via the conditional `includeIf` in `~/.gitconfig` — verify with `git config user.email`).
+
+**One change per branch.** Don't bundle unrelated work. For the OpenSpec flow (proposal commit, per-section commits during apply, archive commit before PR merge), see [AGENTS.md](AGENTS.md).
+
+**Examples** (taken from recent history):
+
+- `feat(variable-exercise-reps): AI + history round-trip (tasks 4.x)`
+- `fix: consolidate exercise card actions into three-dots menu`
+- `chore(claude): add npm scripts to settings allowlist`
+- `docs: document persisted data structure and require sync on schema changes`
+
 # Data structure docs
 
 Persisted data shapes (localStorage keys, TypeScript types, migrations, export payload) are documented in [docs/data-structure.md](docs/data-structure.md).
