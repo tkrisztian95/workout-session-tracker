@@ -126,19 +126,6 @@ There is no telemetry beyond what's listed above. There is no third-party script
 | `npm run dev-seed:generate` | Regenerate the dev-seed JSON corpus                           |
 | `npm run dev-seed:validate` | Validate dev-seed JSON against schemas                        |
 
-## 🗺 Roadmap
-
-This is a personal hobby project, so the roadmap is a wish list, not a commitment.
-
-- [ ] Exercise instructions and form cues
-- [ ] Rest timer between sets with haptic feedback
-- [ ] Body-weight / measurements tracking with chart overlay
-- [ ] PWA install + offline-ready service worker
-- [ ] Per-exercise notes that survive across sessions
-- [ ] Apple Health / Google Fit export
-
-Open an issue if you want to discuss anything on this list — or anything off it.
-
 ## 🤝 Contributing
 
 Contributions are welcome. The repo uses a [spec-driven workflow](AGENTS.md#feature-development-with-openspec) for non-trivial features and [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
