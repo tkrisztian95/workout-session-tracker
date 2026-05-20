@@ -1,4 +1,5 @@
-import type { Exercise, LoggedSet } from './types';
+import type { Muscle } from './muscles';
+import type { Exercise, LoggedSet, WorkoutSession } from './types';
 
 /** Emoji for each 1–5 session rating, in ascending order. Index 0 = rating 1. */
 export const RATING_EMOJI = ['😩', '😕', '😐', '💪', '🔥'] as const;
@@ -104,4 +105,77 @@ export function formatDuration(seconds: number, units: DurationUnits = defaultUn
   if (h > 0) return `${h}${units.h} ${m}${units.m}`;
   if (m > 0) return `${m}${units.m} ${s}${units.s}`;
   return `${s}${units.s}`;
+}
+
+export interface SessionTimelineEntry {
+  exerciseId: string;
+  name: string;
+  muscle?: Muscle;
+  startedAt: string; // ISO timestamp (derived)
+  endedAt: string; // ISO timestamp (derived)
+  durationSec: number;
+}
+
+/**
+ * Derives a per-exercise timeline from a completed session using the timestamps
+ * already captured during the workout: each exercise's `completedAt` and the
+ * `loggedAt` on individual sets. Dismissed exercises and exercises without any
+ * timing signal are omitted. Entries are returned in chronological order and
+ * guaranteed not to overlap — if logged-set times are stale or out of order, the
+ * start is clamped to the previous entry's end so the visualization stays
+ * monotonic.
+ */
+export function buildSessionTimeline(session: WorkoutSession): SessionTimelineEntry[] {
+  const sessionStart = new Date(session.startedAt).getTime();
+
+  type Raw = {
+    exercise: Exercise;
+    firstSetTime: number | null;
+    lastSetTime: number | null;
+    completedTime: number | null;
+    sortKey: number;
+    originalIndex: number;
+  };
+
+  const raw: Raw[] = [];
+  session.exercises.forEach((ex, originalIndex) => {
+    if (ex.dismissed) return;
+
+    const setTimes = (ex.loggedSets ?? [])
+      .map((s) => new Date(s.loggedAt).getTime())
+      .filter((t) => Number.isFinite(t));
+
+    const completedTime = ex.completedAt ? new Date(ex.completedAt).getTime() : null;
+    if (completedTime == null && setTimes.length === 0) return;
+
+    const firstSetTime = setTimes.length > 0 ? Math.min(...setTimes) : null;
+    const lastSetTime = setTimes.length > 0 ? Math.max(...setTimes) : null;
+    const sortKey = completedTime ?? lastSetTime ?? 0;
+
+    raw.push({ exercise: ex, firstSetTime, lastSetTime, completedTime, sortKey, originalIndex });
+  });
+
+  raw.sort((a, b) => a.sortKey - b.sortKey || a.originalIndex - b.originalIndex);
+
+  let prevEnd = sessionStart;
+  const entries: SessionTimelineEntry[] = [];
+  for (const r of raw) {
+    let start = r.firstSetTime ?? prevEnd;
+    if (start < prevEnd) start = prevEnd;
+
+    let end = r.completedTime ?? r.lastSetTime ?? start;
+    if (end < start) end = start;
+
+    entries.push({
+      exerciseId: r.exercise.id,
+      name: r.exercise.name,
+      muscle: r.exercise.muscle,
+      startedAt: new Date(start).toISOString(),
+      endedAt: new Date(end).toISOString(),
+      durationSec: Math.max(0, Math.round((end - start) / 1000)),
+    });
+    prevEnd = end;
+  }
+
+  return entries;
 }
