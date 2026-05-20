@@ -6,13 +6,14 @@ This document describes every piece of persisted data in the app and how it maps
 
 ## Sources of truth
 
-| Concern                                    | File                                                           |
-| ------------------------------------------ | -------------------------------------------------------------- |
-| Type definitions                           | [src/lib/types.ts](../src/lib/types.ts)                        |
-| Storage keys, getters, setters, migrations | [src/lib/storage.ts](../src/lib/storage.ts)                    |
-| Muscle taxonomy + legacy category map      | [src/lib/muscles.ts](../src/lib/muscles.ts)                    |
-| Achievement records + definitions          | [src/lib/achievementDefs.ts](../src/lib/achievementDefs.ts)    |
-| Export payload shape                       | `ExportPayload` in [src/lib/storage.ts](../src/lib/storage.ts) |
+| Concern                                    | File                                                                                          |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Type definitions                           | [src/lib/types.ts](../src/lib/types.ts)                                                       |
+| Storage keys, getters, setters, migrations | [src/lib/storage.ts](../src/lib/storage.ts)                                                   |
+| Muscle taxonomy + legacy category map      | [src/lib/muscles.ts](../src/lib/muscles.ts)                                                   |
+| Achievement records + definitions          | [src/lib/achievementDefs.ts](../src/lib/achievementDefs.ts)                                   |
+| Export payload shape                       | `ExportPayload` in [src/lib/storage.ts](../src/lib/storage.ts)                                |
+| Dev seed corpus + JSON Schemas             | [src/lib/dev-seed-data/](../src/lib/dev-seed-data/) (see [Dev seed corpus](#dev-seed-corpus)) |
 
 ## localStorage keys
 
@@ -255,6 +256,69 @@ Notes:
 - Profile fields are read from their individual `wst_user_*` keys at export time and bundled into the `profile` object.
 - The LLM config, theme, locale, achievements, hidden exercises, consent, and migration flags are intentionally **excluded** from the export.
 
+## Dev seed corpus
+
+The development build populates `localStorage` with a sample dataset on first load (see [src/components/DevSeed.tsx](../src/components/DevSeed.tsx)). The data lives as schema-validated JSON under [src/lib/dev-seed-data/](../src/lib/dev-seed-data/) rather than as code literals, so the corpus is editable, diffable, and validated by CI.
+
+### Layout
+
+```
+src/lib/dev-seed-data/
+├── schemas/
+│   ├── plan.schema.json       # one plan per file
+│   ├── sessions.schema.json   # array of completed sessions
+│   └── profile.schema.json    # profile defaults
+├── plans/
+│   ├── ppl.json
+│   ├── upper-lower.json
+│   └── full-body.json
+├── sessions.json
+└── profile.json
+```
+
+All schemas are [JSON Schema draft 2020-12](https://json-schema.org/draft/2020-12) and mirror the runtime TypeScript shapes defined above (`WorkoutPlan`, `WorkoutSession`, `Exercise`, etc.).
+
+### Relative-time format
+
+Timestamps inside the corpus are **not** ISO strings — they are relative offsets so the files stay evergreen across regenerations:
+
+```jsonc
+// in sessions.json
+{
+  "startedAt": { "daysAgo": 12, "hour": 18, "minute": 5 },
+  "completedAt": { "daysAgo": 12, "hour": 18, "minute": 47 },
+  "exercises": [
+    {
+      "completedAt": { "daysAgo": 12, "hour": 18, "minute": 40 },
+      "loggedSets": [
+        { "weight": 70, "reps": 8, "loggedAt": { "daysAgo": 12, "hour": 18, "minute": 5 } },
+      ],
+    },
+  ],
+}
+```
+
+Plans use scalar `createdAtDaysAgo` / `updatedAtDaysAgo` / `completedAtDaysAgo` integers (day precision only — the runtime loader pins them to a fixed time of day). Profile uses `profileCreatedAtDaysAgo` the same way. The schemas constrain `daysAgo ≥ 0`, `0 ≤ hour ≤ 23`, `0 ≤ minute ≤ 59`.
+
+At runtime [src/lib/devSeed.ts](../src/lib/devSeed.ts) dynamic-imports the JSON, expands every offset against `new Date()`, and writes the result to `localStorage` under the same `wst_*` keys documented above. Dynamic imports keep the corpus out of the production bundle.
+
+### Scripts
+
+| Command                     | Purpose                                                                                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev-seed:generate` | Re-run the deterministic generator in [scripts/generate-dev-seed.ts](../scripts/generate-dev-seed.ts) and overwrite the JSON files.                                                             |
+| `npm run dev-seed:validate` | Validate every JSON file against its schema via AJV (see [scripts/validate-dev-seed.ts](../scripts/validate-dev-seed.ts)). Exits non-zero on the first failure with the offending JSON pointer. |
+
+### Sync rule
+
+When you change a persisted shape (see [When to update this doc](#when-to-update-this-doc)), also:
+
+1. Update the matching JSON Schema in `src/lib/dev-seed-data/schemas/`.
+2. Update the generator in [scripts/generate-dev-seed.ts](../scripts/generate-dev-seed.ts) if the field is one it emits.
+3. Re-run `npm run dev-seed:generate` and commit the regenerated JSON.
+4. Run `npm run dev-seed:validate` and confirm a clean exit.
+5. Bump `SEED_VERSION` in [src/lib/devSeed.ts](../src/lib/devSeed.ts) so dev environments re-seed on next load.
+
 ## When to update this doc
 
 Update this file in the same commit as the code change whenever you:
@@ -263,3 +327,4 @@ Update this file in the same commit as the code change whenever you:
 2. Change any persisted TypeScript shape (`WorkoutPlan`, `PlanDay`, `PlanExercise`, `Exercise`, `LoggedSet`, `ActiveSession`, `WorkoutSession`, `AchievementRecord`, `HiddenExerciseKey`, `LlmConfig`, `Sex`, `Muscle`, `MuscleGroup`).
 3. Add, remove, or modify a migration.
 4. Change the `ExportPayload` shape or bump `schemaVersion`.
+5. Change the dev-seed JSON shape or its schemas (see [Dev seed corpus](#dev-seed-corpus)).
