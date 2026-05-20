@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Star } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import MuscleBadge from '@/components/MuscleBadge';
 import SessionDateLabel from '@/components/SessionDateLabel';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import type { Muscle } from '@/lib/muscles';
 import { useTranslations } from '@/lib/locale-context';
+import { RATING_EMOJI } from '@/lib/sessionUtils';
 
 function durationMinutes(startedAt: string, completedAt: string): number {
   return Math.round((new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 60000);
@@ -41,9 +42,11 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
         <div className="flex items-center gap-2">
           <p className="text-foreground font-semibold text-base truncate">{label}</p>
           {session.rating != null && (
-            <span className="flex items-center gap-0.5 text-brand">
-              <Star className="w-3 h-3 fill-current" />
-              <span className="text-xs font-medium">{session.rating}</span>
+            <span
+              className="text-base leading-none"
+              aria-label={`Rated ${session.rating} out of 5`}
+            >
+              {RATING_EMOJI[session.rating - 1]}
             </span>
           )}
         </div>
