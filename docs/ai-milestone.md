@@ -4,6 +4,8 @@ Working plan for evolving the app's AI surface beyond shallow "generate a plan" 
 
 > **Status:** plan, not contract. Items move between sections as they ship or change. Last reviewed: 2026-05-21.
 
+**GitHub milestone:** [AI: Context-aware coach](https://github.com/tkrisztian95/workout-session-tracker/milestone/1) — every task below has a corresponding open issue.
+
 ---
 
 ## Why this milestone exists
@@ -29,15 +31,21 @@ Subsequent milestones (M3+) are placeholders and may be re-scoped once M1+M2 shi
 
 **Goal:** make every future AI feature a one-file change, not a stack of plumbing.
 
+### Suggested order
+
+The tasks are numbered for reference, but **task 2 (envelope) and task 3 (AiStream) should ship before task 1 (Gateway migration)**. Both are independent — the envelope is pure data shaping, and the streaming primitive only needs the `ai` package installed, not the full migration of existing modals. Doing 2 and 3 first turns task 1 from "build everything at once" into "migrate the 4 modals onto the new patterns" — much smaller PR.
+
+Recommended order: **2 → 3 → 1 → 4 → (5 + 6 interleaved)**.
+
 ### Tasks
 
-1. **Migrate to Vercel AI Gateway + AI SDK v6.**
+1. **Migrate to Vercel AI Gateway + AI SDK v6.** — [#57](https://github.com/tkrisztian95/workout-session-tracker/issues/57)
    - Replace direct OpenAI client calls in [`src/lib/ai/`](../src/lib/ai/) with the [`ai`](https://sdk.vercel.ai/docs) package.
    - Address models as `"openai/gpt-4o-mini"` strings via the Gateway, not via `@ai-sdk/openai` directly.
    - User's BYOK key passes through unchanged during this milestone — Gateway just adds observability and a provider-swap seam.
    - Acceptance: every existing AI call (plan suggestion, exercise swap, notes import) goes through one `generateText` / `streamText` / `generateObject` shape.
 
-2. **Extract `buildAiContext()` — the context envelope.**
+2. **Extract `buildAiContext()` — the context envelope.** — [#58](https://github.com/tkrisztian95/workout-session-tracker/issues/58)
    - One function in `src/lib/ai/context.ts` that builds the user's training reality for any AI feature.
    - Inputs: feature name (`"plan-suggest"` / `"exercise-swap"` / etc.), optional overrides.
    - Output: a typed envelope of the form:
@@ -61,22 +69,22 @@ Subsequent milestones (M3+) are placeholders and may be re-scoped once M1+M2 shi
    - Each AI feature picks fields it needs. Prompt templates live next to the feature, not next to the context builder.
    - Acceptance: removing a field from the envelope breaks all callers in one obvious place, not in 15 prompt strings.
 
-3. **`<AiStream>` UI primitive.**
+3. **`<AiStream>` UI primitive.** — [#59](https://github.com/tkrisztian95/workout-session-tracker/issues/59)
    - Reusable component that handles: idle → loading skeleton → streaming token output → done → error / retry.
    - Today each AI modal reinvents this state machine — see [`AiPlanSuggestionModal.tsx`](../src/components/AiPlanSuggestionModal.tsx), [`AiExerciseSwapModal.tsx`](../src/components/AiExerciseSwapModal.tsx), etc.
    - Acceptance: a new AI feature's modal/sheet is < 50 lines of UI.
 
-4. **Tool calling, not JSON-text parsing.**
+4. **Tool calling, not JSON-text parsing.** — [#60](https://github.com/tkrisztian95/workout-session-tracker/issues/60)
    - When the AI mutates state (swap exercise, adjust plan day, log a set), use AI SDK structured tool calls — not JSON returned in text.
    - Each tool: typed Zod schema, server-side validator, idempotent.
    - Acceptance: zero `JSON.parse(response)` calls in `src/lib/ai/`.
 
-5. **Token telemetry.**
+5. **Token telemetry.** — [#61](https://github.com/tkrisztian95/workout-session-tracker/issues/61)
    - PostHog event `ai_call_completed` with: `feature`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `success`.
    - Console-log the same payload during dev so cost is visible while coding.
    - Acceptance: any AI call missing telemetry is caught by a lint rule or wrapper assertion.
 
-6. **Context budget guard.**
+6. **Context budget guard.** — [#62](https://github.com/tkrisztian95/workout-session-tracker/issues/62)
    - The envelope from task 2 is unbounded — a power user with 6 months of sessions has too many to send. Cap by token budget (per model) and feature.
    - Strategy: prefer recency, prefer relevance to the feature's prompt, summarize older history into the `evaluation` strip.
    - Acceptance: envelope never exceeds 60% of a model's context window, even for synthetic worst-case inputs.
@@ -100,7 +108,7 @@ Subsequent milestones (M3+) are placeholders and may be re-scoped once M1+M2 shi
 
 Pick **one** of the following. Don't sprawl. The point is to validate that M1 makes feature work cheap.
 
-### Option A — In-session AI coach
+### Option A — In-session AI coach — [#63](https://github.com/tkrisztian95/workout-session-tracker/issues/63)
 
 Per-set recommendations during the active session. After each logged set, the focused exercise card shows a small AI suggestion: _"Last set: 70 kg × 8. Suggest 72.5 × 6–8 next. You hit 8 reps last week; one more rep this week is a reasonable progression."_
 
@@ -110,7 +118,7 @@ Per-set recommendations during the active session. After each logged set, the fo
 
 **Risks:** AI quality varies wildly on micro-decisions like "should I add 2.5 kg this week?". Mitigation: show recommendation as a _suggestion_ the user can ignore, not as a target the UI nags about. Also, runs 1 inference per logged set — token cost goes up. Telemetry from M1 catches this.
 
-### Option B — AI session debrief
+### Option B — AI session debrief — [#64](https://github.com/tkrisztian95/workout-session-tracker/issues/64)
 
 When a session is marked finished, the celebration screen shows a one-paragraph AI debrief generated from the session-evaluation meta (issue #54). _"You overdid bench, underperformed squat. Squat is likely fatigued from yesterday's deadlift. Try deloading squat by 5% next session, or move it earlier in the week."_
 
