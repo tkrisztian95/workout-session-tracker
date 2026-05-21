@@ -2,6 +2,7 @@ import type { LlmConfig, Exercise } from '../types';
 import { callOpenAI } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/import';
 import { migrateLegacyCategory } from '../muscles';
+import type { AiContext } from './context';
 
 export type AiImportResult = {
   date: string;
@@ -10,20 +11,20 @@ export type AiImportResult = {
 };
 
 export async function importSessions(
-  notes: string,
-  language: string,
-  existingExerciseNames: string[],
   config: LlmConfig,
+  ctx: AiContext,
+  notes: string,
   systemPrompt = SYSTEM_PROMPT,
 ): Promise<AiImportResult[]> {
   const today = new Date().toISOString().slice(0, 10);
   const existingNamesText =
-    existingExerciseNames.length > 0
-      ? `\n\nExisting exercise names from this user's history (prefer these when matching):\n${existingExerciseNames.join(', ')}`
+    ctx.exerciseHistoryNames.length > 0
+      ? `\n\nExisting exercise names from this user's history (prefer these when matching):\n${ctx.exerciseHistoryNames.join(', ')}`
       : '';
+  const languageLine = ctx.language ? `Output language for exercise names: ${ctx.language}` : '';
 
   const userMessage = `Today's date: ${today}
-Output language for exercise names: ${language}${existingNamesText}
+${languageLine}${existingNamesText}
 
 Workout notes to parse:
 ${notes}`;

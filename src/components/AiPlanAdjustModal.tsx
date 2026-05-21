@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Sparkles, RefreshCw, Loader2, ChevronDown, AlertTriangle } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { getLlmConfig, getLocale } from '@/lib/storage';
-import { adjustPlan, AiValidationError } from '@/lib/ai';
+import { getLlmConfig } from '@/lib/storage';
+import { adjustPlan, AiValidationError, buildAiContext } from '@/lib/ai';
 import type { AiAdjustResult } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
 import { Button, FieldLabel, ModalSheet } from '@/components/ui';
@@ -34,12 +34,6 @@ function ErrorMessage({ message, openLinkLabel }: { message: string; openLinkLab
     </p>
   );
 }
-
-const LOCALE_LANGUAGE: Record<string, string> = {
-  en: 'English',
-  hu: 'Hungarian',
-  de: 'German',
-};
 
 // English instructions sent to the LLM, paired by index with the translated
 // labels in `t.ai_adjust_preset_options`.
@@ -86,9 +80,8 @@ export default function AiPlanAdjustModal({ plan, onApply, onClose }: AiPlanAdju
       has_preset: preset !== null,
     });
     try {
-      const locale = getLocale();
-      const language = locale ? LOCALE_LANGUAGE[locale] : undefined;
-      const adjusted = await adjustPlan(config, plan, instruction, language);
+      const ctx = buildAiContext('plan-adjust');
+      const adjusted = await adjustPlan(config, ctx, plan, instruction);
       setResult(adjusted);
       setView('preview');
       posthog?.capture('ai_plan_adjust_succeeded', {

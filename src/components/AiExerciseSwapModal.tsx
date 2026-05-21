@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Sparkles, RefreshCw, Loader2, ChevronDown, AlertTriangle, ArrowRight } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { getLlmConfig, getLocale } from '@/lib/storage';
-import { swapExercise, AiValidationError } from '@/lib/ai';
+import { getLlmConfig } from '@/lib/storage';
+import { swapExercise, AiValidationError, buildAiContext } from '@/lib/ai';
 import type { PlanExercise, WorkoutPlan } from '@/lib/types';
 import { formatExerciseDetail } from '@/lib/sessionUtils';
 import { Button, FieldLabel, ModalSheet } from '@/components/ui';
@@ -35,12 +35,6 @@ function ErrorMessage({ message, openLinkLabel }: { message: string; openLinkLab
     </p>
   );
 }
-
-const LOCALE_LANGUAGE: Record<string, string> = {
-  en: 'English',
-  hu: 'Hungarian',
-  de: 'German',
-};
 
 function ExerciseSummary({ ex }: { ex: PlanExercise }) {
   return (
@@ -90,15 +84,14 @@ export default function AiExerciseSwapModal({
     setView('loading');
     posthog?.capture('ai_exercise_swap_started', { model: config.model });
     try {
-      const locale = getLocale();
-      const language = locale ? LOCALE_LANGUAGE[locale] : undefined;
+      const ctx = buildAiContext('exercise-swap');
       const result = await swapExercise(
         config,
+        ctx,
         plan,
         exercise,
         dayName,
         custom.trim() || undefined,
-        language,
       );
       setSuggestion(result.exercise);
       setReasoning(result.reasoning);

@@ -7,6 +7,12 @@ import {
   normalizePlanExerciseMuscle,
   normalizePlanExerciseReps,
 } from './plan';
+import {
+  type AiContext,
+  formatProfilePreamble,
+  formatRecentSessions,
+  formatLanguageInstruction,
+} from './context';
 
 export type AiAdjustResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
 export type AiSwapResult = { exercise: PlanExercise; reasoning?: string };
@@ -19,10 +25,20 @@ function ensureIds(exercises: PlanExercise[]): PlanExercise[] {
   );
 }
 
-function languageLine(language?: string): string {
-  return language
-    ? `\n\nWrite the plan name, day names, exercise names, reasoning, and any validation message in ${language}.`
-    : '';
+/**
+ * Builds a `Recent training` block from the envelope's recentSessions for
+ * features that previously had no training context (swap, adjust). Returns
+ * an empty string when the envelope has no recent sessions, so prompts stay
+ * tight for new users.
+ */
+function buildContextBlock(ctx: AiContext): string {
+  const profile = formatProfilePreamble(ctx.profile);
+  const sessions = ctx.recentSessions.length > 0 ? formatRecentSessions(ctx.recentSessions) : null;
+  const parts: string[] = [];
+  if (profile) parts.push(profile);
+  if (sessions) parts.push(`Recent training (most recent first):\n${sessions}`);
+  if (parts.length === 0) return '';
+  return parts.join('\n\n') + '\n\n';
 }
 
 /**
@@ -31,11 +47,13 @@ function languageLine(language?: string): string {
  */
 export async function adjustPlan(
   config: LlmConfig,
+  ctx: AiContext,
   plan: WorkoutPlan,
   instruction: string,
-  language?: string,
 ): Promise<AiAdjustResult> {
-  const userMessage = `Here is my current workout plan:\n${summarisePlan(plan)}\n\nAdjustment I want: ${instruction}${languageLine(language)}`;
+  const userMessage =
+    `${buildContextBlock(ctx)}Here is my current workout plan:\n${summarisePlan(plan)}\n\n` +
+    `Adjustment I want: ${instruction}${formatLanguageInstruction(ctx.language)}`;
 
   const content = await callOpenAI(config, adjustCurrent, userMessage);
 
@@ -76,19 +94,33 @@ export async function adjustPlan(
 
 /**
  * Suggests a single replacement exercise for one exercise in a plan. The
- * replacement keeps the original exercise's role (core/optional).
+ * replacement keeps the original exercise's role (core/optional). Uses the
+ * envelope's `progression` to highlight the user's recent performance on the
+ * target exercise when available.
  */
 export async function swapExercise(
   config: LlmConfig,
+  ctx: AiContext,
   plan: WorkoutPlan,
   target: PlanExercise,
   dayName: string | null,
-  instruction: string | undefined,
-  language?: string,
+  instruction?: string,
 ): Promise<AiSwapResult> {
   const location = dayName ? `training day "${dayName}"` : 'the shared exercises';
   const instructionLine = instruction ? `\n\nReplacement preferences: ${instruction}` : '';
-  const userMessage = `Here is my current workout plan:\n${summarisePlan(plan)}\n\nReplace this exercise in ${location}:\n${summariseExercise(target)}${instructionLine}${languageLine(language)}`;
+
+  // Pull the matching progression entry — gives the LLM a concrete sense of
+  // where the user is on the exercise it's replacing.
+  const targetProgression = ctx.progression.find(
+    (p) => p.exerciseName.toLowerCase() === target.name.toLowerCase(),
+  );
+  const progressionLine = targetProgression
+    ? `\n\nUser's recent weights on "${target.name}": ${targetProgression.sessionWeights.join(' → ')} kg (trend: ${targetProgression.trend}).`
+    : '';
+
+  const userMessage =
+    `${buildContextBlock(ctx)}Here is my current workout plan:\n${summarisePlan(plan)}\n\n` +
+    `Replace this exercise in ${location}:\n${summariseExercise(target)}${progressionLine}${instructionLine}${formatLanguageInstruction(ctx.language)}`;
 
   const content = await callOpenAI(config, swapCurrent, userMessage);
 

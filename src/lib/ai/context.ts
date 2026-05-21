@@ -189,6 +189,77 @@ export function summariseSessionToSummary(
   return summary;
 }
 
+// ─── Rendering helpers ───────────────────────────────────────────────────────
+
+/**
+ * Renders one line of a session summary for an LLM prompt. Compact form:
+ * `2026-05-10 Push (46m, 1500kg, 4/5): Bench 4×70kg, Squat 3×100kg [+2 more]`.
+ *
+ * The shape is intentional: ISO date first so the model can reason about
+ * recency, then optional plan day / duration / volume / rating in
+ * parentheses, then a list of top exercises. Avoids the per-set noise of
+ * `WorkoutSession` while keeping every signal a prompt needs.
+ */
+export function formatSessionSummaryLine(s: SessionSummary): string {
+  const date = s.completedAt.slice(0, 10);
+  const meta: string[] = [];
+  if (typeof s.durationMin === 'number') meta.push(`${s.durationMin}m`);
+  if (typeof s.totalVolumeKg === 'number') meta.push(`${s.totalVolumeKg}kg`);
+  if (s.rating) meta.push(`${s.rating}/5`);
+  const head = s.planDayName ? `${date} ${s.planDayName}` : date;
+  const metaStr = meta.length > 0 ? ` (${meta.join(', ')})` : '';
+  const exParts = s.topExercises.map((ex) => {
+    const weight = typeof ex.bestWeightKg === 'number' ? ` @${ex.bestWeightKg}kg` : '';
+    const muscle = ex.muscle ? ` [${ex.muscle}]` : '';
+    return `${ex.name} ${ex.sets}×${weight ? weight.trim() : '—'}${muscle}`.replace(' @', '@');
+  });
+  const exTail =
+    s.exerciseCount > s.topExercises.length
+      ? ` [+${s.exerciseCount - s.topExercises.length} more]`
+      : '';
+  return `${head}${metaStr}: ${exParts.join(', ')}${exTail}`;
+}
+
+/**
+ * Renders the profile preamble (`About me: …`) used by every AI feature
+ * prompt. Returns an empty string when no metrics are set.
+ */
+export function formatProfilePreamble(profile: ContextProfile): string {
+  const parts: string[] = [];
+  if (profile.sex) parts.push(`Biological sex: ${profile.sex}`);
+  if (typeof profile.age === 'number') parts.push(`Age: ${profile.age} years`);
+  if (typeof profile.heightCm === 'number') parts.push(`Height: ${profile.heightCm} cm`);
+  if (typeof profile.weightKg === 'number') parts.push(`Weight: ${profile.weightKg} kg`);
+  if (parts.length === 0) return '';
+  return `About me: ${parts.join(', ')}.`;
+}
+
+/**
+ * Renders the recent-sessions block. Returns a `No completed sessions yet.`
+ * fallback when the envelope's `recentSessions` is empty.
+ */
+export function formatRecentSessions(sessions: SessionSummary[]): string {
+  if (sessions.length === 0) return 'No completed sessions yet.';
+  return sessions.map(formatSessionSummaryLine).join('\n');
+}
+
+/**
+ * Renders the `language` field as a single instruction line for inclusion
+ * in any AI feature prompt. Returns an empty string when no locale is set.
+ */
+export function formatLanguageInstruction(language: Locale | null): string {
+  if (!language) return '';
+  const label =
+    language === 'en'
+      ? 'English'
+      : language === 'hu'
+        ? 'Hungarian'
+        : language === 'de'
+          ? 'German'
+          : language;
+  return `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${label}.`;
+}
+
 // ─── Factory ──────────────────────────────────────────────────────────────────
 
 interface BuildOptions {

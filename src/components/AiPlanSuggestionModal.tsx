@@ -3,8 +3,8 @@
 import { useRef, useState } from 'react';
 import { Sparkles, RefreshCw, Loader2, ChevronDown, AlertTriangle } from 'lucide-react';
 import { usePostHog } from 'posthog-js/react';
-import { getLlmConfig, getPlans, getSessions, getLocale } from '@/lib/storage';
-import { suggestPlan, AiValidationError } from '@/lib/ai';
+import { getLlmConfig } from '@/lib/storage';
+import { suggestPlan, AiValidationError, buildAiContext } from '@/lib/ai';
 import type { AiPlanPreferences } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
 import { Button, FieldLabel, ModalSheet } from '@/components/ui';
@@ -118,16 +118,8 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
     });
     generationStartRef.current = Date.now();
     try {
-      const plans = getPlans();
-      const sessions = getSessions();
-      const localeLanguage: Record<string, string> = {
-        en: 'English',
-        hu: 'Hungarian',
-        de: 'German',
-      };
-      const locale = getLocale();
-      const language = locale ? localeLanguage[locale] : undefined;
-      const result = await suggestPlan(config, plans, sessions, preferences, language);
+      const ctx = buildAiContext('plan-suggest');
+      const result = await suggestPlan(config, ctx, preferences);
       setSuggestedPlan(result);
       setReasoning(result.reasoning);
       setView('preview');
