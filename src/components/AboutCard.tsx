@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart2, Scale, Shield } from 'lucide-react';
+import { BarChart2, Bug, Code2, ExternalLink, Mail, Scale, Shield } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
 import { getConsentAccepted, saveConsentAccepted, saveConsentDeclined } from '@/lib/storage';
 import { initPostHog } from '@/components/PostHogProvider';
@@ -82,6 +82,63 @@ export default function AboutCard() {
             </div>
             <p className="text-foreground text-sm font-medium">{t.about_license}</p>
           </div>
+
+          {/* Source code row */}
+          <a
+            href="https://github.com/tkrisztian95/workout-session-tracker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-4 active:bg-elevated transition-colors cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <Code2 className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-foreground text-sm font-medium leading-tight">
+                {t.about_source_code}
+              </p>
+              <p className="text-dim text-xs mt-0.5 truncate">
+                github.com/tkrisztian95/workout-session-tracker
+              </p>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted shrink-0" />
+          </a>
+
+          {/* Feedback / Report an issue row */}
+          <a
+            href="https://github.com/tkrisztian95/workout-session-tracker/issues/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-4 active:bg-elevated transition-colors cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <Bug className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-foreground text-sm font-medium leading-tight">
+                {t.about_feedback}
+              </p>
+              <p className="text-dim text-xs mt-0.5">{t.about_feedback_subtitle}</p>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted shrink-0" />
+          </a>
+
+          {/* Contact row */}
+          <a
+            href="mailto:ktothdev@gmail.com?subject=Workout%20Sessions%20Tracker"
+            className="flex items-center gap-3 px-4 py-4 active:bg-elevated transition-colors cursor-pointer"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <Mail className="w-4 h-4 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-foreground text-sm font-medium leading-tight">{t.about_contact}</p>
+              <p className="text-dim text-xs mt-0.5 truncate">
+                Krisztian Toth · ktothdev@gmail.com
+              </p>
+            </div>
+            <ExternalLink className="w-4 h-4 text-muted shrink-0" />
+          </a>
 
           {/* Privacy Policy row */}
           <button
