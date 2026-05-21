@@ -75,13 +75,19 @@ export default function AboutCard() {
             </div>
           </button>
 
-          {/* License row */}
-          <div className="flex items-center gap-3 px-4 py-4">
+          {/* Privacy Policy row */}
+          <button
+            type="button"
+            onClick={() => setIsPolicyOpen(true)}
+            className="w-full flex items-center gap-3 px-4 py-4 active:bg-elevated transition-colors cursor-pointer"
+          >
             <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-              <Scale className="w-4 h-4 text-secondary" />
+              <Shield className="w-4 h-4 text-secondary" />
             </div>
-            <p className="text-foreground text-sm font-medium">{t.about_license}</p>
-          </div>
+            <p className="flex-1 text-left text-foreground text-sm font-medium">
+              {t.about_privacy_policy}
+            </p>
+          </button>
 
           {/* Source code row */}
           <a
@@ -140,19 +146,13 @@ export default function AboutCard() {
             <ExternalLink className="w-4 h-4 text-muted shrink-0" />
           </a>
 
-          {/* Privacy Policy row */}
-          <button
-            type="button"
-            onClick={() => setIsPolicyOpen(true)}
-            className="w-full flex items-center gap-3 px-4 py-4 active:bg-elevated transition-colors cursor-pointer"
-          >
+          {/* License row */}
+          <div className="flex items-center gap-3 px-4 py-4">
             <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-              <Shield className="w-4 h-4 text-secondary" />
+              <Scale className="w-4 h-4 text-secondary" />
             </div>
-            <p className="flex-1 text-left text-foreground text-sm font-medium">
-              {t.about_privacy_policy}
-            </p>
-          </button>
+            <p className="text-foreground text-sm font-medium">{t.about_license}</p>
+          </div>
         </div>
       </div>
 
