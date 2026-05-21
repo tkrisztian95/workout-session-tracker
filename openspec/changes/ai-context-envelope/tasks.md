@@ -1,27 +1,27 @@
 ## 1. Type definitions
 
-- [ ] 1.1 Add `AiFeature` literal union (`'plan-suggest' | 'exercise-swap' | 'plan-adjust' | 'notes-import'`) in `src/lib/ai/context.ts`.
-- [ ] 1.2 Define `SessionSummary` interface (id, completedAt, planId?, planDayName?, rating?, durationMin?, totalVolumeKg?, exerciseCount, topExercises) in `src/lib/ai/context.ts`.
-- [ ] 1.3 Define `ContextProfile` interface (sex?, age?, heightCm?, weightKg?, name?) in `src/lib/ai/context.ts`.
-- [ ] 1.4 Declare deferred placeholder types: `ContextPreferences`, `ContextLikes`, plus optional `SessionEvaluation[]` field (use an empty `interface ContextPreferences {}` and `interface ContextLikes {}` so callers can already destructure / pass them around — feeders will widen them).
-- [ ] 1.5 Define `AiContext` interface exposing the Phase 1 populated fields (`profile`, `activePlans: WorkoutPlan[]`, `recentSessions: SessionSummary[]`, `progression: ExerciseProgression[]`, `exerciseHistoryNames: string[]`, `language: Locale | null`) and the deferred optional fields (`preferences?`, `evaluation?`, `likes?`).
+- [x] 1.1 Add `AiFeature` literal union (`'plan-suggest' | 'exercise-swap' | 'plan-adjust' | 'notes-import'`) in `src/lib/ai/context.ts`.
+- [x] 1.2 Define `SessionSummary` interface (id, completedAt, planId?, planDayName?, rating?, durationMin?, totalVolumeKg?, exerciseCount, topExercises) in `src/lib/ai/context.ts`.
+- [x] 1.3 Define `ContextProfile` interface (sex?, age?, heightCm?, weightKg?, name?) in `src/lib/ai/context.ts`.
+- [x] 1.4 Declare deferred placeholder types: `ContextPreferences`, `ContextLikes`, plus optional `SessionEvaluation[]` field (use an empty `interface ContextPreferences {}` and `interface ContextLikes {}` so callers can already destructure / pass them around — feeders will widen them).
+- [x] 1.5 Define `AiContext` interface exposing the Phase 1 populated fields (`profile`, `activePlans: WorkoutPlan[]`, `recentSessions: SessionSummary[]`, `progression: ExerciseProgression[]`, `exerciseHistoryNames: string[]`, `language: Locale | null`) and the deferred optional fields (`preferences?`, `evaluation?`, `likes?`).
 
 ## 2. Envelope factory
 
-- [ ] 2.1 Implement `summariseSessionToSummary(session: WorkoutSession): SessionSummary` in `src/lib/ai/context.ts` — computes top exercises with best weight, total volume, duration minutes, exercise count.
-- [ ] 2.2 Implement `buildAiContext(feature: AiFeature, options?: { now?: Date }): AiContext` in `src/lib/ai/context.ts` reading exclusively through `src/lib/storage.ts`.
-- [ ] 2.3 Enforce ordering invariants inside `buildAiContext`: filter `sessions` to those with `completedAt`; sort newest-first; cap at exported constant `RECENT_SESSIONS_LIMIT = 20`.
-- [ ] 2.4 Derive `progression` via `getExerciseWeightProgression(recent, all)` from `src/lib/statsUtils.ts` — passing the recent slice as the "in-range" set and the full session list as the "all-time" set so the trend/`isNew` flags stay correct.
-- [ ] 2.5 Derive `exerciseHistoryNames` (frequency-sorted, capped at 100) so notes-import keeps its current disambiguation context.
-- [ ] 2.6 Populate `language` from `getLocale()` so feature signatures can drop their per-call `language` arg.
-- [ ] 2.7 Keep all deferred fields `undefined` in Phase 1 — do not pre-populate or attempt to read non-existent state.
+- [x] 2.1 Implement `summariseSessionToSummary(session: WorkoutSession): SessionSummary` in `src/lib/ai/context.ts` — computes top exercises with best weight, total volume, duration minutes, exercise count.
+- [x] 2.2 Implement `buildAiContext(feature: AiFeature, options?: { now?: Date }): AiContext` in `src/lib/ai/context.ts` reading exclusively through `src/lib/storage.ts`.
+- [x] 2.3 Enforce ordering invariants inside `buildAiContext`: filter `sessions` to those with `completedAt`; sort newest-first; cap at exported constant `RECENT_SESSIONS_LIMIT = 20`.
+- [x] 2.4 Derive `progression` via `getExerciseWeightProgression(recent, all)` from `src/lib/statsUtils.ts` — passing the recent slice as the "in-range" set and the full session list as the "all-time" set so the trend/`isNew` flags stay correct.
+- [x] 2.5 Derive `exerciseHistoryNames` (frequency-sorted, capped at 100) so notes-import keeps its current disambiguation context.
+- [x] 2.6 Populate `language` from `getLocale()` so feature signatures can drop their per-call `language` arg.
+- [x] 2.7 Keep all deferred fields `undefined` in Phase 1 — do not pre-populate or attempt to read non-existent state.
 
 ## 3. Unit tests
 
-- [ ] 3.1 Add `src/lib/ai/context.test.ts` covering: empty-state envelope (no plans, no sessions, no metrics).
-- [ ] 3.2 Add test: typical user (some plans, some sessions, full profile) — assert populated fields, deferred undefined, `recentSessions` newest-first and capped at 20.
-- [ ] 3.3 Add test: 100 synthetic sessions — assert exactly 20 retained, no `completedAt: ''` sessions present, top exercise selection deterministic.
-- [ ] 3.4 Add test: `SessionSummary` excludes raw `loggedSets` (regression guard for token bloat).
+- [x] 3.1 Add `src/lib/ai/context.test.ts` covering: empty-state envelope (no plans, no sessions, no metrics).
+- [x] 3.2 Add test: typical user (some plans, some sessions, full profile) — assert populated fields, deferred undefined, `recentSessions` newest-first and capped at 20.
+- [x] 3.3 Add test: 100 synthetic sessions — assert exactly 20 retained, no `completedAt: ''` sessions present, top exercise selection deterministic.
+- [x] 3.4 Add test: `SessionSummary` excludes raw `loggedSets` (regression guard for token bloat).
 
 ## 4. Migrate AI feature modules
 
