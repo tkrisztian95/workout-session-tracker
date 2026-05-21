@@ -135,7 +135,7 @@ function ProfilePageInner() {
           </div>
         </div>
 
-        {/* ── Identity card (name + sex) ── */}
+        {/* ── Identity card (name + sex + body metrics) ── */}
         <div className="bg-surface border border-border rounded-2xl overflow-hidden divide-y divide-border/60">
           {/* Name row */}
           <div className="flex items-center gap-4 px-4 py-4">
@@ -224,112 +224,112 @@ function ProfilePageInner() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* ── Body metrics ── */}
-        <div
-          className="bg-surface border border-border rounded-2xl overflow-hidden divide-y divide-border/60"
-          data-ph-no-capture
-        >
-          <button
-            onClick={() => toggleCard('body-metrics')}
-            className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
-          >
-            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-              <Ruler className="w-5 h-5 text-secondary" />
-            </div>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-foreground text-sm font-semibold leading-tight">
-                {t.profile_body_metrics_label}
-              </p>
-              <p className="text-dim text-xs mt-0.5">
-                {age || heightCm || weightKg
-                  ? [age && `${age} y`, heightCm && `${heightCm} cm`, weightKg && `${weightKg} kg`]
-                      .filter(Boolean)
-                      .join(' · ')
-                  : t.profile_body_metrics_not_set}
-              </p>
-            </div>
-            <ChevronDown
-              className={`w-4 h-4 text-muted transition-transform duration-200 shrink-0 ${openCard === 'body-metrics' ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {openCard === 'body-metrics' && (
-            <div className="border-t border-border divide-y divide-border/60">
-              {/* Age row */}
-              <div className="flex items-center gap-4 px-4 py-4">
-                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-                  <CalendarDays className="w-4 h-4 text-secondary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
-                    {t.profile_age_label}
-                  </p>
-                  <input
-                    type="number"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    onBlur={handleAgeBlur}
-                    placeholder={t.profile_age_placeholder}
-                    min={10}
-                    max={120}
-                    className="w-full bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
-                  />
-                </div>
+          {/* Body metrics row — inline expand/collapse */}
+          <div data-ph-no-capture>
+            <button
+              onClick={() => toggleCard('body-metrics')}
+              className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
+            >
+              <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                <Ruler className="w-5 h-5 text-secondary" />
               </div>
-
-              {/* Height row */}
-              <div className="flex items-center gap-4 px-4 py-4">
-                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-                  <Ruler className="w-4 h-4 text-secondary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
-                    {t.profile_height_label}
-                  </p>
-                  <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-foreground text-sm font-semibold leading-tight">
+                  {t.profile_body_metrics_label}
+                </p>
+                <p className="text-dim text-xs mt-0.5">
+                  {age || heightCm || weightKg
+                    ? [
+                        age && `${age} y`,
+                        heightCm && `${heightCm} cm`,
+                        weightKg && `${weightKg} kg`,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')
+                    : t.profile_body_metrics_not_set}
+                </p>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 text-muted transition-transform duration-200 shrink-0 ${openCard === 'body-metrics' ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {openCard === 'body-metrics' && (
+              <div className="border-t border-border divide-y divide-border/60">
+                {/* Age row */}
+                <div className="flex items-center gap-4 px-4 py-4">
+                  <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                    <CalendarDays className="w-4 h-4 text-secondary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                      {t.profile_age_label}
+                    </p>
                     <input
                       type="number"
-                      value={heightCm}
-                      onChange={(e) => setHeightCm(e.target.value)}
-                      onBlur={handleHeightBlur}
-                      placeholder={t.profile_height_placeholder}
-                      min={50}
-                      max={300}
-                      className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                      onBlur={handleAgeBlur}
+                      placeholder={t.profile_age_placeholder}
+                      min={10}
+                      max={120}
+                      className="w-full bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
                     />
-                    <span className="text-xs text-muted">{t.unit_cm}</span>
+                  </div>
+                </div>
+
+                {/* Height row */}
+                <div className="flex items-center gap-4 px-4 py-4">
+                  <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                    <Ruler className="w-4 h-4 text-secondary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                      {t.profile_height_label}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={heightCm}
+                        onChange={(e) => setHeightCm(e.target.value)}
+                        onBlur={handleHeightBlur}
+                        placeholder={t.profile_height_placeholder}
+                        min={50}
+                        max={300}
+                        className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                      />
+                      <span className="text-xs text-muted">{t.unit_cm}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weight row */}
+                <div className="flex items-center gap-4 px-4 py-4">
+                  <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+                    <Dumbbell className="w-4 h-4 text-secondary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                      {t.profile_weight_label}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={weightKg}
+                        onChange={(e) => setWeightKg(e.target.value)}
+                        onBlur={handleWeightBlur}
+                        placeholder={t.profile_weight_placeholder}
+                        min={20}
+                        max={500}
+                        step={0.1}
+                        className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
+                      />
+                      <span className="text-xs text-muted">{t.unit_kg}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Weight row */}
-              <div className="flex items-center gap-4 px-4 py-4">
-                <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
-                  <Dumbbell className="w-4 h-4 text-secondary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-secondary tracking-widest uppercase">
-                    {t.profile_weight_label}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={weightKg}
-                      onChange={(e) => setWeightKg(e.target.value)}
-                      onBlur={handleWeightBlur}
-                      placeholder={t.profile_weight_placeholder}
-                      min={20}
-                      max={500}
-                      step={0.1}
-                      className="flex-1 bg-transparent text-foreground text-sm mt-0.5 outline-none placeholder:text-dim"
-                    />
-                    <span className="text-xs text-muted">{t.unit_kg}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── Achievements ── */}
@@ -353,14 +353,14 @@ function ProfilePageInner() {
           </button>
         </div>
 
+        {/* ── AI Configuration ── */}
+        <AiConfigCard open={openCard === 'ai'} onToggle={() => toggleCard('ai')} />
+
         {/* ── Language ── */}
         <LanguageCard open={openCard === 'language'} onToggle={() => toggleCard('language')} />
 
         {/* ── Theme ── */}
         <ThemeCard open={openCard === 'theme'} onToggle={() => toggleCard('theme')} />
-
-        {/* ── AI Configuration ── */}
-        <AiConfigCard open={openCard === 'ai'} onToggle={() => toggleCard('ai')} />
 
         {/* ── Export data ── */}
         <ExportDataCard />
