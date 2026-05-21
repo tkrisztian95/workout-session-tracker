@@ -19,7 +19,7 @@ Add or edit guidance in `AGENTS.md`, not here. The only content that belongs in 
 
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **workout-session-tracker** (5685 symbols, 7483 relationships, 142 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **workout-session-tracker** (5689 symbols, 7487 relationships, 142 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
