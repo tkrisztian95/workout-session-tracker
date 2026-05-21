@@ -412,6 +412,9 @@
   "about_version": "Version",
   "about_license": "MIT License",
   "about_source_code": "Source Code",
+  "about_feedback": "Report an Issue",
+  "about_feedback_subtitle": "Bug reports & feature requests",
+  "about_contact": "Contact",
   "about_privacy_policy": "Privacy Policy",
   "about_data_summary": "What data leaves your device",
 
