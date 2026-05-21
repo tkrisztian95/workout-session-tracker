@@ -46,6 +46,8 @@ Recommended order: **2 → 3 → 1 → 4 → (5 + 6 interleaved)**.
    - Acceptance: every existing AI call (plan suggestion, exercise swap, notes import) goes through one `generateText` / `streamText` / `generateObject` shape.
 
 2. **Extract `buildAiContext()` — the context envelope.** — [#58](https://github.com/tkrisztian95/workout-session-tracker/issues/58)
+
+   **Ships incrementally.** Phase 1 = `profile + activePlans + recentSessions + progression` (everything available in `localStorage` today). The deferred fields (`preferences`, `evaluation`, `likes`) get added one line at a time as their feeder issues land — [#53 onboarding](https://github.com/tkrisztian95/workout-session-tracker/issues/53), [#54 session meta](https://github.com/tkrisztian95/workout-session-tracker/issues/54), [#52 like/dislike](https://github.com/tkrisztian95/workout-session-tracker/issues/52). The envelope is useful in Phase 1 because it stops per-feature drift and gives the 4 existing AI features a shared `progression` view; richness arrives feeder-by-feeder.
    - One function in `src/lib/ai/context.ts` that builds the user's training reality for any AI feature.
    - Inputs: feature name (`"plan-suggest"` / `"exercise-swap"` / etc.), optional overrides.
    - Output: a typed envelope of the form:
