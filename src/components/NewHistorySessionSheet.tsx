@@ -19,19 +19,11 @@ import AddExerciseModal from '@/components/AddExerciseModal';
 import AiImportReviewView from '@/components/AiImportReviewView';
 import { HistoryExerciseEditorContent, formatTarget } from '@/components/HistoryExerciseEditor';
 import MuscleBadge from '@/components/MuscleBadge';
-import {
-  getPlans,
-  getLlmConfig,
-  saveSession,
-  getLocale,
-  getRecentExerciseNames,
-} from '@/lib/storage';
-import { importSessions, AiValidationError, type AiImportResult } from '@/lib/ai';
+import { getPlans, getLlmConfig, saveSession } from '@/lib/storage';
+import { importSessions, AiValidationError, buildAiContext, type AiImportResult } from '@/lib/ai';
 import type { Exercise, LlmConfig, PlanExercise, WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { formatExerciseDetail, formatLoggedSet } from '@/lib/sessionUtils';
-
-const LOCALE_LANGUAGE: Record<string, string> = { en: 'English', hu: 'Hungarian', de: 'German' };
 
 function buildSession(result: AiImportResult): WorkoutSession {
   const mins = result.durationMins;
@@ -168,10 +160,8 @@ export default function NewHistorySessionSheet({
     setAiError(null);
     setAiValidationError(null);
     try {
-      const locale = getLocale() ?? 'en';
-      const language = LOCALE_LANGUAGE[locale] ?? 'English';
-      const existingNames = getRecentExerciseNames();
-      const results = await importSessions(aiNotes, language, existingNames, config);
+      const ctx = buildAiContext('notes-import');
+      const results = await importSessions(config, ctx, aiNotes);
       setReviewDrafts(results.map(buildSession));
     } catch (err) {
       if (err instanceof AiValidationError) {

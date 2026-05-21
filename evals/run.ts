@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { importSessions } from '../src/lib/ai/import';
+import type { AiContext } from '../src/lib/ai/context';
+import type { Locale } from '../src/lib/i18n';
 import { scoreFixture, type FixtureResult, type ExpectedSession } from './score';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -59,9 +61,21 @@ async function runFixture(
 ): Promise<FixtureResult> {
   const { notes, language, existingNames } = fixture.input;
 
+  // The eval runner does not depend on localStorage. Build a synthetic envelope
+  // containing only the inputs notes-import actually reads (`language`,
+  // `exerciseHistoryNames`); everything else stays empty.
+  const ctx: AiContext = {
+    language: (language as Locale) || null,
+    profile: {},
+    activePlans: [],
+    recentSessions: [],
+    progression: [],
+    exerciseHistoryNames: existingNames,
+  };
+
   let actual;
   try {
-    actual = await importSessions(notes, language, existingNames, config, version.prompt);
+    actual = await importSessions(config, ctx, notes, version.prompt);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { fixture: file, score: 0, sessions: [], errors: [`API error: ${msg}`] };

@@ -7,6 +7,26 @@ export { importSessions } from './import';
 export type { AiAdjustResult, AiSwapResult } from './adjust';
 export { adjustPlan, swapExercise } from './adjust';
 
+export type {
+  AiContext,
+  AiFeature,
+  ContextProfile,
+  SessionSummary,
+  SessionSummaryExercise,
+  ContextPreferences,
+  ContextLikes,
+  SessionEvaluation,
+} from './context';
+export {
+  buildAiContext,
+  summariseSessionToSummary,
+  formatSessionSummaryLine,
+  formatProfilePreamble,
+  formatRecentSessions,
+  formatLanguageInstruction,
+  RECENT_SESSIONS_LIMIT,
+} from './context';
+
 /**
  * Error thrown when AI agent input is rejected as not fitness-relevant.
  */

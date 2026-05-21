@@ -1,8 +1,13 @@
-import type { LlmConfig, WorkoutPlan, WorkoutSession, PlanDay, PlanExercise, Sex } from '../types';
-import { getSex, getAge, getHeightCm, getWeightKg } from '../storage';
+import type { LlmConfig, WorkoutPlan, PlanDay, PlanExercise } from '../types';
 import { callOpenAI } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/plan';
 import { migrateLegacyCategory } from '../muscles';
+import {
+  type AiContext,
+  formatProfilePreamble,
+  formatRecentSessions,
+  formatLanguageInstruction,
+} from './context';
 
 /**
  * Defensive: the LLM may still emit a legacy `category` field or a non-canonical
@@ -92,64 +97,19 @@ export function summarisePlan(plan: WorkoutPlan): string {
   return result;
 }
 
-function summariseSession(session: WorkoutSession): string {
-  const date = session.completedAt.slice(0, 10);
-  const exercises = session.exercises
-    .map((e) => {
-      let desc: string;
-      if (e.type === 'sets-reps') {
-        const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
-        if (e.loggedSets && e.loggedSets.length > 0) {
-          const sets = e.loggedSets.map((s) => `${s.reps}r@${s.weight}kg`).join('+');
-          desc = `${e.name} [${sets}]`;
-        } else {
-          const repsPart =
-            e.repsPerSet && e.repsPerSet.length > 0
-              ? e.repsPerSet.join('/')
-              : `${e.sets}×${e.reps}`;
-          desc = `${e.name} ${repsPart}${weight}`;
-        }
-      } else if (e.type === 'sets-duration') {
-        const weight = e.weightKg ? ` @${e.weightKg}kg` : '';
-        desc = `${e.name} ${e.sets}×${e.duration}s${weight}`;
-      } else {
-        desc = `${e.name} ${e.duration}s`;
-      }
-      if (e.muscle) desc += ` [${e.muscle}]`;
-      return desc;
-    })
-    .join(', ');
-  const rating = session.rating ? ` (rating: ${session.rating}/5)` : '';
-  return `${date}: ${exercises}${rating}`;
-}
-
 export type AiPlanPreferences = {
   focus?: string;
   daysPerWeek?: string;
   goal?: string;
 };
 
-export function buildPlanSuggestionPrompt(
-  plans: WorkoutPlan[],
-  sessions: WorkoutSession[],
-  preferences?: AiPlanPreferences,
-  language?: string,
-  sex?: Sex | null,
-  age?: number | null,
-  heightCm?: number | null,
-  weightKg?: number | null,
-): string {
-  const recentSessions = [...sessions]
-    .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
-    .slice(0, 20);
-
+export function buildPlanSuggestionPrompt(ctx: AiContext, preferences?: AiPlanPreferences): string {
   const plansSummary =
-    plans.length > 0 ? plans.map(summarisePlan).join('\n') : 'No existing plans.';
+    ctx.activePlans.length > 0
+      ? ctx.activePlans.map(summarisePlan).join('\n')
+      : 'No existing plans.';
 
-  const sessionsSummary =
-    recentSessions.length > 0
-      ? recentSessions.map(summariseSession).join('\n')
-      : 'No completed sessions yet.';
+  const sessionsSummary = formatRecentSessions(ctx.recentSessions);
 
   const goalParts: string[] = [];
   if (preferences?.focus) goalParts.push(`Focus: ${preferences.focus}`);
@@ -160,47 +120,22 @@ export function buildPlanSuggestionPrompt(
   const goalSection =
     goalParts.length > 0 ? `My goals for this plan:\n${goalParts.join('\n')}\n\n` : '';
 
-  const languageInstruction = language
-    ? `\n\nPlease write the plan name, day names, exercise names, and reasoning in ${language}.`
-    : '';
+  const metricsPreamble = formatProfilePreamble(ctx.profile);
+  const metricsBlock = metricsPreamble ? `${metricsPreamble}\n\n` : '';
 
-  const metricLines = [
-    sex ? `Biological sex: ${sex}` : '',
-    age ? `Age: ${age} years` : '',
-    heightCm ? `Height: ${heightCm} cm` : '',
-    weightKg ? `Weight: ${weightKg} kg` : '',
-  ]
-    .filter(Boolean)
-    .join(', ');
+  const languageInstruction = formatLanguageInstruction(ctx.language);
 
-  const metricsPreamble = metricLines ? `About me: ${metricLines}.\n\n` : '';
-
-  return `${goalSection}${metricsPreamble}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${languageInstruction}`;
+  return `${goalSection}${metricsBlock}Here are my existing workout plans:\n${plansSummary}\n\nHere are my recent workout sessions (most recent first):\n${sessionsSummary}\n\nPlease suggest a new workout plan that builds on my history and helps me progress.${languageInstruction}`;
 }
 
 export type AiPlanResult = Omit<WorkoutPlan, 'id' | 'status'> & { reasoning?: string };
 
 export async function suggestPlan(
   config: LlmConfig,
-  plans: WorkoutPlan[],
-  sessions: WorkoutSession[],
+  ctx: AiContext,
   preferences?: AiPlanPreferences,
-  language?: string,
 ): Promise<AiPlanResult> {
-  const sex = getSex();
-  const age = getAge();
-  const heightCm = getHeightCm();
-  const weightKg = getWeightKg();
-  const userMessage = buildPlanSuggestionPrompt(
-    plans,
-    sessions,
-    preferences,
-    language,
-    sex,
-    age,
-    heightCm,
-    weightKg,
-  );
+  const userMessage = buildPlanSuggestionPrompt(ctx, preferences);
 
   const content = await callOpenAI(config, SYSTEM_PROMPT, userMessage);
 

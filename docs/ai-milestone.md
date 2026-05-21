@@ -45,9 +45,11 @@ Recommended order: **2 → 3 → 1 → 4 → (5 + 6 interleaved)**.
    - User's BYOK key passes through unchanged during this milestone — Gateway just adds observability and a provider-swap seam.
    - Acceptance: every existing AI call (plan suggestion, exercise swap, notes import) goes through one `generateText` / `streamText` / `generateObject` shape.
 
-2. **Extract `buildAiContext()` — the context envelope.** — [#58](https://github.com/tkrisztian95/workout-session-tracker/issues/58)
+2. **Extract `buildAiContext()` — the context envelope.** — [#58](https://github.com/tkrisztian95/workout-session-tracker/issues/58) — **Phase 1 shipped** ✅
 
-   **Ships incrementally.** Phase 1 = `profile + activePlans + recentSessions + progression` (everything available in `localStorage` today). The deferred fields (`preferences`, `evaluation`, `likes`) get added one line at a time as their feeder issues land — [#53 onboarding](https://github.com/tkrisztian95/workout-session-tracker/issues/53), [#54 session meta](https://github.com/tkrisztian95/workout-session-tracker/issues/54), [#52 like/dislike](https://github.com/tkrisztian95/workout-session-tracker/issues/52). The envelope is useful in Phase 1 because it stops per-feature drift and gives the 4 existing AI features a shared `progression` view; richness arrives feeder-by-feeder.
+   **Ships incrementally.** Phase 1 = `profile + activePlans + recentSessions + progression + exerciseHistoryNames + language` (everything available in `localStorage` today). The deferred fields (`preferences`, `evaluation`, `likes`) get added one line at a time as their feeder issues land — [#53 onboarding](https://github.com/tkrisztian95/workout-session-tracker/issues/53), [#54 session meta](https://github.com/tkrisztian95/workout-session-tracker/issues/54), [#52 like/dislike](https://github.com/tkrisztian95/workout-session-tracker/issues/52). The envelope is useful in Phase 1 because it stops per-feature drift and gives the 4 existing AI features a shared `progression` view; richness arrives feeder-by-feeder.
+
+   **Shipped behavior:** all four AI feature entry points now take `(config, ctx, ...feature-specific args)` and read every shared input through the envelope. `swapExercise` and `adjustPlan` gained body-metrics + recent-training context that they were previously missing. `evals/run.ts` synthesises an envelope locally so it stays decoupled from `localStorage`.
    - One function in `src/lib/ai/context.ts` that builds the user's training reality for any AI feature.
    - Inputs: feature name (`"plan-suggest"` / `"exercise-swap"` / etc.), optional overrides.
    - Output: a typed envelope of the form:
