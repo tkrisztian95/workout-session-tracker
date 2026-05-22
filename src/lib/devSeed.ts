@@ -298,3 +298,14 @@ export function clearDevSeed(): void {
     SEED_FLAG,
   ].forEach((k) => localStorage.removeItem(k));
 }
+
+/**
+ * Wipe all seeded data but mark the seed flag as applied, so the next load does
+ * NOT re-seed — leaving the app on a clean onboarding flow. Used by the dev-only
+ * reset control to exercise onboarding from scratch without re-seeding.
+ */
+export function resetToOnboarding(): void {
+  if (typeof window === 'undefined') return;
+  clearDevSeed();
+  localStorage.setItem(SEED_FLAG, SEED_VERSION);
+}

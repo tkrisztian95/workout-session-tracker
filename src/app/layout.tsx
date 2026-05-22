@@ -58,7 +58,9 @@ export default function RootLayout({
             <LocaleProvider>
               {children}
               <MuscleMigrationToast />
-              {process.env.NODE_ENV === 'development' && <DevSeed />}
+              {(process.env.NODE_ENV === 'development' ||
+                process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview' ||
+                process.env.NEXT_PUBLIC_VERCEL_ENV === 'development') && <DevSeed />}
             </LocaleProvider>
           </ThemeProvider>
         </PostHogProvider>
