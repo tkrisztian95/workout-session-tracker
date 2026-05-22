@@ -36,7 +36,8 @@ This change is task 3 of the M1 — AI Infrastructure milestone (see [`docs/ai-m
 - **Modified:** `src/components/AiPlanSuggestionModal.tsx` (re-wires onto `useAiStream`, drops the local view/error state machine, preserves all PostHog events and the validation/rejection branch).
 - **Modified:** `package.json` — add `ai` to `dependencies`. No version pin opinion; latest v6 stable at the time of apply. `package-lock.json` updates accordingly.
 - **Modified:** `vitest.config.ts` and `package.json` (`devDependencies`) — add `@testing-library/react` and matching `@types` so `renderHook` is available. (The project has `jsdom` configured but no React testing library yet; we need it to validate the hook in isolation.)
-- **Unchanged:** `src/lib/ai/client.ts` (`callOpenAI` stays), `src/lib/ai/plan.ts` (`suggestPlan` signature stays), all prompts, all persisted shapes (`localStorage`, `ExportPayload`, `schemaVersion`), and the three non-migrated AI modals.
+- **Modified:** `src/lib/ai/client.ts` — `callOpenAI` wraps its `fetch()` call so a network-level failure surfaces friendly copy instead of the raw `TypeError: Failed to fetch`. This is a contract-preserving bug fix (still throws an `Error`, still returns a `string`), not the SDK migration deferred to M1.1 (#57). It benefits all four AI features. New `src/lib/ai/client.test.ts` covers the network-failure, 401, and success paths.
+- **Unchanged:** `src/lib/ai/plan.ts` (`suggestPlan` signature stays), all prompts, all persisted shapes (`localStorage`, `ExportPayload`, `schemaVersion`), and the three non-migrated AI modals.
 - **Tests:** existing test suite must still pass. New tests live under `src/components/AiStream.test.tsx`.
 - **No env-var changes**, no `process.env.NEXT_PUBLIC_*` reads added, BYOK API-key handling stays purely client-side per the M1–M4 forward-compat rules in `docs/ai-milestone.md`.
 - **No persisted-shape changes** — `docs/data-structure.md` does not need an update.

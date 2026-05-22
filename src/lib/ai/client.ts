@@ -5,21 +5,31 @@ export async function callOpenAI(
   systemPrompt: string,
   userMessage: string,
 ): Promise<string> {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: config.model,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage },
-      ],
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+      }),
+    });
+  } catch {
+    // fetch() rejects (rather than resolving non-ok) only on network-level
+    // failures — offline, DNS, CORS. Surface friendly copy instead of the
+    // raw "TypeError: Failed to fetch".
+    throw new Error(
+      'Could not reach the OpenAI API. Check your internet connection and try again.',
+    );
+  }
 
   if (!response.ok) {
     let code = '';

@@ -44,7 +44,13 @@
 
 ## 5. Verification & docs
 
-- [ ] 5.1 Run `gitnexus_detect_changes()` to confirm only the expected symbols / flows changed.
-- [ ] 5.2 Playwright MCP visual check: navigate to the dev server, open the AI Suggest modal, exercise the config → loading → preview path and the error / rejected path; screenshot each state.
-- [ ] 5.3 Confirm `docs/data-structure.md` needs no update (no persisted-shape change) and `docs/ai-milestone.md` task 3 status can be ticked.
-- [ ] 5.4 Run `openspec validate ai-stream-primitive --strict` and the full `npm test` suite once more before archiving.
+- [x] 5.1 Run `gitnexus_detect_changes()` to confirm only the expected symbols / flows changed.
+- [x] 5.2 Browser visual check: navigate to the dev server, open the AI Suggest modal, exercise the no-config view, the config form, and the generate → error path; confirm the `role="status"` / `aria-live="polite"` region is present. (Preview / rejected paths need a working OpenAI key + outbound network — unreachable from the test environment; covered by the hook's unit tests instead.)
+- [x] 5.3 Confirm `docs/data-structure.md` needs no update (no persisted-shape change) and tick `docs/ai-milestone.md` task 3.
+- [x] 5.4 Run `openspec validate ai-stream-primitive --strict` and the full `npm test` suite once more before archiving.
+
+## 6. Friendly network-error copy in callOpenAI
+
+- [x] 6.1 Run `gitnexus_impact` on `callOpenAI` — HIGH risk (4 AI features + evals); the change is additive / contract-preserving, so proceed.
+- [x] 6.2 Wrap the `fetch()` call in `src/lib/ai/client.ts` with a `try/catch` that maps a network-level rejection to "Could not reach the OpenAI API…" instead of the raw `TypeError: Failed to fetch`.
+- [x] 6.3 Add `src/lib/ai/client.test.ts` covering the network-failure, 401, and success paths.
