@@ -33,14 +33,14 @@
 
 ## 4. Migrate AiPlanSuggestionModal
 
-- [ ] 4.1 Run `gitnexus_impact` on `AiPlanSuggestionModal` (and on any symbol being changed) before editing; report the blast radius.
-- [ ] 4.2 Replace the `View` enum (`'no-config' | 'config' | 'loading' | 'preview' | 'rejected'`) with `'no-config' | 'config' | 'preview' | 'rejected'` — the loading view becomes the hook's `'loading'` state.
-- [ ] 4.3 Wire `useAiStream` with a Promise fetcher that calls `suggestPlan(config, ctx, preferences)`; remove the inline `try/catch` from `handleGenerate`.
-- [ ] 4.4 Preserve all three PostHog events: `ai_plan_generation_started` (in the fetcher, before `suggestPlan`), `ai_plan_generation_succeeded` (in `onComplete`), `ai_plan_generation_failed` (in `onError`, keeping the existing `error_type` classification).
-- [ ] 4.5 Keep the `AiValidationError` branch: detect it in `onError` (or via `parse`) and switch the modal to the `'rejected'` view with the validation reason; ensure no plan is created/stored.
-- [ ] 4.6 Wrap the loading / preview / rejected dynamic region in the `<AiStream>` component (or a `role="status"` / `aria-live="polite"` element) — not the whole modal body.
-- [ ] 4.7 Re-wire `handleRegenerate` to call the hook's `retry` / `reset` instead of manually clearing state; verify regenerate still resets the preference chips per current behavior.
-- [ ] 4.8 Run `npm run lint` and `npm run build` — no errors.
+- [x] 4.1 Run `gitnexus_impact` on `AiPlanSuggestionModal` (and on any symbol being changed) before editing; report the blast radius.
+- [x] 4.2 Replace the `View` enum (`'no-config' | 'config' | 'loading' | 'preview' | 'rejected'`) with `'no-config' | 'config'` — loading / preview / rejected all derive from the hook's `state` + error type.
+- [x] 4.3 Wire `useAiStream` with a Promise fetcher that calls `suggestPlan(config, ctx, preferences)`; remove the inline `try/catch` from `handleGenerate`.
+- [x] 4.4 Preserve all three PostHog events: `ai_plan_generation_started` (in `handleGenerate`, before `retry`), `ai_plan_generation_succeeded` (in `onComplete`), `ai_plan_generation_failed` (in `onError`, keeping the existing `error_type` classification).
+- [x] 4.5 Keep the `AiValidationError` branch: detect it in `onError` and derive the rejected view + validation reason from `aiStream.error`; ensure no plan is created/stored.
+- [x] 4.6 Wrap the loading / preview / rejected dynamic region in a `role="status"` / `aria-live="polite"` element — not the whole modal body.
+- [x] 4.7 Re-wire `handleRegenerate` to call the hook's `reset` instead of manually clearing state; verify regenerate still resets the preference chips per current behavior.
+- [x] 4.8 Run `npm run lint` and `npm run build` — no errors.
 
 ## 5. Verification & docs
 
