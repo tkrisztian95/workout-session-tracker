@@ -1,35 +1,35 @@
 ## 1. Dependencies & test toolchain
 
-- [ ] 1.1 Add `ai` (Vercel AI SDK v6, latest stable) to `dependencies` in `package.json` via `npm install ai`.
-- [ ] 1.2 Add `@testing-library/react` and `@testing-library/dom` to `devDependencies` via `npm install -D`.
-- [ ] 1.3 Verify the build still passes (`npm run build`) and note the bundle-size delta from the `ai` install; if the raw delta is non-trivial, confirm it tree-shakes (type-only import) before proceeding.
-- [ ] 1.4 Confirm `vitest.config.ts` `jsdom` environment is sufficient for `renderHook` — add a setup file only if RTL requires one.
+- [x] 1.1 Add `ai` (Vercel AI SDK v6, latest stable) to `dependencies` in `package.json` via `npm install ai`.
+- [x] 1.2 Add `@testing-library/react` and `@testing-library/dom` to `devDependencies` via `npm install -D`.
+- [x] 1.3 Verify the build still passes (`npm run build`) and note the bundle-size delta from the `ai` install; if the raw delta is non-trivial, confirm it tree-shakes (type-only import) before proceeding.
+- [x] 1.4 Confirm `vitest.config.ts` `jsdom` environment is sufficient for `renderHook` — add a setup file only if RTL requires one.
 
 ## 2. Build the AiStream primitive
 
-- [ ] 2.1 Create `src/components/AiStream.tsx` with a top-of-file JSDoc block containing two `@example` blocks: one Promise / one-shot fetcher, one AsyncIterable / streaming fetcher.
-- [ ] 2.2 Define exported types: `AiStreamState` (`'idle' | 'loading' | 'streaming' | 'done' | 'error'`), `AiStreamFetcher<T>` (receives `{ signal: AbortSignal }`, returns `Promise<T>` | `Promise<AsyncIterable<string>>` | `AsyncIterable<string>`), `UseAiStreamOptions<T>` (`fetch`, optional `parse`, `onComplete`, `onError`, `autoStart`), and `UseAiStreamReturn<T>`.
-- [ ] 2.3 Implement `useAiStream<T>` — internal state for `state`, `text`, `data`, `error`; an `AbortController` ref; a run-token ref so stale runs cannot write state after `cancel` / `retry`.
-- [ ] 2.4 Implement the run routine: invoke `fetch({ signal })`, await once, discriminate on `Symbol.asyncIterator`. Streaming branch: set `'streaming'`, iterate accumulating `text`, run `parse(text)` at end, set `data`, transition to `'done'`. One-shot branch: skip `'streaming'`, set `data` from the resolved value, transition to `'done'`.
-- [ ] 2.5 Implement error handling: synchronous throw, rejected Promise, iterator throw, and `parse` throw all transition to `'error'` with the value coerced to `Error`; fire `onError`. `onComplete` fires only on a clean `'done'`.
-- [ ] 2.6 Implement `start` (no-op unless `'idle'`), `retry` (`cancel` + clear + re-run from any state), `reset` (back to `'idle'`, clear all), `cancel` (`abort()` the controller, ignore further chunks via the run token, return to `'idle'`, clear all). Honor `autoStart` (default `true`) via `useEffect` on mount.
-- [ ] 2.7 Implement the `<AiStream>` wrapper component — render-prop / children-as-function over `useAiStream`, root element with `role="status"`, `aria-live="polite"`, `aria-atomic="false"`.
-- [ ] 2.8 Verify the file's static imports are only `react` and `type`-only `ai` — no `@/lib/*`, no `posthog-js`, no storage/env access.
+- [x] 2.1 Create `src/components/AiStream.tsx` with a top-of-file JSDoc block containing two `@example` blocks: one Promise / one-shot fetcher, one AsyncIterable / streaming fetcher.
+- [x] 2.2 Define exported types: `AiStreamState` (`'idle' | 'loading' | 'streaming' | 'done' | 'error'`), `AiStreamFetcher<T>` (receives `{ signal: AbortSignal }`, returns `Promise<T>` | `Promise<AsyncIterable<string>>` | `AsyncIterable<string>`), `UseAiStreamOptions<T>` (`fetch`, optional `parse`, `onComplete`, `onError`, `autoStart`), and `UseAiStreamReturn<T>`.
+- [x] 2.3 Implement `useAiStream<T>` — internal state for `state`, `text`, `data`, `error`; an `AbortController` ref; a run-token ref so stale runs cannot write state after `cancel` / `retry`.
+- [x] 2.4 Implement the run routine: invoke `fetch({ signal })`, await once, discriminate on `Symbol.asyncIterator`. Streaming branch: set `'streaming'`, iterate accumulating `text`, run `parse(text)` at end, set `data`, transition to `'done'`. One-shot branch: skip `'streaming'`, set `data` from the resolved value, transition to `'done'`.
+- [x] 2.5 Implement error handling: synchronous throw, rejected Promise, iterator throw, and `parse` throw all transition to `'error'` with the value coerced to `Error`; fire `onError`. `onComplete` fires only on a clean `'done'`.
+- [x] 2.6 Implement `start` (no-op unless `'idle'`), `retry` (`cancel` + clear + re-run from any state), `reset` (back to `'idle'`, clear all), `cancel` (`abort()` the controller, ignore further chunks via the run token, return to `'idle'`, clear all). Honor `autoStart` (default `true`) via `useEffect` on mount.
+- [x] 2.7 Implement the `<AiStream>` wrapper component — render-prop / children-as-function over `useAiStream`, root element with `role="status"`, `aria-live="polite"`, `aria-atomic="false"`.
+- [x] 2.8 Verify the file's static imports are only `react` and `type`-only `ai` — no `@/lib/*`, no `posthog-js`, no storage/env access.
 
 ## 3. Validate the primitive in isolation
 
-- [ ] 3.1 Create `src/components/AiStream.test.tsx`.
-- [ ] 3.2 Test: initial state with `autoStart: false` is `'idle'` with empty `text` / null `data` / null `error`.
-- [ ] 3.3 Test: `autoStart` default invokes `fetch` on mount and transitions to `'loading'`.
-- [ ] 3.4 Test: Promise fetcher resolving `v` → `'done'`, `data === v`, `onComplete(v, '')` called once.
-- [ ] 3.5 Test: AsyncIterable fetcher yielding chunks → `'streaming' → 'done'`, `text` accumulates, `parse` runs once, `onComplete(parsedData, fullText)` called once.
-- [ ] 3.6 Test: `Promise<AsyncIterable>` and bare `AsyncIterable` both dispatch to streaming mode.
-- [ ] 3.7 Test: fetcher throw / Promise rejection / iterator throw → `'error'`, `error` is an `Error`, `onError` called once.
-- [ ] 3.8 Test: `parse` throwing → `'error'`, `onComplete` not called, `onError` called.
-- [ ] 3.9 Test: `retry` from `'error'` and from `'done'` replays the fetcher and clears prior state.
-- [ ] 3.10 Test: `reset` returns to `'idle'`; `cancel` during streaming aborts, returns to `'idle'`, and ignores chunks yielded post-abort; `start` is a no-op when not `'idle'`.
-- [ ] 3.11 Test: fetcher receives `{ signal }` and the signal aborts when `cancel` is called.
-- [ ] 3.12 Run `npm test` — all new and existing tests pass.
+- [x] 3.1 Create `src/components/AiStream.test.tsx`.
+- [x] 3.2 Test: initial state with `autoStart: false` is `'idle'` with empty `text` / null `data` / null `error`.
+- [x] 3.3 Test: `autoStart` default invokes `fetch` on mount and transitions to `'loading'`.
+- [x] 3.4 Test: Promise fetcher resolving `v` → `'done'`, `data === v`, `onComplete(v, '')` called once.
+- [x] 3.5 Test: AsyncIterable fetcher yielding chunks → `'streaming' → 'done'`, `text` accumulates, `parse` runs once, `onComplete(parsedData, fullText)` called once.
+- [x] 3.6 Test: `Promise<AsyncIterable>` and bare `AsyncIterable` both dispatch to streaming mode.
+- [x] 3.7 Test: fetcher throw / Promise rejection / iterator throw → `'error'`, `error` is an `Error`, `onError` called once.
+- [x] 3.8 Test: `parse` throwing → `'error'`, `onComplete` not called, `onError` called.
+- [x] 3.9 Test: `retry` from `'error'` and from `'done'` replays the fetcher and clears prior state.
+- [x] 3.10 Test: `reset` returns to `'idle'`; `cancel` during streaming aborts, returns to `'idle'`, and ignores chunks yielded post-abort; `start` is a no-op when not `'idle'`.
+- [x] 3.11 Test: fetcher receives `{ signal }` and the signal aborts when `cancel` is called.
+- [x] 3.12 Run `npm test` — all new and existing tests pass.
 
 ## 4. Migrate AiPlanSuggestionModal
 
