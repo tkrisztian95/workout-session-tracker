@@ -30,7 +30,7 @@ The system SHALL render an "AI Suggest" button on the Plans tab, visually distin
 
 ### Requirement: System generates a plan suggestion using LLM
 
-The system SHALL collect existing plans and the last 20 completed workout sessions, construct a prompt, and call the OpenAI Chat Completions API with `response_format: { type: "json_object" }`. The returned JSON SHALL include a `valid` boolean field; if `valid` is false the system SHALL display the model's rejection reason instead of a plan preview. If `valid` is true (or absent), the returned JSON SHALL be parsed into a `WorkoutPlan` object.
+The system SHALL collect existing plans and the last 20 completed workout sessions, construct a prompt, and call the OpenAI Chat Completions API with `response_format: { type: "json_object" }`. The returned JSON SHALL include a `valid` boolean field; if `valid` is false the system SHALL display the model's rejection reason instead of a plan preview. If `valid` is true (or absent), the returned JSON SHALL be parsed into a `WorkoutPlan` object. The modal SHALL orchestrate the loading / preview / rejected / retry states through the shared `useAiStream` hook from `[[ai-stream-primitive]]` rather than a local view enum, and the loading region SHALL be wrapped in an ARIA live region (`role="status"`, `aria-live="polite"`) so assistive tech announces the in-flight state.
 
 #### Scenario: Successful plan generation with history
 
@@ -58,6 +58,12 @@ The system SHALL collect existing plans and the last 20 completed workout sessio
 - **THEN** the plan modal SHALL display the model's rejection reason (or a fallback locale string) instead of a plan preview
 - **AND** the "Regenerate" action SHALL remain available so the user can update preferences and retry
 - **AND** no plan data SHALL be created or stored
+
+#### Scenario: Loading region announced via ARIA live region
+
+- **WHEN** the user taps "Generate" and the modal enters the loading state
+- **THEN** the loading region SHALL be rendered inside an element with `role="status"` and `aria-live="polite"`
+- **AND** assistive tech SHALL receive a polite announcement when the state transitions to loading, done, or error
 
 ### Requirement: User can preview and apply the suggested plan
 
