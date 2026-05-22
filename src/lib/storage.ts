@@ -284,15 +284,42 @@ export function saveWeightKg(kg: number): void {
 
 // ─── LLM Config ───────────────────────────────────────────────────────────────
 
+/**
+ * Dev/preview convenience: seed the AI key from a build-time env var so the AI
+ * features are usable without hand-entering a key in Profile → AI Configuration.
+ *
+ * SECURITY: `NEXT_PUBLIC_*` vars are inlined into the client bundle and visible
+ * to anyone. This fallback is honored ONLY in local dev or a Vercel preview —
+ * never production. The gate fails closed: if the deployment environment can't
+ * be confirmed as non-production, the env key is ignored. The primary safeguard
+ * is still not setting `NEXT_PUBLIC_OPENAI_API_KEY` on the Production env in
+ * Vercel; this code gate is defense-in-depth.
+ */
+function getEnvLlmConfig(): LlmConfig | null {
+  const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+  if (!apiKey) return null;
+  const vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
+  const isNonProduction =
+    process.env.NODE_ENV === 'development' ||
+    vercelEnv === 'preview' ||
+    vercelEnv === 'development';
+  if (!isNonProduction) return null;
+  return {
+    provider: 'openai',
+    apiKey,
+    model: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
+  };
+}
+
 export function getLlmConfig(): LlmConfig | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(KEYS.llmConfig);
-    if (!raw) return null;
-    return JSON.parse(raw) as LlmConfig;
+    if (raw) return JSON.parse(raw) as LlmConfig;
   } catch {
-    return null;
+    // Corrupt localStorage value — fall through to the env fallback.
   }
+  return getEnvLlmConfig();
 }
 
 export function saveLlmConfig(config: LlmConfig): void {

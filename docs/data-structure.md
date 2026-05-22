@@ -63,6 +63,12 @@ interface LlmConfig {
 
 Persisted at `wst_llm_config`. The API key is stored in plaintext on the client.
 
+`getLlmConfig()` returns the saved `wst_llm_config` when present. As a dev/preview
+convenience, when nothing is saved it falls back to a config synthesized from the
+`NEXT_PUBLIC_OPENAI_API_KEY` (and optional `NEXT_PUBLIC_OPENAI_MODEL`) env vars —
+but only in local dev or a Vercel preview, never production. The fallback never
+writes to `localStorage`; a saved config always takes precedence. See `.env.example`.
+
 ### Muscle taxonomy
 
 Defined in [src/lib/muscles.ts](../src/lib/muscles.ts):
