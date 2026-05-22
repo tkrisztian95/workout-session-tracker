@@ -73,10 +73,12 @@ Recommended order: **2 → 3 → 1 → 4 → (5 + 6 interleaved)**.
    - Each AI feature picks fields it needs. Prompt templates live next to the feature, not next to the context builder.
    - Acceptance: removing a field from the envelope breaks all callers in one obvious place, not in 15 prompt strings.
 
-3. **`<AiStream>` UI primitive.** — [#59](https://github.com/tkrisztian95/workout-session-tracker/issues/59)
+3. **`<AiStream>` UI primitive.** — [#59](https://github.com/tkrisztian95/workout-session-tracker/issues/59) — **Shipped** ✅
    - Reusable component that handles: idle → loading skeleton → streaming token output → done → error / retry.
    - Today each AI modal reinvents this state machine — see [`AiPlanSuggestionModal.tsx`](../src/components/AiPlanSuggestionModal.tsx), [`AiExerciseSwapModal.tsx`](../src/components/AiExerciseSwapModal.tsx), etc.
    - Acceptance: a new AI feature's modal/sheet is < 50 lines of UI.
+
+   **Shipped behavior:** `src/components/AiStream.tsx` exports the `useAiStream` hook (the `idle | loading | streaming | done | error` state machine, with `retry` / `reset` / `cancel` and an `AbortController` seam) plus a thin `<AiStream>` wrapper that renders the accessible `role="status"` / `aria-live="polite"` region. The fetcher is injected and discriminated at runtime — `Promise<T>` one-shot calls and `AsyncIterable<string>` streaming calls both flow through the same hook. `AiPlanSuggestionModal` is migrated onto it as the proof consumer; M1.1 (#57) ports the remaining three modals.
 
 4. **Tool calling, not JSON-text parsing.** — [#60](https://github.com/tkrisztian95/workout-session-tracker/issues/60)
    - When the AI mutates state (swap exercise, adjust plan day, log a set), use AI SDK structured tool calls — not JSON returned in text.

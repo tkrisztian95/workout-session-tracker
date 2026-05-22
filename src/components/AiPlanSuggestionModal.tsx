@@ -5,9 +5,10 @@ import { Sparkles, RefreshCw, Loader2, ChevronDown, AlertTriangle } from 'lucide
 import { usePostHog } from 'posthog-js/react';
 import { getLlmConfig } from '@/lib/storage';
 import { suggestPlan, AiValidationError, buildAiContext } from '@/lib/ai';
-import type { AiPlanPreferences } from '@/lib/ai';
+import type { AiPlanPreferences, AiPlanResult } from '@/lib/ai';
 import type { WorkoutPlan } from '@/lib/types';
 import { Button, FieldLabel, ModalSheet } from '@/components/ui';
+import { useAiStream } from '@/components/AiStream';
 import { useTranslations } from '@/lib/locale-context';
 import Link from 'next/link';
 
@@ -36,7 +37,13 @@ function ErrorMessage({ message, openLinkLabel }: { message: string; openLinkLab
   );
 }
 
-type View = 'no-config' | 'config' | 'loading' | 'preview' | 'rejected';
+function classifyError(message: string): string {
+  if (message.includes('no credits')) return 'quota';
+  if (message.includes('Invalid API key')) return 'auth';
+  if (message.includes('parse JSON')) return 'parse';
+  if (message.includes('missing required')) return 'validation';
+  return 'api';
+}
 
 interface AiPlanSuggestionModalProps {
   onApply: (plan: Omit<WorkoutPlan, 'id' | 'status'>) => void;
@@ -84,32 +91,61 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
   const savedConfig = getLlmConfig();
   const hasSavedConfig = !!savedConfig?.apiKey;
 
-  const [view, setView] = useState<View>(hasSavedConfig ? 'config' : 'no-config');
-  const [error, setError] = useState('');
-  const [suggestedPlan, setSuggestedPlan] = useState<Omit<WorkoutPlan, 'id' | 'status'> | null>(
-    null,
-  );
-  const [reasoning, setReasoning] = useState<string | undefined>(undefined);
+  const [view, setView] = useState<'no-config' | 'config'>(hasSavedConfig ? 'config' : 'no-config');
   const [reasoningOpen, setReasoningOpen] = useState(false);
-  const [validationReason, setValidationReason] = useState('');
   const [focus, setFocus] = useState('');
   const [daysPerWeek, setDaysPerWeek] = useState('');
   const [goal, setGoal] = useState('');
   const generationStartRef = useRef<number>(0);
 
-  const handleGenerate = async () => {
+  // The loading → done/error state machine lives in useAiStream; the modal only
+  // owns the no-config gate, the preference chips, and the reasoning toggle.
+  const aiStream = useAiStream<AiPlanResult>({
+    autoStart: false,
+    fetch: async () => {
+      const config = getLlmConfig();
+      if (!config?.apiKey) throw new Error('Missing API key');
+      const preferences: AiPlanPreferences = {
+        focus: focus || undefined,
+        daysPerWeek: daysPerWeek || undefined,
+        goal: goal || undefined,
+      };
+      const ctx = buildAiContext('plan-suggest');
+      return suggestPlan(config, ctx, preferences);
+    },
+    onComplete: (plan) => {
+      posthog?.capture('ai_plan_generation_succeeded', {
+        model: getLlmConfig()?.model,
+        duration_ms: Date.now() - generationStartRef.current,
+        day_count: plan.days.length,
+      });
+    },
+    onError: (err) => {
+      posthog?.capture('ai_plan_generation_failed', {
+        model: getLlmConfig()?.model,
+        duration_ms: Date.now() - generationStartRef.current,
+        error_type: err instanceof AiValidationError ? 'validation' : classifyError(err.message),
+      });
+    },
+  });
+
+  const plan = aiStream.data;
+  const reasoning = plan?.reasoning;
+  const validationReason =
+    aiStream.error instanceof AiValidationError ? aiStream.error.reason : null;
+  const apiError = aiStream.state === 'error' && !validationReason ? aiStream.error : null;
+  const showConfigForm =
+    view === 'config' &&
+    aiStream.state !== 'loading' &&
+    aiStream.state !== 'done' &&
+    !validationReason;
+
+  const handleGenerate = () => {
     const config = getLlmConfig();
     if (!config?.apiKey) {
       setView('no-config');
       return;
     }
-    setError('');
-    setView('loading');
-    const preferences: AiPlanPreferences = {
-      focus: focus || undefined,
-      daysPerWeek: daysPerWeek || undefined,
-      goal: goal || undefined,
-    };
     posthog?.capture('ai_plan_generation_started', {
       model: config.model,
       focus: focus || null,
@@ -117,67 +153,27 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
       goal: goal || null,
     });
     generationStartRef.current = Date.now();
-    try {
-      const ctx = buildAiContext('plan-suggest');
-      const result = await suggestPlan(config, ctx, preferences);
-      setSuggestedPlan(result);
-      setReasoning(result.reasoning);
-      setView('preview');
-      posthog?.capture('ai_plan_generation_succeeded', {
-        model: config.model,
-        duration_ms: Date.now() - generationStartRef.current,
-        day_count: result.days.length,
-      });
-    } catch (err) {
-      if (err instanceof AiValidationError) {
-        setValidationReason(err.reason);
-        setView('rejected');
-        posthog?.capture('ai_plan_generation_failed', {
-          model: config.model,
-          duration_ms: Date.now() - generationStartRef.current,
-          error_type: 'validation',
-        });
-        return;
-      }
-      const message = err instanceof Error ? err.message : 'Failed to generate plan';
-      setError(message);
-      setView('config');
-      posthog?.capture('ai_plan_generation_failed', {
-        model: config.model,
-        duration_ms: Date.now() - generationStartRef.current,
-        error_type: message.includes('no credits')
-          ? 'quota'
-          : message.includes('Invalid API key')
-            ? 'auth'
-            : message.includes('parse JSON')
-              ? 'parse'
-              : message.includes('missing required')
-                ? 'validation'
-                : 'api',
-      });
-    }
+    aiStream.retry();
   };
 
   const handleUse = () => {
-    if (!suggestedPlan) return;
+    if (!plan) return;
     posthog?.capture('ai_plan_applied', {
       model: getLlmConfig()?.model,
-      day_count: suggestedPlan.days.length,
+      day_count: plan.days.length,
     });
-    onApply(suggestedPlan);
+    onApply(plan);
   };
 
   const handleRegenerate = () => {
     posthog?.capture('ai_plan_regenerated', {
       model: getLlmConfig()?.model,
     });
-    setSuggestedPlan(null);
-    setReasoning(undefined);
-    setValidationReason('');
+    setReasoningOpen(false);
     setFocus('');
     setDaysPerWeek('');
     setGoal('');
-    setView('config');
+    aiStream.reset();
   };
 
   return (
@@ -204,7 +200,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
       )}
 
       {/* Config view (preferences only) */}
-      {view === 'config' && (
+      {showConfigForm && (
         <div className="space-y-4">
           <div>
             <FieldLabel>{t.ai_preferences_label}</FieldLabel>
@@ -239,7 +235,11 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
             </div>
           </div>
 
-          {error && <ErrorMessage message={error} openLinkLabel={t.ai_error_open_link} />}
+          {apiError && (
+            <div role="status" aria-live="polite">
+              <ErrorMessage message={apiError.message} openLinkLabel={t.ai_error_open_link} />
+            </div>
+          )}
 
           <Button onClick={handleGenerate} className="w-full gap-2 mt-2">
             <Sparkles className="w-4 h-4" />
@@ -248,92 +248,95 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
         </div>
       )}
 
-      {/* Loading view */}
-      {view === 'loading' && (
-        <div className="flex flex-col items-center justify-center py-12 gap-4">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
-          <p className="text-secondary text-sm">{t.ai_generating}</p>
-        </div>
-      )}
-
-      {/* Rejected view */}
-      {view === 'rejected' && (
-        <div className="space-y-4">
-          <div className="bg-warning/8 rounded-2xl px-4 py-4 flex gap-3">
-            <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <p className="text-warning text-sm font-semibold">{t.ai_validation_title}</p>
-              <p className="text-warning/80 text-sm leading-relaxed">{validationReason}</p>
-            </div>
-          </div>
-          <Button variant="secondary" onClick={handleRegenerate} className="w-full gap-2">
-            <RefreshCw className="w-4 h-4" />
-            {t.ai_regenerate_button}
-          </Button>
-        </div>
-      )}
-
-      {/* Preview view */}
-      {view === 'preview' && suggestedPlan && (
-        <div className="space-y-5">
-          <div className="bg-elevated rounded-2xl px-4 py-4 space-y-1">
-            <p className="font-bold text-foreground text-base">{suggestedPlan.name}</p>
-            <p className="text-muted text-sm">
-              {suggestedPlan.days.length}{' '}
-              {suggestedPlan.days.length !== 1 ? t.ai_training_days : t.ai_training_day}
-            </p>
-            {suggestedPlan.days.map((day) => (
-              <div key={day.id} className="pt-1">
-                <p className="text-secondary text-sm font-medium">{day.name || 'Day'}</p>
-                <p className="text-dim text-xs">
-                  {day.coreExercises.length + day.optionalExercises.length} {t.ai_exercises}
-                </p>
-              </div>
-            ))}
-            {suggestedPlan.sharedExercises.length > 0 && (
-              <p className="text-dim text-xs pt-1">
-                + {suggestedPlan.sharedExercises.length}{' '}
-                {suggestedPlan.sharedExercises.length !== 1
-                  ? t.ai_shared_exercises
-                  : t.ai_shared_exercise}
-              </p>
-            )}
-          </div>
-
-          {reasoning && (
-            <div className="bg-elevated rounded-2xl overflow-hidden">
-              <button
-                onClick={() => setReasoningOpen((o) => !o)}
-                className="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
-              >
-                <p className="text-muted text-xs font-medium uppercase tracking-wide">
-                  {t.ai_why_this_plan}
-                </p>
-                <ChevronDown
-                  className={`w-4 h-4 text-muted transition-transform duration-200 ${reasoningOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
-              {reasoningOpen && (
-                <p className="text-secondary text-sm leading-relaxed px-4 pb-4">{reasoning}</p>
-              )}
+      {/* AI-call outcome: loading / rejected / preview. Kept mounted as one
+          live region so transitions are announced to assistive tech. */}
+      {view === 'config' && (
+        <div role="status" aria-live="polite" aria-atomic="false">
+          {aiStream.state === 'loading' && (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <Loader2 className="w-8 h-8 text-brand animate-spin" />
+              <p className="text-secondary text-sm">{t.ai_generating}</p>
             </div>
           )}
 
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleRegenerate}
-              className="flex-1 gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              {t.ai_regenerate_button}
-            </Button>
-            <Button onClick={handleUse} className="flex-[2] gap-2">
-              <Sparkles className="w-4 h-4" />
-              {t.ai_use_plan_button}
-            </Button>
-          </div>
+          {validationReason && (
+            <div className="space-y-4">
+              <div className="bg-warning/8 rounded-2xl px-4 py-4 flex gap-3">
+                <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="text-warning text-sm font-semibold">{t.ai_validation_title}</p>
+                  <p className="text-warning/80 text-sm leading-relaxed">{validationReason}</p>
+                </div>
+              </div>
+              <Button variant="secondary" onClick={handleRegenerate} className="w-full gap-2">
+                <RefreshCw className="w-4 h-4" />
+                {t.ai_regenerate_button}
+              </Button>
+            </div>
+          )}
+
+          {aiStream.state === 'done' && plan && (
+            <div className="space-y-5">
+              <div className="bg-elevated rounded-2xl px-4 py-4 space-y-1">
+                <p className="font-bold text-foreground text-base">{plan.name}</p>
+                <p className="text-muted text-sm">
+                  {plan.days.length}{' '}
+                  {plan.days.length !== 1 ? t.ai_training_days : t.ai_training_day}
+                </p>
+                {plan.days.map((day) => (
+                  <div key={day.id} className="pt-1">
+                    <p className="text-secondary text-sm font-medium">{day.name || 'Day'}</p>
+                    <p className="text-dim text-xs">
+                      {day.coreExercises.length + day.optionalExercises.length} {t.ai_exercises}
+                    </p>
+                  </div>
+                ))}
+                {plan.sharedExercises.length > 0 && (
+                  <p className="text-dim text-xs pt-1">
+                    + {plan.sharedExercises.length}{' '}
+                    {plan.sharedExercises.length !== 1
+                      ? t.ai_shared_exercises
+                      : t.ai_shared_exercise}
+                  </p>
+                )}
+              </div>
+
+              {reasoning && (
+                <div className="bg-elevated rounded-2xl overflow-hidden">
+                  <button
+                    onClick={() => setReasoningOpen((o) => !o)}
+                    className="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
+                  >
+                    <p className="text-muted text-xs font-medium uppercase tracking-wide">
+                      {t.ai_why_this_plan}
+                    </p>
+                    <ChevronDown
+                      className={`w-4 h-4 text-muted transition-transform duration-200 ${reasoningOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {reasoningOpen && (
+                    <p className="text-secondary text-sm leading-relaxed px-4 pb-4">{reasoning}</p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleRegenerate}
+                  className="flex-1 gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  {t.ai_regenerate_button}
+                </Button>
+                <Button onClick={handleUse} className="flex-[2] gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  {t.ai_use_plan_button}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </ModalSheet>

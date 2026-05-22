@@ -36,7 +36,11 @@
       "mcp__gitnexus__rename",
       "mcp__gitnexus__route_map",
       "mcp__gitnexus__shape_check",
-      "mcp__gitnexus__tool_map"
+      "mcp__gitnexus__tool_map",
+      "Bash(npx openspec:*)",
+      "Bash(vitest:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm run vitest:*)"
     ]
   }
 }

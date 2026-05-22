@@ -123,6 +123,8 @@ mcp__playwright__browser_fill_form
 
 Typical flow: navigate → screenshot → interact → screenshot again. Use `browser_snapshot` for an accessibility-tree view when you need to inspect element structure rather than visuals. This is useful for verifying AI modal states (loading, preview, rejection) or the session import review flow without manually opening a browser.
 
+**Always check in a mobile viewport.** This app is mobile-first — a desktop-width screenshot does not reflect what users see. Before taking any screenshot or visual check, emulate a mobile viewport, matching the `capture-screenshots` skill: `448×844 CSS px at 2× DPR, mobile, touch`. With the `chrome-devtools` MCP set it via `emulate({ viewport: '448x844x2,mobile,touch' })` — not `resize_page`, which clamps to a 500 px minimum window width on macOS.
+
 ### UI/UX Design with `ui-ux-pro-max`
 
 When adding or redesigning UI components, invoke the `/ui-ux-pro-max` skill to get design guidance aligned with the project's stack (Next.js, Tailwind CSS 4, shadcn/ui, mobile-first):
