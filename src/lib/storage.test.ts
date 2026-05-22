@@ -1,11 +1,18 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { getActiveSession, getHiddenExercises, getPlans, getSessions } from './storage';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  getActiveSession,
+  getHiddenExercises,
+  getLlmConfig,
+  getPlans,
+  getSessions,
+} from './storage';
 
 const KEYS = {
   plans: 'wst_plans',
   sessions: 'wst_sessions',
   activeSession: 'wst_active_session',
   hiddenExercises: 'wst_hidden_exercises',
+  llmConfig: 'wst_llm_config',
 } as const;
 
 function legacySession(exercises: unknown[]) {
@@ -146,5 +153,63 @@ describe('getHiddenExercises migration', () => {
     );
     const loaded = getHiddenExercises();
     expect(loaded).toEqual([{ nameKey: 'squat', muscle: 'quads' }]);
+  });
+});
+
+describe('getLlmConfig env-var fallback', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('returns null when nothing is saved and no env var is set', () => {
+    expect(getLlmConfig()).toBeNull();
+  });
+
+  it('returns a config synthesized from the env var in local dev', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(getLlmConfig()).toEqual({
+      provider: 'openai',
+      apiKey: 'sk-env-key',
+      model: 'gpt-4o-mini',
+    });
+  });
+
+  it('honors the env var in a Vercel preview deployment', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'preview');
+    expect(getLlmConfig()?.apiKey).toBe('sk-env-key');
+  });
+
+  it('uses NEXT_PUBLIC_OPENAI_MODEL when provided', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_MODEL', 'gpt-4o');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(getLlmConfig()?.model).toBe('gpt-4o');
+  });
+
+  it('ignores the env var in a production deployment (gate fails closed)', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'production');
+    expect(getLlmConfig()).toBeNull();
+  });
+
+  it('ignores the env var when the environment cannot be confirmed non-production', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', '');
+    expect(getLlmConfig()).toBeNull();
+  });
+
+  it('lets a saved localStorage config take precedence over the env var', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NODE_ENV', 'development');
+    localStorage.setItem(
+      KEYS.llmConfig,
+      JSON.stringify({ provider: 'openai', apiKey: 'sk-saved-key', model: 'gpt-4o' }),
+    );
+    expect(getLlmConfig()?.apiKey).toBe('sk-saved-key');
   });
 });
