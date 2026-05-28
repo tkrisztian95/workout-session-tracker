@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSessionTimeline,
   formatExerciseDetail,
+  formatMonthBucket,
   formatRepsTarget,
+  getSessionBucket,
   parseRepScheme,
 } from './sessionUtils';
 import type { Exercise, WorkoutSession } from './types';
@@ -162,5 +164,60 @@ describe('buildSessionTimeline', () => {
 
   it('returns an empty array when no exercises have timing data', () => {
     expect(buildSessionTimeline(session([baseExercise({ id: 'a' })]))).toEqual([]);
+  });
+});
+
+describe('getSessionBucket', () => {
+  // Thursday 2026-05-28; week starts Monday 2026-05-25.
+  const now = new Date(2026, 4, 28, 10, 0, 0);
+  const at = (y: number, m: number, d: number) => new Date(y, m - 1, d, 9, 0, 0).toISOString();
+
+  it('buckets dates in the current week as "this week"', () => {
+    expect(getSessionBucket(at(2026, 5, 25), now).relativeKey).toBe('this_week');
+    expect(getSessionBucket(at(2026, 5, 28), now).relativeKey).toBe('this_week');
+  });
+
+  it('treats future dates as "this week"', () => {
+    expect(getSessionBucket(at(2026, 6, 10), now).relativeKey).toBe('this_week');
+  });
+
+  it('buckets the prior week as "last week"', () => {
+    expect(getSessionBucket(at(2026, 5, 18), now).relativeKey).toBe('last_week');
+    expect(getSessionBucket(at(2026, 5, 24), now).relativeKey).toBe('last_week');
+  });
+
+  it('buckets two weeks back as "two weeks ago"', () => {
+    expect(getSessionBucket(at(2026, 5, 11), now).relativeKey).toBe('two_weeks_ago');
+    expect(getSessionBucket(at(2026, 5, 17), now).relativeKey).toBe('two_weeks_ago');
+  });
+
+  it('collapses older same-month dates into "earlier this month"', () => {
+    expect(getSessionBucket(at(2026, 5, 10), now).relativeKey).toBe('earlier_this_month');
+    expect(getSessionBucket(at(2026, 5, 1), now).relativeKey).toBe('earlier_this_month');
+  });
+
+  it('buckets prior months by calendar month with a stable id', () => {
+    const april = getSessionBucket(at(2026, 4, 15), now);
+    expect(april.relativeKey).toBeNull();
+    expect(april.monthDate).toBe('2026-04-01');
+    expect(april.id).toBe('month-2026-04-01');
+  });
+
+  it('keeps the same month across years in distinct buckets', () => {
+    const may2025 = getSessionBucket(at(2025, 5, 15), now);
+    expect(may2025.monthDate).toBe('2025-05-01');
+    expect(may2025.id).toBe('month-2025-05-01');
+  });
+});
+
+describe('formatMonthBucket', () => {
+  const now = new Date(2026, 4, 28);
+
+  it('shows only the month name within the current year', () => {
+    expect(formatMonthBucket('2026-03-01', 'en-US', now)).toBe('March');
+  });
+
+  it('appends the year for other years', () => {
+    expect(formatMonthBucket('2025-12-01', 'en-US', now)).toBe('December 2025');
   });
 });
