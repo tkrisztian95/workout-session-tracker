@@ -61,6 +61,65 @@ export function formatSessionDate(
   });
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** Local midnight of the Monday that starts the week containing `d`. */
+function startOfWeek(d: Date): Date {
+  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const mondayOffset = (r.getDay() + 6) % 7; // Sunday (0) → 6, Monday (1) → 0
+  r.setDate(r.getDate() - mondayOffset);
+  return r;
+}
+
+export type RelativeBucketKey = 'this_week' | 'last_week' | 'two_weeks_ago' | 'earlier_this_month';
+
+export interface SessionBucket {
+  /** Stable identifier — groups consecutive day-groups under one heading. */
+  id: string;
+  /** Set for the fixed relative buckets; `null` for calendar-month buckets. */
+  relativeKey: RelativeBucketKey | null;
+  /** ISO `YYYY-MM-01` of the bucket's month; `null` for relative buckets. */
+  monthDate: string | null;
+}
+
+/**
+ * Assigns a session date to a history bucket. The three most recent weeks get
+ * relative labels (this week / last week / two weeks ago); anything older but
+ * still in the current calendar month collapses into "earlier this month"; the
+ * rest are grouped by calendar month. Bucket boundaries are monotonic with the
+ * date, so day-groups sorted newest-first never revisit a bucket.
+ */
+export function getSessionBucket(iso: string, now: Date = new Date()): SessionBucket {
+  const date = new Date(iso);
+  const weeksAgo = Math.round((startOfWeek(now).getTime() - startOfWeek(date).getTime()) / WEEK_MS);
+
+  if (weeksAgo <= 0) return { id: 'this_week', relativeKey: 'this_week', monthDate: null };
+  if (weeksAgo === 1) return { id: 'last_week', relativeKey: 'last_week', monthDate: null };
+  if (weeksAgo === 2) return { id: 'two_weeks_ago', relativeKey: 'two_weeks_ago', monthDate: null };
+
+  const sameMonth = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+  if (sameMonth) {
+    return { id: 'earlier_this_month', relativeKey: 'earlier_this_month', monthDate: null };
+  }
+
+  const monthDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+  return { id: `month-${monthDate}`, relativeKey: null, monthDate };
+}
+
+/** Localized label for a calendar-month bucket — month name, plus year when it differs from `now`. */
+export function formatMonthBucket(
+  monthDate: string,
+  locale: string,
+  now: Date = new Date(),
+): string {
+  const d = new Date(`${monthDate}T12:00:00`);
+  const includeYear = d.getFullYear() !== now.getFullYear();
+  return d.toLocaleDateString(locale, {
+    month: 'long',
+    ...(includeYear ? { year: 'numeric' } : {}),
+  });
+}
+
 export interface SessionStats {
   completedExercises: number;
   completedSets: number;

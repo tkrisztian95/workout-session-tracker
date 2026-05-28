@@ -11,7 +11,15 @@ import { WorkoutHistoryDayGroup } from '@/components/WorkoutHistoryCard';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useLocale, useTranslations } from '@/lib/locale-context';
+import { formatMonthBucket, getSessionBucket, type RelativeBucketKey } from '@/lib/sessionUtils';
 import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
+
+const RELATIVE_BUCKET_LABEL_KEY = {
+  this_week: 'history_bucket_this_week',
+  last_week: 'history_bucket_last_week',
+  two_weeks_ago: 'history_bucket_two_weeks_ago',
+  earlier_this_month: 'history_bucket_earlier_this_month',
+} as const satisfies Record<RelativeBucketKey, keyof ReturnType<typeof useTranslations>>;
 
 function loadSessions(): WorkoutSession[] {
   return getSessions()
@@ -91,6 +99,15 @@ function HistoryContent() {
       ? grouped.filter((g) => g.date >= dateRange.from! && g.date <= dateRange.to!)
       : grouped;
 
+  const now = new Date();
+  const bucketedGroups = visibleGroups.map((group) => {
+    const bucket = getSessionBucket(group.sessions[0].completedAt, now);
+    const label = bucket.relativeKey
+      ? t[RELATIVE_BUCKET_LABEL_KEY[bucket.relativeKey]]
+      : formatMonthBucket(bucket.monthDate!, locale, now);
+    return { ...group, bucketId: bucket.id, bucketLabel: label };
+  });
+
   const rangeLabel =
     dateRange.from && dateRange.to ? formatRangeLabel(dateRange.from, dateRange.to, locale) : null;
 
@@ -155,16 +172,28 @@ function HistoryContent() {
             subtitle={t.history_filter_no_results_subtitle}
           />
         ) : (
-          visibleGroups.map(({ date, sessions: daySessions }) => (
-            <div key={date} ref={date === dateFilter ? scrollTargetRef : null}>
-              <WorkoutHistoryDayGroup
-                date={date}
-                sessions={daySessions}
-                planMap={planMap}
-                newSessionId={newSessionId}
-              />
-            </div>
-          ))
+          bucketedGroups.map(({ date, sessions: daySessions, bucketId, bucketLabel }, i) => {
+            const showBucketHeader = i === 0 || bucketedGroups[i - 1].bucketId !== bucketId;
+            return (
+              <div key={date} ref={date === dateFilter ? scrollTargetRef : null}>
+                {showBucketHeader && (
+                  <h2
+                    className={`text-foreground font-condensed text-2xl font-bold tracking-tight mb-3 ${
+                      i === 0 ? '' : 'mt-7'
+                    }`}
+                  >
+                    {bucketLabel}
+                  </h2>
+                )}
+                <WorkoutHistoryDayGroup
+                  date={date}
+                  sessions={daySessions}
+                  planMap={planMap}
+                  newSessionId={newSessionId}
+                />
+              </div>
+            );
+          })
         )}
       </div>
 
