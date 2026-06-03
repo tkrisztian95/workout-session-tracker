@@ -26,28 +26,32 @@
 
 ## 3. Catalog picker
 
-- [ ] 3.1 Create `ExerciseCatalogPicker` mirroring `ExerciseHistoryPicker`:
+- [x] 3.1 Create `ExerciseCatalogPicker` mirroring `ExerciseHistoryPicker`:
       `ModalSheet` with search and a muscle-group-grouped list, rendering each
       entry's localized name + `MuscleBadge`.
-- [ ] 3.2 Call `onSelect(entry)` on tap and close.
+- [x] 3.2 Call `onSelect(entry)` on tap and close.
 
 ## 4. Add Exercise flow integration
 
-- [ ] 4.1 Add a "Pick from catalog" button + `applyCatalogEntry` to
+- [x] 4.1 Add a "Pick from catalog" button + `applyCatalogEntry` to
       `AddExerciseModal`, wiring the picker (gated `isOpen` like the history
       picker) so a selection pre-fills name/muscle/type/defaults.
-- [ ] 4.2 Add the same button + `applyCatalogEntry` + picker to
+- [x] 4.2 Add the same button + `applyCatalogEntry` + picker to
       `AddPlanExerciseModal`.
 
 ## 5. Browse screen
 
-- [ ] 5.1 Add `src/app/catalog/page.tsx`: catalog grouped by muscle group with a
+- [x] 5.1 Add `src/app/catalog/page.tsx`: catalog grouped by muscle group with a
       search box and `MuscleBadge`, matching the app's mobile-first styling.
-- [ ] 5.2 Add a link to `/catalog` from the Profile page.
+- [x] 5.2 Add a link to `/catalog` from the Profile page.
 
 ## 6. Verification
 
-- [ ] 6.1 Run `npm run lint`, `npm test`, and `npx tsc --noEmit` (or the
+- [x] 6.1 Run `npm run lint`, `npm test`, and `npx tsc --noEmit` (or the
       project's typecheck script); fix issues.
-- [ ] 6.2 Visual check with Playwright MCP: open the catalog picker from both Add
-      Exercise modals, select an entry, and open the `/catalog` browse screen.
+- [~] 6.2 Visual check with Playwright MCP: open the catalog picker from both Add
+  Exercise modals, select an entry, and open the `/catalog` browse screen.
+  NOTE: Playwright MCP is not connected in this execution environment.
+  Substituted a production build (`npm run build`) which compiled cleanly
+  and registered the `/catalog` route. Live visual check still recommended
+  before merge.

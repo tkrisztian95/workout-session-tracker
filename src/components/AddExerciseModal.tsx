@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { History } from 'lucide-react';
+import { History, LayoutGrid } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
+import ExerciseCatalogPicker from '@/components/ExerciseCatalogPicker';
 import type { HistoryEntry } from '@/lib/exerciseHistory';
+import { catalogName, type CatalogExercise } from '@/lib/exerciseCatalog';
 import { useTranslations } from '@/lib/locale-context';
 import type { Muscle } from '@/lib/muscles';
 import { ALL_MUSCLE_GROUPS, MUSCLES_BY_GROUP, migrateLegacyCategory } from '@/lib/muscles';
@@ -39,6 +41,7 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   const [selectedCategory, setSelectedCategory] = useState<Muscle | null>(null);
   const [manualCategory, setManualCategory] = useState<Muscle | ''>('');
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
 
   const isEditMode = !!initialValues;
 
@@ -94,6 +97,21 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
     setPickerOpen(false);
   };
 
+  const applyCatalogEntry = (entry: CatalogExercise) => {
+    setName(catalogName(t, entry.id));
+    setType(entry.type);
+    setSets(String(entry.defaultSets ?? 3));
+    setReps(String(entry.defaultReps ?? 10));
+    setRepsMode('fixed');
+    const totalSecs = entry.defaultDurationSec ?? 0;
+    setDurationMins(String(Math.floor(totalSecs / 60)));
+    setDurationSecs(String(totalSecs % 60));
+    setWeightKg('');
+    setManualCategory(entry.muscle);
+    setSelectedCategory(entry.muscle);
+    setCatalogOpen(false);
+  };
+
   const handleSubmit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -138,20 +156,30 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   return (
     <>
       <ModalSheet
-        isOpen={isOpen && !pickerOpen}
+        isOpen={isOpen && !pickerOpen && !catalogOpen}
         onClose={handleClose}
         title={isEditMode ? 'Edit exercise' : t.add_exercise_title}
       >
         <div className="flex-1 min-h-0 overflow-y-auto space-y-5">
-          {/* Pick from history */}
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
-          >
-            <History className="w-4 h-4" />
-            {t.history_picker_open_button}
-          </button>
+          {/* Pre-fill sources */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
+            >
+              <History className="w-4 h-4" />
+              {t.history_picker_open_button}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCatalogOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-elevated text-secondary text-sm font-semibold cursor-pointer active:bg-border-subtle transition-colors duration-150"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              {t.catalog_picker_open_button}
+            </button>
+          </div>
 
           {/* Name */}
           <div>
@@ -347,6 +375,11 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={applyHistoryEntry}
+      />
+      <ExerciseCatalogPicker
+        isOpen={catalogOpen}
+        onClose={() => setCatalogOpen(false)}
+        onSelect={applyCatalogEntry}
       />
     </>
   );
