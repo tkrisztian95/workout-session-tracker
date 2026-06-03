@@ -23,6 +23,6 @@
 
 ## 4. Verify
 
-- [ ] 4.1 Run `npm run lint` and `npm test` (or project equivalents) green
-- [ ] 4.2 Visual check via Playwright/Chrome MCP: open an active plan (overview → Edit → save → overview), open a completed plan (no Edit, reactivate works), open a plan that was never followed
-- [ ] 4.3 Run `openspec validate --strict` for the change
+- [x] 4.1 Run `npm run lint` and `npm test` (or project equivalents) green
+- [x] 4.2 Visual check via Playwright/Chrome MCP: open an active plan (overview → Edit → save → overview), open a completed plan (no Edit, reactivate works), open a plan that was never followed
+- [x] 4.3 Run `openspec validate --strict` for the change
