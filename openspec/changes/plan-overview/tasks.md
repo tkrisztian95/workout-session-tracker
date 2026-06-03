@@ -1,9 +1,9 @@
 ## 1. Helpers & i18n
 
-- [ ] 1.1 Add `getPlanExerciseCount(plan)` to `src/lib/plan-list.ts` (shared + every day's core + optional exercises) with a doc comment
-- [ ] 1.2 Add a unit test for `getPlanExerciseCount` covering shared-only, day-only, and mixed plans
-- [ ] 1.3 Add overview i18n keys to `src/locales/en.json` (stat tile labels, details labels — created/last-followed/never-followed, muscle-groups heading, shared-exercises heading, edit action)
-- [ ] 1.4 Mirror the new keys in `src/locales/de.json` and `src/locales/hu.json` (translate where confident; flag any English-fallback values)
+- [x] 1.1 Add `getPlanExerciseCount(plan)` to `src/lib/plan-list.ts` (shared + every day's core + optional exercises) with a doc comment
+- [x] 1.2 Add a unit test for `getPlanExerciseCount` covering shared-only, day-only, and mixed plans
+- [x] 1.3 Add overview i18n keys to `src/locales/en.json` (stat tile labels, details labels — created/last-followed/never-followed, muscle-groups heading, shared-exercises heading, edit action)
+- [x] 1.4 Mirror the new keys in `src/locales/de.json` and `src/locales/hu.json` (translate where confident; flag any English-fallback values)
 
 ## 2. PlanOverview component
 

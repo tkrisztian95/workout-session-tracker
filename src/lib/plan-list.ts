@@ -44,6 +44,15 @@ export function getPlanFollowCount(planId: string, sessions: WorkoutSession[]): 
   return count;
 }
 
+/** Total number of exercises in a plan: shared plus every day's core and optional. */
+export function getPlanExerciseCount(plan: WorkoutPlan): number {
+  let count = plan.sharedExercises.length;
+  for (const d of plan.days) {
+    count += d.coreExercises.length + d.optionalExercises.length;
+  }
+  return count;
+}
+
 /** Distinct muscles trained across a plan's shared and per-day exercises. */
 export function getPlanMuscles(plan: WorkoutPlan): Muscle[] {
   const all = [
