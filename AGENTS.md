@@ -24,6 +24,8 @@ Good for surfacing tradeoffs, mapping the codebase, or clarifying scope. No code
 /opsx:propose <change-name or description>
 ```
 
+**Before generating artifacts, check the project's GitHub issues** (repo `tkrisztian95/workout-session-tracker`) for any open issue that overlaps with the change. Use the GitHub MCP tools to search/list issues by keyword. If a relevant issue exists, reference it in `proposal.md` (e.g. `Closes #123` or `Refs #123`) and in the proposal commit body so the work stays linked. If the change reveals new scope, gaps, or follow-ups, file or update the corresponding issue rather than letting it drift. If nothing matches, note that you checked and proceed.
+
 Produces `proposal.md`, `design.md`, and `tasks.md` under `openspec/changes/<name>/`. Review them before moving on.
 
 **3. Apply** — implement the tasks from the change:
@@ -44,6 +46,7 @@ Moves the change to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
 
 ### Best practices
 
+- **Check GitHub issues before proposing.** Every `/opsx:propose` SHALL begin by searching the project's open GitHub issues (repo `tkrisztian95/workout-session-tracker`, via the GitHub MCP tools) for work that overlaps the change. Link any matching issue from `proposal.md` and the proposal commit (`Closes #N` / `Refs #N`), and create or update issues for new scope surfaced during the work so the issue tracker stays the source of truth for what's planned. State that you checked even when nothing matches.
 - **Branch per change with a Conventional Commits prefix.** Every `/opsx:propose` SHALL start by creating a new branch off the current base (usually `main`) named `<type>/<change-name>`. `<type>` comes from the allowed list in [Commit style](#commit-style); use the same kebab-case `<change-name>` as the `openspec/changes/<name>/` directory. Examples: `feat/two-tier-muscle-categories`, `fix/session-pause-resume-drift`, `chore/bump-next-16`. One change per branch. If the user is already on a non-`main` branch when `/opsx:propose` runs, ask before branching off it.
 - **Commit the proposal artifacts as the first commit on the branch.** Immediately after `/opsx:propose` finishes generating `proposal.md`, `design.md`, `specs/**`, and `tasks.md`, create one clean commit that contains **only** those artifacts under `openspec/changes/<name>/` — no source-code edits, no doc edits outside the change directory. Subject line: `<type>(<change-name>): propose <one-line summary>`. Body lists the new + modified capabilities from `proposal.md`. This makes the proposal reviewable on its own and gives a stable base for the implementation commits that follow.
 - **Validate specs before applying.** Run `openspec validate --strict` after propose and before apply to catch JSON/Markdown formatting errors early.
