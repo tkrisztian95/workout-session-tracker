@@ -1,7 +1,8 @@
 ## 1. Catalog data module
 
-- [x] 1.1 Add `src/lib/exerciseCatalog.ts` with the `CatalogExercise` interface
-      and `EXERCISE_CATALOG` array: the user's gym machines (Elliptical,
+- [x] 1.1 Add `src/lib/exerciseCatalog.json` with the entry data and
+      `src/lib/exerciseCatalog.ts` with the `CatalogExercise` interface that
+      imports + types it as `EXERCISE_CATALOG`: the user's gym machines (Elliptical,
       Treadmill, Stationary bike, Stair climber, Rowing machine → `cardio`;
       Glute machine + Hip abduction + Hip adduction → `glutes`; Lying & seated
       leg curl → `hamstrings`; Leg extension + Leg press → `quads`; Ab/crunch

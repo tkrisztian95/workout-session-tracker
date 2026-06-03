@@ -15,13 +15,14 @@ persistence, no migration.
 
 ## What Changes
 
-- Add a built-in catalog module (`src/lib/exerciseCatalog.ts`) defining ~25
-  entries: the user's gym machines (cardio + resistance) de-duplicated from
-  their HU/DE notes, plus a common starter set (bench press, lat pulldown,
-  cable row, shoulder press, etc.). Each entry has a stable `id`, a `Muscle`, a
-  default `type`, and default sets/reps/duration. Display names are localized
-  in the `en`/`hu`/`de` locale files (keyed by catalog id), reusing the
-  existing i18n convention used for `muscle_labels`.
+- Add a built-in catalog: ~25 entries — the user's gym machines (cardio +
+  resistance) de-duplicated from their HU/DE notes, plus a common starter set
+  (bench press, lat pulldown, cable row, shoulder press, etc.). Entry **data**
+  lives in `src/lib/exerciseCatalog.json` (id, muscle, default type, default
+  sets/reps/duration); the `src/lib/exerciseCatalog.ts` module imports it,
+  types it as `CatalogExercise[]`, and exposes lookup helpers. Display names are
+  localized in the `en`/`hu`/`de` locale files (keyed by catalog id), reusing
+  the existing i18n convention used for `muscle_labels`.
 - Add an **"Pick from catalog"** picker (`ExerciseCatalogPicker`) to the Add
   Exercise flow in both `AddExerciseModal` (session) and `AddPlanExerciseModal`
   (plans), sitting beside the existing "Pick from history" button. Selecting an
@@ -45,7 +46,8 @@ persistence, no migration.
 
 ## Impact
 
-- **New module**: `src/lib/exerciseCatalog.ts` (catalog data + lookup helpers).
+- **New data + module**: `src/lib/exerciseCatalog.json` (catalog entry data) and
+  `src/lib/exerciseCatalog.ts` (types + lookup helpers that import the JSON).
 - **New components**: `ExerciseCatalogPicker`, plus a `/catalog` route screen.
 - **UI**: `AddExerciseModal` and `AddPlanExerciseModal` gain a "Pick from
   catalog" entry point; the Profile page gains a link to the browse screen.

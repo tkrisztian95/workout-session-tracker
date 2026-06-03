@@ -37,20 +37,24 @@ picker that reuses the exact same pre-fill mechanism.
 
 ### Catalog data shape
 
-A new `src/lib/exerciseCatalog.ts` exports:
+Entry data lives in `src/lib/exerciseCatalog.json` (a plain array) so it can be
+edited without touching code. `src/lib/exerciseCatalog.ts` owns the type and
+helpers, importing the JSON and asserting it to `CatalogExercise[]` (the JSON
+import widens string fields; the shape is guarded by the unit test):
 
 ```ts
 export interface CatalogExercise {
-  id: string;                  // stable slug, e.g. 'leg-press'
+  id: string; // stable slug, e.g. 'leg-press'
   muscle: Muscle;
-  type: Exercise['type'];      // 'sets-reps' | 'sets-duration' | 'duration'
-  defaultSets?: number;        // for sets-reps / sets-duration
-  defaultReps?: number;        // for sets-reps
+  type: Exercise['type']; // 'sets-reps' | 'sets-duration' | 'duration'
+  defaultSets?: number; // for sets-reps / sets-duration
+  defaultReps?: number; // for sets-reps
   defaultDurationSec?: number; // for sets-duration / duration
-  source: 'gym' | 'starter';   // user's machines vs common additions
+  source: 'gym' | 'starter'; // user's machines vs common additions
 }
 
-export const EXERCISE_CATALOG: CatalogExercise[];
+import catalogData from './exerciseCatalog.json';
+export const EXERCISE_CATALOG = catalogData as CatalogExercise[];
 ```
 
 `id` is a stable English slug used as the i18n key and React key; it is **not**

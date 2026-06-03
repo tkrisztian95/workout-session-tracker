@@ -1,0 +1,200 @@
+[
+  {
+    "id": "elliptical",
+    "muscle": "cardio",
+    "type": "duration",
+    "defaultDurationSec": 600,
+    "source": "gym"
+  },
+  {
+    "id": "treadmill",
+    "muscle": "cardio",
+    "type": "duration",
+    "defaultDurationSec": 600,
+    "source": "gym"
+  },
+  {
+    "id": "stationary-bike",
+    "muscle": "cardio",
+    "type": "duration",
+    "defaultDurationSec": 600,
+    "source": "gym"
+  },
+  {
+    "id": "stair-climber",
+    "muscle": "cardio",
+    "type": "duration",
+    "defaultDurationSec": 600,
+    "source": "gym"
+  },
+  {
+    "id": "rowing-machine",
+    "muscle": "cardio",
+    "type": "duration",
+    "defaultDurationSec": 600,
+    "source": "gym"
+  },
+
+  {
+    "id": "leg-press",
+    "muscle": "quads",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "gym"
+  },
+  {
+    "id": "leg-extension",
+    "muscle": "quads",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "gym"
+  },
+  {
+    "id": "leg-curl-lying",
+    "muscle": "hamstrings",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "gym"
+  },
+  {
+    "id": "leg-curl-seated",
+    "muscle": "hamstrings",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "gym"
+  },
+  {
+    "id": "glute-machine",
+    "muscle": "glutes",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "gym"
+  },
+  {
+    "id": "hip-abduction",
+    "muscle": "glutes",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "gym"
+  },
+  {
+    "id": "hip-adduction",
+    "muscle": "glutes",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "gym"
+  },
+
+  {
+    "id": "ab-crunch-machine",
+    "muscle": "abs",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "gym"
+  },
+  {
+    "id": "rotary-torso",
+    "muscle": "obliques",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "gym"
+  },
+  {
+    "id": "back-extension",
+    "muscle": "lower_back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "gym"
+  },
+
+  {
+    "id": "bench-press",
+    "muscle": "chest",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "starter"
+  },
+  {
+    "id": "incline-bench-press",
+    "muscle": "chest",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "starter"
+  },
+  {
+    "id": "chest-press-machine",
+    "muscle": "chest",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "lat-pulldown",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "seated-cable-row",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "overhead-press",
+    "muscle": "shoulders",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "starter"
+  },
+  {
+    "id": "lateral-raise",
+    "muscle": "shoulders",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "starter"
+  },
+  {
+    "id": "biceps-curl",
+    "muscle": "arms",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "triceps-pushdown",
+    "muscle": "arms",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "plank",
+    "muscle": "abs",
+    "type": "sets-duration",
+    "defaultSets": 3,
+    "defaultDurationSec": 30,
+    "source": "starter"
+  }
+]
