@@ -1,6 +1,6 @@
 ## 1. Catalog data module
 
-- [ ] 1.1 Add `src/lib/exerciseCatalog.ts` with the `CatalogExercise` interface
+- [x] 1.1 Add `src/lib/exerciseCatalog.ts` with the `CatalogExercise` interface
       and `EXERCISE_CATALOG` array: the user's gym machines (Elliptical,
       Treadmill, Stationary bike, Stair climber, Rowing machine → `cardio`;
       Glute machine + Hip abduction + Hip adduction → `glutes`; Lying & seated
@@ -9,18 +9,18 @@
       plus a common starter set (bench press, incline press, lat pulldown, cable
       row, shoulder press, biceps curl, triceps pushdown, plank, etc.) with
       `type` and type-appropriate defaults.
-- [ ] 1.2 Add `catalogName(t, id)` and `catalogByGroup()` helpers (group via
+- [x] 1.2 Add `catalogName(t, id)` and `catalogByGroup()` helpers (group via
       `MUSCLE_TO_GROUP`, ordered by `ALL_MUSCLE_GROUPS` / `MUSCLES_BY_GROUP`).
-- [ ] 1.3 Add `src/lib/exerciseCatalog.test.ts` asserting unique ids, valid
+- [x] 1.3 Add `src/lib/exerciseCatalog.test.ts` asserting unique ids, valid
       muscle/type/defaults per type, and that every id has a name in all three
       locales.
 
 ## 2. Localization
 
-- [ ] 2.1 Add a `catalog_exercise_names` map (id → localized name) to `en`,
+- [x] 2.1 Add a `catalog_exercise_names` map (id → localized name) to `en`,
       `hu`, and `de`, using the user's native HU/DE machine names where they
       apply.
-- [ ] 2.2 Add `catalog_*` UI keys (picker button + title + search placeholder +
+- [x] 2.2 Add `catalog_*` UI keys (picker button + title + search placeholder +
       empty/no-results, browse screen title/subtitle, Profile link label) to all
       three locales.
 
