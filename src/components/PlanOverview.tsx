@@ -1,7 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, ChevronLeft, RotateCcw, Sparkles, Trash2 } from 'lucide-react';
+import {
+  CalendarDays,
+  CheckCircle,
+  ChevronLeft,
+  Dumbbell,
+  Flame,
+  ListChecks,
+  RotateCcw,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { PlanExercise, WorkoutPlan } from '@/lib/types';
 import { getPlanExerciseCount, getPlanMuscles } from '@/lib/plan-list';
 import { ALL_MUSCLE_GROUPS, MUSCLE_TO_GROUP } from '@/lib/muscles';
@@ -67,11 +78,17 @@ export default function PlanOverview({
       ).replace('{n}', String(plan.scheduledWeeks))
     : null;
 
-  const stats: { label: string; value: number }[] = [
-    { label: t.plan_overview_stat_days, value: plan.days.length },
-    { label: t.plan_overview_stat_exercises, value: exerciseCount },
-    { label: t.plan_overview_stat_follows, value: followCount },
+  const stats: { label: string; value: number; icon: LucideIcon }[] = [
+    { label: t.plan_overview_stat_days, value: plan.days.length, icon: CalendarDays },
+    { label: t.plan_overview_stat_exercises, value: exerciseCount, icon: Dumbbell },
+    { label: t.plan_overview_stat_follows, value: followCount, icon: Flame },
   ];
+
+  const exerciseCountLabel = (n: number) =>
+    (n === 1 ? t.plan_overview_exercise_count_one : t.plan_overview_exercises_count).replace(
+      '{n}',
+      String(n),
+    );
 
   const details: { label: string; value: string }[] = [
     { label: t.plan_overview_created_label, value: fmtDate(plan.createdAt) },
@@ -127,7 +144,7 @@ export default function PlanOverview({
             </IconButton>
             <IconButton
               onClick={() => setShowDeleteConfirm(true)}
-              aria-label="Delete plan"
+              aria-label={`${t.delete} ${plan.name}`}
               className="border border-border hover:border-danger/50"
             >
               <Trash2 className="w-4 h-4 text-muted" />
@@ -152,8 +169,9 @@ export default function PlanOverview({
         {/* Stat tiles */}
         <div className="grid grid-cols-3 gap-3">
           {stats.map((s) => (
-            <Card key={s.label} className="px-3 py-4 text-center">
-              <p className="text-foreground text-3xl font-bold font-condensed leading-none">
+            <Card key={s.label} className="px-3 py-4 flex flex-col items-center text-center">
+              <s.icon className="w-4 h-4 text-brand mb-2" aria-hidden="true" />
+              <p className="text-foreground text-3xl font-bold font-condensed leading-none tabular-nums">
                 {s.value}
               </p>
               <p className="text-muted text-xs mt-1.5">{s.label}</p>
@@ -218,39 +236,61 @@ export default function PlanOverview({
           <LabelOverline className="mb-2">
             {t.training_days_label} ({plan.days.length})
           </LabelOverline>
-          <div className="space-y-3">
-            {plan.days.map((day, i) => {
-              const exercises = [...day.coreExercises, ...day.optionalExercises];
-              return (
-                <Card key={day.id} className="overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                    <span className="text-foreground text-sm font-semibold">
-                      {day.name.trim() || `${t.training_day} ${i + 1}`}
-                    </span>
-                    {day.weekdays.length > 0 && (
-                      <span className="text-dim text-xs">
-                        {[...day.weekdays]
-                          .sort((a, b) => a - b)
-                          .map((w) => t.weekday_abbr[w])
-                          .join(', ')}
-                      </span>
-                    )}
-                  </div>
-                  {exercises.length > 0 ? (
-                    <div className="divide-y divide-border">
-                      {exercises.map((ex) => (
-                        <ExerciseRow key={ex.id} ex={ex} />
-                      ))}
+          {plan.days.length === 0 ? (
+            <Card className="flex flex-col items-center text-center px-6 py-10">
+              <CalendarDays className="w-8 h-8 text-dim mb-3" aria-hidden="true" />
+              <p className="text-secondary text-sm font-medium">{t.plan_overview_no_days}</p>
+              <p className="text-muted text-xs mt-1">{t.plan_overview_no_days_subtitle}</p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {plan.days.map((day, i) => {
+                const count = day.coreExercises.length + day.optionalExercises.length;
+                return (
+                  <Card key={day.id} className="overflow-hidden">
+                    <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
+                      <div className="min-w-0">
+                        <p className="text-foreground text-sm font-semibold truncate">
+                          {day.name.trim() || `${t.training_day} ${i + 1}`}
+                        </p>
+                        <p className="text-dim text-xs mt-0.5 flex items-center gap-1">
+                          <ListChecks className="w-3 h-3" aria-hidden="true" />
+                          {exerciseCountLabel(count)}
+                        </p>
+                      </div>
+                      {day.weekdays.length > 0 && (
+                        <span className="text-dim text-xs flex-shrink-0">
+                          {[...day.weekdays]
+                            .sort((a, b) => a - b)
+                            .map((w) => t.weekday_abbr[w])
+                            .join(', ')}
+                        </span>
+                      )}
                     </div>
-                  ) : (
-                    <p className="px-4 py-3 text-muted text-sm">
-                      {t.plan_overview_no_day_exercises}
-                    </p>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
+                    {count > 0 ? (
+                      <div className="divide-y divide-border">
+                        {day.coreExercises.map((ex) => (
+                          <ExerciseRow key={ex.id} ex={ex} />
+                        ))}
+                        {day.optionalExercises.map((ex) => (
+                          <ExerciseRow
+                            key={ex.id}
+                            ex={ex}
+                            optional
+                            optionalLabel={t.optional_label}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="px-4 py-3 text-muted text-sm">
+                        {t.plan_overview_no_day_exercises}
+                      </p>
+                    )}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -265,17 +305,26 @@ export default function PlanOverview({
   );
 }
 
-function ExerciseRow({ ex }: { ex: PlanExercise }) {
+function ExerciseRow({
+  ex,
+  optional = false,
+  optionalLabel,
+}: {
+  ex: PlanExercise;
+  optional?: boolean;
+  optionalLabel?: string;
+}) {
   return (
     <div className="flex items-center gap-2 px-4 py-2.5">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-foreground text-sm font-medium truncate">{ex.name}</p>
           {ex.muscle && <MuscleBadge muscle={ex.muscle} />}
+          {optional && optionalLabel && <Badge variant="subtle">{optionalLabel}</Badge>}
         </div>
         {ex.scalingNote && <p className="text-muted text-xs mt-0.5 truncate">{ex.scalingNote}</p>}
       </div>
-      <span className="text-brand text-xs flex-shrink-0">{exerciseDetail(ex)}</span>
+      <span className="text-brand text-xs flex-shrink-0 tabular-nums">{exerciseDetail(ex)}</span>
     </div>
   );
 }

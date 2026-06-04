@@ -301,6 +301,10 @@
   "plan_overview_weeks_value": "{n} weeks",
   "plan_overview_week_value": "{n} week",
   "plan_overview_no_day_exercises": "No exercises",
+  "plan_overview_no_days": "No training days",
+  "plan_overview_no_days_subtitle": "This plan has no training days yet.",
+  "plan_overview_exercises_count": "{n} exercises",
+  "plan_overview_exercise_count_one": "{n} exercise",
   "delete_plan_body": "\"{name}\" will be permanently deleted. This cannot be undone.",
 
   "ai_modal_title": "AI Plan Suggestion",

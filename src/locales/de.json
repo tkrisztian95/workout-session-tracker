@@ -301,6 +301,10 @@
   "plan_overview_weeks_value": "{n} Wochen",
   "plan_overview_week_value": "{n} Woche",
   "plan_overview_no_day_exercises": "Keine Übungen",
+  "plan_overview_no_days": "Keine Trainingstage",
+  "plan_overview_no_days_subtitle": "Dieser Plan hat noch keine Trainingstage.",
+  "plan_overview_exercises_count": "{n} Übungen",
+  "plan_overview_exercise_count_one": "{n} Übung",
   "delete_plan_body": "\"{name}\" wird dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
 
   "ai_modal_title": "KI-Planvorschlag",
