@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getPlans, savePlan, deletePlan, togglePlanStatus } from '@/lib/storage';
-import type { WorkoutPlan } from '@/lib/types';
+import { getPlans, getSessions, savePlan, deletePlan, togglePlanStatus } from '@/lib/storage';
+import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
+import { getPlanFollowCount, getPlanLastFollowedAt } from '@/lib/plan-list';
 import PlanForm from '@/components/PlanForm';
+import PlanOverview from '@/components/PlanOverview';
 import { useTranslations } from '@/lib/locale-context';
 import { Page } from '@/components/ui';
 
@@ -15,6 +17,8 @@ export default function PlanDetailPage() {
   const [plan, setPlan] = useState<WorkoutPlan | null>(
     () => getPlans().find((p) => p.id === params.id) ?? null,
   );
+  const [sessions] = useState<WorkoutSession[]>(() => getSessions());
+  const [mode, setMode] = useState<'overview' | 'edit'>('overview');
 
   if (!plan) {
     return (
@@ -26,7 +30,8 @@ export default function PlanDetailPage() {
 
   const handleSave = (updated: WorkoutPlan) => {
     savePlan(updated);
-    router.push('/plans');
+    setPlan(updated);
+    setMode('overview');
   };
 
   const handleDelete = () => {
@@ -39,14 +44,28 @@ export default function PlanDetailPage() {
     setPlan(getPlans().find((p) => p.id === plan.id) ?? null);
   };
 
+  if (mode === 'edit') {
+    return (
+      <PlanForm
+        initialPlan={plan}
+        onSave={handleSave}
+        onCancel={() => setMode('overview')}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+        readOnly={plan.status === 'completed'}
+      />
+    );
+  }
+
   return (
-    <PlanForm
-      initialPlan={plan}
-      onSave={handleSave}
-      onCancel={() => router.back()}
+    <PlanOverview
+      plan={plan}
+      followCount={getPlanFollowCount(plan.id, sessions)}
+      lastFollowedAt={getPlanLastFollowedAt(plan.id, sessions)}
+      onEdit={() => setMode('edit')}
+      onBack={() => router.push('/plans')}
       onDelete={handleDelete}
       onToggleStatus={handleToggleStatus}
-      readOnly={plan.status === 'completed'}
     />
   );
 }

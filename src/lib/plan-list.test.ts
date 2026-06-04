@@ -4,6 +4,7 @@ import {
   availableMuscles,
   countActiveFilters,
   DEFAULT_PLAN_FILTERS,
+  getPlanExerciseCount,
   getPlanFollowCount,
   getPlanLastFollowedAt,
   organizePlans,
@@ -88,6 +89,44 @@ describe('getPlanFollowCount', () => {
     ];
     expect(getPlanFollowCount('p1', sessions)).toBe(2);
     expect(getPlanFollowCount('none', sessions)).toBe(0);
+  });
+});
+
+describe('getPlanExerciseCount', () => {
+  it('counts shared-only plans', () => {
+    expect(getPlanExerciseCount(plan({ id: 'p', name: 'P', sharedExercises: [ex(), ex()] }))).toBe(
+      2,
+    );
+  });
+
+  it('counts day core and optional exercises', () => {
+    const d: PlanDay = {
+      id: 'd1',
+      name: 'Day',
+      weekdays: [],
+      coreExercises: [ex(), ex()],
+      optionalExercises: [ex()],
+    };
+    expect(getPlanExerciseCount(plan({ id: 'p', name: 'P', days: [d] }))).toBe(3);
+  });
+
+  it('sums shared and all days', () => {
+    const d: PlanDay = {
+      id: 'd1',
+      name: 'Day',
+      weekdays: [],
+      coreExercises: [ex()],
+      optionalExercises: [ex()],
+    };
+    expect(
+      getPlanExerciseCount(
+        plan({ id: 'p', name: 'P', sharedExercises: [ex()], days: [d, day(['chest'])] }),
+      ),
+    ).toBe(4);
+  });
+
+  it('is zero for an empty plan', () => {
+    expect(getPlanExerciseCount(plan({ id: 'p', name: 'P' }))).toBe(0);
   });
 });
 
