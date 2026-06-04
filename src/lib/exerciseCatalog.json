@@ -76,14 +76,6 @@
     "source": "gym"
   },
   {
-    "id": "glute-trainer",
-    "muscle": "glutes",
-    "type": "sets-reps",
-    "defaultSets": 3,
-    "defaultReps": 12,
-    "source": "gym"
-  },
-  {
     "id": "hip-abduction",
     "muscle": "glutes",
     "type": "sets-reps",
@@ -151,14 +143,6 @@
   },
   {
     "id": "incline-press",
-    "muscle": "chest",
-    "type": "sets-reps",
-    "defaultSets": 3,
-    "defaultReps": 10,
-    "source": "gym"
-  },
-  {
-    "id": "vertical-bench-press",
     "muscle": "chest",
     "type": "sets-reps",
     "defaultSets": 3,

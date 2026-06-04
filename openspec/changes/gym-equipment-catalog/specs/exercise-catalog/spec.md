@@ -82,3 +82,39 @@ reachable from the Profile page.
 
 - **WHEN** the user is on the Profile page
 - **THEN** there SHALL be a link that opens the catalog browse screen
+
+### Requirement: Disambiguate similar entries with aliases and hints
+
+To help users who cannot tell near-identical machines apart, the catalog SHALL
+support optional, localized alternative names (aliases) and a short
+disambiguating hint per entry. Clear duplicates SHALL be represented as a single
+canonical entry whose alternative labels are aliases rather than separate
+entries. Catalog search SHALL match an entry by its name, aliases, or hint in
+any supported locale, so a query in one language finds an entry shown in
+another. The picker and browse screen SHALL show an entry's hint and "also
+called" aliases when present.
+
+#### Scenario: Duplicate machine is a single entry
+
+- **WHEN** two notes refer to the same machine under different names (e.g.
+  "Glute machine" and "Glute trainer")
+- **THEN** the catalog SHALL contain one entry, and the other name SHALL be an
+  alias of it rather than a separate entry
+
+#### Scenario: Search matches an alias
+
+- **WHEN** the user searches for an alias of an entry (e.g. "vertical bench
+  press" for the chest press machine)
+- **THEN** the canonical entry SHALL appear in the results
+
+#### Scenario: Cross-locale search
+
+- **WHEN** the user searches using an entry's name from a non-active locale
+  (e.g. the German "Beinpresse" while the UI is English)
+- **THEN** the matching entry SHALL appear in the results
+
+#### Scenario: Hint and aliases shown
+
+- **WHEN** an entry with a hint and/or aliases is listed in the picker or browse
+  screen
+- **THEN** its hint and "also called" alias names SHALL be shown beneath its name

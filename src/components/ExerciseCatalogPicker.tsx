@@ -7,8 +7,11 @@ import { useTranslations } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
 import {
   EXERCISE_CATALOG,
+  catalogAliases,
   catalogByGroup,
+  catalogHint,
   catalogName,
+  catalogSearchText,
   type CatalogExercise,
 } from '@/lib/exerciseCatalog';
 
@@ -29,10 +32,10 @@ export default function ExerciseCatalogPicker({ isOpen, onClose, onSelect }: Pro
     return catalogByGroup()
       .map((g) => ({
         group: g.group,
-        entries: g.entries.filter((e) => catalogName(t, e.id).toLowerCase().includes(query)),
+        entries: g.entries.filter((e) => catalogSearchText(e.id).includes(query)),
       }))
       .filter((g) => g.entries.length > 0);
-  }, [query, t]);
+  }, [query]);
 
   const hasResults = groups.length > 0;
   const totalShown = groups.reduce((n, g) => n + g.entries.length, 0);
@@ -79,8 +82,24 @@ export default function ExerciseCatalogPicker({ isOpen, onClose, onSelect }: Pro
                           onClick={() => onSelect(entry)}
                           className="w-full flex items-center gap-2 text-left py-3 px-2 rounded-lg active:bg-elevated transition-colors duration-100 cursor-pointer min-h-[48px]"
                         >
-                          <span className="flex-1 text-foreground text-sm font-medium truncate">
-                            {catalogName(t, entry.id)}
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-foreground text-sm font-medium truncate">
+                              {catalogName(t, entry.id)}
+                            </span>
+                            {(catalogHint(t, entry.id) ||
+                              catalogAliases(t, entry.id).length > 0) && (
+                              <span className="block text-muted text-xs truncate">
+                                {catalogHint(t, entry.id)}
+                                {catalogHint(t, entry.id) &&
+                                  catalogAliases(t, entry.id).length > 0 &&
+                                  ' · '}
+                                {catalogAliases(t, entry.id).length > 0 &&
+                                  t.catalog_also_called.replace(
+                                    '{names}',
+                                    catalogAliases(t, entry.id).join(', '),
+                                  )}
+                              </span>
+                            )}
                           </span>
                           <span className="shrink-0">
                             <MuscleBadge muscle={entry.muscle} />

@@ -2,6 +2,7 @@ import type { Muscle, MuscleGroup } from './muscles';
 import { ALL_MUSCLE_GROUPS, MUSCLE_TO_GROUP } from './muscles';
 import type { Exercise } from './types';
 import type { Translations } from './i18n';
+import { translations } from './i18n';
 import catalogData from './exerciseCatalog.json';
 
 /**
@@ -50,6 +51,44 @@ export const EXERCISE_CATALOG = catalogData as CatalogExercise[];
 export function catalogName(t: Translations, id: string): string {
   const names = t.catalog_exercise_names as Record<string, string>;
   return names[id] ?? id;
+}
+
+/**
+ * Alternative names for an entry in the active locale (e.g. "Glute trainer" for
+ * `glute-machine`). Used for the "also called" line and matched by search.
+ * Returns an empty array when the entry has no aliases.
+ */
+export function catalogAliases(t: Translations, id: string): string[] {
+  const aliases = t.catalog_exercise_aliases as Record<string, string[]>;
+  return aliases[id] ?? [];
+}
+
+/**
+ * A short disambiguating hint for an entry in the active locale (e.g. "Flat
+ * barbell press" vs "Flat machine press"). Returns undefined when absent.
+ */
+export function catalogHint(t: Translations, id: string): string | undefined {
+  const hints = t.catalog_exercise_hints as Record<string, string>;
+  return hints[id];
+}
+
+/**
+ * Lowercased search haystack for an entry: its name, aliases, and hint across
+ * ALL locales. This lets a query in any language (e.g. the German "Beinpresse")
+ * match the entry regardless of the active UI locale, and lets a merged
+ * machine's alias (e.g. "Vertical bench press") surface its canonical entry.
+ */
+export function catalogSearchText(id: string): string {
+  const parts: string[] = [];
+  for (const t of Object.values(translations)) {
+    const names = t.catalog_exercise_names as Record<string, string>;
+    const aliases = t.catalog_exercise_aliases as Record<string, string[]>;
+    const hints = t.catalog_exercise_hints as Record<string, string>;
+    if (names[id]) parts.push(names[id]);
+    if (aliases[id]) parts.push(...aliases[id]);
+    if (hints[id]) parts.push(hints[id]);
+  }
+  return parts.join(' ').toLowerCase();
 }
 
 /**

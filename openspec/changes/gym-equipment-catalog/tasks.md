@@ -56,3 +56,18 @@
   Substituted a production build (`npm run build`) which compiled cleanly
   and registered the `/catalog` route. Live visual check still recommended
   before merge.
+
+## 7. Disambiguation (aliases + hints)
+
+- [x] 7.1 Merge clear duplicates into a single canonical entry: drop
+      `glute-trainer` (→ `glute-machine`) and `vertical-bench-press`
+      (→ `chest-press-machine`) from `exerciseCatalog.json`.
+- [x] 7.2 Add localized `catalog_exercise_aliases` (id → string[]) and
+      `catalog_exercise_hints` (id → string) maps plus a `catalog_also_called`
+      string to `en`/`hu`/`de`, with matching key-sets.
+- [x] 7.3 Add `catalogAliases`, `catalogHint`, and a cross-locale
+      `catalogSearchText` helper; switch the picker and browse screen to search
+      via `catalogSearchText` and render the hint + "also called" aliases.
+- [x] 7.4 Extend the unit test: alias/hint key parity across locales, ids
+      reference real entries, merged-away ids are gone, and cross-locale/alias
+      search matches.

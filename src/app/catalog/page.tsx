@@ -7,7 +7,13 @@ import BottomNav from '@/components/BottomNav';
 import MuscleBadge from '@/components/MuscleBadge';
 import { Page, PageHeader, HeadingXL, Input } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
-import { catalogByGroup, catalogName } from '@/lib/exerciseCatalog';
+import {
+  catalogAliases,
+  catalogByGroup,
+  catalogHint,
+  catalogName,
+  catalogSearchText,
+} from '@/lib/exerciseCatalog';
 
 export default function CatalogPage() {
   const router = useRouter();
@@ -21,10 +27,10 @@ export default function CatalogPage() {
     return catalogByGroup()
       .map((g) => ({
         group: g.group,
-        entries: g.entries.filter((e) => catalogName(t, e.id).toLowerCase().includes(query)),
+        entries: g.entries.filter((e) => catalogSearchText(e.id).includes(query)),
       }))
       .filter((g) => g.entries.length > 0);
-  }, [query, t]);
+  }, [query]);
 
   return (
     <Page className="pb-24">
@@ -71,9 +77,24 @@ export default function CatalogPage() {
                 <div className="bg-surface border border-border rounded-2xl overflow-hidden divide-y divide-border/60">
                   {entries.map((entry) => (
                     <div key={entry.id} className="flex items-center gap-3 px-4 py-3.5">
-                      <span className="flex-1 text-foreground text-sm font-medium">
-                        {catalogName(t, entry.id)}
-                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="block text-foreground text-sm font-medium">
+                          {catalogName(t, entry.id)}
+                        </span>
+                        {(catalogHint(t, entry.id) || catalogAliases(t, entry.id).length > 0) && (
+                          <span className="block text-muted text-xs mt-0.5">
+                            {catalogHint(t, entry.id)}
+                            {catalogHint(t, entry.id) &&
+                              catalogAliases(t, entry.id).length > 0 &&
+                              ' · '}
+                            {catalogAliases(t, entry.id).length > 0 &&
+                              t.catalog_also_called.replace(
+                                '{names}',
+                                catalogAliases(t, entry.id).join(', '),
+                              )}
+                          </span>
+                        )}
+                      </div>
                       <MuscleBadge muscle={entry.muscle} />
                     </div>
                   ))}
