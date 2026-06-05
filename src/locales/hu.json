@@ -242,6 +242,7 @@
     "chest-press-machine": "Vízszintes, gépen",
     "incline-press": "Ferde, gépen"
   },
+  "catalog_exercise_notes": {},
   "exercise_role_label": "Szerep",
   "exercise_scaling_note_label": "Megjegyzés",
   "exercise_scaling_note_optional": "(opcionális)",

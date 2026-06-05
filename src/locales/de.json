@@ -254,6 +254,7 @@
     "chest-press-machine": "Flach an der Maschine",
     "incline-press": "Schräg an der Maschine"
   },
+  "catalog_exercise_notes": {},
   "exercise_role_label": "Rolle",
   "exercise_scaling_note_label": "Skalierungsnotiz",
   "exercise_scaling_note_optional": "(optional)",

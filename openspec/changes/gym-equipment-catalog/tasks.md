@@ -71,3 +71,6 @@
 - [x] 7.4 Extend the unit test: alias/hint key parity across locales, ids
       reference real entries, merged-away ids are gone, and cross-locale/alias
       search matches.
+- [x] 7.5 Prepare (structure only) a localized `catalog_exercise_notes` map +
+      `catalogNote` helper to later seed `Exercise.scalingNote` (the card note);
+      maps left empty and unwired, kept key-aligned by the test.

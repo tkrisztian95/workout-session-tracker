@@ -82,6 +82,17 @@ muscle, and the type-appropriate defaults — the same state-setting shape as
 `applyHistoryEntry`. No changes to `handleSubmit` or the produced
 `Exercise`/`PlanExercise`.
 
+### Card note structure (prepared, not yet wired)
+
+To later show a coaching/form note on the exercise card — the way AI-generated
+exercises do via `Exercise.scalingNote` — the catalog reserves a localized
+`catalog_exercise_notes` map (id → string) in each locale, with a `catalogNote`
+helper. The maps are intentionally **empty** for now and `applyCatalogEntry`
+does not pass a note through yet; populating the maps and adding one line to seed
+`scalingNote` on selection is all that's needed when the feature is wanted. The
+unit test already keeps the note map key-aligned across locales so it can't drift
+as entries are added.
+
 ### Muscle mapping for hip machines
 
 The `Muscle` taxonomy has no dedicated adductors/abductors entry. The user's

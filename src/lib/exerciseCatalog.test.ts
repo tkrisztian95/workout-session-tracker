@@ -55,14 +55,16 @@ describe('EXERCISE_CATALOG', () => {
 describe('catalog aliases and hints', () => {
   const locales = { en, hu, de };
 
-  it('keeps alias and hint maps key-aligned across locales', () => {
+  it('keeps alias, hint, and note maps key-aligned across locales', () => {
     const aliasKeys = Object.keys(en.catalog_exercise_aliases);
     const hintKeys = Object.keys(en.catalog_exercise_hints);
+    const noteKeys = Object.keys(en.catalog_exercise_notes);
     for (const [name, loc] of Object.entries(locales)) {
       expect(Object.keys(loc.catalog_exercise_aliases), `aliases drift in ${name}`).toEqual(
         aliasKeys,
       );
       expect(Object.keys(loc.catalog_exercise_hints), `hints drift in ${name}`).toEqual(hintKeys);
+      expect(Object.keys(loc.catalog_exercise_notes), `notes drift in ${name}`).toEqual(noteKeys);
     }
   });
 
@@ -73,6 +75,9 @@ describe('catalog aliases and hints', () => {
       }
       for (const id of Object.keys(loc.catalog_exercise_hints)) {
         expect(CATALOG_IDS.has(id), `hint for unknown id "${id}"`).toBe(true);
+      }
+      for (const id of Object.keys(loc.catalog_exercise_notes)) {
+        expect(CATALOG_IDS.has(id), `note for unknown id "${id}"`).toBe(true);
       }
     }
   });

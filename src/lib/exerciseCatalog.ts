@@ -73,6 +73,19 @@ export function catalogHint(t: Translations, id: string): string | undefined {
 }
 
 /**
+ * An optional localized coaching/form note for an entry, intended to seed the
+ * created exercise's `scalingNote` (the note rendered on the exercise card, as
+ * AI-generated exercises carry). Structure only for now — the
+ * `catalog_exercise_notes` maps are empty and `applyCatalogEntry` does not yet
+ * pass this through; populate the maps and wire it up when the card note is
+ * wanted. Returns undefined when absent.
+ */
+export function catalogNote(t: Translations, id: string): string | undefined {
+  const notes = t.catalog_exercise_notes as Record<string, string>;
+  return notes[id];
+}
+
+/**
  * Lowercased search haystack for an entry: its name, aliases, and hint across
  * ALL locales. This lets a query in any language (e.g. the German "Beinpresse")
  * match the entry regardless of the active UI locale, and lets a merged

@@ -254,6 +254,7 @@
     "chest-press-machine": "Flat machine press",
     "incline-press": "Incline machine press"
   },
+  "catalog_exercise_notes": {},
   "exercise_role_label": "Role",
   "exercise_scaling_note_label": "Scaling Note",
   "exercise_scaling_note_optional": "(optional)",
