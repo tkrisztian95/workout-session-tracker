@@ -166,6 +166,14 @@
     "source": "starter"
   },
   {
+    "id": "pull-up",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 8,
+    "source": "gym"
+  },
+  {
     "id": "overhead-press",
     "muscle": "shoulders",
     "type": "sets-reps",
