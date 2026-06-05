@@ -68,6 +68,14 @@
     "source": "gym"
   },
   {
+    "id": "romanian-deadlift",
+    "muscle": "hamstrings",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 8,
+    "source": "gym"
+  },
+  {
     "id": "glute-machine",
     "muscle": "glutes",
     "type": "sets-reps",
@@ -89,6 +97,14 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "source": "gym"
+  },
+  {
+    "id": "hip-thrust",
+    "muscle": "glutes",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
     "source": "gym"
   },
 
