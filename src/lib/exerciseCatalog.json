@@ -76,6 +76,14 @@
     "source": "gym"
   },
   {
+    "id": "deadlift",
+    "muscle": "hamstrings",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 5,
+    "source": "gym"
+  },
+  {
     "id": "glute-machine",
     "muscle": "glutes",
     "type": "sets-reps",
@@ -190,12 +198,28 @@
     "source": "gym"
   },
   {
+    "id": "dumbbell-row",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "gym"
+  },
+  {
     "id": "overhead-press",
     "muscle": "shoulders",
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
     "source": "starter"
+  },
+  {
+    "id": "dumbbell-shoulder-press",
+    "muscle": "shoulders",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "gym"
   },
   {
     "id": "lateral-raise",
