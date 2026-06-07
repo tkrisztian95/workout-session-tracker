@@ -90,7 +90,7 @@ export function HistoryExerciseEditorContent({
   return (
     <div className="flex-1 min-h-0 flex flex-col">
       {exercise.type === 'sets-reps' ? (
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-1">
+        <div className="flex-1 min-h-0 overflow-y-auto -mx-2 px-2 space-y-1">
           {/* Column headers */}
           <div className="flex items-center gap-2 px-1 mb-1">
             <span className="w-6 flex-shrink-0" />
