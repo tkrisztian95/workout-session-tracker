@@ -5,6 +5,7 @@ import { LayoutGrid, Search } from 'lucide-react';
 import { ModalSheet, Input } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
+import DifficultyBadge from '@/components/DifficultyBadge';
 import {
   EXERCISE_CATALOG,
   catalogAliases,
@@ -101,8 +102,9 @@ export default function ExerciseCatalogPicker({ isOpen, onClose, onSelect }: Pro
                               </span>
                             )}
                           </span>
-                          <span className="shrink-0">
+                          <span className="shrink-0 flex flex-col items-end gap-1">
                             <MuscleBadge muscle={entry.muscle} />
+                            <DifficultyBadge difficulty={entry.difficulty} />
                           </span>
                         </button>
                       </li>

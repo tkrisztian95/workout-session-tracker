@@ -6,6 +6,7 @@ import { ALL_MUSCLES } from './muscles';
 import { EXERCISE_CATALOG, catalogByGroup, catalogSearchText } from './exerciseCatalog';
 
 const VALID_TYPES = new Set(['sets-reps', 'sets-duration', 'duration']);
+const VALID_DIFFICULTIES = new Set(['beginner', 'intermediate', 'advanced']);
 const CATALOG_IDS = new Set(EXERCISE_CATALOG.map((e) => e.id));
 
 describe('EXERCISE_CATALOG', () => {
@@ -14,10 +15,22 @@ describe('EXERCISE_CATALOG', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('uses only canonical muscles and valid types', () => {
+  it('uses only canonical muscles, valid types, and valid difficulties', () => {
     for (const entry of EXERCISE_CATALOG) {
       expect(ALL_MUSCLES).toContain(entry.muscle);
       expect(VALID_TYPES.has(entry.type)).toBe(true);
+      expect(VALID_DIFFICULTIES.has(entry.difficulty), `bad difficulty for "${entry.id}"`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('has a label for every difficulty in all locales', () => {
+    for (const locale of [en, hu, de]) {
+      const labels = locale.catalog_difficulty_labels as Record<string, string>;
+      for (const d of VALID_DIFFICULTIES) {
+        expect(labels[d], `missing ${d} label`).toBeTruthy();
+      }
     }
   });
 

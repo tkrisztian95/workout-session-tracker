@@ -74,3 +74,13 @@
 - [x] 7.5 Prepare (structure only) a localized `catalog_exercise_notes` map +
       `catalogNote` helper to later seed `Exercise.scalingNote` (the card note);
       maps left empty and unwired, kept key-aligned by the test.
+
+## 8. Difficulty annotation
+
+- [x] 8.1 Add a required `difficulty` (`beginner`/`intermediate`/`advanced`)
+      field + `Difficulty` type to the catalog; annotate every entry in
+      `exerciseCatalog.json`.
+- [x] 8.2 Add localized `catalog_difficulty_labels` to `en`/`hu`/`de` and a
+      `DifficultyBadge` component (color-coded: green/orange/red).
+- [x] 8.3 Show the difficulty badge beside the muscle badge in the picker and
+      browse screen; extend the test to validate difficulty values + labels.

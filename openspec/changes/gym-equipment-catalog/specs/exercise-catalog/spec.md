@@ -118,3 +118,21 @@ called" aliases when present.
 - **WHEN** an entry with a hint and/or aliases is listed in the picker or browse
   screen
 - **THEN** its hint and "also called" alias names SHALL be shown beneath its name
+
+### Requirement: Difficulty annotation
+
+Every catalog entry SHALL carry a difficulty level of `beginner`,
+`intermediate`, or `advanced`, with a localized label in every supported locale.
+The difficulty SHALL be shown as a badge alongside the muscle badge in both the
+picker and the browse screen.
+
+#### Scenario: Every entry has a difficulty
+
+- **WHEN** the catalog is loaded
+- **THEN** each entry SHALL have one of the levels beginner, intermediate, or
+  advanced
+
+#### Scenario: Difficulty badge shown
+
+- **WHEN** an entry is listed in the picker or browse screen
+- **THEN** its difficulty SHALL be shown as a localized badge next to its muscle

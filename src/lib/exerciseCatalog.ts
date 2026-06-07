@@ -15,11 +15,18 @@ import catalogData from './exerciseCatalog.json';
  * shown to the user. Display names live in the locale files under
  * `catalog_exercise_names`, keyed by this id (see `catalogName`).
  */
+/** Relative skill/experience level for a catalog entry. */
+export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+
+export const ALL_DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
+
 export interface CatalogExercise {
   /** Stable slug, e.g. 'leg-press'. Used as i18n key and React key. */
   id: string;
   /** Muscle from the app's taxonomy. */
   muscle: Muscle;
+  /** Relative skill level, shown as a badge in the picker and browse screen. */
+  difficulty: Difficulty;
   /** Default exercise type pre-filled into the Add Exercise form. */
   type: Exercise['type'];
   /** Default sets for `sets-reps` / `sets-duration`. */

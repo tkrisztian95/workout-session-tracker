@@ -4,6 +4,7 @@
     "muscle": "cardio",
     "type": "duration",
     "defaultDurationSec": 600,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -11,6 +12,7 @@
     "muscle": "cardio",
     "type": "duration",
     "defaultDurationSec": 600,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -18,6 +20,7 @@
     "muscle": "cardio",
     "type": "duration",
     "defaultDurationSec": 600,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -25,6 +28,7 @@
     "muscle": "cardio",
     "type": "duration",
     "defaultDurationSec": 600,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -32,6 +36,7 @@
     "muscle": "cardio",
     "type": "duration",
     "defaultDurationSec": 600,
+    "difficulty": "beginner",
     "source": "gym"
   },
 
@@ -41,6 +46,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -49,6 +55,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -57,6 +64,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 8,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -65,6 +73,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -73,6 +82,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -81,6 +91,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -89,6 +100,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 8,
+    "difficulty": "intermediate",
     "source": "gym"
   },
   {
@@ -97,6 +109,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 5,
+    "difficulty": "advanced",
     "source": "gym"
   },
   {
@@ -105,6 +118,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -113,6 +127,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -121,6 +136,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -129,6 +145,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -137,6 +154,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -145,6 +163,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "starter"
   },
 
@@ -154,6 +173,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -162,6 +182,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -170,6 +191,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -178,6 +200,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "gym"
   },
 
@@ -187,6 +210,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -195,6 +219,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -203,6 +228,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -211,6 +237,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -219,6 +246,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -227,6 +255,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -235,6 +264,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -243,6 +273,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -251,6 +282,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 8,
+    "difficulty": "advanced",
     "source": "gym"
   },
   {
@@ -259,6 +291,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -267,6 +300,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -275,6 +309,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -283,6 +318,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "beginner",
     "source": "gym"
   },
   {
@@ -291,6 +327,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -299,6 +336,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 15,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -307,6 +345,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -315,6 +354,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -323,6 +363,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -331,6 +372,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "difficulty": "beginner",
     "source": "starter"
   },
   {
@@ -339,6 +381,7 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 10,
+    "difficulty": "intermediate",
     "source": "starter"
   },
   {
@@ -347,6 +390,7 @@
     "type": "sets-duration",
     "defaultSets": 3,
     "defaultDurationSec": 30,
+    "difficulty": "beginner",
     "source": "starter"
   }
 ]

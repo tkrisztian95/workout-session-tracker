@@ -234,6 +234,11 @@
     "plank": "Plank (deszka)"
   },
   "catalog_also_called": "Másképp: {names}",
+  "catalog_difficulty_labels": {
+    "beginner": "Kezdő",
+    "intermediate": "Középhaladó",
+    "advanced": "Haladó"
+  },
   "catalog_exercise_aliases": {
     "stationary-bike": ["Szobakerékpár"],
     "romanian-deadlift": ["RDL"],

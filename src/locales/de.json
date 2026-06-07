@@ -246,6 +246,11 @@
     "plank": "Unterarmstütz (Plank)"
   },
   "catalog_also_called": "Auch: {names}",
+  "catalog_difficulty_labels": {
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "advanced": "Profi"
+  },
   "catalog_exercise_aliases": {
     "stationary-bike": ["Heimtrainer"],
     "romanian-deadlift": ["RDL"],

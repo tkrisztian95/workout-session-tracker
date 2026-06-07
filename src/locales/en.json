@@ -246,6 +246,11 @@
     "plank": "Plank"
   },
   "catalog_also_called": "Also: {names}",
+  "catalog_difficulty_labels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
   "catalog_exercise_aliases": {
     "stationary-bike": ["Exercise bike"],
     "romanian-deadlift": ["RDL"],

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, Search } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import MuscleBadge from '@/components/MuscleBadge';
+import DifficultyBadge from '@/components/DifficultyBadge';
 import { Page, PageHeader, HeadingXL, Input } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
 import {
@@ -95,7 +96,10 @@ export default function CatalogPage() {
                           </span>
                         )}
                       </div>
-                      <MuscleBadge muscle={entry.muscle} />
+                      <div className="shrink-0 flex flex-col items-end gap-1">
+                        <MuscleBadge muscle={entry.muscle} />
+                        <DifficultyBadge difficulty={entry.difficulty} />
+                      </div>
                     </div>
                   ))}
                 </div>
