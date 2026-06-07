@@ -98,11 +98,11 @@ export default function PlanCard({
         {isCompleted && <span className="text-dim text-xs flex-shrink-0">{completedLabel}</span>}
       </div>
       {compact ? (
-        <p className="text-muted text-sm mt-0.5">
+        <p className="text-muted text-sm leading-tight mt-0.5">
           {dayCountLabel} · {exerciseCountLabel}
         </p>
       ) : (
-        <p className="text-muted text-sm mt-0.5">
+        <p className="text-muted text-sm leading-tight mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {plan.scheduledWeeks && (
             <span className="ml-2">
@@ -249,7 +249,7 @@ function PlanFollowProgress({
   if (isCompleted) {
     if (followCount === 0) return null;
     return (
-      <div className="mt-1.5">
+      <div className="mt-1">
         <Badge
           variant="subtle"
           aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
@@ -264,7 +264,7 @@ function PlanFollowProgress({
     const pct = Math.min(100, (followCount / planned) * 100);
     return (
       <div
-        className="flex items-center gap-2 mt-1.5"
+        className="flex items-center gap-2 mt-1"
         aria-label={t.plan_progress_aria
           .replace('{done}', String(followCount))
           .replace('{planned}', String(planned))}
@@ -285,7 +285,7 @@ function PlanFollowProgress({
   const dots = Math.min(followCount, FOLLOW_DOT_LIMIT);
   return (
     <div
-      className="mt-1.5 flex items-center gap-1"
+      className="mt-1 flex items-center gap-1"
       aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
     >
       {Array.from({ length: dots }).map((_, i) => (
