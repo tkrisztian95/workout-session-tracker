@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildSessionTimeline,
+  classifyLoggedSets,
   formatExerciseDetail,
   formatMonthBucket,
   formatRepsTarget,
   getSessionBucket,
   parseRepScheme,
 } from './sessionUtils';
-import type { Exercise, WorkoutSession } from './types';
+import type { Exercise, LoggedSet, WorkoutSession } from './types';
 
 describe('formatRepsTarget', () => {
   it('returns the uniform rep count as a string', () => {
@@ -219,5 +220,57 @@ describe('formatMonthBucket', () => {
 
   it('appends the year for other years', () => {
     expect(formatMonthBucket('2025-12-01', 'en-US', now)).toBe('December 2025');
+  });
+});
+
+describe('classifyLoggedSets', () => {
+  const set = (weight: number, reps: number): LoggedSet => ({
+    weight,
+    reps,
+    loggedAt: '2026-06-07T10:00:00.000Z',
+  });
+
+  it('marks every set neutral when the exercise has no weight target', () => {
+    expect(classifyLoggedSets({ reps: 8, loggedSets: [set(40, 5), set(60, 8)] })).toEqual([
+      'neutral',
+      'neutral',
+    ]);
+  });
+
+  it('marks sets below the target weight as warmups', () => {
+    expect(
+      classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(30, 8), set(50, 8)] }),
+    ).toEqual(['warmup', 'warmup']);
+  });
+
+  it('counts a set as working only when weight and reps targets are met', () => {
+    expect(
+      classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(60, 8), set(70, 10)] }),
+    ).toEqual(['working', 'working']);
+  });
+
+  it('marks a set at target weight but short on reps as partial', () => {
+    expect(classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(60, 5)] })).toEqual([
+      'partial',
+    ]);
+  });
+
+  it('treats a missing rep target as no rep gate (working on weight alone)', () => {
+    expect(classifyLoggedSets({ weightKg: 60, loggedSets: [set(60, 1)] })).toEqual(['working']);
+  });
+
+  it('matches a per-set rep scheme to weight-qualifying sets in order, skipping warmups', () => {
+    // Warmup (30) skipped; the three weight-qualifying sets map to 15/12/8.
+    expect(
+      classifyLoggedSets({
+        weightKg: 60,
+        repsPerSet: [15, 12, 8],
+        loggedSets: [set(30, 20), set(60, 15), set(60, 10), set(60, 8)],
+      }),
+    ).toEqual(['warmup', 'working', 'partial', 'working']);
+  });
+
+  it('returns an empty array when there are no logged sets', () => {
+    expect(classifyLoggedSets({ weightKg: 60, reps: 8 })).toEqual([]);
   });
 });

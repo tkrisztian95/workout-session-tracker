@@ -8,7 +8,7 @@ import LoggedSetBadge from '@/components/LoggedSetBadge';
 import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
-import { formatRepsTarget } from '@/lib/sessionUtils';
+import { classifyLoggedSets, formatRepsTarget } from '@/lib/sessionUtils';
 
 interface Props {
   exercise: Exercise;
@@ -73,10 +73,12 @@ export default function ExerciseCard({
     (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
 
   const loggedCount = exercise.loggedSets?.length ?? 0;
+  // Per-set warmup/partial/working classification drives both badge colours and
+  // what counts toward the goal. A set only qualifies when it hits the target
+  // weight AND the rep target; weight-only "partial" sets don't count.
+  const setStatuses = classifyLoggedSets(exercise);
   const qualifyingSetCount =
-    exercise.weightKg != null
-      ? (exercise.loggedSets?.filter((s) => s.weight >= exercise.weightKg!).length ?? 0)
-      : loggedCount;
+    exercise.weightKg == null ? loggedCount : setStatuses.filter((s) => s === 'working').length;
   const setsGoalAchieved =
     exercise.type === 'sets-reps'
       ? exercise.sets != null && qualifyingSetCount >= exercise.sets
@@ -198,7 +200,7 @@ export default function ExerciseCard({
                   <LoggedSetBadge
                     key={i}
                     set={logged}
-                    targetWeight={exercise.weightKg}
+                    status={setStatuses[i]}
                     isPendingDelete={pendingDeleteIndex === i}
                     removeLabel={t.exercise_remove_set}
                     onRemove={() => {
@@ -325,7 +327,7 @@ export default function ExerciseCard({
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {exercise.loggedSets.map((s, i) => (
-                  <LoggedSetBadge key={i} set={s} targetWeight={exercise.weightKg} />
+                  <LoggedSetBadge key={i} set={s} status={setStatuses[i]} />
                 ))}
               </div>
             )}
