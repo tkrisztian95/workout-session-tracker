@@ -93,8 +93,11 @@ export function ModalSheet({
       >
         {/* Header — always visible, never scrolls */}
         <div className="px-6 pt-6 flex-shrink-0">{header}</div>
-        {/* Body — children manage their own scroll */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))]">
+        {/* Body — children manage their own scroll. The bottom safe-area
+            padding is applied to the body's direct child rather than the
+            wrapper, so a scrolling child uses the full available height and the
+            padding becomes scroll-end breathing room instead of a dead band. */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden px-6 [&>*]:pb-[max(2.5rem,env(safe-area-inset-bottom))]">
           {children}
         </div>
       </div>

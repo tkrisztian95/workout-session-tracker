@@ -50,3 +50,14 @@ input[type='number']::-webkit-outer-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+
+/*
+ * Reserve space for the scrollbar gutter on vertical scroll containers so the
+ * scrollbar never overlays content (e.g. the right edge of inputs inside the
+ * add-exercise modal). Applies app-wide to every `overflow-y-auto` scroller.
+ * The wheel pickers use `overflow-y-scroll` with a hidden scrollbar, so they
+ * are intentionally excluded.
+ */
+.overflow-y-auto {
+  scrollbar-gutter: stable;
+}
