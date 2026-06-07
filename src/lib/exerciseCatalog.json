@@ -222,6 +222,14 @@
     "source": "starter"
   },
   {
+    "id": "push-up",
+    "muscle": "chest",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "starter"
+  },
+  {
     "id": "lat-pulldown",
     "muscle": "back",
     "type": "sets-reps",
@@ -323,6 +331,14 @@
     "type": "sets-reps",
     "defaultSets": 3,
     "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "dips",
+    "muscle": "arms",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
     "source": "starter"
   },
   {
