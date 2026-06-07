@@ -134,3 +134,33 @@ picker and the browse screen.
 
 - **WHEN** an entry is listed in the picker or browse screen
 - **THEN** its difficulty SHALL be shown as a localized badge next to its muscle
+
+### Requirement: Filter the catalog by muscle group and difficulty
+
+The picker and the browse screen SHALL provide filter chips for muscle group and
+for difficulty. Selection SHALL be multi-select within each dimension, and an
+empty selection for a dimension SHALL impose no constraint on it. The active
+filters SHALL combine with the text search and with each other using AND logic.
+
+#### Scenario: Filter chips shown alongside search
+
+- **WHEN** the user opens the catalog picker or browse screen
+- **THEN** muscle-group and difficulty filter chips SHALL be shown near the
+  search box
+
+#### Scenario: Multi-select within a dimension
+
+- **WHEN** the user selects more than one chip in the same dimension
+- **THEN** entries matching ANY of the selected chips in that dimension SHALL be
+  shown
+
+#### Scenario: Filters and search combine with AND
+
+- **WHEN** the user has a text query and one or more filter chips active
+- **THEN** only entries that match the query AND every active dimension SHALL be
+  shown
+
+#### Scenario: No filters means no constraint
+
+- **WHEN** no chip in a dimension is selected
+- **THEN** that dimension SHALL NOT restrict the results
