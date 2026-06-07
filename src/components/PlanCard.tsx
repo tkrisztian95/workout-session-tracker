@@ -106,7 +106,11 @@ export default function PlanCard({
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {plan.scheduledWeeks && (
             <span className="ml-2">
-              · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
+              ·{' '}
+              {(plan.scheduledWeeks !== 1
+                ? t.plan_overview_weeks_value
+                : t.plan_overview_week_value
+              ).replace('{n}', String(plan.scheduledWeeks))}
             </span>
           )}
           {scheduledWeekdays.length > 0 && (
