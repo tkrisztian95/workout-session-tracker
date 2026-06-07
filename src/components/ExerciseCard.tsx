@@ -91,6 +91,12 @@ export default function ExerciseCard({
     exercise.loggedSets!.some((s) => s.weight >= exercise.weightKg!);
   const allTargetsAchieved = setsGoalAchieved && (exercise.weightKg == null || weightGoalAchieved);
 
+  // Live "qualifying sets / target" progress for the sets goal. Uses the same
+  // qualifyingSetCount the checkmark is judged on, so the counter, the green
+  // set badges, and the tick all agree on what "counts".
+  const showSetsProgress =
+    (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
+
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
     const scheme = exercise.repsPerSet;
@@ -142,6 +148,15 @@ export default function ExerciseCard({
             </div>
             <p className="flex items-center gap-1.5 mt-1 text-base font-medium text-brand">
               {detail}
+              {showSetsProgress && (
+                <span
+                  className={`text-xs font-semibold tabular-nums px-1.5 py-0.5 rounded-md ${
+                    setsGoalAchieved ? 'text-success' : 'bg-elevated text-secondary'
+                  }`}
+                >
+                  {qualifyingSetCount}/{exercise.sets}
+                </span>
+              )}
               {setsGoalAchieved && (
                 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
                   <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
