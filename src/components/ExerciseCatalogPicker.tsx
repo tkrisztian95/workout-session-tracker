@@ -4,16 +4,18 @@ import { useMemo, useState } from 'react';
 import { LayoutGrid, Search } from 'lucide-react';
 import { ModalSheet, Input } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
+import type { MuscleGroup } from '@/lib/muscles';
 import MuscleBadge from '@/components/MuscleBadge';
 import DifficultyBadge from '@/components/DifficultyBadge';
+import CatalogFilterBar from '@/components/CatalogFilterBar';
 import {
   EXERCISE_CATALOG,
   catalogAliases,
-  catalogByGroup,
   catalogHint,
   catalogName,
-  catalogSearchText,
+  filterCatalogByGroup,
   type CatalogExercise,
+  type Difficulty,
 } from '@/lib/exerciseCatalog';
 
 interface Props {
@@ -25,18 +27,28 @@ interface Props {
 export default function ExerciseCatalogPicker({ isOpen, onClose, onSelect }: Props) {
   const t = useTranslations();
   const [search, setSearch] = useState('');
+  const [selectedGroups, setSelectedGroups] = useState<Set<MuscleGroup>>(new Set());
+  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<Difficulty>>(new Set());
 
-  const query = search.trim().toLowerCase();
+  const toggleGroup = (group: MuscleGroup) =>
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  const toggleDifficulty = (difficulty: Difficulty) =>
+    setSelectedDifficulties((prev) => {
+      const next = new Set(prev);
+      if (next.has(difficulty)) next.delete(difficulty);
+      else next.add(difficulty);
+      return next;
+    });
 
-  const groups = useMemo(() => {
-    if (!query) return catalogByGroup();
-    return catalogByGroup()
-      .map((g) => ({
-        group: g.group,
-        entries: g.entries.filter((e) => catalogSearchText(e.id).includes(query)),
-      }))
-      .filter((g) => g.entries.length > 0);
-  }, [query]);
+  const groups = useMemo(
+    () => filterCatalogByGroup(search, selectedGroups, selectedDifficulties),
+    [search, selectedGroups, selectedDifficulties],
+  );
 
   const hasResults = groups.length > 0;
   const totalShown = groups.reduce((n, g) => n + g.entries.length, 0);
@@ -59,6 +71,16 @@ export default function ExerciseCatalogPicker({ isOpen, onClose, onSelect }: Pro
             placeholder={t.catalog_picker_search_placeholder}
             className="pl-9"
             autoComplete="off"
+          />
+        </div>
+
+        {/* Filter chips */}
+        <div className="mb-3 flex-shrink-0">
+          <CatalogFilterBar
+            selectedGroups={selectedGroups}
+            selectedDifficulties={selectedDifficulties}
+            onToggleGroup={toggleGroup}
+            onToggleDifficulty={toggleDifficulty}
           />
         </div>
 

@@ -122,3 +122,29 @@ export function catalogByGroup(): { group: MuscleGroup; entries: CatalogExercise
     entries: EXERCISE_CATALOG.filter((e) => MUSCLE_TO_GROUP[e.muscle] === group),
   })).filter((g) => g.entries.length > 0);
 }
+
+/**
+ * Filter the grouped catalog by a free-text query, a set of muscle groups, and a
+ * set of difficulties. An empty set means "no constraint" for that dimension;
+ * the query matches via `catalogSearchText` (name/alias/hint across all locales).
+ * Groups with no surviving entries are omitted. Shared by the picker and the
+ * browse screen so their filter chips behave identically.
+ */
+export function filterCatalogByGroup(
+  query: string,
+  groups: Set<MuscleGroup>,
+  difficulties: Set<Difficulty>,
+): { group: MuscleGroup; entries: CatalogExercise[] }[] {
+  const q = query.trim().toLowerCase();
+  return catalogByGroup()
+    .filter((g) => groups.size === 0 || groups.has(g.group))
+    .map((g) => ({
+      group: g.group,
+      entries: g.entries.filter(
+        (e) =>
+          (difficulties.size === 0 || difficulties.has(e.difficulty)) &&
+          (!q || catalogSearchText(e.id).includes(q)),
+      ),
+    }))
+    .filter((g) => g.entries.length > 0);
+}

@@ -3,7 +3,14 @@ import en from '@/locales/en.json';
 import hu from '@/locales/hu.json';
 import de from '@/locales/de.json';
 import { ALL_MUSCLES } from './muscles';
-import { EXERCISE_CATALOG, catalogByGroup, catalogSearchText } from './exerciseCatalog';
+import type { MuscleGroup } from './muscles';
+import {
+  EXERCISE_CATALOG,
+  catalogByGroup,
+  catalogSearchText,
+  filterCatalogByGroup,
+  type Difficulty,
+} from './exerciseCatalog';
 
 const VALID_TYPES = new Set(['sets-reps', 'sets-duration', 'duration']);
 const VALID_DIFFICULTIES = new Set(['beginner', 'intermediate', 'advanced']);
@@ -113,5 +120,38 @@ describe('catalogByGroup', () => {
     const grouped = catalogByGroup().flatMap((g) => g.entries);
     expect(grouped).toHaveLength(EXERCISE_CATALOG.length);
     expect(new Set(grouped.map((e) => e.id)).size).toBe(EXERCISE_CATALOG.length);
+  });
+});
+
+describe('filterCatalogByGroup', () => {
+  const none = new Set<MuscleGroup>();
+  const noDiff = new Set<Difficulty>();
+
+  it('returns the full catalog with no filters or query', () => {
+    const total = filterCatalogByGroup('', none, noDiff).flatMap((g) => g.entries);
+    expect(total).toHaveLength(EXERCISE_CATALOG.length);
+  });
+
+  it('restricts to selected muscle groups', () => {
+    const result = filterCatalogByGroup('', new Set<MuscleGroup>(['cardio']), noDiff);
+    expect(result.map((g) => g.group)).toEqual(['cardio']);
+  });
+
+  it('restricts to selected difficulties', () => {
+    const result = filterCatalogByGroup('', none, new Set<Difficulty>(['advanced']));
+    const entries = result.flatMap((g) => g.entries);
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries.every((e) => e.difficulty === 'advanced')).toBe(true);
+  });
+
+  it('combines query, group, and difficulty (AND)', () => {
+    const result = filterCatalogByGroup(
+      'press',
+      new Set<MuscleGroup>(['upper']),
+      new Set<Difficulty>(['beginner']),
+    );
+    const entries = result.flatMap((g) => g.entries);
+    expect(entries.every((e) => e.difficulty === 'beginner')).toBe(true);
+    expect(entries.some((e) => e.id === 'chest-press-machine')).toBe(true);
   });
 });

@@ -354,7 +354,7 @@ function ProfilePageInner() {
           </button>
         </div>
 
-        {/* ── Equipment catalog ── */}
+        {/* ── Exercise catalog ── */}
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <button
             onClick={() => router.push('/catalog')}
