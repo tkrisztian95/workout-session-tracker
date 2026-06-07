@@ -8,7 +8,7 @@ import LoggedSetBadge from '@/components/LoggedSetBadge';
 import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
-import { formatRepsTarget } from '@/lib/sessionUtils';
+import { classifyLoggedSets, formatRepsTarget } from '@/lib/sessionUtils';
 
 interface Props {
   exercise: Exercise;
@@ -73,10 +73,14 @@ export default function ExerciseCard({
     (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
 
   const loggedCount = exercise.loggedSets?.length ?? 0;
+  // Per-set warmup/partial/working classification drives both badge colours and
+  // what counts toward the goal. A set only qualifies when it hits the target
+  // weight AND the rep target; weight-only "partial" sets don't count.
+  const setClassifications = classifyLoggedSets(exercise);
   const qualifyingSetCount =
-    exercise.weightKg != null
-      ? (exercise.loggedSets?.filter((s) => s.weight >= exercise.weightKg!).length ?? 0)
-      : loggedCount;
+    exercise.weightKg == null
+      ? loggedCount
+      : setClassifications.filter((c) => c.status === 'working').length;
   const setsGoalAchieved =
     exercise.type === 'sets-reps'
       ? exercise.sets != null && qualifyingSetCount >= exercise.sets
@@ -90,6 +94,29 @@ export default function ExerciseCard({
     loggedCount > 0 &&
     exercise.loggedSets!.some((s) => s.weight >= exercise.weightKg!);
   const allTargetsAchieved = setsGoalAchieved && (exercise.weightKg == null || weightGoalAchieved);
+
+  // Live "qualifying sets / target" progress for the sets goal. Uses the same
+  // qualifyingSetCount the checkmark is judged on, so the counter, the green
+  // set badges, and the tick all agree on what "counts".
+  const showSetsProgress =
+    (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
+
+  // Slot count keeps an empty placeholder open for every set still needed to
+  // reach the target. Non-qualifying warmups don't consume a target slot, so a
+  // fresh placeholder is added for each one — there are always enough empty
+  // slots left to hit the qualifying-set goal.
+  const setSlotCount = loggedCount + Math.max(0, (exercise.sets ?? 0) - qualifyingSetCount);
+
+  // Target line: weight target first, then the reps/sets detail, joined by a
+  // dot. `mergedDetail` is the plain-text form for the collapsed card.
+  const weightLabel = exercise.weightKg != null ? `${exercise.weightKg} kg` : null;
+  const mergedDetail = weightLabel ? `${weightLabel} · ${detail}` : detail;
+
+  const goalCheck = (
+    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
+      <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
+    </span>
+  );
 
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
@@ -140,24 +167,26 @@ export default function ExerciseCard({
                 {t.exercise_skip}
               </button>
             </div>
-            <p className="flex items-center gap-1.5 mt-1 text-base font-medium text-brand">
-              {detail}
-              {setsGoalAchieved && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
-                  <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
+            <p className="flex flex-wrap items-center gap-1.5 mt-1 text-base font-medium text-brand">
+              {weightLabel != null && (
+                <span className="inline-flex items-center gap-1.5 text-foreground">
+                  {weightLabel}
+                  {weightGoalAchieved && goalCheck}
                 </span>
               )}
+              {weightLabel != null && <span className="text-muted">·</span>}
+              {detail}
+              {showSetsProgress && (
+                <span
+                  className={`text-xs font-semibold tabular-nums px-1.5 py-0.5 rounded-md ${
+                    setsGoalAchieved ? 'text-success' : 'bg-elevated text-secondary'
+                  }`}
+                >
+                  {qualifyingSetCount}/{exercise.sets}
+                </span>
+              )}
+              {setsGoalAchieved && goalCheck}
             </p>
-            {exercise.weightKg != null && (
-              <p className="flex items-center gap-1.5 text-sm text-foreground font-medium mt-1.5">
-                {t.target_weight}: {exercise.weightKg} kg
-                {weightGoalAchieved && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
-                    <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
-                  </span>
-                )}
-              </p>
-            )}
             {exercise.scalingNote && (
               <div className="mt-2 flex items-start gap-1.5 bg-elevated/40 rounded-xl px-3 py-2 border border-border/50">
                 <Info className="w-3.5 h-3.5 text-brand/70 mt-0.5 flex-shrink-0" />
@@ -170,13 +199,15 @@ export default function ExerciseCard({
           {showSetSlots && (
             <div className="flex flex-wrap gap-1.5 px-4 pb-3">
               {Array.from({
-                length: Math.max(exercise.sets ?? 0, exercise.loggedSets?.length ?? 0),
+                length: setSlotCount,
               }).map((_, i) => {
                 const logged = exercise.loggedSets?.[i];
                 return logged ? (
                   <LoggedSetBadge
                     key={i}
                     set={logged}
+                    status={setClassifications[i]?.status}
+                    repTarget={setClassifications[i]?.repTarget}
                     isPendingDelete={pendingDeleteIndex === i}
                     removeLabel={t.exercise_remove_set}
                     onRemove={() => {
@@ -294,7 +325,7 @@ export default function ExerciseCard({
               {exercise.name}
             </p>
             <p className={`mt-0.5 text-xs font-medium ${isDone ? 'text-dim' : 'text-brand'}`}>
-              {detail}
+              {mergedDetail}
             </p>
             {exercise.scalingNote && !isDone && (
               <p className="mt-1 text-xs text-muted leading-snug">{exercise.scalingNote}</p>
@@ -303,7 +334,12 @@ export default function ExerciseCard({
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {exercise.loggedSets.map((s, i) => (
-                  <LoggedSetBadge key={i} set={s} />
+                  <LoggedSetBadge
+                    key={i}
+                    set={s}
+                    status={setClassifications[i]?.status}
+                    repTarget={setClassifications[i]?.repTarget}
+                  />
                 ))}
               </div>
             )}

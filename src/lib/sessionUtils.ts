@@ -20,6 +20,56 @@ export function formatRepsTarget(ex: { reps?: number; repsPerSet?: number[] }): 
   return String(ex.reps ?? 0);
 }
 
+/**
+ * How a logged set relates to the exercise's target, used to colour-code
+ * badges and decide what counts toward the sets goal:
+ *
+ * - `neutral` — no weight target on the exercise; every set just counts.
+ * - `warmup`  — below the target weight; a ramp-up that doesn't count.
+ * - `partial` — at/above target weight but short of the rep target; a near
+ *               miss that does NOT count toward the goal.
+ * - `working` — at/above target weight and meeting the rep target; counts.
+ */
+export type SetStatus = 'neutral' | 'warmup' | 'partial' | 'working';
+
+export interface LoggedSetClassification {
+  status: SetStatus;
+  /** Rep target this set was measured against — present for working/partial sets. */
+  repTarget?: number;
+}
+
+/**
+ * Classifies each logged set against the exercise's weight + rep targets,
+ * returning a result aligned 1:1 with `loggedSets`. Only `working` sets count
+ * toward the sets goal. When the exercise has no weight target every set is
+ * `neutral` (unchanged legacy behaviour). For a per-set rep scheme
+ * (`repsPerSet`), the rep target is matched to the Nth weight-qualifying set in
+ * order — warmups are skipped — since the scheme describes the working sets.
+ * The matched `repTarget` is returned so callers can show how short a `partial`
+ * set fell (e.g. reps "5/8").
+ */
+export function classifyLoggedSets(ex: {
+  weightKg?: number;
+  reps?: number;
+  repsPerSet?: number[];
+  loggedSets?: LoggedSet[];
+}): LoggedSetClassification[] {
+  const sets = ex.loggedSets ?? [];
+  if (ex.weightKg == null) return sets.map(() => ({ status: 'neutral' }));
+
+  let weightQualifyingIndex = 0;
+  return sets.map((s) => {
+    if (s.weight < ex.weightKg!) return { status: 'warmup' };
+    const repTarget =
+      ex.repsPerSet && ex.repsPerSet.length > 0
+        ? ex.repsPerSet[Math.min(weightQualifyingIndex, ex.repsPerSet.length - 1)]
+        : ex.reps;
+    weightQualifyingIndex++;
+    const status: SetStatus = repTarget != null && s.reps < repTarget ? 'partial' : 'working';
+    return { status, repTarget };
+  });
+}
+
 /** Parse a free-text rep scheme ("15, 12, 8, 4" / "15 12 8 4" / "15/12/8/4") into positive integers. */
 export function parseRepScheme(text: string): number[] {
   return text
