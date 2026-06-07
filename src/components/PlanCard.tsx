@@ -246,7 +246,7 @@ function PlanFollowProgress({
   if (isCompleted) {
     if (followCount === 0) return null;
     return (
-      <div className="mt-2">
+      <div className="mt-1.5">
         <Badge
           variant="subtle"
           aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
@@ -261,7 +261,7 @@ function PlanFollowProgress({
     const pct = Math.min(100, (followCount / planned) * 100);
     return (
       <div
-        className="flex items-center gap-2 mt-2"
+        className="flex items-center gap-2 mt-1.5"
         aria-label={t.plan_progress_aria
           .replace('{done}', String(followCount))
           .replace('{planned}', String(planned))}
@@ -278,7 +278,7 @@ function PlanFollowProgress({
 
   if (followCount === 0) return null;
   return (
-    <div className="mt-2" aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}>
+    <div className="mt-1.5" aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}>
       <span className="text-dim text-xs font-medium">{followCount}×</span>
     </div>
   );
