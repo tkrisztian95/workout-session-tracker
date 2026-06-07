@@ -395,6 +395,7 @@
   "view_plan_title": "Plan",
   "plan_completed_on_label": "Completed on",
   "plan_followed_aria": "Followed {n} times",
+  "plan_progress_aria": "Followed {done} of {planned} planned sessions",
   "plan_followed_badge": "Followed {n}×",
   "view_plan_completed_note": "This plan is completed and read-only. Reactivate it to make changes.",
   "plan_scheduled_duration_label": "Scheduled duration (weeks)",

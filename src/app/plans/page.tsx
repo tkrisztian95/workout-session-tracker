@@ -3,18 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Plus,
-  Dumbbell,
-  CheckCircle,
-  RotateCcw,
-  Sparkles,
-  Copy,
-  MoreVertical,
-  Search,
-  X,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { Plus, Dumbbell, Sparkles, Search, X, SlidersHorizontal } from 'lucide-react';
 import { getPlans, togglePlanStatus, savePlan, duplicatePlan, getSessions } from '@/lib/storage';
 import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
 import {
@@ -23,16 +12,14 @@ import {
   countActiveFilters,
   DEFAULT_PLAN_FILTERS,
   getPlanFollowCount,
-  getPlanMuscles,
   organizePlans,
   type PlanFilters,
   type PlanSort,
 } from '@/lib/plan-list';
 import BottomNav from '@/components/BottomNav';
-import { useLocale, useTranslations } from '@/lib/locale-context';
-import MuscleBadge from '@/components/MuscleBadge';
+import { useTranslations } from '@/lib/locale-context';
+import PlanCard from '@/components/PlanCard';
 import {
-  Badge,
   BottomSheet,
   Button,
   EmptyState,
@@ -67,7 +54,6 @@ export default function PlansPage() {
     for (const p of plans) counts.set(p.id, getPlanFollowCount(p.id, sessions));
     return counts;
   }, [plans, sessions]);
-  const maxFollowCount = Math.max(1, ...followCounts.values());
   const filterCount = countActiveFilters(filters);
   const hasPlans = plans.length > 0;
   const controlsActive = search.trim() !== '' || filterCount > 0 || sort !== 'created';
@@ -172,7 +158,7 @@ export default function PlansPage() {
                 key={plan.id}
                 plan={plan}
                 followCount={followCounts.get(plan.id) ?? 0}
-                maxFollowCount={maxFollowCount}
+                href={`/plans/${plan.id}`}
                 onToggleStatus={() => handleToggleStatus(plan.id)}
                 onDuplicate={() => handleDuplicate(plan.id)}
               />
@@ -189,7 +175,7 @@ export default function PlansPage() {
                     key={plan.id}
                     plan={plan}
                     followCount={followCounts.get(plan.id) ?? 0}
-                    maxFollowCount={maxFollowCount}
+                    href={`/plans/${plan.id}`}
                     onToggleStatus={() => handleToggleStatus(plan.id)}
                     onDuplicate={() => handleDuplicate(plan.id)}
                   />
@@ -419,157 +405,5 @@ function PlanControlsSheet({
         {t.plans_filters_done}
       </Button>
     </BottomSheet>
-  );
-}
-
-function PlanCard({
-  plan,
-  followCount,
-  maxFollowCount,
-  onToggleStatus,
-  onDuplicate,
-}: {
-  plan: WorkoutPlan;
-  followCount: number;
-  maxFollowCount: number;
-  onToggleStatus: () => void;
-  onDuplicate: () => void;
-}) {
-  const { t, locale } = useLocale();
-  const isCompleted = plan.status === 'completed';
-  const completedLabel =
-    isCompleted && plan.completedAt
-      ? `${t.plan_completed_label} · ${new Date(plan.completedAt).toLocaleDateString(locale, {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        })}`
-      : t.plan_completed_label;
-  const muscles = getPlanMuscles(plan);
-  const scheduledWeekdays = [...new Set(plan.days.flatMap((d) => d.weekdays))].sort(
-    (a, b) => a - b,
-  );
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <div
-      className={`relative flex items-center rounded-2xl border px-4 py-4 gap-3 ${
-        isCompleted ? 'bg-surface/50 border-border/50' : 'bg-surface border-border'
-      }`}
-    >
-      {plan.aiGenerated === true && (
-        <div className="absolute -top-px left-3 flex items-center gap-1 bg-brand text-white rounded-b-md px-1.5 py-0.5">
-          <Sparkles className="w-2.5 h-2.5" />
-          <span className="text-[9px] font-bold tracking-wide uppercase leading-none">AI</span>
-        </div>
-      )}
-
-      <Link
-        href={`/plans/${plan.id}`}
-        className="flex-1 min-w-0 active:opacity-70 transition-opacity duration-150"
-      >
-        <div className="flex items-center gap-2">
-          <p
-            className={`font-semibold text-base truncate ${isCompleted ? 'text-muted' : 'text-foreground'}`}
-          >
-            {plan.name}
-          </p>
-          {isCompleted && <span className="text-dim text-xs flex-shrink-0">{completedLabel}</span>}
-        </div>
-        <p className="text-muted text-sm mt-0.5">
-          {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
-          {plan.scheduledWeeks && (
-            <span className="ml-2">
-              · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
-            </span>
-          )}
-          {scheduledWeekdays.length > 0 && (
-            <span className="ml-2 text-dim">
-              · {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(', ')}
-            </span>
-          )}
-        </p>
-        {followCount > 0 &&
-          (isCompleted ? (
-            <div className="mt-2">
-              <Badge
-                variant="subtle"
-                aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
-              >
-                {t.plan_followed_badge.replace('{n}', String(followCount))}
-              </Badge>
-            </div>
-          ) : (
-            <div
-              className="flex items-center gap-2 mt-2"
-              aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
-            >
-              <div className="flex-1 h-1.5 rounded-full bg-elevated overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-brand"
-                  style={{ width: `${Math.max(8, (followCount / maxFollowCount) * 100)}%` }}
-                />
-              </div>
-              <span className="text-dim text-xs font-medium flex-shrink-0">{followCount}×</span>
-            </div>
-          ))}
-        {muscles.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5">
-            {muscles.map((m) => (
-              <MuscleBadge key={m} muscle={m} />
-            ))}
-          </div>
-        )}
-      </Link>
-
-      <div className="relative flex items-center gap-2 flex-shrink-0">
-        <IconButton
-          size="sm"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Plan actions"
-          className="bg-elevated/50 active:scale-90"
-        >
-          <MoreVertical className="w-4 h-4 text-muted" />
-        </IconButton>
-
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
-              <button
-                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onDuplicate();
-                }}
-              >
-                <Copy className="w-4 h-4 text-muted flex-shrink-0" />
-                {t.plan_action_duplicate}
-              </button>
-              <div className="h-px bg-border/50 mx-3" />
-              <button
-                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onToggleStatus();
-                }}
-              >
-                {isCompleted ? (
-                  <>
-                    <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
-                    {t.plan_action_reactivate}
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
-                    {t.plan_action_mark_completed}
-                  </>
-                )}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
   );
 }

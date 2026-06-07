@@ -7,6 +7,8 @@ import {
   getPlanExerciseCount,
   getPlanFollowCount,
   getPlanLastFollowedAt,
+  getPlanPlannedOccurrences,
+  getPlanUniqueExerciseCount,
   organizePlans,
   type PlanFilters,
   type PlanQuery,
@@ -127,6 +129,87 @@ describe('getPlanExerciseCount', () => {
 
   it('is zero for an empty plan', () => {
     expect(getPlanExerciseCount(plan({ id: 'p', name: 'P' }))).toBe(0);
+  });
+});
+
+describe('getPlanUniqueExerciseCount', () => {
+  function named(name: string): PlanExercise {
+    return { id: `e-${name}-${Math.random()}`, name, type: 'sets-reps', role: 'core' };
+  }
+  function dayWith(core: PlanExercise[], optional: PlanExercise[] = []): PlanDay {
+    return {
+      id: `d-${Math.random()}`,
+      name: 'Day',
+      weekdays: [],
+      coreExercises: core,
+      optionalExercises: optional,
+    };
+  }
+
+  it('is zero for an empty plan', () => {
+    expect(getPlanUniqueExerciseCount(plan({ id: 'p', name: 'P' }))).toBe(0);
+  });
+
+  it('counts distinct names across shared and all days', () => {
+    const p = plan({
+      id: 'p',
+      name: 'P',
+      sharedExercises: [named('Plank')],
+      days: [dayWith([named('Bench Press'), named('Squat')], [named('Curl')])],
+    });
+    expect(getPlanUniqueExerciseCount(p)).toBe(4);
+  });
+
+  it('deduplicates the same movement repeated across days (case-insensitive)', () => {
+    const p = plan({
+      id: 'p',
+      name: 'P',
+      days: [dayWith([named('Bench Press')]), dayWith([named('bench press '), named('Squat')])],
+    });
+    expect(getPlanUniqueExerciseCount(p)).toBe(2);
+  });
+});
+
+describe('getPlanPlannedOccurrences', () => {
+  function dayOn(weekdays: number[]): PlanDay {
+    return {
+      id: `d-${weekdays.join('')}`,
+      name: 'Day',
+      weekdays,
+      coreExercises: [],
+      optionalExercises: [],
+    };
+  }
+
+  it('returns null for open-ended plans without scheduledWeeks', () => {
+    expect(getPlanPlannedOccurrences(plan({ id: 'p', name: 'P', days: [dayOn([1])] }))).toBeNull();
+  });
+
+  it('returns null when scheduledWeeks is set but the plan has no days', () => {
+    expect(getPlanPlannedOccurrences(plan({ id: 'p', name: 'P', scheduledWeeks: 8 }))).toBeNull();
+  });
+
+  it('multiplies weeks by total scheduled weekday slots', () => {
+    // 8 weeks × (Mon + Thu = 2 weekly slots) = 16
+    const p = plan({ id: 'p', name: 'P', scheduledWeeks: 8, days: [dayOn([1]), dayOn([4])] });
+    expect(getPlanPlannedOccurrences(p)).toBe(16);
+  });
+
+  it('counts multiple weekdays on a single day', () => {
+    // 4 weeks × (one day scheduled Mon + Thu = 2 slots) = 8
+    const p = plan({ id: 'p', name: 'P', scheduledWeeks: 4, days: [dayOn([1, 4])] });
+    expect(getPlanPlannedOccurrences(p)).toBe(8);
+  });
+
+  it('falls back to the day count when no weekdays are assigned', () => {
+    // 6 weeks × 3 days (no weekdays scheduled) = 18
+    const p = plan({
+      id: 'p',
+      name: 'P',
+      scheduledWeeks: 6,
+      days: [dayOn([]), dayOn([]), dayOn([])],
+    });
+    expect(getPlanPlannedOccurrences(p)).toBe(18);
   });
 });
 

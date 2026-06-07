@@ -44,6 +44,21 @@ export function getPlanFollowCount(planId: string, sessions: WorkoutSession[]): 
   return count;
 }
 
+/**
+ * Total number of sessions a plan schedules across its defined duration, or
+ * `null` when the plan is open-ended (no `scheduledWeeks`) and therefore has no
+ * planned total to progress toward. Weekly sessions are the number of scheduled
+ * weekday slots across all days (e.g. 8 weeks × 2 weekly slots = 16), falling
+ * back to the plain training-day count when no weekdays are assigned.
+ */
+export function getPlanPlannedOccurrences(plan: WorkoutPlan): number | null {
+  if (!plan.scheduledWeeks || plan.scheduledWeeks <= 0) return null;
+  const weekdaySlots = plan.days.reduce((sum, d) => sum + d.weekdays.length, 0);
+  const weeklySessions = weekdaySlots > 0 ? weekdaySlots : plan.days.length;
+  if (weeklySessions <= 0) return null;
+  return plan.scheduledWeeks * weeklySessions;
+}
+
 /** Total number of exercises in a plan: shared plus every day's core and optional. */
 export function getPlanExerciseCount(plan: WorkoutPlan): number {
   let count = plan.sharedExercises.length;
@@ -51,6 +66,23 @@ export function getPlanExerciseCount(plan: WorkoutPlan): number {
     count += d.coreExercises.length + d.optionalExercises.length;
   }
   return count;
+}
+
+/**
+ * Number of distinct exercises a plan contains, deduplicated by name
+ * (case-insensitive). The same movement appearing on several days counts once.
+ */
+export function getPlanUniqueExerciseCount(plan: WorkoutPlan): number {
+  const names = new Set<string>();
+  const all = [
+    ...plan.sharedExercises,
+    ...plan.days.flatMap((d) => [...d.coreExercises, ...d.optionalExercises]),
+  ];
+  for (const e of all) {
+    const key = e.name.trim().toLowerCase();
+    if (key) names.add(key);
+  }
+  return names.size;
 }
 
 /** Distinct muscles trained across a plan's shared and per-day exercises. */
