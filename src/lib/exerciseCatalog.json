@@ -52,6 +52,22 @@
     "source": "gym"
   },
   {
+    "id": "squat",
+    "muscle": "quads",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 8,
+    "source": "starter"
+  },
+  {
+    "id": "lunges",
+    "muscle": "quads",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "starter"
+  },
+  {
     "id": "leg-curl-lying",
     "muscle": "hamstrings",
     "type": "sets-reps",
@@ -115,6 +131,22 @@
     "defaultReps": 10,
     "source": "gym"
   },
+  {
+    "id": "standing-calf-raise",
+    "muscle": "calves",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "starter"
+  },
+  {
+    "id": "seated-calf-raise",
+    "muscle": "calves",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "starter"
+  },
 
   {
     "id": "ab-crunch-machine",
@@ -123,6 +155,14 @@
     "defaultSets": 3,
     "defaultReps": 15,
     "source": "gym"
+  },
+  {
+    "id": "hanging-leg-raise",
+    "muscle": "abs",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
   },
   {
     "id": "rotary-torso",
@@ -174,6 +214,14 @@
     "source": "gym"
   },
   {
+    "id": "chest-fly",
+    "muscle": "chest",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
     "id": "lat-pulldown",
     "muscle": "back",
     "type": "sets-reps",
@@ -206,6 +254,14 @@
     "source": "gym"
   },
   {
+    "id": "bent-over-row",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 10,
+    "source": "starter"
+  },
+  {
     "id": "overhead-press",
     "muscle": "shoulders",
     "type": "sets-reps",
@@ -230,6 +286,14 @@
     "source": "starter"
   },
   {
+    "id": "rear-delt-fly",
+    "muscle": "shoulders",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 15,
+    "source": "starter"
+  },
+  {
     "id": "biceps-curl",
     "muscle": "arms",
     "type": "sets-reps",
@@ -239,6 +303,22 @@
   },
   {
     "id": "triceps-pushdown",
+    "muscle": "arms",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "hammer-curl",
+    "muscle": "arms",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "source": "starter"
+  },
+  {
+    "id": "overhead-triceps-extension",
     "muscle": "arms",
     "type": "sets-reps",
     "defaultSets": 3,
