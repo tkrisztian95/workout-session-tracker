@@ -1,8 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle, Copy, MoreVertical, RotateCcw, Sparkles } from 'lucide-react';
+import { CheckCircle, ChevronRight, Copy, MoreVertical, RotateCcw, Sparkles } from 'lucide-react';
 import type { WorkoutPlan } from '@/lib/types';
 import { getPlanMuscles, getPlanPlannedOccurrences } from '@/lib/plan-list';
 import { useLocale } from '@/lib/locale-context';
@@ -17,6 +18,10 @@ export interface PlanCardProps {
   href?: string;
   /** When set (and no `href`), tapping the card body invokes this (plan picker). */
   onSelect?: () => void;
+  /** Leading avatar icon, rendered before the body (plan picker). */
+  leadingIcon?: ReactNode;
+  /** Show a trailing chevron affordance (plan picker). */
+  trailingChevron?: boolean;
   /** Show the "Recent" last-followed badge beside the plan name. */
   lastFollowed?: boolean;
   /** Duplicate handler — together with `onToggleStatus`, enables the actions menu. */
@@ -35,6 +40,8 @@ export default function PlanCard({
   followCount,
   href,
   onSelect,
+  leadingIcon,
+  trailingChevron = false,
   lastFollowed = false,
   onDuplicate,
   onToggleStatus,
@@ -95,79 +102,104 @@ export default function PlanCard({
     </>
   );
 
-  return (
-    <div
-      className={`relative flex items-center rounded-2xl border px-4 py-4 gap-3 ${
-        isCompleted ? 'bg-surface/50 border-border/50' : 'bg-surface border-border'
-      }`}
+  const outerClass = `relative flex items-center rounded-2xl border px-4 py-4 gap-3 ${
+    isCompleted ? 'bg-surface/50 border-border/50' : 'bg-surface border-border'
+  }`;
+  const aiBadge = plan.aiGenerated === true && (
+    <div className="absolute -top-px left-3 flex items-center gap-1 bg-brand text-white rounded-b-md px-1.5 py-0.5">
+      <Sparkles className="w-2.5 h-2.5" />
+      <span className="text-[9px] font-bold tracking-wide uppercase leading-none">AI</span>
+    </div>
+  );
+  const avatar = leadingIcon && (
+    <span
+      aria-hidden
+      className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0"
     >
-      {plan.aiGenerated === true && (
-        <div className="absolute -top-px left-3 flex items-center gap-1 bg-brand text-white rounded-b-md px-1.5 py-0.5">
-          <Sparkles className="w-2.5 h-2.5" />
-          <span className="text-[9px] font-bold tracking-wide uppercase leading-none">AI</span>
-        </div>
-      )}
+      {leadingIcon}
+    </span>
+  );
 
-      {href ? (
-        <Link href={href} className={bodyClass}>
-          {body}
-        </Link>
-      ) : (
-        <button type="button" onClick={onSelect} className={bodyClass}>
-          {body}
-        </button>
-      )}
+  // Picker variant: no actions menu, so the whole card is one tappable target
+  // with an optional leading icon and trailing chevron.
+  if (!showMenu) {
+    const wrapperClass = `${outerClass} w-full text-left active:opacity-70 transition-opacity duration-150 cursor-pointer`;
+    const inner = (
+      <>
+        {aiBadge}
+        {avatar}
+        <div className="flex-1 min-w-0">{body}</div>
+        {trailingChevron && <ChevronRight className="w-5 h-5 text-dim flex-shrink-0" />}
+      </>
+    );
+    return href ? (
+      <Link href={href} className={wrapperClass}>
+        {inner}
+      </Link>
+    ) : (
+      <button type="button" onClick={onSelect} className={wrapperClass}>
+        {inner}
+      </button>
+    );
+  }
 
-      {showMenu && (
-        <div className="relative flex items-center gap-2 flex-shrink-0">
-          <IconButton
-            size="sm"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Plan actions"
-            className="bg-elevated/50 active:scale-90"
-          >
-            <MoreVertical className="w-4 h-4 text-muted" />
-          </IconButton>
+  // List variant: body links to the plan detail; the actions menu sits beside it.
+  return (
+    <div className={outerClass}>
+      {aiBadge}
 
-          {menuOpen && (
-            <>
-              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
-                <button
-                  className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onDuplicate?.();
-                  }}
-                >
-                  <Copy className="w-4 h-4 text-muted flex-shrink-0" />
-                  {t.plan_action_duplicate}
-                </button>
-                <div className="h-px bg-border/50 mx-3" />
-                <button
-                  className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onToggleStatus?.();
-                  }}
-                >
-                  {isCompleted ? (
-                    <>
-                      <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
-                      {t.plan_action_reactivate}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
-                      {t.plan_action_mark_completed}
-                    </>
-                  )}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      <Link href={href ?? '#'} className={bodyClass}>
+        {body}
+      </Link>
+
+      <div className="relative flex items-center gap-2 flex-shrink-0">
+        <IconButton
+          size="sm"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Plan actions"
+          className="bg-elevated/50 active:scale-90"
+        >
+          <MoreVertical className="w-4 h-4 text-muted" />
+        </IconButton>
+
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+            <div className="absolute right-0 top-full mt-1 z-20 bg-elevated border border-border rounded-2xl shadow-lg overflow-hidden min-w-[180px]">
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDuplicate?.();
+                }}
+              >
+                <Copy className="w-4 h-4 text-muted flex-shrink-0" />
+                {t.plan_action_duplicate}
+              </button>
+              <div className="h-px bg-border/50 mx-3" />
+              <button
+                className="flex items-center gap-3 w-full px-4 py-3.5 text-sm text-foreground active:bg-surface transition-colors cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onToggleStatus?.();
+                }}
+              >
+                {isCompleted ? (
+                  <>
+                    <RotateCcw className="w-4 h-4 text-secondary flex-shrink-0" />
+                    {t.plan_action_reactivate}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-muted flex-shrink-0" />
+                    {t.plan_action_mark_completed}
+                  </>
+                )}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

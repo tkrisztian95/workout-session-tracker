@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
 import type { PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
@@ -72,11 +72,11 @@ export function DayPickerScreen({
             >
               <span
                 aria-hidden
-                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-bold tabular-nums ${
+                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   isNext ? 'bg-brand text-white' : 'bg-elevated/60 text-secondary'
                 }`}
               >
-                {index + 1}
+                <Dumbbell className="w-5 h-5" />
               </span>
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center gap-2">
