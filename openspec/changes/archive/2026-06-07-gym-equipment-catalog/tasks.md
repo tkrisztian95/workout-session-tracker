@@ -1,0 +1,86 @@
+## 1. Catalog data module
+
+- [x] 1.1 Add `src/lib/exerciseCatalog.json` with the entry data and
+      `src/lib/exerciseCatalog.ts` with the `CatalogExercise` interface that
+      imports + types it as `EXERCISE_CATALOG`: the user's gym machines (Elliptical,
+      Treadmill, Stationary bike, Stair climber, Rowing machine → `cardio`;
+      Glute machine + Hip abduction + Hip adduction → `glutes`; Lying & seated
+      leg curl → `hamstrings`; Leg extension + Leg press → `quads`; Ab/crunch
+      machine → `abs`; Back extension → `lower_back`; Rotary torso → `obliques`)
+      plus a common starter set (bench press, incline press, lat pulldown, cable
+      row, shoulder press, biceps curl, triceps pushdown, plank, etc.) with
+      `type` and type-appropriate defaults.
+- [x] 1.2 Add `catalogName(t, id)` and `catalogByGroup()` helpers (group via
+      `MUSCLE_TO_GROUP`, ordered by `ALL_MUSCLE_GROUPS` / `MUSCLES_BY_GROUP`).
+- [x] 1.3 Add `src/lib/exerciseCatalog.test.ts` asserting unique ids, valid
+      muscle/type/defaults per type, and that every id has a name in all three
+      locales.
+
+## 2. Localization
+
+- [x] 2.1 Add a `catalog_exercise_names` map (id → localized name) to `en`,
+      `hu`, and `de`, using the user's native HU/DE machine names where they
+      apply.
+- [x] 2.2 Add `catalog_*` UI keys (picker button + title + search placeholder +
+      empty/no-results, browse screen title/subtitle, Profile link label) to all
+      three locales.
+
+## 3. Catalog picker
+
+- [x] 3.1 Create `ExerciseCatalogPicker` mirroring `ExerciseHistoryPicker`:
+      `ModalSheet` with search and a muscle-group-grouped list, rendering each
+      entry's localized name + `MuscleBadge`.
+- [x] 3.2 Call `onSelect(entry)` on tap and close.
+
+## 4. Add Exercise flow integration
+
+- [x] 4.1 Add a "Pick from catalog" button + `applyCatalogEntry` to
+      `AddExerciseModal`, wiring the picker (gated `isOpen` like the history
+      picker) so a selection pre-fills name/muscle/type/defaults.
+- [x] 4.2 Add the same button + `applyCatalogEntry` + picker to
+      `AddPlanExerciseModal`.
+
+## 5. Browse screen
+
+- [x] 5.1 Add `src/app/catalog/page.tsx`: catalog grouped by muscle group with a
+      search box and `MuscleBadge`, matching the app's mobile-first styling.
+- [x] 5.2 Add a link to `/catalog` from the Profile page.
+
+## 6. Verification
+
+- [x] 6.1 Run `npm run lint`, `npm test`, and `npx tsc --noEmit` (or the
+      project's typecheck script); fix issues.
+- [~] 6.2 Visual check with Playwright MCP: open the catalog picker from both Add
+  Exercise modals, select an entry, and open the `/catalog` browse screen.
+  NOTE: Playwright MCP is not connected in this execution environment.
+  Substituted a production build (`npm run build`) which compiled cleanly
+  and registered the `/catalog` route. Live visual check still recommended
+  before merge.
+
+## 7. Disambiguation (aliases + hints)
+
+- [x] 7.1 Merge clear duplicates into a single canonical entry: drop
+      `glute-trainer` (→ `glute-machine`) and `vertical-bench-press`
+      (→ `chest-press-machine`) from `exerciseCatalog.json`.
+- [x] 7.2 Add localized `catalog_exercise_aliases` (id → string[]) and
+      `catalog_exercise_hints` (id → string) maps plus a `catalog_also_called`
+      string to `en`/`hu`/`de`, with matching key-sets.
+- [x] 7.3 Add `catalogAliases`, `catalogHint`, and a cross-locale
+      `catalogSearchText` helper; switch the picker and browse screen to search
+      via `catalogSearchText` and render the hint + "also called" aliases.
+- [x] 7.4 Extend the unit test: alias/hint key parity across locales, ids
+      reference real entries, merged-away ids are gone, and cross-locale/alias
+      search matches.
+- [x] 7.5 Prepare (structure only) a localized `catalog_exercise_notes` map +
+      `catalogNote` helper to later seed `Exercise.scalingNote` (the card note);
+      maps left empty and unwired, kept key-aligned by the test.
+
+## 8. Difficulty annotation
+
+- [x] 8.1 Add a required `difficulty` (`beginner`/`intermediate`/`advanced`)
+      field + `Difficulty` type to the catalog; annotate every entry in
+      `exerciseCatalog.json`.
+- [x] 8.2 Add localized `catalog_difficulty_labels` to `en`/`hu`/`de` and a
+      `DifficultyBadge` component (color-coded: green/orange/red).
+- [x] 8.3 Show the difficulty badge beside the muscle badge in the picker and
+      browse screen; extend the test to validate difficulty values + labels.

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronRight,
   Dumbbell,
+  LayoutGrid,
   Pencil,
   Ruler,
   Trophy,
@@ -347,6 +348,24 @@ function ProfilePageInner() {
               </p>
               <p className="text-dim text-xs mt-0.5">
                 {earnedCount} / {totalCount}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted shrink-0" />
+          </button>
+        </div>
+
+        {/* ── Exercise catalog ── */}
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+          <button
+            onClick={() => router.push('/catalog')}
+            className="w-full flex items-center gap-4 px-4 py-4 cursor-pointer active:bg-elevated transition-colors duration-150"
+          >
+            <div className="w-10 h-10 rounded-xl bg-elevated flex items-center justify-center shrink-0">
+              <LayoutGrid className="w-5 h-5 text-secondary" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-foreground text-sm font-semibold leading-tight">
+                {t.catalog_profile_link}
               </p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted shrink-0" />
