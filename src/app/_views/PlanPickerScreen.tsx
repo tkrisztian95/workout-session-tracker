@@ -1,11 +1,12 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useTranslations } from '@/lib/locale-context';
 import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
-import { getPlanExerciseCount, getPlanLastFollowedAt } from '@/lib/plan-list';
-import { BackButton, Badge, CardRow, HeadingXL, Page, PageHeader } from '@/components/ui';
+import { getPlanFollowCount, getPlanLastFollowedAt } from '@/lib/plan-list';
+import PlanCard from '@/components/PlanCard';
+import { BackButton, HeadingXL, Page, PageHeader } from '@/components/ui';
 
 /** Id of the plan with the most recent completed session, or null if none followed. */
 function getLastFollowedPlanId(plans: WorkoutPlan[], sessions: WorkoutSession[]): string | null {
@@ -35,14 +36,6 @@ export function PlanPickerScreen({
   const t = useTranslations();
   const lastFollowedPlanId = getLastFollowedPlanId(plans, sessions);
 
-  const dayCountLabel = (n: number) =>
-    (n === 1 ? t.plan_picker_day_count_one : t.plan_picker_day_count).replace('{n}', String(n));
-  const exerciseCountLabel = (n: number) =>
-    (n === 1 ? t.plan_overview_exercise_count_one : t.plan_overview_exercises_count).replace(
-      '{n}',
-      String(n),
-    );
-
   return (
     <Page className="pb-20">
       <PageHeader>
@@ -62,30 +55,15 @@ export function PlanPickerScreen({
             <p className="text-muted text-sm mt-1">{t.no_plans_go_to_plans}</p>
           </div>
         ) : (
-          plans.map((plan) => {
-            const isLastFollowed = plan.id === lastFollowedPlanId;
-            return (
-              <CardRow key={plan.id} onClick={() => onSelect(plan)}>
-                <span
-                  aria-hidden
-                  className="w-11 h-11 rounded-xl bg-brand/10 flex items-center justify-center flex-shrink-0"
-                >
-                  <Dumbbell className="w-5 h-5 text-brand" />
-                </span>
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-center gap-2">
-                    <p className="text-foreground font-semibold text-base truncate">{plan.name}</p>
-                    {isLastFollowed && <Badge variant="subtle">{t.last_followed_badge}</Badge>}
-                  </div>
-                  <p className="text-muted text-sm mt-0.5 truncate">
-                    {dayCountLabel(plan.days.length)} ·{' '}
-                    {exerciseCountLabel(getPlanExerciseCount(plan))}
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-dim flex-shrink-0" />
-              </CardRow>
-            );
-          })
+          plans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              followCount={getPlanFollowCount(plan.id, sessions)}
+              lastFollowed={plan.id === lastFollowedPlanId}
+              onSelect={() => onSelect(plan)}
+            />
+          ))
         )}
       </div>
 
