@@ -250,11 +250,20 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
   const t = useTranslations();
   const delta = row.actualSets - row.plannedSets;
   const isExtra = row.status === 'extra';
+  // Extra exercises have no planned baseline to deviate from, so the +/- set
+  // delta ("X sets more") is meaningless — the Extra badge stands on its own.
+  const showDelta = !isExtra && delta !== 0;
   const denominator = Math.max(row.plannedSets, row.actualSets, 1);
   const plannedPct = (row.plannedSets / denominator) * 100;
   const actualPct = (row.actualSets / denominator) * 100;
-  const achievedPct = (Math.min(row.plannedSets, row.actualSets) / denominator) * 100;
-  const overPct = Math.max(0, actualPct - plannedPct);
+  // An extra (ad-hoc) exercise has no planned baseline, so every set logged is
+  // the extra contribution itself — render it as a full achieved bar rather than
+  // as work done "over" a zero plan, which read as a false overdone. The Extra
+  // badge already conveys that it wasn't part of the plan.
+  const achievedPct = isExtra
+    ? 100
+    : (Math.min(row.plannedSets, row.actualSets) / denominator) * 100;
+  const overPct = isExtra ? 0 : Math.max(0, actualPct - plannedPct);
 
   const statusLabel =
     row.status === 'overdone'
@@ -359,9 +368,9 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
         </span>
       </div>
 
-      {(delta !== 0 || showWeight) && (
+      {(showDelta || showWeight) && (
         <div className="mt-1.5 flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px] tabular-nums">
-          {delta !== 0 && (
+          {showDelta && (
             <span className="flex items-center gap-1 text-muted">
               {delta > 0 ? (
                 <>
