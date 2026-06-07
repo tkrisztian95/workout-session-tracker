@@ -67,6 +67,7 @@ export function PlanPickerScreen({
               onSelect={() => onSelect(plan)}
               leadingIcon={<ClipboardList className="w-5 h-5 text-brand" />}
               trailingChevron
+              compact
             />
           ))
         )}

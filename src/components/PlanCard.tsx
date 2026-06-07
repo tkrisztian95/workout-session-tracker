@@ -22,6 +22,8 @@ export interface PlanCardProps {
   leadingIcon?: ReactNode;
   /** Show a trailing chevron affordance (plan picker). */
   trailingChevron?: boolean;
+  /** Hide the schedule line and muscle badges, leaving just the name, badges, and progress (plan picker). */
+  compact?: boolean;
   /** Show the "Recent" last-followed badge beside the plan name. */
   lastFollowed?: boolean;
   /** Duplicate handler — together with `onToggleStatus`, enables the actions menu. */
@@ -42,6 +44,7 @@ export default function PlanCard({
   onSelect,
   leadingIcon,
   trailingChevron = false,
+  compact = false,
   lastFollowed = false,
   onDuplicate,
   onToggleStatus,
@@ -78,21 +81,23 @@ export default function PlanCard({
         {lastFollowed && <Badge variant="subtle">{t.last_followed_badge}</Badge>}
         {isCompleted && <span className="text-dim text-xs flex-shrink-0">{completedLabel}</span>}
       </div>
-      <p className="text-muted text-sm mt-0.5">
-        {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
-        {plan.scheduledWeeks && (
-          <span className="ml-2">
-            · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
-          </span>
-        )}
-        {scheduledWeekdays.length > 0 && (
-          <span className="ml-2 text-dim">
-            · {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(', ')}
-          </span>
-        )}
-      </p>
+      {!compact && (
+        <p className="text-muted text-sm mt-0.5">
+          {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
+          {plan.scheduledWeeks && (
+            <span className="ml-2">
+              · {plan.scheduledWeeks} {plan.scheduledWeeks !== 1 ? 'weeks' : 'week'}
+            </span>
+          )}
+          {scheduledWeekdays.length > 0 && (
+            <span className="ml-2 text-dim">
+              · {scheduledWeekdays.map((w) => t.weekday_abbr[w]).join(', ')}
+            </span>
+          )}
+        </p>
+      )}
       <PlanFollowProgress followCount={followCount} planned={planned} isCompleted={isCompleted} />
-      {muscles.length > 0 && (
+      {!compact && muscles.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
           {muscles.map((m) => (
             <MuscleBadge key={m} muscle={m} />
