@@ -14,6 +14,9 @@ import { useLocale } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
 import { Badge, IconButton } from '@/components/ui';
 
+/** Max follow "stamp" dots drawn before spilling into a +N counter. */
+const FOLLOW_DOT_LIMIT = 10;
+
 export interface PlanCardProps {
   plan: WorkoutPlan;
   /** Completed sessions logged against this plan. */
@@ -277,9 +280,22 @@ function PlanFollowProgress({
   }
 
   if (followCount === 0) return null;
+  // Open-ended plan: render one "stamp" dot per follow, like a loyalty card,
+  // capping the row and spilling the remainder into a +N counter.
+  const dots = Math.min(followCount, FOLLOW_DOT_LIMIT);
   return (
-    <div className="mt-1.5" aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}>
-      <span className="text-dim text-xs font-medium">{followCount}×</span>
+    <div
+      className="mt-1.5 flex items-center gap-1"
+      aria-label={t.plan_followed_aria.replace('{n}', String(followCount))}
+    >
+      {Array.from({ length: dots }).map((_, i) => (
+        <span key={i} aria-hidden className="w-2 h-2 rounded-full bg-brand" />
+      ))}
+      {followCount > FOLLOW_DOT_LIMIT && (
+        <span className="text-dim text-xs font-medium ml-0.5">
+          +{followCount - FOLLOW_DOT_LIMIT}
+        </span>
+      )}
     </div>
   );
 }
