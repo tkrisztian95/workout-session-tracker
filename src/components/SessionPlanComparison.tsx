@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
 import { cn } from '@/lib/utils';
-import { formatExerciseDetail } from '@/lib/sessionUtils';
+import { classifyLoggedSets, formatExerciseDetail } from '@/lib/sessionUtils';
 import type { Exercise, PlanDay, PlanExercise, WorkoutSession } from '@/lib/types';
 
 type Status = 'overdone' | 'matched' | 'underperformed' | 'missed' | 'extra';
@@ -27,7 +27,17 @@ function normName(s: string): string {
 
 function actualSetsFor(ex: Exercise): number {
   if (ex.dismissed) return 0;
-  if (ex.loggedSets && ex.loggedSets.length > 0) return ex.loggedSets.length;
+  if (ex.loggedSets && ex.loggedSets.length > 0) {
+    // Mirror the active exercise card's `qualifyingSetCount`: for a sets-reps
+    // exercise with a weight target, only "working" sets (hitting both the
+    // weight and rep targets) count toward the goal — warmups and partials
+    // don't, so they no longer inflate the bar into a false "overdone". Other
+    // set types (and weightless exercises) count every logged set.
+    if (ex.type === 'sets-reps' && ex.weightKg != null) {
+      return classifyLoggedSets(ex).filter((c) => c.status === 'working').length;
+    }
+    return ex.loggedSets.length;
+  }
   if (ex.completed && typeof ex.sets === 'number') return ex.sets;
   return 0;
 }
@@ -240,11 +250,20 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
   const t = useTranslations();
   const delta = row.actualSets - row.plannedSets;
   const isExtra = row.status === 'extra';
+  // Extra exercises have no planned baseline to deviate from, so the +/- set
+  // delta ("X sets more") is meaningless — the Extra badge stands on its own.
+  const showDelta = !isExtra && delta !== 0;
   const denominator = Math.max(row.plannedSets, row.actualSets, 1);
   const plannedPct = (row.plannedSets / denominator) * 100;
   const actualPct = (row.actualSets / denominator) * 100;
-  const achievedPct = (Math.min(row.plannedSets, row.actualSets) / denominator) * 100;
-  const overPct = Math.max(0, actualPct - plannedPct);
+  // An extra (ad-hoc) exercise has no planned baseline, so every set logged is
+  // the extra contribution itself — render it as a full achieved bar rather than
+  // as work done "over" a zero plan, which read as a false overdone. The Extra
+  // badge already conveys that it wasn't part of the plan.
+  const achievedPct = isExtra
+    ? 100
+    : (Math.min(row.plannedSets, row.actualSets) / denominator) * 100;
+  const overPct = isExtra ? 0 : Math.max(0, actualPct - plannedPct);
 
   const statusLabel =
     row.status === 'overdone'
@@ -278,7 +297,10 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
   const overBarClass = 'bg-success';
 
   const plannedWeight = row.planned?.weightKg;
-  const actualWeight = maxLoggedWeight(row.actual);
+  // A skipped/missed exercise performs no sets, so it lifted no weight — even
+  // though its actual record may still carry a weightKg copied from the plan
+  // target. Reporting 0 prevents the weight target from rendering as achieved.
+  const actualWeight = row.actualSets > 0 ? maxLoggedWeight(row.actual) : 0;
   const showWeight = (plannedWeight ?? 0) > 0 || (isExtra && actualWeight > 0);
   const weightAchieved = plannedWeight ? actualWeight >= plannedWeight : null;
 
@@ -346,9 +368,9 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
         </span>
       </div>
 
-      {(delta !== 0 || showWeight) && (
+      {(showDelta || showWeight) && (
         <div className="mt-1.5 flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px] tabular-nums">
-          {delta !== 0 && (
+          {showDelta && (
             <span className="flex items-center gap-1 text-muted">
               {delta > 0 ? (
                 <>
