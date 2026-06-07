@@ -107,6 +107,17 @@ export default function ExerciseCard({
   // slots left to hit the qualifying-set goal.
   const setSlotCount = loggedCount + Math.max(0, (exercise.sets ?? 0) - qualifyingSetCount);
 
+  // Target line: weight target first, then the reps/sets detail, joined by a
+  // dot. `mergedDetail` is the plain-text form for the collapsed card.
+  const weightLabel = exercise.weightKg != null ? `${exercise.weightKg} kg` : null;
+  const mergedDetail = weightLabel ? `${weightLabel} · ${detail}` : detail;
+
+  const goalCheck = (
+    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
+      <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
+    </span>
+  );
+
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
     const scheme = exercise.repsPerSet;
@@ -156,7 +167,14 @@ export default function ExerciseCard({
                 {t.exercise_skip}
               </button>
             </div>
-            <p className="flex items-center gap-1.5 mt-1 text-base font-medium text-brand">
+            <p className="flex flex-wrap items-center gap-1.5 mt-1 text-base font-medium text-brand">
+              {weightLabel != null && (
+                <span className="inline-flex items-center gap-1.5 text-foreground">
+                  {weightLabel}
+                  {weightGoalAchieved && goalCheck}
+                </span>
+              )}
+              {weightLabel != null && <span className="text-muted">·</span>}
               {detail}
               {showSetsProgress && (
                 <span
@@ -167,22 +185,8 @@ export default function ExerciseCard({
                   {qualifyingSetCount}/{exercise.sets}
                 </span>
               )}
-              {setsGoalAchieved && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
-                  <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
-                </span>
-              )}
+              {setsGoalAchieved && goalCheck}
             </p>
-            {exercise.weightKg != null && (
-              <p className="flex items-center gap-1.5 text-sm text-foreground font-medium mt-1.5">
-                {t.target_weight}: {exercise.weightKg} kg
-                {weightGoalAchieved && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
-                    <Check className="w-2.5 h-2.5 text-success" strokeWidth={3} />
-                  </span>
-                )}
-              </p>
-            )}
             {exercise.scalingNote && (
               <div className="mt-2 flex items-start gap-1.5 bg-elevated/40 rounded-xl px-3 py-2 border border-border/50">
                 <Info className="w-3.5 h-3.5 text-brand/70 mt-0.5 flex-shrink-0" />
@@ -321,7 +325,7 @@ export default function ExerciseCard({
               {exercise.name}
             </p>
             <p className={`mt-0.5 text-xs font-medium ${isDone ? 'text-dim' : 'text-brand'}`}>
-              {detail}
+              {mergedDetail}
             </p>
             {exercise.scalingNote && !isDone && (
               <p className="mt-1 text-xs text-muted leading-snug">{exercise.scalingNote}</p>
