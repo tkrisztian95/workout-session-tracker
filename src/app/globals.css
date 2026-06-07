@@ -52,12 +52,32 @@ input[type='number'] {
 }
 
 /*
- * Reserve space for the scrollbar gutter on vertical scroll containers so the
- * scrollbar never overlays content (e.g. the right edge of inputs inside the
- * add-exercise modal). Applies app-wide to every `overflow-y-auto` scroller.
- * The wheel pickers use `overflow-y-scroll` with a hidden scrollbar, so they
- * are intentionally excluded.
+ * Keep the scrollbar from overlaying content (e.g. the right edge of inputs
+ * inside the add-exercise modal). Applies app-wide to every `overflow-y-auto`
+ * scroller; the wheel pickers use `overflow-y-scroll` with a hidden scrollbar,
+ * so they are intentionally excluded.
+ *
+ * `scrollbar-gutter: stable` alone is not enough: it is a no-op for the overlay
+ * scrollbars used by default on macOS/Chromium, which still float over content.
+ * Defining a `::-webkit-scrollbar` width opts those engines out of overlay mode
+ * into a real, space-occupying scrollbar, and `scrollbar-width: thin` does the
+ * same on Firefox — so the bar always sits beside content, never on top of it.
  */
 .overflow-y-auto {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-subtle) transparent;
+}
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-subtle);
+  border-radius: 9999px;
+  /* Inset the thumb so it reads as a thin pill within the gutter. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
