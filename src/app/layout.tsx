@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/lib/theme-context';
 import { PostHogProvider } from '@/components/PostHogProvider';
 import MuscleMigrationToast from '@/components/MuscleMigrationToast';
 import DevSeed from '@/components/DevSeed';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import './globals.css';
 
 const barlow = Barlow({
@@ -22,6 +23,12 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: 'Workout Tracker',
   description: 'Track your workout sessions',
+  applicationName: 'Workout Tracker',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Workout',
+  },
 };
 
 export const viewport: Viewport = {
@@ -30,6 +37,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#0b1220',
 };
 
 const themeScript = `
@@ -53,6 +61,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}>
+        <ServiceWorkerRegister />
         <PostHogProvider>
           <ThemeProvider>
             <LocaleProvider>
