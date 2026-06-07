@@ -229,34 +229,38 @@ describe('classifyLoggedSets', () => {
     reps,
     loggedAt: '2026-06-07T10:00:00.000Z',
   });
+  const statuses = (ex: Parameters<typeof classifyLoggedSets>[0]) =>
+    classifyLoggedSets(ex).map((c) => c.status);
 
   it('marks every set neutral when the exercise has no weight target', () => {
-    expect(classifyLoggedSets({ reps: 8, loggedSets: [set(40, 5), set(60, 8)] })).toEqual([
+    expect(statuses({ reps: 8, loggedSets: [set(40, 5), set(60, 8)] })).toEqual([
       'neutral',
       'neutral',
     ]);
   });
 
   it('marks sets below the target weight as warmups', () => {
-    expect(
-      classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(30, 8), set(50, 8)] }),
-    ).toEqual(['warmup', 'warmup']);
+    expect(statuses({ weightKg: 60, reps: 8, loggedSets: [set(30, 8), set(50, 8)] })).toEqual([
+      'warmup',
+      'warmup',
+    ]);
   });
 
   it('counts a set as working only when weight and reps targets are met', () => {
-    expect(
-      classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(60, 8), set(70, 10)] }),
-    ).toEqual(['working', 'working']);
+    expect(statuses({ weightKg: 60, reps: 8, loggedSets: [set(60, 8), set(70, 10)] })).toEqual([
+      'working',
+      'working',
+    ]);
   });
 
-  it('marks a set at target weight but short on reps as partial', () => {
+  it('marks a set at target weight but short on reps as partial, exposing the rep target', () => {
     expect(classifyLoggedSets({ weightKg: 60, reps: 8, loggedSets: [set(60, 5)] })).toEqual([
-      'partial',
+      { status: 'partial', repTarget: 8 },
     ]);
   });
 
   it('treats a missing rep target as no rep gate (working on weight alone)', () => {
-    expect(classifyLoggedSets({ weightKg: 60, loggedSets: [set(60, 1)] })).toEqual(['working']);
+    expect(statuses({ weightKg: 60, loggedSets: [set(60, 1)] })).toEqual(['working']);
   });
 
   it('matches a per-set rep scheme to weight-qualifying sets in order, skipping warmups', () => {
@@ -267,7 +271,12 @@ describe('classifyLoggedSets', () => {
         repsPerSet: [15, 12, 8],
         loggedSets: [set(30, 20), set(60, 15), set(60, 10), set(60, 8)],
       }),
-    ).toEqual(['warmup', 'working', 'partial', 'working']);
+    ).toEqual([
+      { status: 'warmup' },
+      { status: 'working', repTarget: 15 },
+      { status: 'partial', repTarget: 12 },
+      { status: 'working', repTarget: 8 },
+    ]);
   });
 
   it('returns an empty array when there are no logged sets', () => {

@@ -76,9 +76,11 @@ export default function ExerciseCard({
   // Per-set warmup/partial/working classification drives both badge colours and
   // what counts toward the goal. A set only qualifies when it hits the target
   // weight AND the rep target; weight-only "partial" sets don't count.
-  const setStatuses = classifyLoggedSets(exercise);
+  const setClassifications = classifyLoggedSets(exercise);
   const qualifyingSetCount =
-    exercise.weightKg == null ? loggedCount : setStatuses.filter((s) => s === 'working').length;
+    exercise.weightKg == null
+      ? loggedCount
+      : setClassifications.filter((c) => c.status === 'working').length;
   const setsGoalAchieved =
     exercise.type === 'sets-reps'
       ? exercise.sets != null && qualifyingSetCount >= exercise.sets
@@ -200,7 +202,8 @@ export default function ExerciseCard({
                   <LoggedSetBadge
                     key={i}
                     set={logged}
-                    status={setStatuses[i]}
+                    status={setClassifications[i]?.status}
+                    repTarget={setClassifications[i]?.repTarget}
                     isPendingDelete={pendingDeleteIndex === i}
                     removeLabel={t.exercise_remove_set}
                     onRemove={() => {
@@ -327,7 +330,12 @@ export default function ExerciseCard({
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {exercise.loggedSets.map((s, i) => (
-                  <LoggedSetBadge key={i} set={s} status={setStatuses[i]} />
+                  <LoggedSetBadge
+                    key={i}
+                    set={s}
+                    status={setClassifications[i]?.status}
+                    repTarget={setClassifications[i]?.repTarget}
+                  />
                 ))}
               </div>
             )}
