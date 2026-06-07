@@ -177,6 +177,7 @@ export default function ExerciseCard({
                   <LoggedSetBadge
                     key={i}
                     set={logged}
+                    targetWeight={exercise.weightKg}
                     isPendingDelete={pendingDeleteIndex === i}
                     removeLabel={t.exercise_remove_set}
                     onRemove={() => {
@@ -303,7 +304,7 @@ export default function ExerciseCard({
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {exercise.loggedSets.map((s, i) => (
-                  <LoggedSetBadge key={i} set={s} />
+                  <LoggedSetBadge key={i} set={s} targetWeight={exercise.weightKg} />
                 ))}
               </div>
             )}
