@@ -278,7 +278,10 @@ function ComparisonRowItem({ row }: { row: ComparisonRow }) {
   const overBarClass = 'bg-success';
 
   const plannedWeight = row.planned?.weightKg;
-  const actualWeight = maxLoggedWeight(row.actual);
+  // A skipped/missed exercise performs no sets, so it lifted no weight — even
+  // though its actual record may still carry a weightKg copied from the plan
+  // target. Reporting 0 prevents the weight target from rendering as achieved.
+  const actualWeight = row.actualSets > 0 ? maxLoggedWeight(row.actual) : 0;
   const showWeight = (plannedWeight ?? 0) > 0 || (isExtra && actualWeight > 0);
   const weightAchieved = plannedWeight ? actualWeight >= plannedWeight : null;
 
