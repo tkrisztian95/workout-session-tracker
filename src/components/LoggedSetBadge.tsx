@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import type { LoggedSet } from '@/lib/types';
 import { formatLoggedSet, type SetStatus } from '@/lib/sessionUtils';
 
@@ -21,18 +21,19 @@ interface Props {
   removeLabel?: string;
 }
 
-// Tailwind classes per status — `button` carries a border, `span` doesn't
-// (except `partial`, whose dashed outline is the whole point).
+// Tailwind classes per status. A `partial` set hit the target weight (so it
+// shares the green working style) but fell short on reps — flagged with the
+// orange star marker rather than its own colour.
 const BUTTON_STYLE: Record<SetStatus, string> = {
   working: 'bg-success/15 border-success/45 text-success',
-  partial: 'set-badge-partial border-success/40 text-foreground',
+  partial: 'bg-success/15 border-success/45 text-success',
   warmup: 'bg-brand/10 border-brand/40 text-brand',
   neutral: 'bg-brand/10 border-brand/40 text-brand',
 };
 
 const SPAN_STYLE: Record<SetStatus, string> = {
   working: 'bg-success/15 text-success',
-  partial: 'set-badge-partial text-foreground',
+  partial: 'bg-success/15 text-success',
   warmup: 'bg-brand/10 text-brand',
   neutral: 'bg-elevated text-secondary',
 };
@@ -45,6 +46,12 @@ export default function LoggedSetBadge({
   onBlur,
   removeLabel,
 }: Props) {
+  // Orange star flags a set that reached the target weight but missed the rep
+  // target — a marker on the reps, not a colour change.
+  const repsShortMarker = status === 'partial' && (
+    <Star className="w-2.5 h-2.5 fill-brand text-brand" strokeWidth={1.5} aria-hidden />
+  );
+
   if (onRemove) {
     return (
       <button
@@ -60,15 +67,21 @@ export default function LoggedSetBadge({
             {removeLabel}
           </>
         ) : (
-          formatLoggedSet(set)
+          <>
+            {formatLoggedSet(set)}
+            {repsShortMarker}
+          </>
         )}
       </button>
     );
   }
 
   return (
-    <span className={`text-xs rounded-md px-1.5 py-0.5 font-medium ${SPAN_STYLE[status]}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-xs rounded-md px-1.5 py-0.5 font-medium ${SPAN_STYLE[status]}`}
+    >
       {formatLoggedSet(set)}
+      {repsShortMarker}
     </span>
   );
 }
