@@ -103,12 +103,17 @@
   "home_create_plan": "Plan erstellen",
 
   "choose_plan_title": "Plan wählen",
+  "last_followed_badge": "Zuletzt verwendet",
+  "plan_picker_day_count": "{n} Tage",
+  "plan_picker_day_count_one": "{n} Tag",
   "no_plans_title": "Noch keine Pläne",
   "no_plans_go_to_plans": "Gehe zu Pläne, um einen zu erstellen",
 
   "choose_day_title": "Tag wählen",
   "next_badge": "Nächster",
   "today_badge": "Heute",
+  "day_picker_core_count": "{n} Pflicht",
+  "day_picker_optional_count": "{n} optional",
 
   "optional_exercises_title": "Optionale Übungen",
   "optional_exercises_subtitle": "Pflichtübungen sind vorausgewählt. Füge optionale unten hinzu.",

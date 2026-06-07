@@ -34,6 +34,9 @@ export function DayPickerScreen({
   const nextDayIndex = getNextDayIndex(plan, sessions);
   const nextDayRef = useRef<HTMLButtonElement | null>(null);
 
+  const coreCountLabel = (n: number) => t.day_picker_core_count.replace('{n}', String(n));
+  const optionalCountLabel = (n: number) => t.day_picker_optional_count.replace('{n}', String(n));
+
   useEffect(() => {
     nextDayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, []);
@@ -62,30 +65,38 @@ export function DayPickerScreen({
               key={day.id}
               ref={isNext ? nextDayRef : null}
               onClick={() => onSelect(day)}
-              className={`w-full flex items-center justify-between rounded-2xl border px-4 py-4 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 ${
+              aria-current={isNext ? 'step' : undefined}
+              className={`w-full flex items-center rounded-2xl border px-4 py-4 gap-3 cursor-pointer active:scale-[0.98] transition-all duration-150 ${
                 isNext ? 'bg-brand/10 border-brand/40' : 'bg-surface border-border'
               }`}
             >
-              <div className="text-left">
+              <span
+                aria-hidden
+                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-bold tabular-nums ${
+                  isNext ? 'bg-brand text-white' : 'bg-elevated/60 text-secondary'
+                }`}
+              >
+                {index + 1}
+              </span>
+              <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center gap-2">
-                  <p className="text-foreground font-semibold text-base">
+                  <p className="text-foreground font-semibold text-base truncate">
                     {day.name || t.free_session}
                   </p>
                   {isNext && <Badge variant="brand">{t.next_badge}</Badge>}
                   {isSuggested && !isNext && <Badge variant="subtle">{t.today_badge}</Badge>}
                 </div>
-                <p className="text-muted text-sm mt-0.5">
-                  {coreCount} core{optionalCount > 0 ? ` · ${optionalCount} optional` : ''}
+                <p className="text-muted text-sm mt-0.5 truncate">
+                  {coreCountLabel(coreCount)}
+                  {optionalCount > 0 ? ` · ${optionalCountLabel(optionalCount)}` : ''}
                 </p>
                 {day.weekdays.length > 0 && (
-                  <p className="text-dim text-xs mt-1">
+                  <p className="text-dim text-xs mt-1 truncate">
                     {day.weekdays.map((w) => t.weekday_abbr[w]).join(', ')}
                   </p>
                 )}
               </div>
-              <span className="w-7 h-7 rounded-full bg-elevated/50 flex items-center justify-center flex-shrink-0">
-                <ChevronRight className="w-4 h-4 text-muted" />
-              </span>
+              <ChevronRight className="w-5 h-5 text-dim flex-shrink-0" />
             </button>
           );
         })}

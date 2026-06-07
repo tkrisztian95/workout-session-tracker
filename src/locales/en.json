@@ -103,12 +103,17 @@
   "home_create_plan": "Create a plan",
 
   "choose_plan_title": "Choose Plan",
+  "last_followed_badge": "Last followed",
+  "plan_picker_day_count": "{n} days",
+  "plan_picker_day_count_one": "{n} day",
   "no_plans_title": "No plans yet",
   "no_plans_go_to_plans": "Go to Plans to create one first",
 
   "choose_day_title": "Choose Day",
   "next_badge": "Next",
   "today_badge": "Today",
+  "day_picker_core_count": "{n} core",
+  "day_picker_optional_count": "{n} optional",
 
   "optional_exercises_title": "Optional Exercises",
   "optional_exercises_subtitle": "Core exercises are pre-selected. Add optional ones below.",

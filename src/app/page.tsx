@@ -177,6 +177,7 @@ export default function HomePage() {
     return (
       <PlanPickerScreen
         plans={plans}
+        sessions={sessions}
         onSelect={(plan) => {
           setSelectedPlan(plan);
           setStep('pick-day');
