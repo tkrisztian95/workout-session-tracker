@@ -97,6 +97,12 @@ export default function ExerciseCard({
   const showSetsProgress =
     (exercise.type === 'sets-reps' || exercise.type === 'sets-duration') && exercise.sets != null;
 
+  // Slot count keeps an empty placeholder open for every set still needed to
+  // reach the target. Non-qualifying warmups don't consume a target slot, so a
+  // fresh placeholder is added for each one — there are always enough empty
+  // slots left to hit the qualifying-set goal.
+  const setSlotCount = loggedCount + Math.max(0, (exercise.sets ?? 0) - qualifyingSetCount);
+
   const openSetForm = () => {
     setWeightInput(defaultWeight(exercise));
     const scheme = exercise.repsPerSet;
@@ -185,7 +191,7 @@ export default function ExerciseCard({
           {showSetSlots && (
             <div className="flex flex-wrap gap-1.5 px-4 pb-3">
               {Array.from({
-                length: Math.max(exercise.sets ?? 0, exercise.loggedSets?.length ?? 0),
+                length: setSlotCount,
               }).map((_, i) => {
                 const logged = exercise.loggedSets?.[i];
                 return logged ? (
