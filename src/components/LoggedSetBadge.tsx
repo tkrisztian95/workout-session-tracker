@@ -25,14 +25,14 @@ interface Props {
 // (except `partial`, whose dashed outline is the whole point).
 const BUTTON_STYLE: Record<SetStatus, string> = {
   working: 'bg-success/15 border-success/45 text-success',
-  partial: 'bg-success/5 border-dashed border-success/50 text-success/80',
+  partial: 'set-badge-partial border-success/40 text-foreground',
   warmup: 'bg-brand/10 border-brand/40 text-brand',
   neutral: 'bg-brand/10 border-brand/40 text-brand',
 };
 
 const SPAN_STYLE: Record<SetStatus, string> = {
   working: 'bg-success/15 text-success',
-  partial: 'bg-success/5 border border-dashed border-success/50 text-success/80',
+  partial: 'set-badge-partial text-foreground',
   warmup: 'bg-brand/10 text-brand',
   neutral: 'bg-elevated text-secondary',
 };
