@@ -68,6 +68,23 @@ export function getPlanExerciseCount(plan: WorkoutPlan): number {
   return count;
 }
 
+/**
+ * Number of distinct exercises a plan contains, deduplicated by name
+ * (case-insensitive). The same movement appearing on several days counts once.
+ */
+export function getPlanUniqueExerciseCount(plan: WorkoutPlan): number {
+  const names = new Set<string>();
+  const all = [
+    ...plan.sharedExercises,
+    ...plan.days.flatMap((d) => [...d.coreExercises, ...d.optionalExercises]),
+  ];
+  for (const e of all) {
+    const key = e.name.trim().toLowerCase();
+    if (key) names.add(key);
+  }
+  return names.size;
+}
+
 /** Distinct muscles trained across a plan's shared and per-day exercises. */
 export function getPlanMuscles(plan: WorkoutPlan): Muscle[] {
   const all = [

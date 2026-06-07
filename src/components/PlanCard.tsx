@@ -5,7 +5,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle, ChevronRight, Copy, MoreVertical, RotateCcw, Sparkles } from 'lucide-react';
 import type { WorkoutPlan } from '@/lib/types';
-import { getPlanMuscles, getPlanPlannedOccurrences } from '@/lib/plan-list';
+import {
+  getPlanMuscles,
+  getPlanPlannedOccurrences,
+  getPlanUniqueExerciseCount,
+} from '@/lib/plan-list';
 import { useLocale } from '@/lib/locale-context';
 import MuscleBadge from '@/components/MuscleBadge';
 import { Badge, IconButton } from '@/components/ui';
@@ -68,6 +72,15 @@ export default function PlanCard({
   );
   const planned = getPlanPlannedOccurrences(plan);
 
+  const dayCount = plan.days.length;
+  const dayCountLabel = (
+    dayCount === 1 ? t.plan_picker_day_count_one : t.plan_picker_day_count
+  ).replace('{n}', String(dayCount));
+  const exerciseCount = getPlanUniqueExerciseCount(plan);
+  const exerciseCountLabel = (
+    exerciseCount === 1 ? t.plan_overview_exercise_count_one : t.plan_overview_exercises_count
+  ).replace('{n}', String(exerciseCount));
+
   const bodyClass =
     'flex-1 min-w-0 text-left active:opacity-70 transition-opacity duration-150 cursor-pointer';
   const body = (
@@ -81,7 +94,11 @@ export default function PlanCard({
         {lastFollowed && <Badge variant="subtle">{t.last_followed_badge}</Badge>}
         {isCompleted && <span className="text-dim text-xs flex-shrink-0">{completedLabel}</span>}
       </div>
-      {!compact && (
+      {compact ? (
+        <p className="text-muted text-sm mt-0.5">
+          {dayCountLabel} · {exerciseCountLabel}
+        </p>
+      ) : (
         <p className="text-muted text-sm mt-0.5">
           {plan.days.length} {plan.days.length !== 1 ? t.training_days : t.training_day}
           {plan.scheduledWeeks && (

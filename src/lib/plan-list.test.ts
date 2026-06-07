@@ -8,6 +8,7 @@ import {
   getPlanFollowCount,
   getPlanLastFollowedAt,
   getPlanPlannedOccurrences,
+  getPlanUniqueExerciseCount,
   organizePlans,
   type PlanFilters,
   type PlanQuery,
@@ -128,6 +129,44 @@ describe('getPlanExerciseCount', () => {
 
   it('is zero for an empty plan', () => {
     expect(getPlanExerciseCount(plan({ id: 'p', name: 'P' }))).toBe(0);
+  });
+});
+
+describe('getPlanUniqueExerciseCount', () => {
+  function named(name: string): PlanExercise {
+    return { id: `e-${name}-${Math.random()}`, name, type: 'sets-reps', role: 'core' };
+  }
+  function dayWith(core: PlanExercise[], optional: PlanExercise[] = []): PlanDay {
+    return {
+      id: `d-${Math.random()}`,
+      name: 'Day',
+      weekdays: [],
+      coreExercises: core,
+      optionalExercises: optional,
+    };
+  }
+
+  it('is zero for an empty plan', () => {
+    expect(getPlanUniqueExerciseCount(plan({ id: 'p', name: 'P' }))).toBe(0);
+  });
+
+  it('counts distinct names across shared and all days', () => {
+    const p = plan({
+      id: 'p',
+      name: 'P',
+      sharedExercises: [named('Plank')],
+      days: [dayWith([named('Bench Press'), named('Squat')], [named('Curl')])],
+    });
+    expect(getPlanUniqueExerciseCount(p)).toBe(4);
+  });
+
+  it('deduplicates the same movement repeated across days (case-insensitive)', () => {
+    const p = plan({
+      id: 'p',
+      name: 'P',
+      days: [dayWith([named('Bench Press')]), dayWith([named('bench press '), named('Squat')])],
+    });
+    expect(getPlanUniqueExerciseCount(p)).toBe(2);
   });
 });
 
