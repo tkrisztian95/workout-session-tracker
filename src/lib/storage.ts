@@ -292,22 +292,31 @@ export function saveWeightKg(kg: number): void {
  * to anyone. This fallback is honored ONLY in local dev or a Vercel preview —
  * never production. The gate fails closed: if the deployment environment can't
  * be confirmed as non-production, the env key is ignored. The primary safeguard
- * is still not setting `NEXT_PUBLIC_OPENAI_API_KEY` on the Production env in
- * Vercel; this code gate is defense-in-depth.
+ * is still not setting `NEXT_PUBLIC_OPENAI_API_KEY` / `NEXT_PUBLIC_GEMINI_API_KEY`
+ * on the Production env in Vercel; this code gate is defense-in-depth.
  */
 function getEnvLlmConfig(): LlmConfig | null {
-  const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-  if (!apiKey) return null;
+  const openaiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+  const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!openaiKey && !geminiKey) return null;
   const vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
   const isNonProduction =
     process.env.NODE_ENV === 'development' ||
     vercelEnv === 'preview' ||
     vercelEnv === 'development';
   if (!isNonProduction) return null;
+  // OpenAI keeps precedence when both keys are present.
+  if (openaiKey) {
+    return {
+      provider: 'openai',
+      apiKey: openaiKey,
+      model: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
+    };
+  }
   return {
-    provider: 'openai',
-    apiKey,
-    model: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
+    provider: 'gemini',
+    apiKey: geminiKey as string,
+    model: process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash',
   };
 }
 

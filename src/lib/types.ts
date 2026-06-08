@@ -4,8 +4,10 @@ export type Sex = 'male' | 'female';
 
 // ─── LLM Config ───────────────────────────────────────────────────────────────
 
+export type LlmProvider = 'openai' | 'gemini';
+
 export interface LlmConfig {
-  provider: 'openai';
+  provider: LlmProvider;
   apiKey: string;
   model: string;
 }

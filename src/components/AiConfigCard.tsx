@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, Sparkles } from 'lucide-react';
 import { getLlmConfig, saveLlmConfig } from '@/lib/storage';
+import type { LlmProvider } from '@/lib/types';
 import { Button, FieldLabel, Input, Select } from '@/components/ui';
 
 interface AiConfigCardProps {
@@ -11,14 +12,52 @@ interface AiConfigCardProps {
   onToggle?: () => void;
 }
 
+interface ProviderMeta {
+  label: string;
+  defaultModel: string;
+  models: { value: string; label: string }[];
+  keyLabel: string;
+  keyUrl: string;
+  keyPlaceholder: string;
+  tagline: string;
+}
+
+const PROVIDERS: Record<LlmProvider, ProviderMeta> = {
+  openai: {
+    label: 'OpenAI',
+    defaultModel: 'gpt-4o-mini',
+    models: [
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini (faster, cheaper)' },
+      { value: 'gpt-4o', label: 'GPT-4o (more capable)' },
+    ],
+    keyLabel: 'OpenAI API Key',
+    keyUrl: 'https://platform.openai.com/api-keys',
+    keyPlaceholder: 'sk-...',
+    tagline: 'Use your own OpenAI subscription',
+  },
+  gemini: {
+    label: 'Gemini',
+    defaultModel: 'gemini-2.5-flash',
+    models: [
+      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (faster, cheaper)' },
+      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (more capable)' },
+    ],
+    keyLabel: 'Gemini API Key',
+    keyUrl: 'https://aistudio.google.com/app/apikey',
+    keyPlaceholder: 'AIza...',
+    tagline: 'Use your own Google Gemini key',
+  },
+};
+
 export default function AiConfigCard({
   defaultOpen = false,
   open: openProp,
   onToggle,
 }: AiConfigCardProps) {
   const savedConfig = getLlmConfig();
+  const [provider, setProvider] = useState<LlmProvider>(() => savedConfig?.provider ?? 'openai');
   const [apiKey, setApiKey] = useState(() => savedConfig?.apiKey ?? '');
-  const [model, setModel] = useState(() => savedConfig?.model ?? 'gpt-4o-mini');
+  const [model, setModel] = useState(() => savedConfig?.model ?? PROVIDERS.openai.defaultModel);
   const [saved, setSaved] = useState(false);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
 
@@ -26,8 +65,17 @@ export default function AiConfigCard({
   const open = controlled ? openProp : internalOpen;
   const toggle = controlled ? onToggle! : () => setInternalOpen((o) => !o);
 
+  const meta = PROVIDERS[provider];
+
+  function handleProviderChange(next: LlmProvider) {
+    setProvider(next);
+    // Reset to the new provider's default so an OpenAI model is never saved
+    // under `gemini` (or vice versa).
+    setModel(PROVIDERS[next].defaultModel);
+  }
+
   function handleSave() {
-    saveLlmConfig({ provider: 'openai', apiKey: apiKey.trim(), model });
+    saveLlmConfig({ provider, apiKey: apiKey.trim(), model });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -46,7 +94,7 @@ export default function AiConfigCard({
             <>
               <p className="text-foreground text-sm font-semibold leading-tight">AI Companion</p>
               <p className="text-dim text-xs mt-0.5 truncate">
-                {apiKey.slice(0, 5)}··· · {model}
+                {meta.label} · {apiKey.slice(0, 5)}··· · {model}
               </p>
             </>
           ) : (
@@ -54,7 +102,7 @@ export default function AiConfigCard({
               <p className="text-foreground text-sm font-semibold leading-tight">
                 Connect your AI companion
               </p>
-              <p className="text-dim text-xs mt-0.5">Use your own OpenAI subscription</p>
+              <p className="text-dim text-xs mt-0.5">Use your own OpenAI or Gemini key</p>
             </>
           )}
         </div>
@@ -73,12 +121,26 @@ export default function AiConfigCard({
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
           <div>
+            <FieldLabel htmlFor="ai-provider">Provider</FieldLabel>
+            <Select
+              id="ai-provider"
+              value={provider}
+              onChange={(e) => handleProviderChange(e.target.value as LlmProvider)}
+            >
+              {(Object.keys(PROVIDERS) as LlmProvider[]).map((p) => (
+                <option key={p} value={p}>
+                  {PROVIDERS[p].label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
             <div className="flex items-baseline justify-between mb-1.5">
               <FieldLabel htmlFor="ai-api-key" className="mb-0">
-                OpenAI API Key
+                {meta.keyLabel}
               </FieldLabel>
               <a
-                href="https://platform.openai.com/api-keys"
+                href={meta.keyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-brand text-xs font-medium"
@@ -91,7 +153,7 @@ export default function AiConfigCard({
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-..."
+              placeholder={meta.keyPlaceholder}
               autoComplete="off"
               data-ph-no-capture
             />
@@ -99,8 +161,11 @@ export default function AiConfigCard({
           <div>
             <FieldLabel htmlFor="ai-model">Model</FieldLabel>
             <Select id="ai-model" value={model} onChange={(e) => setModel(e.target.value)}>
-              <option value="gpt-4o-mini">GPT-4o Mini (faster, cheaper)</option>
-              <option value="gpt-4o">GPT-4o (more capable)</option>
+              {meta.models.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </Select>
           </div>
           <p className="text-dim text-xs leading-relaxed">

@@ -54,20 +54,27 @@ Profile fields live as separate keys (`wst_user_name`, `wst_user_sex`, `wst_user
 ### LLM config
 
 ```ts
+type LlmProvider = 'openai' | 'gemini';
+
 interface LlmConfig {
-  provider: 'openai';
+  provider: LlmProvider;
   apiKey: string;
   model: string;
 }
 ```
 
 Persisted at `wst_llm_config`. The API key is stored in plaintext on the client.
+`provider` selects which backend the four AI features call (`openai` →
+OpenAI Chat Completions, `gemini` → Google Generative Language `generateContent`);
+`model` is a provider-specific model id (e.g. `gpt-4o-mini`, `gemini-2.5-flash`).
 
 `getLlmConfig()` returns the saved `wst_llm_config` when present. As a dev/preview
 convenience, when nothing is saved it falls back to a config synthesized from the
-`NEXT_PUBLIC_OPENAI_API_KEY` (and optional `NEXT_PUBLIC_OPENAI_MODEL`) env vars —
-but only in local dev or a Vercel preview, never production. The fallback never
-writes to `localStorage`; a saved config always takes precedence. See `.env.example`.
+`NEXT_PUBLIC_OPENAI_API_KEY` (+ optional `NEXT_PUBLIC_OPENAI_MODEL`) or
+`NEXT_PUBLIC_GEMINI_API_KEY` (+ optional `NEXT_PUBLIC_GEMINI_MODEL`) env vars —
+OpenAI takes precedence when both are set, and only in local dev or a Vercel
+preview, never production. The fallback never writes to `localStorage`; a saved
+config always takes precedence. See `.env.example`.
 
 ### Muscle taxonomy
 
