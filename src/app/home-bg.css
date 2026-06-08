@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════════════════════════
+   HOME BACKGROUNDS — Workout Sessions Tracker
+   Uses the app's existing semantic tokens (--color-brand etc.),
+   so it tracks both dark (default) and light themes automatically.
+   ═══════════════════════════════════════════════════════════ */
+
+/* The layer sits behind the Start screen; content is lifted above it.
+   Add `data-home-bg="velocity|charge|ignite|none"` to the <Page> wrapper. */
+[data-home-bg]:not([data-home-bg='none']) {
+  position: relative;
+  isolation: isolate;
+}
+[data-home-bg] > .home-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 1 · VELOCITY — diagonal speed streaks fanning from top-right */
+.bg-velocity {
+  background: repeating-linear-gradient(
+    -24deg,
+    transparent 0 24px,
+    color-mix(in srgb, var(--color-brand) 6%, transparent) 24px 27px
+  );
+}
+.bg-velocity::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -24deg,
+    transparent 0 13px,
+    color-mix(in srgb, var(--color-brand) 30%, transparent) 13px 20px
+  );
+  -webkit-mask: radial-gradient(82% 62% at 102% -2%, #000 0%, transparent 68%);
+  mask: radial-gradient(82% 62% at 102% -2%, #000 0%, transparent 68%);
+}
+.bg-velocity::after {
+  content: '';
+  position: absolute;
+  bottom: 96px;
+  left: -120px;
+  width: 520px;
+  height: 5px;
+  background: var(--color-brand);
+  transform: rotate(-24deg);
+  opacity: 0.16;
+  box-shadow:
+    0 26px 0 0 color-mix(in srgb, var(--color-brand) 45%, transparent),
+    0 -34px 0 0 color-mix(in srgb, var(--color-brand) 28%, transparent),
+    0 52px 0 0 color-mix(in srgb, var(--color-brand) 22%, transparent);
+}
+
+/* 3 · CHARGE — angular orange facets */
+.bg-charge {
+  background: conic-gradient(
+    from 200deg at 88% -4%,
+    color-mix(in srgb, var(--color-brand) 30%, transparent) 0deg 32deg,
+    transparent 32deg 80deg,
+    color-mix(in srgb, var(--color-brand) 16%, transparent) 80deg 110deg,
+    transparent 110deg 360deg
+  );
+}
+.bg-charge::before {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -40px;
+  width: 320px;
+  height: 320px;
+  background: conic-gradient(
+    from 20deg at 0% 100%,
+    color-mix(in srgb, var(--color-brand) 22%, transparent) 0deg 28deg,
+    transparent 28deg 70deg,
+    color-mix(in srgb, var(--color-brand) 12%, transparent) 70deg 96deg,
+    transparent 96deg 360deg
+  );
+}
+
+/* 4 · IGNITE — dark hero: radial glow + diagonal speed streaks.
+   Intentionally dark in BOTH themes. In light mode, also set
+   data-theme="dark" on the same wrapper so text + chrome stay legible. */
+.bg-ignite {
+  background:
+    radial-gradient(
+      120% 80% at 80% 6%,
+      color-mix(in srgb, var(--color-brand) 46%, transparent) 0%,
+      transparent 54%
+    ),
+    radial-gradient(
+      95% 62% at 6% 102%,
+      color-mix(in srgb, #f97316 24%, transparent) 0%,
+      transparent 60%
+    ),
+    #0b1120;
+}
+.bg-ignite::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -24deg,
+    transparent 0 20px,
+    color-mix(in srgb, var(--color-brand) 16%, transparent) 20px 24px
+  );
+  -webkit-mask: radial-gradient(88% 66% at 88% 2%, #000 0%, transparent 70%);
+  mask: radial-gradient(88% 66% at 88% 2%, #000 0%, transparent 70%);
+}
+.bg-ignite::after {
+  content: '';
+  position: absolute;
+  bottom: 120px;
+  left: -120px;
+  width: 540px;
+  height: 4px;
+  background: var(--color-brand);
+  transform: rotate(-24deg);
+  opacity: 0.5;
+  box-shadow:
+    0 30px 0 0 color-mix(in srgb, var(--color-brand) 30%, transparent),
+    0 -40px 0 0 color-mix(in srgb, var(--color-brand) 22%, transparent);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 55%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 55%, transparent);
+}

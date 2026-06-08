@@ -70,6 +70,7 @@ const KEYS = {
   userHeightCm: 'wst_user_height_cm',
   userWeightKg: 'wst_user_weight_kg',
   theme: 'wst_theme',
+  homeBackground: 'wst_home_background',
   consentAccepted: 'wst_consent_accepted',
   achievements: 'wst_achievements',
   profileCreatedAt: 'wst_profile_created_at',
@@ -386,6 +387,23 @@ export function getTheme(): Theme | null {
 
 export function saveTheme(theme: Theme): void {
   localStorage.setItem(KEYS.theme, theme);
+}
+
+// ─── Home background ──────────────────────────────────────────────────────────
+
+export type HomeBackground = 'velocity' | 'charge' | 'ignite' | 'none';
+
+export function getHomeBackground(): HomeBackground {
+  if (typeof window === 'undefined') return 'velocity';
+  const stored = localStorage.getItem(KEYS.homeBackground);
+  if (stored === 'velocity' || stored === 'charge' || stored === 'ignite' || stored === 'none') {
+    return stored;
+  }
+  return 'velocity';
+}
+
+export function saveHomeBackground(value: HomeBackground): void {
+  localStorage.setItem(KEYS.homeBackground, value);
 }
 
 // ─── Profile created at ───────────────────────────────────────────────────────

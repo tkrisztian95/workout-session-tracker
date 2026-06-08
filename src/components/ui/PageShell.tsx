@@ -19,13 +19,15 @@ Page.displayName = 'Page';
 
 interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  /** Drop the opaque `bg-base` so a decorative page background shows through. */
+  transparent?: boolean;
 }
 
 export const PageHeader = forwardRef<HTMLDivElement, PageHeaderProps>(
-  ({ className = '', ...props }, ref) => (
+  ({ className = '', transparent = false, ...props }, ref) => (
     <div
       ref={ref}
-      className={`px-6 sticky top-0 z-10 bg-base pt-[max(0.5rem,env(safe-area-inset-top))] ${className || 'pb-6'}`}
+      className={`px-6 sticky top-0 z-10 ${transparent ? '' : 'bg-base'} pt-[max(0.5rem,env(safe-area-inset-top))] ${className || 'pb-6'}`}
       {...props}
     />
   ),

@@ -13,7 +13,9 @@ import {
   hasSeenConsent,
   getProfileCreatedAt,
   saveProfileCreatedAt,
+  getHomeBackground,
 } from '@/lib/storage';
+import type { HomeBackground } from '@/lib/storage';
 import UserNameModal from '@/components/UserNameModal';
 import ConsentModal from '@/components/ConsentModal';
 import AchievementCelebration from '@/components/AchievementCelebration';
@@ -46,6 +48,7 @@ export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState<WorkoutPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<PlanDay | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [homeBackground, setHomeBackground] = useState<HomeBackground>('velocity');
   const [consentSeen, setConsentSeen] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
   const { newUnlocks, allRecords, markSeen } = useAchievements();
@@ -62,6 +65,7 @@ export default function HomePage() {
     setPlans(getPlans().filter((p) => (p.status ?? 'active') === 'active'));
     setSessions(getSessions());
     setUserName(getUserName());
+    setHomeBackground(getHomeBackground());
     setConsentSeen(hasSeenConsent());
     setMounted(true);
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -268,6 +272,7 @@ export default function HomePage() {
         lastSessionInfo={lastSessionInfo}
         achievementCount={allRecords.length}
         onOpenAchievements={() => router.push('/profile/achievements?from=home')}
+        homeBackground={homeBackground}
       />
       {!consentSeen && <ConsentModal variant="modal" onComplete={() => setConsentSeen(true)} />}
       {consentSeen && newUnlocks.length > 0 && (

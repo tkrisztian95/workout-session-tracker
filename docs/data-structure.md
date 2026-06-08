@@ -19,25 +19,26 @@ This document describes every piece of persisted data in the app and how it maps
 
 All keys are namespaced with the `wst_` prefix and declared in the `KEYS` const in [src/lib/storage.ts](../src/lib/storage.ts).
 
-| Key                            | Value (JSON unless noted)       | Type / shape                                  | Accessor functions                                                                      |
-| ------------------------------ | ------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `wst_plans`                    | array                           | `WorkoutPlan[]`                               | `getPlans` / `savePlan` / `deletePlan` / `duplicatePlan` / `togglePlanStatus`           |
-| `wst_sessions`                 | array                           | `WorkoutSession[]`                            | `getSessions` / `saveSession` / `deleteSession` / `updateSession`                       |
-| `wst_active_session`           | object                          | `ActiveSession`                               | `getActiveSession` / `setActiveSession` / `clearActiveSession`                          |
-| `wst_user_name`                | raw string                      | `string`                                      | `getUserName` / `saveUserName`                                                          |
-| `wst_locale`                   | raw string                      | `'en' \| 'hu' \| 'de'` (`Locale`)             | `getLocale` / `saveLocale`                                                              |
-| `wst_llm_config`               | object                          | `LlmConfig`                                   | `getLlmConfig` / `saveLlmConfig`                                                        |
-| `wst_user_sex`                 | raw string                      | `'male' \| 'female'` (`Sex`)                  | `getSex` / `saveSex`                                                                    |
-| `wst_user_age`                 | raw number string               | `number`                                      | `getAge` / `saveAge`                                                                    |
-| `wst_user_height_cm`           | raw number string               | `number`                                      | `getHeightCm` / `saveHeightCm`                                                          |
-| `wst_user_weight_kg`           | raw number string               | `number`                                      | `getWeightKg` / `saveWeightKg`                                                          |
-| `wst_theme`                    | raw string                      | `'light' \| 'dark' \| 'system'` (`Theme`)     | `getTheme` / `saveTheme`                                                                |
-| `wst_consent_accepted`         | raw string `'true'` / `'false'` | boolean-as-string (presence = seen)           | `hasSeenConsent` / `getConsentAccepted` / `saveConsentAccepted` / `saveConsentDeclined` |
-| `wst_achievements`             | array                           | `AchievementRecord[]`                         | `getAchievements` / `saveAchievements`                                                  |
-| `wst_profile_created_at`       | raw ISO string                  | `string`                                      | `getProfileCreatedAt` / `saveProfileCreatedAt`                                          |
-| `wst_hidden_exercises`         | array                           | `HiddenExerciseKey[]`                         | `getHiddenExercises` / `saveHiddenExercises`                                            |
-| `wst_muscle_migration_pending` | raw string `'true'`             | flag — set by migration, cleared on dismiss   | `shouldShowMuscleMigrationNotice` / `dismissMuscleMigrationNotice`                      |
-| `wst_muscle_migration_seen`    | raw string `'true'`             | flag — set when the user dismisses the notice | same as above                                                                           |
+| Key                            | Value (JSON unless noted)       | Type / shape                                                      | Accessor functions                                                                      |
+| ------------------------------ | ------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `wst_plans`                    | array                           | `WorkoutPlan[]`                                                   | `getPlans` / `savePlan` / `deletePlan` / `duplicatePlan` / `togglePlanStatus`           |
+| `wst_sessions`                 | array                           | `WorkoutSession[]`                                                | `getSessions` / `saveSession` / `deleteSession` / `updateSession`                       |
+| `wst_active_session`           | object                          | `ActiveSession`                                                   | `getActiveSession` / `setActiveSession` / `clearActiveSession`                          |
+| `wst_user_name`                | raw string                      | `string`                                                          | `getUserName` / `saveUserName`                                                          |
+| `wst_locale`                   | raw string                      | `'en' \| 'hu' \| 'de'` (`Locale`)                                 | `getLocale` / `saveLocale`                                                              |
+| `wst_llm_config`               | object                          | `LlmConfig`                                                       | `getLlmConfig` / `saveLlmConfig`                                                        |
+| `wst_user_sex`                 | raw string                      | `'male' \| 'female'` (`Sex`)                                      | `getSex` / `saveSex`                                                                    |
+| `wst_user_age`                 | raw number string               | `number`                                                          | `getAge` / `saveAge`                                                                    |
+| `wst_user_height_cm`           | raw number string               | `number`                                                          | `getHeightCm` / `saveHeightCm`                                                          |
+| `wst_user_weight_kg`           | raw number string               | `number`                                                          | `getWeightKg` / `saveWeightKg`                                                          |
+| `wst_theme`                    | raw string                      | `'light' \| 'dark' \| 'system'` (`Theme`)                         | `getTheme` / `saveTheme`                                                                |
+| `wst_home_background`          | raw string                      | `'velocity' \| 'charge' \| 'ignite' \| 'none'` (`HomeBackground`) | `getHomeBackground` / `saveHomeBackground`                                              |
+| `wst_consent_accepted`         | raw string `'true'` / `'false'` | boolean-as-string (presence = seen)                               | `hasSeenConsent` / `getConsentAccepted` / `saveConsentAccepted` / `saveConsentDeclined` |
+| `wst_achievements`             | array                           | `AchievementRecord[]`                                             | `getAchievements` / `saveAchievements`                                                  |
+| `wst_profile_created_at`       | raw ISO string                  | `string`                                                          | `getProfileCreatedAt` / `saveProfileCreatedAt`                                          |
+| `wst_hidden_exercises`         | array                           | `HiddenExerciseKey[]`                                             | `getHiddenExercises` / `saveHiddenExercises`                                            |
+| `wst_muscle_migration_pending` | raw string `'true'`             | flag — set by migration, cleared on dismiss                       | `shouldShowMuscleMigrationNotice` / `dismissMuscleMigrationNotice`                      |
+| `wst_muscle_migration_seen`    | raw string `'true'`             | flag — set when the user dismisses the notice                     | same as above                                                                           |
 
 "Raw string" means the value is written directly (no `JSON.stringify`).
 

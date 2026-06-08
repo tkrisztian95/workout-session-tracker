@@ -32,6 +32,7 @@ import {
 } from '@/lib/storage';
 import LanguageCard from '@/components/LanguageCard';
 import ThemeCard from '@/components/ThemeCard';
+import HomeBackgroundCard from '@/components/HomeBackgroundCard';
 import AiConfigCard from '@/components/AiConfigCard';
 import { getInitials } from '@/utils';
 import ExportDataCard from '@/components/ExportDataCard';
@@ -69,10 +70,10 @@ function ProfilePageInner() {
   });
   const savedWeightRef = useRef(getWeightKg());
   const [openCard, setOpenCard] = useState<
-    'sex' | 'body-metrics' | 'language' | 'theme' | 'ai' | null
+    'sex' | 'body-metrics' | 'language' | 'theme' | 'home-bg' | 'ai' | null
   >(expandAi ? 'ai' : null);
 
-  function toggleCard(card: 'sex' | 'body-metrics' | 'language' | 'theme' | 'ai') {
+  function toggleCard(card: 'sex' | 'body-metrics' | 'language' | 'theme' | 'home-bg' | 'ai') {
     setOpenCard((c) => (c === card ? null : card));
   }
 
@@ -380,6 +381,9 @@ function ProfilePageInner() {
 
         {/* ── Theme ── */}
         <ThemeCard open={openCard === 'theme'} onToggle={() => toggleCard('theme')} />
+
+        {/* ── Home background ── */}
+        <HomeBackgroundCard open={openCard === 'home-bg'} onToggle={() => toggleCard('home-bg')} />
 
         {/* ── Export data ── */}
         <ExportDataCard />
