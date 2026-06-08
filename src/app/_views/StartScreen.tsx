@@ -32,7 +32,7 @@ export function StartScreen({
   const { locale } = useLocale();
   return (
     <Page
-      className="pb-20"
+      className="pb-20 overflow-hidden"
       data-home-bg={homeBackground}
       {...(homeBackground === 'ignite' ? { 'data-theme': 'dark' } : {})}
     >
