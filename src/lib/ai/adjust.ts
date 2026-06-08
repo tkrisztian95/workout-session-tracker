@@ -1,5 +1,5 @@
 import type { LlmConfig, WorkoutPlan, PlanDay, PlanExercise } from '../types';
-import { callOpenAI } from './client';
+import { callLlm } from './client';
 import { adjustCurrent, swapCurrent } from './prompts/adjust';
 import {
   summarisePlan,
@@ -55,7 +55,7 @@ export async function adjustPlan(
     `${buildContextBlock(ctx)}Here is my current workout plan:\n${summarisePlan(plan)}\n\n` +
     `Adjustment I want: ${instruction}${formatLanguageInstruction(ctx.language)}`;
 
-  const content = await callOpenAI(config, adjustCurrent, userMessage);
+  const content = await callLlm(config, adjustCurrent, userMessage);
 
   let parsed: AiAdjustResult & { valid?: boolean; validationError?: string };
   try {
@@ -122,7 +122,7 @@ export async function swapExercise(
     `${buildContextBlock(ctx)}Here is my current workout plan:\n${summarisePlan(plan)}\n\n` +
     `Replace this exercise in ${location}:\n${summariseExercise(target)}${progressionLine}${instructionLine}${formatLanguageInstruction(ctx.language)}`;
 
-  const content = await callOpenAI(config, swapCurrent, userMessage);
+  const content = await callLlm(config, swapCurrent, userMessage);
 
   let parsed: {
     exercise?: Omit<PlanExercise, 'id' | 'role'>;

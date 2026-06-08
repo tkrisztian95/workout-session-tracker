@@ -1,5 +1,5 @@
 import type { LlmConfig, WorkoutPlan, PlanDay, PlanExercise } from '../types';
-import { callOpenAI } from './client';
+import { callLlm } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/plan';
 import { migrateLegacyCategory } from '../muscles';
 import {
@@ -137,7 +137,7 @@ export async function suggestPlan(
 ): Promise<AiPlanResult> {
   const userMessage = buildPlanSuggestionPrompt(ctx, preferences);
 
-  const content = await callOpenAI(config, SYSTEM_PROMPT, userMessage);
+  const content = await callLlm(config, SYSTEM_PROMPT, userMessage);
 
   let parsed: AiPlanResult & { reasoning?: string; valid?: boolean; validationError?: string };
   try {

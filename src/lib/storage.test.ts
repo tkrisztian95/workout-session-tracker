@@ -212,4 +212,35 @@ describe('getLlmConfig env-var fallback', () => {
     );
     expect(getLlmConfig()?.apiKey).toBe('sk-saved-key');
   });
+
+  it('synthesizes a Gemini config from the Gemini env var', () => {
+    vi.stubEnv('NEXT_PUBLIC_GEMINI_API_KEY', 'AIza-env-key');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(getLlmConfig()).toEqual({
+      provider: 'gemini',
+      apiKey: 'AIza-env-key',
+      model: 'gemini-2.5-flash',
+    });
+  });
+
+  it('uses NEXT_PUBLIC_GEMINI_MODEL when provided', () => {
+    vi.stubEnv('NEXT_PUBLIC_GEMINI_API_KEY', 'AIza-env-key');
+    vi.stubEnv('NEXT_PUBLIC_GEMINI_MODEL', 'gemini-2.5-pro');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(getLlmConfig()?.model).toBe('gemini-2.5-pro');
+  });
+
+  it('prefers OpenAI over Gemini when both env keys are set', () => {
+    vi.stubEnv('NEXT_PUBLIC_OPENAI_API_KEY', 'sk-env-key');
+    vi.stubEnv('NEXT_PUBLIC_GEMINI_API_KEY', 'AIza-env-key');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(getLlmConfig()?.provider).toBe('openai');
+  });
+
+  it('ignores the Gemini env var in production (gate fails closed)', () => {
+    vi.stubEnv('NEXT_PUBLIC_GEMINI_API_KEY', 'AIza-env-key');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'production');
+    expect(getLlmConfig()).toBeNull();
+  });
 });

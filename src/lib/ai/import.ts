@@ -1,5 +1,5 @@
 import type { LlmConfig, Exercise } from '../types';
-import { callOpenAI } from './client';
+import { callLlm } from './client';
 import { current as SYSTEM_PROMPT } from './prompts/import';
 import { migrateLegacyCategory } from '../muscles';
 import type { AiContext } from './context';
@@ -29,7 +29,7 @@ ${languageLine}${existingNamesText}
 Workout notes to parse:
 ${notes}`;
 
-  const content = await callOpenAI(config, systemPrompt, userMessage);
+  const content = await callLlm(config, systemPrompt, userMessage);
 
   let parsed: { sessions: AiImportResult[]; valid?: boolean; validationError?: string };
   try {
