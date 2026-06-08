@@ -4,6 +4,7 @@ import { ChevronRight, ClipboardList, Dumbbell, Trophy } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import { Button, HeadingXL, LabelOverline, Page, PageHeader } from '@/components/ui';
+import type { HomeBackground } from '@/lib/storage';
 import { formatDate } from './helpers';
 
 export function StartScreen({
@@ -15,6 +16,7 @@ export function StartScreen({
   lastSessionInfo,
   achievementCount,
   onOpenAchievements,
+  homeBackground = 'velocity',
 }: {
   hasPlans: boolean;
   onFollowPlan: () => void;
@@ -24,11 +26,17 @@ export function StartScreen({
   lastSessionInfo: { relativeLabel: string; sessionName: string } | null;
   achievementCount: number;
   onOpenAchievements: () => void;
+  homeBackground?: HomeBackground;
 }) {
   const t = useTranslations();
   const { locale } = useLocale();
   return (
-    <Page className="pb-20">
+    <Page
+      className="pb-20"
+      data-home-bg={homeBackground}
+      {...(homeBackground === 'ignite' ? { 'data-theme': 'dark' } : {})}
+    >
+      {homeBackground !== 'none' && <div className={`home-bg bg-${homeBackground}`} aria-hidden />}
       <PageHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
