@@ -37,7 +37,7 @@ export function StartScreen({
       {...(homeBackground === 'ignite' ? { 'data-theme': 'dark' } : {})}
     >
       {homeBackground !== 'none' && <div className={`home-bg bg-${homeBackground}`} aria-hidden />}
-      <PageHeader>
+      <PageHeader transparent={homeBackground !== 'none'}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <LabelOverline>{formatDate(locale)}</LabelOverline>
