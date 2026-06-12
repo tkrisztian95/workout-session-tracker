@@ -27,7 +27,10 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
   const t = useTranslations();
   const planName = session.planId ? planMap[session.planId]?.name : undefined;
   const label = planName ?? t.free_session;
-  const exerciseCount = session.exercises.length;
+  const totalCount = session.exercises.length;
+  const doneCount = session.exercises.filter((e) => e.completed && !e.dismissed).length;
+  const exerciseCountLabel =
+    doneCount === totalCount ? `${doneCount}` : `${doneCount}/${totalCount}`;
   const mins = durationMinutes(session.startedAt, session.completedAt);
   const muscles = [
     ...new Set(session.exercises.map((e) => e.muscle).filter((m): m is Muscle => Boolean(m))),
@@ -51,8 +54,8 @@ export function WorkoutHistoryCard({ session, planMap, isNew = false }: WorkoutH
           )}
         </div>
         <p className="text-dim text-xs mt-1">
-          {formatStartTime(session.startedAt)} · {mins} {t.min_label} · {exerciseCount}{' '}
-          {exerciseCount !== 1 ? t.exercise_plural : t.exercise_singular}
+          {formatStartTime(session.startedAt)} · {mins} {t.min_label} · {exerciseCountLabel}{' '}
+          {totalCount !== 1 ? t.exercise_plural : t.exercise_singular}
         </p>
         {muscles.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
