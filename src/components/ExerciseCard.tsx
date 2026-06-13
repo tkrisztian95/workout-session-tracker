@@ -8,7 +8,7 @@ import LoggedSetBadge from '@/components/LoggedSetBadge';
 import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
-import { classifyLoggedSets, formatRepsTarget } from '@/lib/sessionUtils';
+import { classifyLoggedSets, countsTowardSetsGoal, formatRepsTarget } from '@/lib/sessionUtils';
 
 interface Props {
   exercise: Exercise;
@@ -74,13 +74,14 @@ export default function ExerciseCard({
 
   const loggedCount = exercise.loggedSets?.length ?? 0;
   // Per-set warmup/partial/working classification drives both badge colours and
-  // what counts toward the goal. A set only qualifies when it hits the target
-  // weight AND the rep target; weight-only "partial" sets don't count.
+  // what counts toward the goal. A set qualifies once it hits the target weight;
+  // a "partial" set that fell short on reps still counts (the weight target is
+  // the harder constraint), only sub-target "warmup" sets are excluded.
   const setClassifications = classifyLoggedSets(exercise);
   const qualifyingSetCount =
     exercise.weightKg == null
       ? loggedCount
-      : setClassifications.filter((c) => c.status === 'working').length;
+      : setClassifications.filter((c) => countsTowardSetsGoal(c.status)).length;
   const setsGoalAchieved =
     exercise.type === 'sets-reps'
       ? exercise.sets != null && qualifyingSetCount >= exercise.sets

@@ -26,11 +26,25 @@ export function formatRepsTarget(ex: { reps?: number; repsPerSet?: number[] }): 
  *
  * - `neutral` — no weight target on the exercise; every set just counts.
  * - `warmup`  — below the target weight; a ramp-up that doesn't count.
- * - `partial` — at/above target weight but short of the rep target; a near
- *               miss that does NOT count toward the goal.
+ * - `partial` — at/above target weight but short of the rep target; the rep
+ *               shortfall is still surfaced (e.g. "5/8"), but the set COUNTS
+ *               toward the goal because the harder weight target was met.
  * - `working` — at/above target weight and meeting the rep target; counts.
+ *
+ * See {@link countsTowardSetsGoal} for the single source of truth on which
+ * statuses count.
  */
 export type SetStatus = 'neutral' | 'warmup' | 'partial' | 'working';
+
+/**
+ * Whether a classified set counts toward the exercise's sets goal. A set counts
+ * as soon as it meets the weight target — including `partial` sets that fell
+ * short on reps — since hitting the prescribed load is the harder constraint.
+ * Only `warmup` sets (below the weight target) are excluded.
+ */
+export function countsTowardSetsGoal(status: SetStatus): boolean {
+  return status !== 'warmup';
+}
 
 export interface LoggedSetClassification {
   status: SetStatus;
@@ -40,9 +54,11 @@ export interface LoggedSetClassification {
 
 /**
  * Classifies each logged set against the exercise's weight + rep targets,
- * returning a result aligned 1:1 with `loggedSets`. Only `working` sets count
- * toward the sets goal. When the exercise has no weight target every set is
- * `neutral` (unchanged legacy behaviour). For a per-set rep scheme
+ * returning a result aligned 1:1 with `loggedSets`. Every set that meets the
+ * weight target counts toward the sets goal — both `working` and (weight-met,
+ * rep-short) `partial` sets — while `warmup` sets below the target weight do
+ * not (see {@link countsTowardSetsGoal}). When the exercise has no weight
+ * target every set is `neutral` (unchanged legacy behaviour). For a per-set rep scheme
  * (`repsPerSet`), the rep target is matched to the Nth weight-qualifying set in
  * order — warmups are skipped — since the scheme describes the working sets.
  * The matched `repTarget` is returned so callers can show how short a `partial`
