@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
 import { cn } from '@/lib/utils';
-import { classifyLoggedSets, formatExerciseDetail } from '@/lib/sessionUtils';
+import { classifyLoggedSets, countsTowardSetsGoal, formatExerciseDetail } from '@/lib/sessionUtils';
 import type { Exercise, PlanDay, PlanExercise, WorkoutSession } from '@/lib/types';
 
 type Status = 'overdone' | 'matched' | 'underperformed' | 'missed' | 'extra';
@@ -29,12 +29,13 @@ function actualSetsFor(ex: Exercise): number {
   if (ex.dismissed) return 0;
   if (ex.loggedSets && ex.loggedSets.length > 0) {
     // Mirror the active exercise card's `qualifyingSetCount`: for a sets-reps
-    // exercise with a weight target, only "working" sets (hitting both the
-    // weight and rep targets) count toward the goal — warmups and partials
-    // don't, so they no longer inflate the bar into a false "overdone". Other
-    // set types (and weightless exercises) count every logged set.
+    // exercise with a weight target, every set that hits the target weight
+    // counts toward the goal — including rep-short "partial" sets — while
+    // sub-target "warmups" don't, so they no longer inflate the bar into a
+    // false "overdone". Other set types (and weightless exercises) count every
+    // logged set.
     if (ex.type === 'sets-reps' && ex.weightKg != null) {
-      return classifyLoggedSets(ex).filter((c) => c.status === 'working').length;
+      return classifyLoggedSets(ex).filter((c) => countsTowardSetsGoal(c.status)).length;
     }
     return ex.loggedSets.length;
   }

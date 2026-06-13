@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSessionTimeline,
   classifyLoggedSets,
+  countsTowardSetsGoal,
   formatExerciseDetail,
   formatMonthBucket,
   formatRepsTarget,
@@ -281,5 +282,40 @@ describe('classifyLoggedSets', () => {
 
   it('returns an empty array when there are no logged sets', () => {
     expect(classifyLoggedSets({ weightKg: 60, reps: 8 })).toEqual([]);
+  });
+});
+
+describe('countsTowardSetsGoal', () => {
+  const set = (weight: number, reps: number): LoggedSet => ({
+    weight,
+    reps,
+    loggedAt: '2026-06-07T10:00:00.000Z',
+  });
+
+  it('counts working sets (weight + reps met)', () => {
+    expect(countsTowardSetsGoal('working')).toBe(true);
+  });
+
+  it('counts partial sets — weight met even though reps fell short', () => {
+    expect(countsTowardSetsGoal('partial')).toBe(true);
+  });
+
+  it('counts neutral sets (no weight target)', () => {
+    expect(countsTowardSetsGoal('neutral')).toBe(true);
+  });
+
+  it('excludes warmup sets below the target weight', () => {
+    expect(countsTowardSetsGoal('warmup')).toBe(false);
+  });
+
+  it('credits a weight-met, rep-short set toward the goal', () => {
+    // 60 kg target met on all three sets; the middle set is rep-short (partial)
+    // but still counts, so all three qualify.
+    const qualifying = classifyLoggedSets({
+      weightKg: 60,
+      reps: 8,
+      loggedSets: [set(60, 8), set(60, 5), set(70, 10)],
+    }).filter((c) => countsTowardSetsGoal(c.status)).length;
+    expect(qualifying).toBe(3);
   });
 });
