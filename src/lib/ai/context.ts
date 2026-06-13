@@ -36,7 +36,12 @@ const TOP_EXERCISES_PER_SESSION = 6;
  * MUST extend this union so future context-shaping logic (budget guards,
  * field selection) can match on the consumer exhaustively.
  */
-export type AiFeature = 'plan-suggest' | 'exercise-swap' | 'plan-adjust' | 'notes-import';
+export type AiFeature =
+  | 'plan-suggest'
+  | 'exercise-swap'
+  | 'exercise-suggest'
+  | 'plan-adjust'
+  | 'notes-import';
 
 export interface ContextProfile {
   name?: string;
