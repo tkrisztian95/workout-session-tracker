@@ -228,7 +228,9 @@
     "chest-press-machine": "Mellnyomó gép",
     "incline-press": "Ferde nyomógép",
     "lat-pulldown": "Felső csiga (lehúzás)",
+    "lat-pulldown-machine": "Lehúzógép",
     "seated-cable-row": "Ülő evezés (alsó csiga)",
+    "seated-machine-row": "Ülő evezőgép",
     "pull-up": "Húzódzkodás",
     "dumbbell-row": "Egykezes súlyzós evezés",
     "overhead-press": "Vállból nyomás",
@@ -254,7 +256,9 @@
     "glute-machine": ["Farizom tréner"],
     "chest-press-machine": ["Függőleges mellnyomó"],
     "lat-pulldown": ["Csigás lehúzás"],
+    "lat-pulldown-machine": ["Gépes lehúzás", "Hammer Strength lehúzás"],
     "seated-cable-row": ["Csigás evezés"],
+    "seated-machine-row": ["Gépes evezés", "Hammer Strength evezés"],
     "overhead-press": ["Vállnyomás"]
   },
   "catalog_exercise_hints": {
@@ -289,7 +293,9 @@
     "bench-press": "Vízszintes, rúddal",
     "incline-bench-press": "Ferde pad, rúddal",
     "chest-press-machine": "Vízszintes, gépen",
-    "incline-press": "Ferde, gépen"
+    "incline-press": "Ferde, gépen",
+    "seated-machine-row": "Gépes evezés, külön fogantyúk — hát",
+    "lat-pulldown-machine": "Gépes lehúzás, külön fogantyúk — hát"
   },
   "catalog_exercise_notes": {},
   "exercise_role_label": "Szerep",

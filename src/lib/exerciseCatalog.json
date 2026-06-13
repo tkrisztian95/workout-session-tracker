@@ -268,6 +268,15 @@
     "source": "starter"
   },
   {
+    "id": "lat-pulldown-machine",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "difficulty": "beginner",
+    "source": "gym"
+  },
+  {
     "id": "seated-cable-row",
     "muscle": "back",
     "type": "sets-reps",
@@ -275,6 +284,15 @@
     "defaultReps": 12,
     "difficulty": "beginner",
     "source": "starter"
+  },
+  {
+    "id": "seated-machine-row",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "difficulty": "beginner",
+    "source": "gym"
   },
   {
     "id": "pull-up",
