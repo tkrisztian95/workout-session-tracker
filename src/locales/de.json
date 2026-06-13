@@ -240,6 +240,7 @@
     "chest-press-machine": "Brustpresse",
     "incline-press": "Schrägpresse",
     "lat-pulldown": "Latzug",
+    "lat-pulldown-machine": "Latzugmaschine",
     "seated-cable-row": "Rudern am Kabelzug",
     "seated-machine-row": "Rudern an der Maschine",
     "pull-up": "Klimmzüge",
@@ -267,6 +268,7 @@
     "glute-machine": ["Glute Trainer"],
     "chest-press-machine": ["Vertikale Brustpresse"],
     "lat-pulldown": ["Latziehen"],
+    "lat-pulldown-machine": ["Maschinen-Latzug", "Iso-lateraler Latzug", "Hammer-Strength-Latzug"],
     "seated-cable-row": ["Kabelrudern"],
     "seated-machine-row": ["Maschinenrudern", "Hammer-Strength-Rudern"],
     "overhead-press": ["Schulterpresse"]
@@ -304,7 +306,8 @@
     "incline-bench-press": "Schrägbank mit Langhantel",
     "chest-press-machine": "Flach an der Maschine",
     "incline-press": "Schräg an der Maschine",
-    "seated-machine-row": "Maschinenrudern, getrennte Griffe — Rücken"
+    "seated-machine-row": "Maschinenrudern, getrennte Griffe — Rücken",
+    "lat-pulldown-machine": "Latzug an der Maschine, getrennte Griffe — Rücken"
   },
   "catalog_exercise_notes": {},
   "exercise_role_label": "Rolle",

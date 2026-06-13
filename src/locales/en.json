@@ -240,6 +240,7 @@
     "chest-press-machine": "Chest press machine",
     "incline-press": "Incline press",
     "lat-pulldown": "Lat pulldown",
+    "lat-pulldown-machine": "Lat pulldown machine",
     "seated-cable-row": "Seated cable row",
     "seated-machine-row": "Seated row machine",
     "pull-up": "Pull-up",
@@ -267,6 +268,11 @@
     "glute-machine": ["Glute trainer"],
     "chest-press-machine": ["Vertical bench press"],
     "lat-pulldown": ["Pulldown"],
+    "lat-pulldown-machine": [
+      "Machine pulldown",
+      "Iso-lateral pulldown",
+      "Hammer Strength pulldown"
+    ],
     "seated-cable-row": ["Cable row"],
     "seated-machine-row": ["Machine row", "Hammer Strength row"],
     "overhead-press": ["Shoulder press"]
@@ -304,7 +310,8 @@
     "incline-bench-press": "Incline barbell press",
     "chest-press-machine": "Flat machine press",
     "incline-press": "Incline machine press",
-    "seated-machine-row": "Machine row, separate handles — back"
+    "seated-machine-row": "Machine row, separate handles — back",
+    "lat-pulldown-machine": "Plate-loaded pulldown, separate handles — back"
   },
   "catalog_exercise_notes": {},
   "exercise_role_label": "Role",
