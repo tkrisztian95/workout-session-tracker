@@ -241,6 +241,7 @@
     "incline-press": "Schrägpresse",
     "lat-pulldown": "Latzug",
     "seated-cable-row": "Rudern am Kabelzug",
+    "seated-machine-row": "Rudern an der Maschine",
     "pull-up": "Klimmzüge",
     "dumbbell-row": "Einarmiges Kurzhantelrudern",
     "overhead-press": "Schulterdrücken",
@@ -267,6 +268,7 @@
     "chest-press-machine": ["Vertikale Brustpresse"],
     "lat-pulldown": ["Latziehen"],
     "seated-cable-row": ["Kabelrudern"],
+    "seated-machine-row": ["Maschinenrudern", "Hammer-Strength-Rudern"],
     "overhead-press": ["Schulterpresse"]
   },
   "catalog_exercise_hints": {
@@ -301,7 +303,8 @@
     "bench-press": "Flach mit Langhantel",
     "incline-bench-press": "Schrägbank mit Langhantel",
     "chest-press-machine": "Flach an der Maschine",
-    "incline-press": "Schräg an der Maschine"
+    "incline-press": "Schräg an der Maschine",
+    "seated-machine-row": "Maschinenrudern, getrennte Griffe — Rücken"
   },
   "catalog_exercise_notes": {},
   "exercise_role_label": "Rolle",

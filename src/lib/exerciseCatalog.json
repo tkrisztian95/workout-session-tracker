@@ -277,6 +277,15 @@
     "source": "starter"
   },
   {
+    "id": "seated-machine-row",
+    "muscle": "back",
+    "type": "sets-reps",
+    "defaultSets": 3,
+    "defaultReps": 12,
+    "difficulty": "beginner",
+    "source": "gym"
+  },
+  {
     "id": "pull-up",
     "muscle": "back",
     "type": "sets-reps",

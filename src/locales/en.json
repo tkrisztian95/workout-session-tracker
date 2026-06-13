@@ -241,6 +241,7 @@
     "incline-press": "Incline press",
     "lat-pulldown": "Lat pulldown",
     "seated-cable-row": "Seated cable row",
+    "seated-machine-row": "Seated row machine",
     "pull-up": "Pull-up",
     "dumbbell-row": "One-arm dumbbell row",
     "overhead-press": "Overhead press",
@@ -267,6 +268,7 @@
     "chest-press-machine": ["Vertical bench press"],
     "lat-pulldown": ["Pulldown"],
     "seated-cable-row": ["Cable row"],
+    "seated-machine-row": ["Machine row", "Hammer Strength row"],
     "overhead-press": ["Shoulder press"]
   },
   "catalog_exercise_hints": {
@@ -301,7 +303,8 @@
     "bench-press": "Flat barbell press",
     "incline-bench-press": "Incline barbell press",
     "chest-press-machine": "Flat machine press",
-    "incline-press": "Incline machine press"
+    "incline-press": "Incline machine press",
+    "seated-machine-row": "Machine row, separate handles — back"
   },
   "catalog_exercise_notes": {},
   "exercise_role_label": "Role",
