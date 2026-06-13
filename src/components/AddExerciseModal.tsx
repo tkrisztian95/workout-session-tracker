@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { History, LayoutGrid } from 'lucide-react';
+import { History, LayoutGrid, Sparkles } from 'lucide-react';
 import type { Exercise } from '@/lib/types';
 import ExerciseHistoryPicker from '@/components/ExerciseHistoryPicker';
 import ExerciseCatalogPicker from '@/components/ExerciseCatalogPicker';
+import AiSuggestExerciseModal from '@/components/AiSuggestExerciseModal';
+import { getLlmConfig } from '@/lib/storage';
+import type { SessionExerciseRef } from '@/lib/ai';
 import type { HistoryEntry } from '@/lib/exerciseHistory';
 import { catalogName, type CatalogExercise } from '@/lib/exerciseCatalog';
 import { useTranslations } from '@/lib/locale-context';
@@ -20,9 +23,18 @@ interface Props {
   onEdit?: (exercise: Omit<Exercise, 'id'>) => void;
   /** Pre-populate fields and switch to edit mode */
   initialValues?: Exercise;
+  /** Exercises already in the current session — fed to the AI suggestion so it avoids duplicates. */
+  sessionExercises?: SessionExerciseRef[];
 }
 
-export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initialValues }: Props) {
+export default function AddExerciseModal({
+  isOpen,
+  onClose,
+  onAdd,
+  onEdit,
+  initialValues,
+  sessionExercises = [],
+}: Props) {
   const t = useTranslations();
   const typeLabels: Record<Exercise['type'], string> = {
     'sets-reps': t.exercise_type_sets_reps,
@@ -42,6 +54,8 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   const [manualCategory, setManualCategory] = useState<Muscle | ''>('');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiEnabled] = useState(() => !!getLlmConfig()?.apiKey);
 
   const isEditMode = !!initialValues;
 
@@ -112,6 +126,23 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
     setCatalogOpen(false);
   };
 
+  const applyAiSuggestion = (ex: Omit<Exercise, 'id'>) => {
+    setName(ex.name);
+    setType(ex.type);
+    setSets(String(ex.sets ?? 3));
+    setReps(String(ex.reps ?? 10));
+    const hasScheme = (ex.repsPerSet?.length ?? 0) > 0;
+    setRepsMode(hasScheme ? 'variable' : 'fixed');
+    setRepsScheme(hasScheme ? ex.repsPerSet!.join(', ') : '15, 12, 8, 4');
+    const totalSecs = ex.duration ?? 0;
+    setDurationMins(String(Math.floor(totalSecs / 60)));
+    setDurationSecs(String(totalSecs % 60));
+    setWeightKg(ex.weightKg !== undefined ? String(ex.weightKg) : '');
+    setManualCategory(ex.muscle ?? '');
+    setSelectedCategory(ex.muscle ?? null);
+    setAiOpen(false);
+  };
+
   const handleSubmit = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -156,12 +187,22 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
   return (
     <>
       <ModalSheet
-        isOpen={isOpen && !pickerOpen && !catalogOpen}
+        isOpen={isOpen && !pickerOpen && !catalogOpen && !aiOpen}
         onClose={handleClose}
         title={isEditMode ? 'Edit exercise' : t.add_exercise_title}
       >
         <div className="flex-1 min-h-0 overflow-y-auto space-y-5">
           {/* Pre-fill sources */}
+          {aiEnabled && !isEditMode && (
+            <button
+              type="button"
+              onClick={() => setAiOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-brand/40 bg-brand/10 text-brand text-sm font-semibold cursor-pointer active:bg-brand/20 transition-colors duration-150"
+            >
+              <Sparkles className="w-4 h-4" />
+              {t.ai_suggest_open_button}
+            </button>
+          )}
           <div className="flex gap-2">
             <button
               type="button"
@@ -381,6 +422,13 @@ export default function AddExerciseModal({ isOpen, onClose, onAdd, onEdit, initi
         onClose={() => setCatalogOpen(false)}
         onSelect={applyCatalogEntry}
       />
+      {aiOpen && (
+        <AiSuggestExerciseModal
+          current={sessionExercises}
+          onSelect={applyAiSuggestion}
+          onClose={() => setAiOpen(false)}
+        />
+      )}
     </>
   );
 }

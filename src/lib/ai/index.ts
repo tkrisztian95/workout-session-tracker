@@ -7,6 +7,9 @@ export { importSessions } from './import';
 export type { AiAdjustResult, AiSwapResult } from './adjust';
 export { adjustPlan, swapExercise } from './adjust';
 
+export type { AiSuggestResult, SessionExerciseRef } from './suggest';
+export { suggestExercise } from './suggest';
+
 export type {
   AiContext,
   AiFeature,

@@ -321,6 +321,7 @@ export function SessionView({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAdd}
+        sessionExercises={session.exercises.map((e) => ({ name: e.name, muscle: e.muscle }))}
       />
 
       {showCompleteOverlay && (
