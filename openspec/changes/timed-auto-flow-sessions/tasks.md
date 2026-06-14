@@ -8,15 +8,15 @@
 
 ## 2. Interval engine (pure, mode-aware)
 
-- [ ] 2.1 Create `src/lib/timedSession.ts` exposing `createTimedEngine(config, startedAt)` computing `{ phase, roundIndex, totalRounds, circuitIndex, activeExercise, clockMs }` as a pure function of `(config, exercises, startedAt, totalPausedMs, now)`
-- [ ] 2.2 Implement the circuit walk: one round = one full pass through the ordered `exercises`; engine exposes the active circuit exercise per phase; length-1 is the trivial case
-- [ ] 2.3 Implement Tabata schedule: work→rest cycles stepping through the circuit, N rounds, no trailing rest after the last round, transition to `done`
-- [ ] 2.4 Implement AMRAP: single count-down of `totalSec`, `tapRound()` = one full circuit pass, `done` at zero with round count preserved
-- [ ] 2.5 Implement EMOM: new interval each `periodSec` (default 60) stepping through the circuit for `rounds` passes; early finish leaves remainder as rest; `done` after last
-- [ ] 2.6 Implement For Time: single count-**up**; auto-`done` at `capSec` when set (uncapped otherwise); `finish()` records total elapsed
-- [ ] 2.7 Integrate pause/resume: phase math computed against active (paused-subtracted) elapsed using `totalPausedMs`
-- [ ] 2.8 Emit auto-log intents on work-phase completion targeting the active circuit exercise (round→set, elapsed→`seconds`)
-- [ ] 2.9 Unit tests per mode incl. multi-exercise circuit distribution, For Time cap, pause across a phase boundary, and refresh-reconstruction from timestamps
+- [x] 2.1 Create `src/lib/timedSession.ts` exposing a pure `computeTimedState(params)` returning `{ phase, roundIndex, totalRounds, circuitIndex, activeExerciseIndex, phaseRemainingMs, completedWorkIntervals, … }` from `(config, circuitLength, startedAt, totalPausedMs, now)` — pure timestamp-derived state, no internal clock
+- [x] 2.2 Implement the circuit walk: one round = one full pass through the ordered `exercises`; engine exposes the active circuit exercise per phase; length-1 is the trivial case
+- [x] 2.3 Implement Tabata schedule: work→rest cycles stepping through the circuit, N rounds, no trailing rest after the last round, transition to `done`
+- [ ] 2.4 Implement AMRAP: single count-down of `totalSec`, `tapRound()` = one full circuit pass, `done` at zero with round count preserved — _deferred to a later slice; throws `not implemented` for now_
+- [ ] 2.5 Implement EMOM: new interval each `periodSec` (default 60) stepping through the circuit for `rounds` passes; early finish leaves remainder as rest; `done` after last — _deferred to a later slice_
+- [ ] 2.6 Implement For Time: single count-**up**; auto-`done` at `capSec` when set (uncapped otherwise); `finish()` records total elapsed — _deferred to a later slice_
+- [x] 2.7 Integrate pause/resume: phase math computed against active (paused-subtracted) elapsed using `totalPausedMs` (and a `pausedAtMs` freeze)
+- [x] 2.8 Emit auto-log intents on work-phase completion targeting the active circuit exercise (round→set, elapsed→`seconds`) — engine exposes `completedWorkIntervals` + `workIntervalInfo()` for the React layer to diff and log (wired in group 3)
+- [x] 2.9 Unit tests for Tabata incl. multi-exercise circuit distribution, no-trailing-rest, pause across a phase boundary, and refresh-reconstruction from timestamps _(For-Time cap test lands with task 2.6)_
 
 ## 3. React integration + auto-log wiring
 
