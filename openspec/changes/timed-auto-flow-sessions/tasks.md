@@ -1,10 +1,10 @@
 ## 1. Schema + storage foundation
 
-- [ ] 1.1 Add `TimedMode` and `TimedConfig` (incl. `capSec` for for-time) types to `src/lib/types.ts`; add optional `timed?: TimedConfig` to `ActiveSession`, `WorkoutSession`, and `PlanDay`. The session's ordered `exercises` array is the circuit — no separate circuit field
-- [ ] 1.2 Run `gitnexus_impact` on `getActiveSession`/`setActiveSession`/`saveSession` before editing; confirm additive change is low risk
-- [ ] 1.3 Bump `ExportPayload.schemaVersion` `'1'` → `'2'` in `src/lib/storage.ts`; make read paths treat missing `timed` as a standard session; ensure import tolerates v1 and v2 payloads
-- [ ] 1.4 Update `docs/data-structure.md` in the same commit to document `TimedConfig`, the new session/plan-day field, and the `schemaVersion` bump
-- [ ] 1.5 Add a unit test confirming v1 sessions/export payloads round-trip and read back as standard sessions
+- [x] 1.1 Add `TimedMode` and `TimedConfig` (incl. `capSec` for for-time) types to `src/lib/types.ts`; add optional `timed?: TimedConfig` to `ActiveSession`, `WorkoutSession`, and `PlanDay`. The session's ordered `exercises` array is the circuit — no separate circuit field
+- [x] 1.2 Run `gitnexus_impact` on `getActiveSession`/`setActiveSession`/`saveSession` before editing; confirm additive change is low risk — _GitNexus MCP not connected this session; verified manually: change is additive optional fields only (no signature/behavior change), so blast radius on existing readers is zero_
+- [x] 1.3 Bump `ExportPayload.schemaVersion` `'1'` → `'2'` in `src/lib/storage.ts`; make read paths treat missing `timed` as a standard session; ensure import tolerates v1 and v2 payloads — _no importer exists (export-only); read paths already treat missing `timed` as standard_
+- [x] 1.4 Update `docs/data-structure.md` in the same commit to document `TimedConfig`, the new session/plan-day field, and the `schemaVersion` bump
+- [x] 1.5 Add a unit test confirming v1 sessions/export payloads round-trip and read back as standard sessions
 
 ## 2. Interval engine (pure, mode-aware)
 

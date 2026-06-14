@@ -161,6 +161,7 @@ interface PlanDay {
   weekdays: number[]; // 0 = Sunday … 6 = Saturday
   coreExercises: PlanExercise[];
   optionalExercises: PlanExercise[];
+  timed?: TimedConfig; // present when this day is a timed block (see Timed sessions)
 }
 
 interface WorkoutPlan {
@@ -192,6 +193,7 @@ interface ActiveSession {
   planDayName?: string;
   pausedAt?: string; // present iff paused
   totalPausedMs: number; // cumulative paused time across all pause/resume cycles
+  timed?: TimedConfig; // present when driven by the timed engine; see Timed sessions
 }
 
 interface WorkoutSession {
@@ -204,10 +206,29 @@ interface WorkoutSession {
   rating?: 1 | 2 | 3 | 4 | 5;
   updatedAt?: string; // set when edited post-completion
   importedViaAi?: boolean; // set when created via AI import
+  timed?: TimedConfig; // records the mode/config when the session was timed-driven
 }
 ```
 
 At most one `ActiveSession` exists at a time (single value at `wst_active_session`). `WorkoutSession` is the immutable record produced when an active session is completed and pushed onto `wst_sessions`. `updateSession` stamps `updatedAt` on every post-completion edit.
+
+### Timed sessions
+
+```ts
+type TimedMode = 'tabata' | 'amrap' | 'emom' | 'for-time';
+
+interface TimedConfig {
+  mode: TimedMode;
+  workSec?: number; // tabata: work phase length
+  restSec?: number; // tabata: rest phase length
+  rounds?: number; // tabata / amrap / emom: passes through the circuit
+  periodSec?: number; // emom: interval length (default 60)
+  totalSec?: number; // amrap: total countdown length
+  capSec?: number; // for-time: optional hard cap (0/undefined = uncapped)
+}
+```
+
+`timed` is an **additive, optional** field on `ActiveSession`, `WorkoutSession`, and `PlanDay`. Its absence means a standard, manually-tracked session/day — so all pre-timed (schemaVersion `'1'`) data reads back unchanged as standard. When present, the session is driven by the interval engine and the ordered `exercises` array is the **circuit**: one round is one full pass through it. Timed sessions persist results onto the existing `Exercise` / `LoggedSet` shape (round → set, elapsed → `seconds`), so history, stats, and export read them with no special-casing. Only Tabata is wired up so far; the other three modes share the same `TimedConfig`.
 
 ### Achievements
 
@@ -250,7 +271,7 @@ Migration is idempotent: once `category` is gone, subsequent reads are no-ops.
 
 ```ts
 interface ExportPayload {
-  schemaVersion: string; // currently '1'
+  schemaVersion: string; // currently '2' (bumped for the additive timed-mode fields)
   exportedAt: string; // ISO timestamp
   profile: {
     name: string | null;

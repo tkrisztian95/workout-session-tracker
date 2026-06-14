@@ -62,6 +62,7 @@ export interface PlanDay {
   weekdays: number[]; // 0 = Sunday … 6 = Saturday
   coreExercises: PlanExercise[];
   optionalExercises: PlanExercise[];
+  timed?: TimedConfig; // present when this day is a timed block (drives the auto-flow)
 }
 
 export interface WorkoutPlan {
@@ -77,6 +78,26 @@ export interface WorkoutPlan {
   scheduledWeeks?: number;
 }
 
+// ─── Timed auto-flow sessions ─────────────────────────────────────────────────
+
+/** Which interval engine drives a timed session. */
+export type TimedMode = 'tabata' | 'amrap' | 'emom' | 'for-time';
+
+/**
+ * Configuration for a timed auto-flow session. Absence of `timed` on a session
+ * means it is a standard, manually-tracked session. The session's ordered
+ * `exercises` array is the circuit: one round is one full pass through it.
+ */
+export interface TimedConfig {
+  mode: TimedMode;
+  workSec?: number; // tabata: work phase length
+  restSec?: number; // tabata: rest phase length
+  rounds?: number; // tabata / amrap / emom: number of passes through the circuit
+  periodSec?: number; // emom: interval length (default 60)
+  totalSec?: number; // amrap: total countdown length
+  capSec?: number; // for-time: optional hard cap (0/undefined = uncapped count-up)
+}
+
 // ─── Session data models ──────────────────────────────────────────────────────
 
 /** A session that is currently in progress (stored in wst_active_session). */
@@ -90,6 +111,7 @@ export interface ActiveSession {
   planDayName?: string;
   pausedAt?: string; // ISO timestamp set when session is paused; absent when active
   totalPausedMs: number; // cumulative ms spent paused across all pause/resume cycles
+  timed?: TimedConfig; // present when the session is driven by the timed engine
 }
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
@@ -111,4 +133,5 @@ export interface WorkoutSession {
   rating?: 1 | 2 | 3 | 4 | 5;
   updatedAt?: string; // set when the session is edited after completion
   importedViaAi?: boolean; // set when the session was created via AI import
+  timed?: TimedConfig; // records the mode/config when the session was timed-driven
 }

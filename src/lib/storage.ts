@@ -503,7 +503,8 @@ export function saveConsentDeclined(): void {
 // ─── Data export ──────────────────────────────────────────────────────────────
 
 export interface ExportPayload {
-  schemaVersion: string;
+  schemaVersion: string; // '2' since the additive timed-mode fields landed; '1' = pre-timed
+
   exportedAt: string;
   profile: {
     name: string | null;
@@ -518,7 +519,7 @@ export interface ExportPayload {
 
 export function exportAllData(): ExportPayload {
   return {
-    schemaVersion: '1',
+    schemaVersion: '2',
     exportedAt: new Date().toISOString(),
     profile: {
       name: getUserName(),

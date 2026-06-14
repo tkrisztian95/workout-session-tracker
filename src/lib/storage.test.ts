@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  exportAllData,
   getActiveSession,
   getHiddenExercises,
   getLlmConfig,
   getPlans,
   getSessions,
+  setActiveSession,
 } from './storage';
+import type { ActiveSession, TimedConfig } from './types';
 
 const KEYS = {
   plans: 'wst_plans',
@@ -242,5 +245,32 @@ describe('getLlmConfig env-var fallback', () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('NEXT_PUBLIC_VERCEL_ENV', 'production');
     expect(getLlmConfig()).toBeNull();
+  });
+});
+
+describe('timed-mode metadata (schemaVersion 2)', () => {
+  const baseSession: ActiveSession = {
+    id: 's-timed',
+    startedAt: '2026-01-01T08:00:00Z',
+    exercises: [{ id: 'e1', name: 'Burpees', type: 'sets-duration' }],
+    totalPausedMs: 0,
+  };
+
+  it('a pre-timed (v1) active session without `timed` reads back as standard', () => {
+    // Shape written before this change: no `timed` key at all.
+    localStorage.setItem(KEYS.activeSession, JSON.stringify(baseSession));
+    const loaded = getActiveSession();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.timed).toBeUndefined();
+  });
+
+  it('round-trips a timed active session, preserving the config', () => {
+    const timed: TimedConfig = { mode: 'tabata', workSec: 20, restSec: 10, rounds: 8 };
+    setActiveSession({ ...baseSession, timed });
+    expect(getActiveSession()!.timed).toEqual(timed);
+  });
+
+  it('exportAllData stamps schemaVersion 2', () => {
+    expect(exportAllData().schemaVersion).toBe('2');
   });
 });
