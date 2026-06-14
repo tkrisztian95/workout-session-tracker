@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   activeElapsedMs,
+  appendAutoLoggedSets,
   computeTimedState,
   workIntervalInfo,
   type TimedComputeParams,
 } from './timedSession';
-import type { TimedConfig } from './types';
+import type { ActiveSession, TimedConfig } from './types';
 
 const TABATA: TimedConfig = { mode: 'tabata', workSec: 20, restSec: 10, rounds: 8 };
 
@@ -119,5 +120,46 @@ describe('pause / resume and refresh reconstruction', () => {
       now: 46_000,
     };
     expect(computeTimedState(params)).toEqual(computeTimedState({ ...params }));
+  });
+});
+
+describe('appendAutoLoggedSets — idempotent auto-logging', () => {
+  function circuitSession(): ActiveSession {
+    return {
+      id: 's',
+      startedAt: '2026-01-01T08:00:00Z',
+      totalPausedMs: 0,
+      timed: { mode: 'tabata', workSec: 20, restSec: 10, rounds: 2 },
+      exercises: [
+        { id: 'a', name: 'A', type: 'sets-duration' },
+        { id: 'b', name: 'B', type: 'sets-duration' },
+      ],
+    };
+  }
+
+  it('distributes completed intervals across the circuit as logged sets', () => {
+    const next = appendAutoLoggedSets(circuitSession(), 3, 20, 'NOW')!;
+    // intervals 0,1,2 → A,B,A
+    expect(next.exercises[0].loggedSets).toHaveLength(2);
+    expect(next.exercises[1].loggedSets).toHaveLength(1);
+    expect(next.exercises[0].loggedSets![0]).toEqual({
+      weight: 0,
+      reps: 0,
+      seconds: 20,
+      loggedAt: 'NOW',
+    });
+  });
+
+  it('only logs the delta beyond what is already recorded', () => {
+    const after3 = appendAutoLoggedSets(circuitSession(), 3, 20, 'NOW')!;
+    const after4 = appendAutoLoggedSets(after3, 4, 20, 'LATER')!;
+    expect(after4.exercises[0].loggedSets).toHaveLength(2);
+    expect(after4.exercises[1].loggedSets).toHaveLength(2);
+    expect(after4.exercises[1].loggedSets![1].loggedAt).toBe('LATER');
+  });
+
+  it('returns null when nothing new to log (refresh-safe)', () => {
+    const after3 = appendAutoLoggedSets(circuitSession(), 3, 20, 'NOW')!;
+    expect(appendAutoLoggedSets(after3, 3, 20, 'AGAIN')).toBeNull();
   });
 });

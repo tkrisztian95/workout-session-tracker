@@ -12,7 +12,7 @@
 // Only Tabata is implemented in this slice; AMRAP / EMOM / For-Time share the
 // same TimedConfig and slot in here later.
 
-import type { TimedConfig } from './types';
+import type { ActiveSession, TimedConfig } from './types';
 
 export type TimedPhase = 'work' | 'rest' | 'done';
 
@@ -130,6 +130,40 @@ function computeTabata(config: TimedConfig, circuitLength: number, elapsed: numb
     completedWorkIntervals,
     totalWorkIntervals,
   };
+}
+
+/**
+ * Idempotently append auto-logged sets for every work interval the engine has
+ * completed but that isn't yet recorded on the session. One work interval →
+ * one `LoggedSet` on the active circuit exercise (round → set, work time →
+ * `seconds`). The "already logged" count is read from the session's own
+ * `loggedSets`, so a page refresh re-derives the same total and never double
+ * logs. Returns the updated session, or `null` when nothing new to log.
+ */
+export function appendAutoLoggedSets(
+  session: ActiveSession,
+  completedWorkIntervals: number,
+  workSec: number,
+  now: string,
+): ActiveSession | null {
+  const alreadyLogged = session.exercises.reduce((n, ex) => n + (ex.loggedSets?.length ?? 0), 0);
+  if (completedWorkIntervals <= alreadyLogged) return null;
+
+  const exercises = session.exercises.map((ex) => ({
+    ...ex,
+    loggedSets: ex.loggedSets ? [...ex.loggedSets] : [],
+  }));
+  const circuitLength = Math.max(1, exercises.length);
+  for (let i = alreadyLogged; i < completedWorkIntervals; i++) {
+    const { circuitIndex } = workIntervalInfo(i, circuitLength);
+    exercises[circuitIndex].loggedSets!.push({
+      weight: 0,
+      reps: 0,
+      seconds: workSec,
+      loggedAt: now,
+    });
+  }
+  return { ...session, exercises };
 }
 
 /** Derive the full engine state for a timed session at instant `now`. */

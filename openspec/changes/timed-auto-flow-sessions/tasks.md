@@ -20,9 +20,9 @@
 
 ## 3. React integration + auto-log wiring
 
-- [ ] 3.1 Add `useTimedEngine` hook that ticks (rAF/`setInterval`) only to re-render; reads time from timestamps
-- [ ] 3.2 Wire auto-log intents to append `LoggedSet { weight: 0, reps: 0, seconds, loggedAt }` to the active exercise and persist via `setActiveSession`
-- [ ] 3.3 Ensure `buildSessionTimeline`, stats, and history consume auto-logged timed sessions unchanged (verify, no rewrites)
+- [x] 3.1 Add `useTimedEngine` hook (`src/lib/useTimedEngine.ts`) that ticks `setInterval` only to re-render and re-derives time from timestamps each render; stops ticking while paused or done
+- [x] 3.2 Auto-log wiring: pure idempotent `appendAutoLoggedSets()` appends `LoggedSet { weight: 0, reps: 0, seconds, loggedAt }` per completed work interval to the active circuit exercise; persisted via `onUpdate`→`setActiveSession` from the timed view (group 4). Refresh-safe — derives the already-logged count from the session itself
+- [x] 3.3 Verified `buildSessionTimeline` / `statsUtils` already iterate `loggedSets` and handle `seconds`; weight-progression correctly skips weight-0 sets. Timed auto-logged sets consumed unchanged — no rewrites
 
 ## 4. Live timed session UI
 
