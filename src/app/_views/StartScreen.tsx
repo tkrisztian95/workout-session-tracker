@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, ClipboardList, Dumbbell, Trophy } from 'lucide-react';
+import { ChevronRight, ClipboardList, Dumbbell, Timer, Trophy } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import { Button, HeadingXL, LabelOverline, Page, PageHeader } from '@/components/ui';
@@ -11,6 +11,7 @@ export function StartScreen({
   hasPlans,
   onFollowPlan,
   onFreeSession,
+  onTimedWorkout,
   onCreatePlan,
   greeting,
   lastSessionInfo,
@@ -21,6 +22,7 @@ export function StartScreen({
   hasPlans: boolean;
   onFollowPlan: () => void;
   onFreeSession: () => void;
+  onTimedWorkout: () => void;
   onCreatePlan: () => void;
   greeting?: string;
   lastSessionInfo: { relativeLabel: string; sessionName: string } | null;
@@ -114,6 +116,13 @@ export function StartScreen({
             </Button>
           </>
         )}
+
+        <button
+          onClick={onTimedWorkout}
+          className="flex items-center justify-center gap-2 text-muted text-sm font-medium py-2 active:text-secondary transition-colors"
+        >
+          <Timer className="w-4 h-4" /> {t.home_timed_workout}
+        </button>
       </div>
 
       <BottomNav active="home" />

@@ -21,18 +21,27 @@ import ConsentModal from '@/components/ConsentModal';
 import AchievementCelebration from '@/components/AchievementCelebration';
 import { useAchievements } from '@/hooks/useAchievements';
 import { useTranslations } from '@/lib/locale-context';
-import type { ActiveSession, Exercise, PlanDay, WorkoutPlan, WorkoutSession } from '@/lib/types';
+import type {
+  ActiveSession,
+  Exercise,
+  PlanDay,
+  TimedConfig,
+  WorkoutPlan,
+  WorkoutSession,
+} from '@/lib/types';
 import type { Muscle } from '@/lib/muscles';
 import { StartScreen } from './_views/StartScreen';
 import { PlanPickerScreen } from './_views/PlanPickerScreen';
 import { DayPickerScreen } from './_views/DayPickerScreen';
 import { OptionalPickerScreen } from './_views/OptionalPickerScreen';
 import { SessionView } from './_views/SessionView';
+import { TimedSessionView } from './_views/TimedSessionView';
+import { TimedConfigScreen } from './_views/TimedConfigScreen';
 import { calendarDaysAgo } from './_views/helpers';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
 
-type Step = 'start' | 'pick-plan' | 'pick-day' | 'pick-optionals' | 'session';
+type Step = 'start' | 'pick-plan' | 'pick-day' | 'pick-optionals' | 'config-timed' | 'session';
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
@@ -133,6 +142,19 @@ export default function HomePage() {
     setStep('session');
   };
 
+  const startTimedSession = (config: TimedConfig, exercises: Omit<Exercise, 'id'>[]) => {
+    const session: ActiveSession = {
+      id: crypto.randomUUID(),
+      startedAt: new Date().toISOString(),
+      exercises: exercises.map((ex) => ({ ...ex, id: crypto.randomUUID() })),
+      totalPausedMs: 0,
+      timed: config,
+    };
+    setActiveSession(session);
+    setActive(session);
+    setStep('session');
+  };
+
   const handleSessionUpdate = (session: ActiveSession) => {
     setActiveSession(session);
     setActive(session);
@@ -148,6 +170,7 @@ export default function HomePage() {
       planId: activeSession.planId,
       planDayId: activeSession.planDayId,
       rating,
+      timed: activeSession.timed,
     });
     clearActiveSession();
     setActive(null);
@@ -167,6 +190,16 @@ export default function HomePage() {
   if (!mounted) return null;
 
   if (step === 'session' && activeSession) {
+    if (activeSession.timed) {
+      return (
+        <TimedSessionView
+          session={activeSession}
+          onUpdate={handleSessionUpdate}
+          onFinish={handleFinish}
+          onDiscard={handleDiscard}
+        />
+      );
+    }
     return (
       <SessionView
         session={activeSession}
@@ -175,6 +208,10 @@ export default function HomePage() {
         onDiscard={handleDiscard}
       />
     );
+  }
+
+  if (step === 'config-timed') {
+    return <TimedConfigScreen onStart={startTimedSession} onBack={() => setStep('start')} />;
   }
 
   if (step === 'pick-plan') {
@@ -267,6 +304,7 @@ export default function HomePage() {
           setStep('pick-plan');
         }}
         onFreeSession={startFreeSession}
+        onTimedWorkout={() => setStep('config-timed')}
         onCreatePlan={() => router.push('/plans/new')}
         greeting={greeting}
         lastSessionInfo={lastSessionInfo}

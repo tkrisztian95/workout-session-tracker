@@ -26,20 +26,20 @@
 
 ## 4. Live timed session UI
 
-- [ ] 4.1 Run `gitnexus_impact` on `SessionView`; gate all timed UI behind the `session.timed` discriminant so the standard path is untouched
-- [ ] 4.2 Build the timed live view: large phase clock (count-down/count-up), work/rest phase indicator, round/interval tracker
-- [ ] 4.3 AMRAP round-tap control and For Time Done button wired to the engine
-- [ ] 4.4 Visual transition cue on every phase change; opt-in chime/vibration gated by the shared cue setting (task 4.6)
-- [ ] 4.6 Add the shared cue preference (chime/vibration opt-in) to Profile/Settings, persisted in localStorage; `emitCue()` reads it; document the key in `docs/data-structure.md`. Authored so issue #49's rest timer reuses it
-- [ ] 4.5 Use `/ui-ux-pro-max` for the timed live view before implementing; verify states with Playwright MCP (work, rest, done, paused)
+- [x] 4.1 Gate all timed UI behind the `session.timed` discriminant — `page.tsx` routes timed sessions to `TimedSessionView`, leaving `SessionView` (standard path) untouched. _GitNexus MCP not connected; SessionView verified unmodified_
+- [x] 4.2 Build the timed live view (`TimedSessionView`): large phase countdown clock, work/rest phase indicator (color + label), round tracker, active circuit exercise, pause/resume, finish-on-done
+- [ ] 4.3 AMRAP round-tap control and For Time Done button wired to the engine — _deferred with those modes (later slice)_
+- [ ] 4.4 Visual transition cue done (work=brand, rest=warning, color + label per phase); opt-in chime/vibration gated by the shared cue setting — _audio/vibration deferred with task 4.6_
+- [ ] 4.6 Add the shared cue preference (chime/vibration opt-in) to Profile/Settings, persisted in localStorage; `emitCue()` reads it; document the key in `docs/data-structure.md`. Authored so issue #49's rest timer reuses it — _deferred (later slice)_
+- [ ] 4.5 Use `/ui-ux-pro-max` for the timed live view; verify states with Playwright MCP (work, rest, done, paused) — _Playwright verify pending (task 7.1)_
 
 ## 5. Ad-hoc quick start
 
-- [ ] 5.1 Add "Timed workout" entry to the session start screen alongside plan/free
-- [ ] 5.2 Build the configuration flow: mode picker + per-mode parameter fields (defaults: Tabata 20/10/8; For Time optional `capSec`) with irrelevant fields hidden
-- [ ] 5.3 Circuit selection reusing the existing catalog/picker; preserve order as the circuit sequence (one round = one pass)
-- [ ] 5.4 `startTimedSession(config, exercises)` creates an active session with `timed` set, no plan refs, and starts the engine
-- [ ] 5.5 Validate config per mode before launch
+- [x] 5.1 Add "Timed workout" entry to the session start screen alongside plan/free
+- [x] 5.2 Build the configuration flow (`TimedConfigScreen`): Tabata parameter fields (defaults 20/10/8). _Mode picker + other-mode params (incl. For Time `capSec`) land with those modes; Tabata is the only mode so far_
+- [x] 5.3 Circuit selection reusing `AddExerciseModal`; order preserved as the circuit sequence (one round = one pass)
+- [x] 5.4 `startTimedSession(config, exercises)` creates an active session with `timed` set, no plan refs, and starts the engine
+- [x] 5.5 Validate config before launch: clamp work/rounds ≥ 1, rest ≥ 0; require ≥ 1 circuit exercise (Start disabled otherwise)
 
 ## 6. Plan-defined timed blocks
 
