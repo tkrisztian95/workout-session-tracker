@@ -443,6 +443,8 @@
   "ai_days_per_week_label": "Tage pro Woche",
   "ai_goal_label": "Fitnessziel",
   "ai_goal_options": ["Muskelaufbau", "Abnehmen", "Ausdauer verbessern", "Fitness erhalten"],
+  "ai_notes_label": "Noch etwas? (optional)",
+  "ai_notes_placeholder": "z. B. nur Kettlebell, kein Überkopfdrücken, Training zu Hause...",
   "ai_generate_button": "Generieren",
   "ai_generating": "Dein Plan wird erstellt...",
   "ai_training_day": "Trainingstag",
