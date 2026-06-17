@@ -95,6 +95,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
   const [focus, setFocus] = useState('');
   const [daysPerWeek, setDaysPerWeek] = useState('');
   const [goal, setGoal] = useState('');
+  const [notes, setNotes] = useState('');
   const generationStartRef = useRef<number>(0);
 
   const handleGenerate = async () => {
@@ -109,12 +110,14 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
       focus: focus || undefined,
       daysPerWeek: daysPerWeek || undefined,
       goal: goal || undefined,
+      notes: notes.trim() || undefined,
     };
     posthog?.capture('ai_plan_generation_started', {
       model: config.model,
       focus: focus || null,
       days_per_week: daysPerWeek || null,
       goal: goal || null,
+      has_notes: notes.trim().length > 0,
     });
     generationStartRef.current = Date.now();
     try {
@@ -177,6 +180,7 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
     setFocus('');
     setDaysPerWeek('');
     setGoal('');
+    setNotes('');
     setView('config');
   };
 
@@ -234,6 +238,17 @@ export default function AiPlanSuggestionModal({ onApply, onClose }: AiPlanSugges
                   labels={t.ai_goal_options}
                   value={goal}
                   onChange={setGoal}
+                />
+              </div>
+              <div>
+                <p className="text-dim text-xs mb-1.5">{t.ai_notes_label}</p>
+                <textarea
+                  id="ai-plan-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder={t.ai_notes_placeholder}
+                  rows={3}
+                  className="w-full rounded-2xl bg-elevated border border-border px-4 py-3 text-sm text-foreground placeholder:text-dim resize-none focus:outline-none focus:border-brand"
                 />
               </div>
             </div>

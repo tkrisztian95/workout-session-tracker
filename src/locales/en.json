@@ -447,6 +447,8 @@
   "ai_days_per_week_label": "Days per week",
   "ai_goal_label": "Fitness goal",
   "ai_goal_options": ["Build muscle", "Lose weight", "Improve cardio", "Maintain fitness"],
+  "ai_notes_label": "Anything else? (optional)",
+  "ai_notes_placeholder": "e.g. kettlebell only, no overhead pressing, train at home...",
   "ai_generate_button": "Generate",
   "ai_generating": "Generating your plan...",
   "ai_training_day": "training day",

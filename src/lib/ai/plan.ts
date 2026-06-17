@@ -101,6 +101,8 @@ export type AiPlanPreferences = {
   focus?: string;
   daysPerWeek?: string;
   goal?: string;
+  /** Free-form notes, e.g. "kettlebell only", "no overhead pressing". */
+  notes?: string;
 };
 
 export function buildPlanSuggestionPrompt(ctx: AiContext, preferences?: AiPlanPreferences): string {
@@ -116,6 +118,7 @@ export function buildPlanSuggestionPrompt(ctx: AiContext, preferences?: AiPlanPr
   if (preferences?.daysPerWeek)
     goalParts.push(`Training days per week: ${preferences.daysPerWeek}`);
   if (preferences?.goal) goalParts.push(`Goal: ${preferences.goal}`);
+  if (preferences?.notes?.trim()) goalParts.push(`Additional notes: ${preferences.notes.trim()}`);
 
   const goalSection =
     goalParts.length > 0 ? `My goals for this plan:\n${goalParts.join('\n')}\n\n` : '';

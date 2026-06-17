@@ -427,6 +427,8 @@
   "ai_days_per_week_label": "Napok hetente",
   "ai_goal_label": "Fitness cél",
   "ai_goal_options": ["Izomépítés", "Fogyás", "Kardió fejlesztés", "Forma megőrzés"],
+  "ai_notes_label": "Bármi más? (opcionális)",
+  "ai_notes_placeholder": "pl. csak kettlebell, fej feletti nyomás nélkül, otthoni edzés...",
   "ai_generate_button": "Generálás",
   "ai_generating": "Terv generálása...",
   "ai_training_day": "edzésnap",
