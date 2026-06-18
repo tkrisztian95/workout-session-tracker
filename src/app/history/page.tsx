@@ -12,6 +12,7 @@ import { WorkoutHistoryDayGroup } from '@/components/WorkoutHistoryCard';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
 import type { MuscleGroup } from '@/lib/muscles';
+import { localizeExerciseName } from '@/lib/exerciseCatalog';
 import {
   availableExerciseNames,
   filterSessions,
@@ -225,7 +226,11 @@ function HistoryContent() {
               />
             ))}
             {filters.exercises.map((name) => (
-              <FilterPill key={name} label={name} onClear={() => clearExercise(name)} />
+              <FilterPill
+                key={name}
+                label={localizeExerciseName(t, name)}
+                onClear={() => clearExercise(name)}
+              />
             ))}
           </div>
         )}

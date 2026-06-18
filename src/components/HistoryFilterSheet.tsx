@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { ModalSheet, Button, Input, FieldLabel } from '@/components/ui';
 import { ALL_MUSCLE_GROUPS, type MuscleGroup } from '@/lib/muscles';
+import { localizeExerciseName } from '@/lib/exerciseCatalog';
 import {
   normalizeExerciseName,
   type HistoryFilters,
@@ -70,10 +71,18 @@ export default function HistoryFilterSheet({
     free: t.history_filter_type_free,
   };
 
+  // Pair each stored name with its active-locale label, then search/sort by label.
+  const exerciseOptions = availableExercises
+    .map((name) => ({ name, label: localizeExerciseName(t, name) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
   const query = normalizeExerciseName(search);
   const filteredExercises = query
-    ? availableExercises.filter((name) => normalizeExerciseName(name).includes(query))
-    : availableExercises;
+    ? exerciseOptions.filter(
+        (o) =>
+          normalizeExerciseName(o.label).includes(query) ||
+          normalizeExerciseName(o.name).includes(query),
+      )
+    : exerciseOptions;
   const selectedKeys = new Set(exercises.map(normalizeExerciseName));
 
   return (
@@ -143,7 +152,7 @@ export default function HistoryFilterSheet({
               {filteredExercises.length === 0 ? (
                 <p className="text-sm text-muted">{t.history_filter_exercises_no_results}</p>
               ) : (
-                filteredExercises.map((name) => {
+                filteredExercises.map(({ name, label }) => {
                   const active = selectedKeys.has(normalizeExerciseName(name));
                   return (
                     <button
@@ -157,7 +166,7 @@ export default function HistoryFilterSheet({
                           : 'bg-elevated border-transparent text-secondary active:bg-border',
                       ].join(' ')}
                     >
-                      {name}
+                      {label}
                     </button>
                   );
                 })
