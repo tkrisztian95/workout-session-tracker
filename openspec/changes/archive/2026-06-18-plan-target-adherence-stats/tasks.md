@@ -24,6 +24,6 @@
 
 ## 5. Verify
 
-- [ ] 5.1 Run `npm run lint` and `npm test` green
-- [ ] 5.2 Visual check via Playwright/Chrome MCP: a profile with plan-linked sessions shows the section + trend; a profile with only ad-hoc sessions hides it; switching time ranges updates it
-- [ ] 5.3 Confirm no persisted data shapes changed (no `docs/data-structure.md` update needed)
+- [x] 5.1 Run `npm run lint` and `npm test` green (also `tsc --noEmit` and `next build` — all pass; 182 tests)
+- [~] 5.2 Visual check via Playwright/Chrome MCP — not possible in this remote environment (no browser MCP, and seeding plan-linked sessions needs a live browser). Covered instead by `getPlanAdherenceProgression` unit tests (hide-when-empty, optional/extra ignored, range filtering) plus a green production build of `/stats`.
+- [x] 5.3 Confirm no persisted data shapes changed (no `docs/data-structure.md` update needed)
