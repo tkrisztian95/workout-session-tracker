@@ -1,15 +1,26 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CalendarDays, Clock, Plus, X } from 'lucide-react';
+import { CalendarDays, Clock, Plus, SlidersHorizontal, X } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import ActivityTiles from '@/components/ActivityTiles';
 import NewHistorySessionSheet from '@/components/NewHistorySessionSheet';
 import DateRangePicker from '@/components/DateRangePicker';
+import HistoryFilterSheet from '@/components/HistoryFilterSheet';
 import { WorkoutHistoryDayGroup } from '@/components/WorkoutHistoryCard';
 import { getSessions, getPlans } from '@/lib/storage';
 import type { WorkoutSession, WorkoutPlan } from '@/lib/types';
+import type { MuscleGroup } from '@/lib/muscles';
+import {
+  availableExerciseNames,
+  filterSessions,
+  hasActiveFilters,
+  nonDateFilterCount,
+  normalizeExerciseName,
+  EMPTY_FILTERS,
+  type HistoryFilters,
+} from '@/lib/historyFilters';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import { formatMonthBucket, getSessionBucket, type RelativeBucketKey } from '@/lib/sessionUtils';
 import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
@@ -33,6 +44,23 @@ function formatRangeLabel(from: string, to: string, locale: string): string {
   return from === to ? fmt(from) : `${fmt(from)} – ${fmt(to)}`;
 }
 
+// ─── Filter pill ───────────────────────────────────────────────────────────────
+
+function FilterPill({ label, onClear }: { label: string; onClear: () => void }) {
+  return (
+    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand/15 text-brand text-sm font-medium">
+      {label}
+      <button
+        onClick={onClear}
+        aria-label={`Clear ${label} filter`}
+        className="ml-0.5 -mr-1 p-0.5 rounded-full active:bg-brand/30 transition-colors"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </span>
+  );
+}
+
 function HistoryContent() {
   const t = useTranslations();
   const { locale } = useLocale();
@@ -48,13 +76,13 @@ function HistoryContent() {
   const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
   const [newSessionId, setNewSessionId] = useState<string | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from: string | null; to: string | null }>({
-    from: null,
-    to: null,
-  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<HistoryFilters>(EMPTY_FILTERS);
 
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollTargetRef = useRef<HTMLDivElement>(null);
+
+  const availableExercises = useMemo(() => availableExerciseNames(sessions), [sessions]);
 
   function handleSessionSaved(sessionId: string) {
     setSessions(loadSessions());
@@ -80,8 +108,10 @@ function HistoryContent() {
     return acc;
   }, {});
 
+  const filteredSessions = filterSessions(sessions, filters);
+
   const grouped: { date: string; sessions: WorkoutSession[] }[] = [];
-  for (const session of sessions) {
+  for (const session of filteredSessions) {
     const date = session.completedAt.slice(0, 10);
     const last = grouped[grouped.length - 1];
     if (last && last.date === date) {
@@ -94,13 +124,8 @@ function HistoryContent() {
     group.sessions.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
   }
 
-  const visibleGroups =
-    dateRange.from && dateRange.to
-      ? grouped.filter((g) => g.date >= dateRange.from! && g.date <= dateRange.to!)
-      : grouped;
-
   const now = new Date();
-  const bucketedGroups = visibleGroups.map((group) => {
+  const bucketedGroups = grouped.map((group) => {
     const bucket = getSessionBucket(group.sessions[0].completedAt, now);
     const label = bucket.relativeKey
       ? t[RELATIVE_BUCKET_LABEL_KEY[bucket.relativeKey]]
@@ -109,7 +134,30 @@ function HistoryContent() {
   });
 
   const rangeLabel =
-    dateRange.from && dateRange.to ? formatRangeLabel(dateRange.from, dateRange.to, locale) : null;
+    filters.dateFrom && filters.dateTo
+      ? formatRangeLabel(filters.dateFrom, filters.dateTo, locale)
+      : null;
+  const extraFilterCount = nonDateFilterCount(filters);
+  const anyFilterActive = hasActiveFilters(filters);
+
+  const sessionTypeLabel =
+    filters.sessionType === 'plan'
+      ? t.history_filter_type_plan
+      : filters.sessionType === 'free'
+        ? t.history_filter_type_free
+        : null;
+
+  function clearMuscleGroup(group: MuscleGroup) {
+    setFilters((f) => ({ ...f, muscleGroups: f.muscleGroups.filter((g) => g !== group) }));
+  }
+
+  function clearExercise(name: string) {
+    const key = normalizeExerciseName(name);
+    setFilters((f) => ({
+      ...f,
+      exercises: f.exercises.filter((e) => normalizeExerciseName(e) !== key),
+    }));
+  }
 
   return (
     <Page className="pb-20">
@@ -117,6 +165,23 @@ function HistoryContent() {
         <div className="flex items-center justify-between">
           <HeadingXL>{t.history_title}</HeadingXL>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              aria-label={t.history_filter_title}
+              className={[
+                'relative w-11 h-11 rounded-full flex items-center justify-center border transition-colors',
+                extraFilterCount > 0
+                  ? 'bg-brand border-brand text-white'
+                  : 'bg-surface border-border active:bg-elevated',
+              ].join(' ')}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              {extraFilterCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-brand text-[11px] font-bold flex items-center justify-center ring-2 ring-base">
+                  {extraFilterCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setIsPickerOpen(true)}
               aria-label="Filter by date range"
@@ -138,18 +203,30 @@ function HistoryContent() {
             </button>
           </div>
         </div>
-        {rangeLabel && (
-          <div className="flex items-center gap-2 mt-2">
-            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand/15 text-brand text-sm font-medium">
-              {rangeLabel}
-              <button
-                onClick={() => setDateRange({ from: null, to: null })}
-                aria-label="Clear date range filter"
-                className="ml-0.5 -mr-1 p-0.5 rounded-full active:bg-brand/30 transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </span>
+        {anyFilterActive && (
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {rangeLabel && (
+              <FilterPill
+                label={rangeLabel}
+                onClear={() => setFilters((f) => ({ ...f, dateFrom: null, dateTo: null }))}
+              />
+            )}
+            {sessionTypeLabel && (
+              <FilterPill
+                label={sessionTypeLabel}
+                onClear={() => setFilters((f) => ({ ...f, sessionType: 'all' }))}
+              />
+            )}
+            {filters.muscleGroups.map((group) => (
+              <FilterPill
+                key={group}
+                label={t.muscle_group_labels[group]}
+                onClear={() => clearMuscleGroup(group)}
+              />
+            ))}
+            {filters.exercises.map((name) => (
+              <FilterPill key={name} label={name} onClear={() => clearExercise(name)} />
+            ))}
           </div>
         )}
       </PageHeader>
@@ -165,7 +242,7 @@ function HistoryContent() {
             title={t.history_no_sessions_title}
             subtitle={t.history_no_sessions_subtitle}
           />
-        ) : visibleGroups.length === 0 ? (
+        ) : bucketedGroups.length === 0 ? (
           <EmptyState
             icon={<Clock className="w-9 h-9 text-border" />}
             title={t.history_filter_no_results_title}
@@ -208,16 +285,40 @@ function HistoryContent() {
       <DateRangePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
-        value={dateRange}
+        value={{ from: filters.dateFrom, to: filters.dateTo }}
         onApply={(from: string, to: string) => {
-          setDateRange({ from, to });
+          setFilters((f) => ({ ...f, dateFrom: from, dateTo: to }));
           setIsPickerOpen(false);
         }}
         onClear={() => {
-          setDateRange({ from: null, to: null });
+          setFilters((f) => ({ ...f, dateFrom: null, dateTo: null }));
           setIsPickerOpen(false);
         }}
         sessions={sessions}
+      />
+
+      <HistoryFilterSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        value={{
+          sessionType: filters.sessionType,
+          muscleGroups: filters.muscleGroups,
+          exercises: filters.exercises,
+        }}
+        availableExercises={availableExercises}
+        onApply={(next) => {
+          setFilters((f) => ({ ...f, ...next }));
+          setIsFilterOpen(false);
+        }}
+        onClear={() => {
+          setFilters((f) => ({
+            ...f,
+            sessionType: 'all',
+            muscleGroups: [],
+            exercises: [],
+          }));
+          setIsFilterOpen(false);
+        }}
       />
     </Page>
   );
