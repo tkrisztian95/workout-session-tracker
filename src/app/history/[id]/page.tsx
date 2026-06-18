@@ -279,7 +279,7 @@ export default function SessionDetailPage() {
         </div>
       ) : (
         <TabsProvider activeId={activeTab} onChange={(id) => setActiveTab(id as DetailTab)}>
-          <TabList tabs={tabItems} className="px-6" />
+          <TabList tabs={tabItems} className="mx-6" />
           <div className="flex-1 px-6 pb-6 pt-4 overflow-y-auto">
             <TabPanels tabs={tabItems} />
           </div>
