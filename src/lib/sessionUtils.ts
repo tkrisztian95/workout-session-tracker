@@ -1,5 +1,5 @@
 import type { Muscle } from './muscles';
-import type { Exercise, LoggedSet, WorkoutSession } from './types';
+import type { Exercise, LoggedSet, PlanExercise, WorkoutSession } from './types';
 
 /** Emoji for each 1–5 session rating, in ascending order. Index 0 = rating 1. */
 export const RATING_EMOJI = ['😩', '😕', '😐', '💪', '🔥'] as const;
@@ -112,6 +112,63 @@ export function formatExerciseDetail(ex: {
     base = d >= 60 ? `${Math.round(d / 60)} min` : `${d}s`;
   }
   return ex.weightKg ? `${base} · ${ex.weightKg} kg` : base;
+}
+
+// ─── Plan comparison classification ────────────────────────────────────────────
+
+/**
+ * How a session's performed exercise compares to its planned target. Excludes
+ * the `extra` (unplanned/ad-hoc) case — that has no planned baseline and is
+ * handled by callers that pair an actual exercise with no plan entry.
+ */
+export type PlanComparisonStatus = 'overdone' | 'matched' | 'underperformed' | 'missed';
+
+/**
+ * Sets a performed exercise contributes toward its plan target. Mirrors the
+ * active exercise card's `qualifyingSetCount`: for a sets-reps exercise with a
+ * weight target, every set that hits the target weight counts — including
+ * rep-short `partial` sets — while sub-target `warmup` sets don't, so warmups
+ * no longer inflate the count. Other set types (and weightless exercises) count
+ * every logged set. With no logged sets, a completed exercise contributes its
+ * prescribed `sets`.
+ */
+export function actualSetsForPlan(ex: Exercise): number {
+  if (ex.dismissed) return 0;
+  if (ex.loggedSets && ex.loggedSets.length > 0) {
+    if (ex.type === 'sets-reps' && ex.weightKg != null) {
+      return classifyLoggedSets(ex).filter((c) => countsTowardSetsGoal(c.status)).length;
+    }
+    return ex.loggedSets.length;
+  }
+  if (ex.completed && typeof ex.sets === 'number') return ex.sets;
+  return 0;
+}
+
+/** Prescribed set count for a planned exercise (explicit `sets`, else the length of a per-set rep scheme). */
+export function plannedSetsForPlan(ex: PlanExercise): number {
+  if (typeof ex.sets === 'number') return ex.sets;
+  if (ex.repsPerSet && ex.repsPerSet.length > 0) return ex.repsPerSet.length;
+  return 0;
+}
+
+/**
+ * Classifies a planned exercise against the matching performed exercise (if
+ * any). Returns the same outcome the per-session plan comparison shows for a
+ * planned row: `missed` when nothing qualifying was performed, `overdone` /
+ * `underperformed` when the qualifying set count is above / below the prescribed
+ * count, and `matched` when they are equal. This is the single source of truth
+ * shared by `SessionPlanComparison` and the stats adherence aggregate.
+ */
+export function classifyPlannedExercise(
+  planned: PlanExercise,
+  actual: Exercise | undefined,
+): PlanComparisonStatus {
+  const plannedSets = plannedSetsForPlan(planned);
+  const actualSets = actual ? actualSetsForPlan(actual) : 0;
+  if (actualSets === 0) return 'missed';
+  if (actualSets > plannedSets) return 'overdone';
+  if (actualSets < plannedSets) return 'underperformed';
+  return 'matched';
 }
 
 export function formatSessionDate(

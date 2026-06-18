@@ -23,11 +23,12 @@ import {
   getExerciseWeightProgression,
   getGroupDistribution,
   getMuscleDistribution,
+  getPlanAdherenceProgression,
   filterSessionsByRange,
   type TimeRange,
 } from '@/lib/statsUtils';
 import type { Muscle, MuscleGroup } from '@/lib/muscles';
-import type { WorkoutSession } from '@/lib/types';
+import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
 import { EmptyState, HeadingXL, Page, PageHeader } from '@/components/ui';
 import {
@@ -251,6 +252,119 @@ function CategoryRadarChart({ sessions }: { sessions: WorkoutSession[] }) {
   );
 }
 
+// ─── Plan Adherence ────────────────────────────────────────────────────────────
+
+const adherenceChartConfig = {
+  score: {
+    label: 'Adherence (%)',
+    theme: { light: 'var(--color-brand)', dark: 'var(--color-brand)' },
+  },
+} satisfies ChartConfig;
+
+function PlanAdherence({
+  sessions,
+  plans,
+  range,
+}: {
+  sessions: WorkoutSession[];
+  plans: WorkoutPlan[];
+  range: TimeRange;
+}) {
+  const t = useTranslations();
+  const { points, average } = useMemo(
+    () => getPlanAdherenceProgression(sessions, plans, range),
+    [sessions, plans, range],
+  );
+
+  const trend = useMemo(() => {
+    if (points.length < 2) return 'flat' as const;
+    const prev = points[points.length - 2].score;
+    const curr = points[points.length - 1].score;
+    if (curr > prev) return 'up' as const;
+    if (curr < prev) return 'down' as const;
+    return 'flat' as const;
+  }, [points]);
+
+  // Nothing to show unless at least one plan-linked session in range was scored.
+  if (points.length === 0 || average == null) return null;
+
+  const chartData = points.map((p) => ({
+    date: new Date(p.date).toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+    score: p.score,
+  }));
+
+  return (
+    <section>
+      <h2 className="text-foreground font-semibold text-base mb-3">{t.stats_adherence_title}</h2>
+      <div className="rounded-2xl bg-surface border border-border p-4">
+        <div className="flex items-end justify-between mb-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-muted text-xs font-medium uppercase tracking-wide">
+              {t.stats_adherence_avg_label}
+            </p>
+            <p className="text-foreground text-2xl font-bold font-condensed leading-none">
+              {average}
+              <span className="text-sm text-secondary font-normal ml-1">%</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {trend === 'up' && (
+              <>
+                <TrendingUp className="w-4 h-4 text-success" />
+                <span className="text-xs text-success">{t.stats_volume_trend_up}</span>
+              </>
+            )}
+            {trend === 'down' && (
+              <>
+                <TrendingDown className="w-4 h-4 text-danger" />
+                <span className="text-xs text-danger">{t.stats_volume_trend_down}</span>
+              </>
+            )}
+            {trend === 'flat' && (
+              <>
+                <Minus className="w-4 h-4 text-muted" />
+                <span className="text-xs text-muted">{t.stats_volume_trend_flat}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <ChartContainer config={adherenceChartConfig} className="h-[160px] w-full">
+          <LineChart data={chartData} margin={{ top: 8, right: 4, left: -20, bottom: 0 }}>
+            <CartesianGrid vertical={false} strokeOpacity={0.3} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10 }}
+              interval="preserveStartEnd"
+            />
+            <YAxis
+              domain={[0, 100]}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fontSize: 10 }}
+              tickFormatter={(v) => `${v}%`}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel indicator="dot" />}
+            />
+            <Line
+              dataKey="score"
+              type="monotone"
+              stroke="var(--color-score)"
+              strokeWidth={2}
+              dot={{ r: 3, fill: 'var(--color-score)' }}
+            />
+          </LineChart>
+        </ChartContainer>
+        <p className="text-muted text-[11px] mt-2">{t.stats_adherence_subtitle}</p>
+      </div>
+    </section>
+  );
+}
+
 // ─── Range Selector ───────────────────────────────────────────────────────────
 
 const TIME_RANGES: { value: TimeRange; labelKey: keyof ReturnType<typeof useTranslations> }[] = [
@@ -307,9 +421,10 @@ export default function StatsPage() {
   const t = useTranslations();
 
   const [sessions] = useState<WorkoutSession[]>(() => getSessions());
+  const [plans] = useState<WorkoutPlan[]>(() => getPlans());
   const completedPlans = useMemo(
-    () => getPlans().filter((p) => p.status === 'completed').length,
-    [],
+    () => plans.filter((p) => p.status === 'completed').length,
+    [plans],
   );
   const [range, setRange] = useState<TimeRange>('month');
 
@@ -384,6 +499,9 @@ export default function StatsPage() {
 
             {/* Exercise Progression Table */}
             <ProgressionTable sessions={filteredSessions} allSessions={sessions} />
+
+            {/* Plan Adherence */}
+            <PlanAdherence sessions={sessions} plans={plans} range={range} />
 
             {/* Category Radar Chart */}
             <CategoryRadarChart sessions={filteredSessions} />

@@ -5,7 +5,12 @@ import { useMemo } from 'react';
 import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
 import { cn } from '@/lib/utils';
-import { classifyLoggedSets, countsTowardSetsGoal, formatExerciseDetail } from '@/lib/sessionUtils';
+import {
+  actualSetsForPlan,
+  formatExerciseDetail,
+  plannedSetsForPlan,
+  classifyPlannedExercise,
+} from '@/lib/sessionUtils';
 import type { Exercise, PlanDay, PlanExercise, WorkoutSession } from '@/lib/types';
 
 type Status = 'overdone' | 'matched' | 'underperformed' | 'missed' | 'extra';
@@ -23,43 +28,6 @@ interface ComparisonRow {
 
 function normName(s: string): string {
   return s.toLowerCase().trim();
-}
-
-function actualSetsFor(ex: Exercise): number {
-  if (ex.dismissed) return 0;
-  if (ex.loggedSets && ex.loggedSets.length > 0) {
-    // Mirror the active exercise card's `qualifyingSetCount`: for a sets-reps
-    // exercise with a weight target, every set that hits the target weight
-    // counts toward the goal — including rep-short "partial" sets — while
-    // sub-target "warmups" don't, so they no longer inflate the bar into a
-    // false "overdone". Other set types (and weightless exercises) count every
-    // logged set.
-    if (ex.type === 'sets-reps' && ex.weightKg != null) {
-      return classifyLoggedSets(ex).filter((c) => countsTowardSetsGoal(c.status)).length;
-    }
-    return ex.loggedSets.length;
-  }
-  if (ex.completed && typeof ex.sets === 'number') return ex.sets;
-  return 0;
-}
-
-function plannedSetsFor(ex: PlanExercise): number {
-  if (typeof ex.sets === 'number') return ex.sets;
-  if (ex.repsPerSet && ex.repsPerSet.length > 0) return ex.repsPerSet.length;
-  return 0;
-}
-
-function statusFor(
-  plannedSets: number,
-  actualSets: number,
-  hasPlan: boolean,
-  hasActual: boolean,
-): Status {
-  if (!hasPlan && hasActual) return 'extra';
-  if (hasPlan && actualSets === 0) return 'missed';
-  if (actualSets > plannedSets) return 'overdone';
-  if (actualSets < plannedSets) return 'underperformed';
-  return 'matched';
 }
 
 function buildRows(session: WorkoutSession, planDay: PlanDay | undefined): ComparisonRow[] {
@@ -84,15 +52,15 @@ function buildRows(session: WorkoutSession, planDay: PlanDay | undefined): Compa
     if (seen.has(key)) continue;
     seen.add(key);
     const a = actualByName.get(key);
-    const plannedSets = plannedSetsFor(p);
-    const actualSets = a ? actualSetsFor(a) : 0;
+    const plannedSets = plannedSetsForPlan(p);
+    const actualSets = a ? actualSetsForPlan(a) : 0;
     rows.push({
       key: `planned-${p.id}`,
       name: p.name,
       muscle: p.muscle,
       plannedSets,
       actualSets,
-      status: statusFor(plannedSets, actualSets, true, Boolean(a) && actualSets > 0),
+      status: classifyPlannedExercise(p, a),
       planned: p,
       actual: a,
     });
@@ -102,7 +70,7 @@ function buildRows(session: WorkoutSession, planDay: PlanDay | undefined): Compa
     const key = normName(a.name);
     if (seen.has(key)) continue;
     if (a.dismissed) continue;
-    const actualSets = actualSetsFor(a);
+    const actualSets = actualSetsForPlan(a);
     if (actualSets === 0) continue;
     seen.add(key);
     rows.push({

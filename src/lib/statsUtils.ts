@@ -1,6 +1,7 @@
-import type { WorkoutSession } from './types';
+import type { Exercise, PlanDay, PlanExercise, WorkoutPlan, WorkoutSession } from './types';
 import type { Muscle, MuscleGroup } from './muscles';
 import { MUSCLE_TO_GROUP } from './muscles';
+import { classifyPlannedExercise, plannedSetsForPlan } from './sessionUtils';
 
 export type TimeRange = '1day' | 'week' | 'month' | '90days' | 'all';
 
@@ -362,4 +363,95 @@ export function getGroupDistribution(sessions: WorkoutSession[]): GroupDistribut
   return Array.from(map.entries())
     .map(([group, count]) => ({ group, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+// ─── Plan target adherence ─────────────────────────────────────────────────────
+
+export interface AdherencePoint {
+  /** ISO `completedAt` of the scored session. */
+  date: string;
+  /** Percentage of the plan day's core exercises that met target, 0–100. */
+  score: number;
+}
+
+export interface PlanAdherenceProgression {
+  /** One point per scored plan-linked session, in chronological order. */
+  points: AdherencePoint[];
+  /** Rounded mean of the points' scores, or `null` when there are no points. */
+  average: number | null;
+}
+
+function normName(s: string): string {
+  return s.toLowerCase().trim();
+}
+
+/**
+ * Whether a planned core exercise met its target in the performed session. Uses
+ * the shared {@link classifyPlannedExercise} (on-target / overdone = met), with
+ * one stats-layer refinement: a pure-duration core exercise carries no
+ * prescribed sets and so cannot be classified on qualifying sets — it counts as
+ * met once the performed exercise was marked completed.
+ */
+function coreExerciseMet(planned: PlanExercise, actual: Exercise | undefined): boolean {
+  const status = classifyPlannedExercise(planned, actual);
+  if (status === 'matched' || status === 'overdone') return true;
+  if (plannedSetsForPlan(planned) === 0 && actual?.completed) return true;
+  return false;
+}
+
+/**
+ * Adherence score for one session against its plan day: the percentage of the
+ * day's **core** exercises that met target. Optional and ad-hoc (extra)
+ * exercises are ignored. Returns `null` when the day has no core exercises, so
+ * the session cannot be scored.
+ */
+function scoreSession(session: WorkoutSession, planDay: PlanDay): number | null {
+  const core = planDay.coreExercises;
+  if (core.length === 0) return null;
+
+  const actualByName = new Map<string, Exercise>();
+  for (const ex of session.exercises) actualByName.set(normName(ex.name), ex);
+
+  let met = 0;
+  for (const p of core) {
+    if (coreExerciseMet(p, actualByName.get(normName(p.name)))) met++;
+  }
+  return Math.round((met / core.length) * 100);
+}
+
+/**
+ * Builds the plan-adherence trend over a time range: one point per completed,
+ * in-range session that is linked to a resolvable plan day with at least one
+ * core exercise, scored by {@link scoreSession}, plus the rounded average. Plan
+ * days are resolved the same way the history detail page does
+ * (`plan.days.find(d => d.id === session.planDayId)`). Sessions whose plan no
+ * longer exists, that have no plan link, or whose day has no core exercises are
+ * excluded.
+ */
+export function getPlanAdherenceProgression(
+  sessions: WorkoutSession[],
+  plans: WorkoutPlan[],
+  range: TimeRange,
+): PlanAdherenceProgression {
+  const inRange = filterSessionsByRange(sessions, range).filter((s) => s.completedAt);
+  const planById = new Map(plans.map((p) => [p.id, p]));
+
+  const points: AdherencePoint[] = [];
+  for (const session of inRange) {
+    if (!session.planId || !session.planDayId) continue;
+    const planDay = planById.get(session.planId)?.days.find((d) => d.id === session.planDayId);
+    if (!planDay) continue;
+    const score = scoreSession(session, planDay);
+    if (score == null) continue;
+    points.push({ date: session.completedAt, score });
+  }
+
+  points.sort((a, b) => a.date.localeCompare(b.date));
+
+  const average =
+    points.length > 0
+      ? Math.round(points.reduce((sum, p) => sum + p.score, 0) / points.length)
+      : null;
+
+  return { points, average };
 }
