@@ -91,8 +91,7 @@ export default function HomePage() {
     setStep('session');
   };
 
-  const startPlanSession = (selectedOptionalIds: Set<string>) => {
-    if (!selectedPlan || !selectedDay) return;
+  const beginPlanSession = (plan: WorkoutPlan, day: PlanDay, selectedOptionalIds: Set<string>) => {
     const toExercise = (ex: {
       name: string;
       type: Exercise['type'];
@@ -113,24 +112,29 @@ export default function HomePage() {
       scalingNote: ex.scalingNote,
       muscle: ex.muscle,
     });
-    const sharedExercises: Exercise[] = (selectedPlan.sharedExercises ?? []).map(toExercise);
-    const coreExercises: Exercise[] = selectedDay.coreExercises.map(toExercise);
-    const optionalExercises: Exercise[] = selectedDay.optionalExercises
+    const sharedExercises: Exercise[] = (plan.sharedExercises ?? []).map(toExercise);
+    const coreExercises: Exercise[] = day.coreExercises.map(toExercise);
+    const optionalExercises: Exercise[] = day.optionalExercises
       .filter((ex) => selectedOptionalIds.has(ex.id))
       .map(toExercise);
     const session: ActiveSession = {
       id: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
       exercises: [...sharedExercises, ...coreExercises, ...optionalExercises],
-      planId: selectedPlan.id,
-      planDayId: selectedDay.id,
-      planName: selectedPlan.name,
-      planDayName: selectedDay.name,
+      planId: plan.id,
+      planDayId: day.id,
+      planName: plan.name,
+      planDayName: day.name,
       totalPausedMs: 0,
     };
     setActiveSession(session);
     setActive(session);
     setStep('session');
+  };
+
+  const startPlanSession = (selectedOptionalIds: Set<string>) => {
+    if (!selectedPlan || !selectedDay) return;
+    beginPlanSession(selectedPlan, selectedDay, selectedOptionalIds);
   };
 
   const handleSessionUpdate = (session: ActiveSession) => {
@@ -278,6 +282,12 @@ export default function HomePage() {
     const plan = plans.find((p) => p.id === planId);
     const day = plan?.days.find((d) => d.id === dayId);
     if (!plan || !day) return;
+    // Nothing to choose: start the session straight away. Otherwise route
+    // through the optional-exercise picker first.
+    if (day.optionalExercises.length === 0) {
+      beginPlanSession(plan, day, new Set());
+      return;
+    }
     setSelectedPlan(plan);
     setSelectedDay(day);
     setStep('pick-optionals');
