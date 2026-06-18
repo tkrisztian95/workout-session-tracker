@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  actualSetsForPlan,
   buildSessionTimeline,
   classifyLoggedSets,
   classifyPlannedExercise,
@@ -321,6 +322,41 @@ describe('countsTowardSetsGoal', () => {
   });
 });
 
+describe('actualSetsForPlan', () => {
+  const set = (weight: number, reps: number): LoggedSet => ({
+    weight,
+    reps,
+    loggedAt: '2026-06-07T10:00:00.000Z',
+  });
+
+  it('excludes warmups when at least one set hits the target weight', () => {
+    // 40, 50 are warmups; 60, 60 qualify → 2 counted.
+    expect(
+      actualSetsForPlan({
+        id: 'a',
+        name: 'Bench',
+        type: 'sets-reps',
+        weightKg: 60,
+        loggedSets: [set(40, 8), set(50, 8), set(60, 8), set(60, 8)],
+      }),
+    ).toBe(2);
+  });
+
+  it('counts all logged sets when none reach the target weight', () => {
+    // 4 sets at 30 kg vs a 33 kg target: none qualify, but the work was done —
+    // fall back to the 4 sets actually performed instead of reporting 0.
+    expect(
+      actualSetsForPlan({
+        id: 'a',
+        name: 'Bench',
+        type: 'sets-reps',
+        weightKg: 33,
+        loggedSets: [set(30, 8), set(30, 8), set(30, 8), set(30, 8)],
+      }),
+    ).toBe(4);
+  });
+});
+
 describe('classifyPlannedExercise', () => {
   const set = (weight: number, reps: number): LoggedSet => ({
     weight,
@@ -387,6 +423,19 @@ describe('classifyPlannedExercise', () => {
       classifyPlannedExercise(
         planned({ sets: 3, weightKg: 60 }),
         actual({ weightKg: 60, loggedSets: [set(40, 8), set(50, 8), set(60, 8)] }),
+      ),
+    ).toBe('underperformed');
+  });
+
+  it('is underperformed — not missed — when every set is below the target weight', () => {
+    // 4 sets logged at 30 kg against a 33 kg target: no set qualifies, but the
+    // exercise was performed, just underloaded. It counts the sets actually done
+    // (so the volume matches the 4 prescribed) yet stays underperformed because
+    // the load target was missed — it must not read as skipped/missed.
+    expect(
+      classifyPlannedExercise(
+        planned({ sets: 4, weightKg: 33 }),
+        actual({ weightKg: 33, loggedSets: [set(30, 8), set(30, 8), set(30, 8), set(30, 8)] }),
       ),
     ).toBe('underperformed');
   });
