@@ -167,23 +167,6 @@ function HistoryContent() {
           <HeadingXL>{t.history_title}</HeadingXL>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsFilterOpen(true)}
-              aria-label={t.history_filter_title}
-              className={[
-                'relative w-11 h-11 rounded-full flex items-center justify-center border transition-colors',
-                extraFilterCount > 0
-                  ? 'bg-brand border-brand text-white'
-                  : 'bg-surface border-border active:bg-elevated',
-              ].join(' ')}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              {extraFilterCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-brand text-[11px] font-bold flex items-center justify-center ring-2 ring-base">
-                  {extraFilterCount}
-                </span>
-              )}
-            </button>
-            <button
               onClick={() => setIsPickerOpen(true)}
               aria-label="Filter by date range"
               className={[
@@ -236,8 +219,28 @@ function HistoryContent() {
         )}
       </PageHeader>
 
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-3">
         <ActivityTiles sessionsByDate={sessionsByDate} />
+      </div>
+
+      <div className="px-6 pb-3 flex justify-end">
+        <button
+          onClick={() => setIsFilterOpen(true)}
+          aria-label={t.history_filter_title}
+          className={[
+            'relative w-11 h-11 rounded-full flex items-center justify-center border transition-colors',
+            extraFilterCount > 0
+              ? 'bg-brand border-brand text-white'
+              : 'bg-surface border-border active:bg-elevated',
+          ].join(' ')}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          {extraFilterCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-brand text-[11px] font-bold flex items-center justify-center ring-2 ring-base">
+              {extraFilterCount}
+            </span>
+          )}
+        </button>
       </div>
 
       <div className="flex-1 px-6 overflow-y-auto">
