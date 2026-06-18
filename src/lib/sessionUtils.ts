@@ -128,20 +128,47 @@ export type PlanComparisonStatus = 'overdone' | 'matched' | 'underperformed' | '
  * active exercise card's `qualifyingSetCount`: for a sets-reps exercise with a
  * weight target, every set that hits the target weight counts — including
  * rep-short `partial` sets — while sub-target `warmup` sets don't, so warmups
- * no longer inflate the count. Other set types (and weightless exercises) count
- * every logged set. With no logged sets, a completed exercise contributes its
- * prescribed `sets`.
+ * no longer inflate the count.
+ *
+ * One exception keeps a wholly underloaded exercise from looking skipped: when
+ * NO logged set reaches the target weight, the exercise was still performed —
+ * just light — so we fall back to the count of sets actually logged rather than
+ * reporting 0. (When at least one set qualifies, warmups are still excluded as
+ * normal.) The weight shortfall is surfaced separately by
+ * {@link classifyPlannedExercise} and the comparison's weight badge.
+ *
+ * Other set types (and weightless exercises) count every logged set. With no
+ * logged sets, a completed exercise contributes its prescribed `sets`.
  */
 export function actualSetsForPlan(ex: Exercise): number {
   if (ex.dismissed) return 0;
   if (ex.loggedSets && ex.loggedSets.length > 0) {
     if (ex.type === 'sets-reps' && ex.weightKg != null) {
-      return classifyLoggedSets(ex).filter((c) => countsTowardSetsGoal(c.status)).length;
+      const qualifying = classifyLoggedSets(ex).filter((c) =>
+        countsTowardSetsGoal(c.status),
+      ).length;
+      return qualifying > 0 ? qualifying : ex.loggedSets.length;
     }
     return ex.loggedSets.length;
   }
   if (ex.completed && typeof ex.sets === 'number') return ex.sets;
   return 0;
+}
+
+/**
+ * Whether a planned exercise prescribed a weight target that no performed set
+ * reached — i.e. the exercise was trained entirely underloaded. Used so a
+ * wholly sub-target effort reads as `underperformed` rather than slipping
+ * through to `matched`/`overdone` on set volume alone (hitting the prescribed
+ * load is the harder constraint). Returns `false` when there's no weight target
+ * or no logged sets to judge against.
+ */
+function weightTargetMissed(planned: PlanExercise, actual: Exercise): boolean {
+  const target = planned.weightKg;
+  if (target == null || target <= 0) return false;
+  const sets = actual.loggedSets;
+  if (!sets || sets.length === 0) return false;
+  return sets.every((s) => s.weight < target);
 }
 
 /** Prescribed set count for a planned exercise (explicit `sets`, else the length of a per-set rep scheme). */
@@ -154,10 +181,12 @@ export function plannedSetsForPlan(ex: PlanExercise): number {
 /**
  * Classifies a planned exercise against the matching performed exercise (if
  * any). Returns the same outcome the per-session plan comparison shows for a
- * planned row: `missed` when nothing qualifying was performed, `overdone` /
- * `underperformed` when the qualifying set count is above / below the prescribed
- * count, and `matched` when they are equal. This is the single source of truth
- * shared by `SessionPlanComparison` and the stats adherence aggregate.
+ * planned row: `missed` when nothing was performed, `overdone` /
+ * `underperformed` when the set count is above / below the prescribed count,
+ * and `matched` when they are equal. A fully underloaded exercise (sets logged,
+ * but none at the target weight) is `underperformed` even when the set volume
+ * matches the plan. This is the single source of truth shared by
+ * `SessionPlanComparison` and the stats adherence aggregate.
  */
 export function classifyPlannedExercise(
   planned: PlanExercise,
@@ -166,6 +195,7 @@ export function classifyPlannedExercise(
   const plannedSets = plannedSetsForPlan(planned);
   const actualSets = actual ? actualSetsForPlan(actual) : 0;
   if (actualSets === 0) return 'missed';
+  if (actual && weightTargetMissed(planned, actual)) return 'underperformed';
   if (actualSets > plannedSets) return 'overdone';
   if (actualSets < plannedSets) return 'underperformed';
   return 'matched';
