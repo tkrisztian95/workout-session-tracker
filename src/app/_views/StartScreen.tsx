@@ -88,42 +88,44 @@ export function StartScreen({
         </div>
       </PageHeader>
 
-      {todaysSessions.length > 0 && (
-        <div className="px-6 pt-2 space-y-2">
-          <LabelOverline className="flex items-center gap-1.5">
-            <CalendarCheck className="w-3.5 h-3.5 text-brand" />
-            {t.home_today_overline}
-          </LabelOverline>
-          {todaysSessions.map((s) => (
-            <button
-              key={`${s.planId}-${s.dayId}`}
-              onClick={() => onStartTodaysSession?.(s.planId, s.dayId)}
-              className="w-full flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-left cursor-pointer active:scale-[0.98] transition-transform duration-150"
-            >
-              <span
-                aria-hidden
-                className="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center flex-shrink-0"
-              >
-                <Dumbbell className="w-5 h-5" />
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-foreground font-semibold text-base truncate">
-                  {s.dayName || s.planName}
-                </p>
-                <p className="text-muted text-sm mt-0.5 truncate">
-                  {s.dayName ? `${s.planName} · ` : ''}
-                  {coreCountLabel(s.coreCount)}
-                  {s.optionalCount > 0 ? ` · ${optionalCountLabel(s.optionalCount)}` : ''}
-                </p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-brand flex-shrink-0" />
-            </button>
-          ))}
-        </div>
-      )}
-
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
         <HeadingXL className="mb-2">{t.home_title}</HeadingXL>
+        {todaysSessions.length > 0 && (
+          <>
+            <div className="space-y-2">
+              <LabelOverline className="flex items-center gap-1.5">
+                <CalendarCheck className="w-3.5 h-3.5 text-brand" />
+                {t.home_today_overline}
+              </LabelOverline>
+              {todaysSessions.map((s) => (
+                <button
+                  key={`${s.planId}-${s.dayId}`}
+                  onClick={() => onStartTodaysSession?.(s.planId, s.dayId)}
+                  className="w-full flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-left cursor-pointer active:scale-[0.98] transition-transform duration-150"
+                >
+                  <span
+                    aria-hidden
+                    className="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center flex-shrink-0"
+                  >
+                    <Dumbbell className="w-5 h-5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-foreground font-semibold text-base truncate">
+                      {s.dayName || s.planName}
+                    </p>
+                    <p className="text-muted text-sm mt-0.5 truncate">
+                      {s.dayName ? `${s.planName} · ` : ''}
+                      {coreCountLabel(s.coreCount)}
+                      {s.optionalCount > 0 ? ` · ${optionalCountLabel(s.optionalCount)}` : ''}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-brand flex-shrink-0" />
+                </button>
+              ))}
+            </div>
+            <hr className="border-border" />
+          </>
+        )}
         {hasPlans ? (
           <>
             <Button size="lg" onClick={onFollowPlan}>
