@@ -103,6 +103,8 @@
   "home_free_session": "Szabad edzés",
   "home_start_free_session": "Szabad edzés indítása",
   "home_create_plan": "Terv létrehozása",
+  "home_today_overline": "Mára tervezve",
+  "home_today_start": "Indítás",
   "choose_plan_title": "Terv kiválasztása",
   "last_followed_badge": "Legutóbb",
   "plan_picker_day_count": "{n} nap",
