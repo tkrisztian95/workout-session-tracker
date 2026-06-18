@@ -91,6 +91,12 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     icon: 'Crown',
     check: ({ sessions }) => sessions.length >= 250,
   },
+  {
+    id: 'session_500',
+    track: 'sessions',
+    icon: 'Rocket',
+    check: ({ sessions }) => sessions.length >= 500,
+  },
 
   // Plans track
   {
@@ -179,6 +185,18 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     icon: 'CalendarCheck',
     check: (data) => weeklyDays(data) >= 5,
   },
+  {
+    id: 'weekly_6',
+    track: 'weekly',
+    icon: 'CalendarCheck',
+    check: (data) => weeklyDays(data) >= 6,
+  },
+  {
+    id: 'weekly_7',
+    track: 'weekly',
+    icon: 'Flame',
+    check: (data) => weeklyDays(data) >= 7,
+  },
 
   // Tenure track
   {
@@ -247,12 +265,18 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     },
   },
 
-  // Volume track
+  // Volume track — cumulative weight lifted across all logged sets
   {
     id: 'volume_1k',
     track: 'volume',
     icon: 'Weight',
     check: (data) => totalVolumeKg(data) >= 1_000,
+  },
+  {
+    id: 'volume_5k',
+    track: 'volume',
+    icon: 'Weight',
+    check: (data) => totalVolumeKg(data) >= 5_000,
   },
   {
     id: 'volume_10k',
@@ -261,9 +285,39 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     check: (data) => totalVolumeKg(data) >= 10_000,
   },
   {
-    id: 'volume_100k',
+    id: 'volume_25k',
     track: 'volume',
     icon: 'Weight',
+    check: (data) => totalVolumeKg(data) >= 25_000,
+  },
+  {
+    id: 'volume_50k',
+    track: 'volume',
+    icon: 'Dumbbell',
+    check: (data) => totalVolumeKg(data) >= 50_000,
+  },
+  {
+    id: 'volume_100k',
+    track: 'volume',
+    icon: 'Dumbbell',
     check: (data) => totalVolumeKg(data) >= 100_000,
+  },
+  {
+    id: 'volume_250k',
+    track: 'volume',
+    icon: 'Flame',
+    check: (data) => totalVolumeKg(data) >= 250_000,
+  },
+  {
+    id: 'volume_500k',
+    track: 'volume',
+    icon: 'Mountain',
+    check: (data) => totalVolumeKg(data) >= 500_000,
+  },
+  {
+    id: 'volume_1m',
+    track: 'volume',
+    icon: 'Gem',
+    check: (data) => totalVolumeKg(data) >= 1_000_000,
   },
 ];
