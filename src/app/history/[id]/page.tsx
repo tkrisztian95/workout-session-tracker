@@ -246,6 +246,7 @@ export default function SessionDetailPage() {
           <Tabs
             activeId={activeTab}
             onChange={(id) => setActiveTab(id as DetailTab)}
+            stickyTabList
             tabs={
               [
                 {

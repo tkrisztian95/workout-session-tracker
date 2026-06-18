@@ -14,9 +14,14 @@ interface TabsProps {
   activeId: string;
   onChange: (id: string) => void;
   className?: string;
+  /**
+   * Pin the tab bar to the top of the nearest scroll container so only the
+   * active panel scrolls. The parent must be the scrolling element.
+   */
+  stickyTabList?: boolean;
 }
 
-export function Tabs({ tabs, activeId, onChange, className }: TabsProps) {
+export function Tabs({ tabs, activeId, onChange, className, stickyTabList = false }: TabsProps) {
   const baseId = useId();
   const activeIndex = Math.max(
     0,
@@ -26,7 +31,13 @@ export function Tabs({ tabs, activeId, onChange, className }: TabsProps) {
 
   return (
     <div className={className}>
-      <div role="tablist" className="relative flex border-b border-border">
+      <div
+        role="tablist"
+        className={cn(
+          'relative flex border-b border-border',
+          stickyTabList && 'sticky top-0 z-10 bg-base',
+        )}
+      >
         {tabs.map((tab) => {
           const isActive = tab.id === active.id;
           return (
