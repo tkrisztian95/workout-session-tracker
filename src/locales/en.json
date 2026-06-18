@@ -109,6 +109,8 @@
   "home_free_session": "Free Session",
   "home_start_free_session": "Start Free Session",
   "home_create_plan": "Create a plan",
+  "home_today_overline": "Planned for today",
+  "home_today_start": "Start",
 
   "choose_plan_title": "Choose Plan",
   "last_followed_badge": "Recent",

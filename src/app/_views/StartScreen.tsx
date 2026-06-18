@@ -1,11 +1,20 @@
 'use client';
 
-import { ChevronRight, ClipboardList, Dumbbell, Trophy } from 'lucide-react';
+import { CalendarCheck, ChevronRight, ClipboardList, Dumbbell, Trophy } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import { Button, HeadingXL, LabelOverline, Page, PageHeader } from '@/components/ui';
 import type { HomeBackground } from '@/lib/storage';
 import { formatDate } from './helpers';
+
+export interface TodaysSession {
+  planId: string;
+  dayId: string;
+  planName: string;
+  dayName: string;
+  coreCount: number;
+  optionalCount: number;
+}
 
 export function StartScreen({
   hasPlans,
@@ -14,6 +23,8 @@ export function StartScreen({
   onCreatePlan,
   greeting,
   lastSessionInfo,
+  todaysSessions = [],
+  onStartTodaysSession,
   achievementCount,
   onOpenAchievements,
   homeBackground = 'velocity',
@@ -24,12 +35,16 @@ export function StartScreen({
   onCreatePlan: () => void;
   greeting?: string;
   lastSessionInfo: { relativeLabel: string; sessionName: string } | null;
+  todaysSessions?: TodaysSession[];
+  onStartTodaysSession?: (planId: string, dayId: string) => void;
   achievementCount: number;
   onOpenAchievements: () => void;
   homeBackground?: HomeBackground;
 }) {
   const t = useTranslations();
   const { locale } = useLocale();
+  const coreCountLabel = (n: number) => t.day_picker_core_count.replace('{n}', String(n));
+  const optionalCountLabel = (n: number) => t.day_picker_optional_count.replace('{n}', String(n));
   return (
     <Page
       className="pb-20 overflow-hidden"
@@ -74,6 +89,39 @@ export function StartScreen({
       </PageHeader>
 
       <div className="flex-1 flex flex-col justify-center px-6 gap-4">
+        {todaysSessions.length > 0 && (
+          <div className="space-y-2">
+            <LabelOverline className="flex items-center gap-1.5">
+              <CalendarCheck className="w-3.5 h-3.5 text-brand" />
+              {t.home_today_overline}
+            </LabelOverline>
+            {todaysSessions.map((s) => (
+              <button
+                key={`${s.planId}-${s.dayId}`}
+                onClick={() => onStartTodaysSession?.(s.planId, s.dayId)}
+                className="w-full flex items-center gap-3 rounded-2xl border border-brand/40 bg-brand/10 px-4 py-3 text-left cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              >
+                <span
+                  aria-hidden
+                  className="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center flex-shrink-0"
+                >
+                  <Dumbbell className="w-5 h-5" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground font-semibold text-base truncate">
+                    {s.dayName || s.planName}
+                  </p>
+                  <p className="text-muted text-sm mt-0.5 truncate">
+                    {s.dayName ? `${s.planName} · ` : ''}
+                    {coreCountLabel(s.coreCount)}
+                    {s.optionalCount > 0 ? ` · ${optionalCountLabel(s.optionalCount)}` : ''}
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-brand flex-shrink-0" />
+              </button>
+            ))}
+          </div>
+        )}
         <HeadingXL className="mb-2">{t.home_title}</HeadingXL>
         {hasPlans ? (
           <>

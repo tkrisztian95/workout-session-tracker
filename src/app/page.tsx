@@ -28,7 +28,7 @@ import { PlanPickerScreen } from './_views/PlanPickerScreen';
 import { DayPickerScreen } from './_views/DayPickerScreen';
 import { OptionalPickerScreen } from './_views/OptionalPickerScreen';
 import { SessionView } from './_views/SessionView';
-import { calendarDaysAgo } from './_views/helpers';
+import { calendarDaysAgo, todayWeekday } from './_views/helpers';
 
 // ─── Steps ───────────────────────────────────────────────────────────────────
 
@@ -258,6 +258,31 @@ export default function HomePage() {
     return { relativeLabel, sessionName };
   })();
 
+  // Days from active plans scheduled for today's weekday. Tapping one jumps
+  // straight to the optional picker for that plan + day.
+  const today = todayWeekday();
+  const todaysSessions = plans.flatMap((plan) =>
+    plan.days
+      .filter((day) => day.weekdays.includes(today))
+      .map((day) => ({
+        planId: plan.id,
+        dayId: day.id,
+        planName: plan.name,
+        dayName: day.name,
+        coreCount: day.coreExercises.length,
+        optionalCount: day.optionalExercises.length,
+      })),
+  );
+
+  const startTodaysSession = (planId: string, dayId: string) => {
+    const plan = plans.find((p) => p.id === planId);
+    const day = plan?.days.find((d) => d.id === dayId);
+    if (!plan || !day) return;
+    setSelectedPlan(plan);
+    setSelectedDay(day);
+    setStep('pick-optionals');
+  };
+
   return (
     <>
       <StartScreen
@@ -270,6 +295,8 @@ export default function HomePage() {
         onCreatePlan={() => router.push('/plans/new')}
         greeting={greeting}
         lastSessionInfo={lastSessionInfo}
+        todaysSessions={todaysSessions}
+        onStartTodaysSession={startTodaysSession}
         achievementCount={allRecords.length}
         onOpenAchievements={() => router.push('/profile/achievements?from=home')}
         homeBackground={homeBackground}
