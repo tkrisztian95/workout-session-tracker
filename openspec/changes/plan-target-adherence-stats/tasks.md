@@ -12,15 +12,15 @@
 
 ## 3. Locale strings
 
-- [ ] 3.1 Add adherence keys to `src/locales/en.json` (`stats_adherence_title`, `stats_adherence_avg_label`, and any trend/percentage helper copy reusing existing `stats_volume_trend_*` patterns where possible)
-- [ ] 3.2 Mirror the keys in `src/locales/de.json` and `src/locales/hu.json` (translate where confident; flag any English-fallback values)
+- [x] 3.1 Add adherence keys to `src/locales/en.json` (`stats_adherence_title`, `stats_adherence_avg_label`, and any trend/percentage helper copy reusing existing `stats_volume_trend_*` patterns where possible)
+- [x] 3.2 Mirror the keys in `src/locales/de.json` and `src/locales/hu.json` (translate where confident; flag any English-fallback values)
 
 ## 4. Stats page section
 
-- [ ] 4.1 In `src/app/stats/page.tsx`, load `getPlans()` and add a `PlanAdherence` section component (co-located with `ProgressionTable` / `CategoryRadarChart`) that calls `getPlanAdherenceProgression(filteredSessions, plans, range)`
-- [ ] 4.2 Render an average-adherence summary card (percentage) with an up/down/flat trend chip reusing the existing volume-trend icon/colour treatment (compare last vs previous point)
-- [ ] 4.3 Render a recharts `LineChart` of per-session score over date labels, y-axis 0–100%, styled like the existing progression chart and theme-aware
-- [ ] 4.4 Return `null` from the section when `points.length === 0` so it hides cleanly; place the section in a sensible spot (e.g. after the progression table)
+- [x] 4.1 In `src/app/stats/page.tsx`, load `getPlans()` and add a `PlanAdherence` section component (co-located with `ProgressionTable` / `CategoryRadarChart`) that calls `getPlanAdherenceProgression(sessions, plans, range)`
+- [x] 4.2 Render an average-adherence summary card (percentage) with an up/down/flat trend chip reusing the existing volume-trend icon/colour treatment (compare last vs previous point)
+- [x] 4.3 Render a recharts `LineChart` of per-session score over date labels, y-axis 0–100%, styled like the existing progression chart and theme-aware
+- [x] 4.4 Return `null` from the section when `points.length === 0` so it hides cleanly; place the section in a sensible spot (e.g. after the progression table)
 
 ## 5. Verify
 
