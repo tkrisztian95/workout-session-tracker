@@ -16,6 +16,9 @@ import {
   Clock,
   Medal,
   Weight,
+  Rocket,
+  Mountain,
+  Gem,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
@@ -38,6 +41,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Clock,
   Medal,
   Weight,
+  Rocket,
+  Mountain,
+  Gem,
 };
 
 interface AchievementCelebrationProps {

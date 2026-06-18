@@ -54,6 +54,11 @@ const ACHIEVEMENTS: Record<string, AchievementDef> = {
       'A geometric crown with sharp angular points, orange #F97316 gemstones, dark gold metal body, number embossed on the front panel',
     number: '250',
   },
+  session_500: {
+    subject:
+      'A bold geometric rocket blasting upward with an intense orange #F97316 flame trail, sharp angular fins, epic and energetic, number embossed on the hull',
+    number: '500',
+  },
 
   // Plans track — achievement and creation
   plan_first_created: {
@@ -117,6 +122,16 @@ const ACHIEVEMENTS: Record<string, AchievementDef> = {
       'A square calendar grid, 5 bold orange #F97316 glowing blocks fully lit, small flame above',
     number: '5',
   },
+  weekly_6: {
+    subject:
+      'A square calendar grid, 6 bold orange #F97316 glowing blocks, one dark block remaining, flame above',
+    number: '6',
+  },
+  weekly_7: {
+    subject:
+      'A square calendar grid fully lit with 7 bold orange #F97316 glowing blocks, a large bold flame erupting above, perfect week energy',
+    number: '7',
+  },
 
   // Tenure track — time and dedication
   tenure_1month: {
@@ -151,15 +166,45 @@ const ACHIEVEMENTS: Record<string, AchievementDef> = {
       'A single bold round weight plate, thick orange #F97316 glowing edge, chrome face, number embossed at center',
     number: '1K',
   },
+  volume_5k: {
+    subject:
+      'Two bold round weight plates leaning together, thick orange #F97316 glowing edges, chrome faces, number embossed on the front plate',
+    number: '5K',
+  },
   volume_10k: {
     subject:
       'A straight barbell with two large weight plates, orange #F97316 glowing bar, powerful, number embossed on the plates',
     number: '10K',
   },
+  volume_25k: {
+    subject:
+      'A loaded barbell with stacked plates on each side, orange #F97316 glowing bar, solid and heavy, number embossed on the outer plate',
+    number: '25K',
+  },
+  volume_50k: {
+    subject:
+      'A heavily loaded barbell bending slightly under thick stacked plates, intense orange #F97316 glow, number embossed on the largest plate',
+    number: '50K',
+  },
   volume_100k: {
     subject:
       'A massive loaded barbell with multiple stacked plates, intense orange #F97316 bloom, epic scale, number embossed on the largest plate',
     number: '100K',
+  },
+  volume_250k: {
+    subject:
+      'A colossal barbell stacked with rows of plates, the bar glowing white-hot orange #F97316, dramatic bloom, number embossed on the front plate',
+    number: '250K',
+  },
+  volume_500k: {
+    subject:
+      'A towering mountain peak forged from stacked weight plates, orange #F97316 light radiating from the summit, monumental, number embossed at the base',
+    number: '500K',
+  },
+  volume_1m: {
+    subject:
+      'A radiant faceted gemstone shaped like a weight plate, brilliant orange #F97316 and white-gold light bursting from every facet, ultimate prestige, number embossed at the core',
+    number: '1M',
   },
 };
 
