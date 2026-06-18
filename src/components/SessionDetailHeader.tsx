@@ -124,8 +124,7 @@ export function SessionDetailHeader({
             {mins} {t.min_label}
           </>
         )}
-      </p>
-      <p className="text-muted text-sm mt-1">
+        {' · '}
         {displaySession.exercises.length}{' '}
         {displaySession.exercises.length !== 1 ? t.exercise_plural : t.exercise_singular}
       </p>
