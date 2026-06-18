@@ -17,7 +17,9 @@ import {
   ListLabel,
   Page,
   PageHeader,
-  Tabs,
+  TabsProvider,
+  TabList,
+  TabPanels,
   type TabItem,
 } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
@@ -210,6 +212,38 @@ export default function SessionDetailPage() {
   const displaySkipped = displaySession.exercises.filter((e) => e.dismissed);
   const displayRemaining = displaySession.exercises.filter((e) => !e.completed && !e.dismissed);
 
+  const tabItems = [
+    {
+      id: 'exercises',
+      label: t.tab_exercises_label,
+      content: (
+        <ExercisesTabContent
+          displaySession={displaySession}
+          displayCompleted={displayCompleted}
+          displayRemaining={displayRemaining}
+          displaySkipped={displaySkipped}
+          isEditing={false}
+          updateDraftExercise={updateDraftExercise}
+          removeDraftExercise={removeDraftExercise}
+          setEditingExercise={setEditingExercise}
+          setIsAddModalOpen={setIsAddModalOpen}
+        />
+      ),
+    },
+    {
+      id: 'timeline',
+      label: t.tab_timeline_label,
+      content: <SessionTimeline session={displaySession} />,
+    },
+    {
+      id: 'comparison',
+      label: t.tab_comparison_label,
+      content: (
+        <SessionPlanComparison session={displaySession} planDay={planDay} planName={planName} />
+      ),
+    },
+  ] satisfies TabItem[];
+
   return (
     <Page className="pb-20">
       <PageHeader>
@@ -229,8 +263,8 @@ export default function SessionDetailPage() {
         />
       </PageHeader>
 
-      <div className="flex-1 px-6 pb-6 overflow-y-auto">
-        {isEditing ? (
+      {isEditing ? (
+        <div className="flex-1 px-6 pb-6 overflow-y-auto">
           <ExercisesTabContent
             displaySession={displaySession}
             displayCompleted={displayCompleted}
@@ -242,51 +276,15 @@ export default function SessionDetailPage() {
             setEditingExercise={setEditingExercise}
             setIsAddModalOpen={setIsAddModalOpen}
           />
-        ) : (
-          <Tabs
-            activeId={activeTab}
-            onChange={(id) => setActiveTab(id as DetailTab)}
-            stickyTabList
-            tabs={
-              [
-                {
-                  id: 'exercises',
-                  label: t.tab_exercises_label,
-                  content: (
-                    <ExercisesTabContent
-                      displaySession={displaySession}
-                      displayCompleted={displayCompleted}
-                      displayRemaining={displayRemaining}
-                      displaySkipped={displaySkipped}
-                      isEditing={false}
-                      updateDraftExercise={updateDraftExercise}
-                      removeDraftExercise={removeDraftExercise}
-                      setEditingExercise={setEditingExercise}
-                      setIsAddModalOpen={setIsAddModalOpen}
-                    />
-                  ),
-                },
-                {
-                  id: 'timeline',
-                  label: t.tab_timeline_label,
-                  content: <SessionTimeline session={displaySession} />,
-                },
-                {
-                  id: 'comparison',
-                  label: t.tab_comparison_label,
-                  content: (
-                    <SessionPlanComparison
-                      session={displaySession}
-                      planDay={planDay}
-                      planName={planName}
-                    />
-                  ),
-                },
-              ] satisfies TabItem[]
-            }
-          />
-        )}
-      </div>
+        </div>
+      ) : (
+        <TabsProvider activeId={activeTab} onChange={(id) => setActiveTab(id as DetailTab)}>
+          <TabList tabs={tabItems} className="px-6" />
+          <div className="flex-1 px-6 pb-6 pt-4 overflow-y-auto">
+            <TabPanels tabs={tabItems} />
+          </div>
+        </TabsProvider>
+      )}
 
       <BottomNav active="history" />
 
