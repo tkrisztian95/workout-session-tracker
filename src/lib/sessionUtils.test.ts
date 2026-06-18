@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSessionTimeline,
   classifyLoggedSets,
+  classifyPlannedExercise,
   countsTowardSetsGoal,
   formatExerciseDetail,
   formatMonthBucket,
@@ -9,7 +10,7 @@ import {
   getSessionBucket,
   parseRepScheme,
 } from './sessionUtils';
-import type { Exercise, LoggedSet, WorkoutSession } from './types';
+import type { Exercise, LoggedSet, PlanExercise, WorkoutSession } from './types';
 
 describe('formatRepsTarget', () => {
   it('returns the uniform rep count as a string', () => {
@@ -317,5 +318,89 @@ describe('countsTowardSetsGoal', () => {
       loggedSets: [set(60, 8), set(60, 5), set(70, 10)],
     }).filter((c) => countsTowardSetsGoal(c.status)).length;
     expect(qualifying).toBe(3);
+  });
+});
+
+describe('classifyPlannedExercise', () => {
+  const set = (weight: number, reps: number): LoggedSet => ({
+    weight,
+    reps,
+    loggedAt: '2026-06-07T10:00:00.000Z',
+  });
+
+  const planned = (over: Partial<PlanExercise> = {}): PlanExercise => ({
+    id: 'p1',
+    name: 'Bench Press',
+    type: 'sets-reps',
+    sets: 3,
+    reps: 8,
+    role: 'core',
+    ...over,
+  });
+
+  const actual = (over: Partial<Exercise> = {}): Exercise => ({
+    id: 'a1',
+    name: 'Bench Press',
+    type: 'sets-reps',
+    ...over,
+  });
+
+  it('is missed when there is no matching performed exercise', () => {
+    expect(classifyPlannedExercise(planned(), undefined)).toBe('missed');
+  });
+
+  it('is missed when the performed exercise logged no qualifying sets', () => {
+    expect(classifyPlannedExercise(planned(), actual({ loggedSets: [] }))).toBe('missed');
+  });
+
+  it('is matched when qualifying sets equal the prescribed count', () => {
+    expect(
+      classifyPlannedExercise(
+        planned({ sets: 3, weightKg: 60 }),
+        actual({ weightKg: 60, loggedSets: [set(60, 8), set(60, 8), set(60, 8)] }),
+      ),
+    ).toBe('matched');
+  });
+
+  it('is overdone when more qualifying sets than prescribed are logged', () => {
+    expect(
+      classifyPlannedExercise(
+        planned({ sets: 2 }),
+        actual({ loggedSets: [set(60, 8), set(60, 8), set(60, 8)] }),
+      ),
+    ).toBe('overdone');
+  });
+
+  it('is underperformed when fewer qualifying sets than prescribed are logged', () => {
+    expect(
+      classifyPlannedExercise(
+        planned({ sets: 3 }),
+        actual({ loggedSets: [set(60, 8), set(60, 8)] }),
+      ),
+    ).toBe('underperformed');
+  });
+
+  it('excludes sub-target warmup sets so they cannot reach matched', () => {
+    // Weight target 60: two warmups (40, 50) do not count; only one working set
+    // qualifies, short of the 3 prescribed → underperformed.
+    expect(
+      classifyPlannedExercise(
+        planned({ sets: 3, weightKg: 60 }),
+        actual({ weightKg: 60, loggedSets: [set(40, 8), set(50, 8), set(60, 8)] }),
+      ),
+    ).toBe('underperformed');
+  });
+
+  it('reports a completed pure-duration exercise (no sets) as missed — matching the per-session comparison', () => {
+    // A pure-duration exercise carries no `sets` and logs no sets, so it has no
+    // qualifying-set signal → `missed`. The stats adherence aggregate applies
+    // its own "completed counts as met" override on top of this; the raw
+    // classification deliberately mirrors what SessionPlanComparison shows.
+    expect(
+      classifyPlannedExercise(
+        planned({ type: 'duration', sets: undefined, reps: undefined, duration: 60 }),
+        actual({ type: 'duration', completed: true, duration: 60 }),
+      ),
+    ).toBe('missed');
   });
 });
