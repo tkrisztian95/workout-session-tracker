@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Dumbbell, Sparkles, Search, X, SlidersHorizontal } from 'lucide-react';
+import { Plus, Dumbbell, Sparkles, Search, X, SlidersHorizontal, SquarePlay } from 'lucide-react';
 import { getPlans, togglePlanStatus, savePlan, duplicatePlan, getSessions } from '@/lib/storage';
 import type { WorkoutPlan, WorkoutSession } from '@/lib/types';
 import {
@@ -29,6 +29,7 @@ import {
   PageHeader,
 } from '@/components/ui';
 import AiPlanSuggestionModal from '@/components/AiPlanSuggestionModal';
+import YoutubeDayImportModal from '@/components/YoutubeDayImportModal';
 
 export default function PlansPage() {
   const t = useTranslations();
@@ -39,6 +40,7 @@ export default function PlansPage() {
   const [sort, setSort] = useState<PlanSort>('created');
   const [filters, setFilters] = useState<PlanFilters>(DEFAULT_PLAN_FILTERS);
   const [showAiModal, setShowAiModal] = useState(false);
+  const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
   const visiblePlans = useMemo(
@@ -90,6 +92,12 @@ export default function PlansPage() {
     router.push(`/plans/${newPlan.id}`);
   };
 
+  const handleYoutubeSaved = (planId: string) => {
+    setPlans(getPlans());
+    setShowYoutubeModal(false);
+    router.push(`/plans/${planId}`);
+  };
+
   return (
     <Page className="pb-24">
       <PageHeader>
@@ -119,6 +127,13 @@ export default function PlansPage() {
                 )}
               </IconButton>
             )}
+            <IconButton
+              onClick={() => setShowYoutubeModal(true)}
+              aria-label={t.youtube_import_open}
+              className="border border-border"
+            >
+              <SquarePlay className="w-4 h-4 text-brand" />
+            </IconButton>
             <IconButton
               onClick={() => setShowAiModal(true)}
               aria-label="AI Suggest Plan"
@@ -202,6 +217,13 @@ export default function PlansPage() {
 
       {showAiModal && (
         <AiPlanSuggestionModal onApply={handleAiApply} onClose={() => setShowAiModal(false)} />
+      )}
+
+      {showYoutubeModal && (
+        <YoutubeDayImportModal
+          onSaved={handleYoutubeSaved}
+          onClose={() => setShowYoutubeModal(false)}
+        />
       )}
 
       <PlanControlsSheet

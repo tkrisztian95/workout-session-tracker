@@ -41,7 +41,8 @@ export type AiFeature =
   | 'exercise-swap'
   | 'exercise-suggest'
   | 'plan-adjust'
-  | 'notes-import';
+  | 'notes-import'
+  | 'youtube-day-import';
 
 export interface ContextProfile {
   name?: string;

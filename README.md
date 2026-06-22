@@ -72,11 +72,12 @@ The app runs at [http://localhost:3000](http://localhost:3000). On first load in
 
 Every env var is optional — the app works fully offline without any of them.
 
-| Variable                   | Purpose                                                                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_POSTHOG_KEY`  | Enables PostHog analytics. Leave unset to disable PostHog entirely (no init, no script).                                                    |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingest host (defaults to `https://eu.i.posthog.com`).                                                                               |
-| `OPENAI_API_KEY`           | Only used by `npm run eval`. The app reads the user's OpenAI key from `localStorage` at runtime — it never reads this file in browser code. |
+| Variable                   | Purpose                                                                                                                                                                          |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_POSTHOG_KEY`  | Enables PostHog analytics. Leave unset to disable PostHog entirely (no init, no script).                                                                                         |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingest host (defaults to `https://eu.i.posthog.com`).                                                                                                                    |
+| `OPENAI_API_KEY`           | Only used by `npm run eval`. The app reads the user's OpenAI key from `localStorage` at runtime — it never reads this file in browser code.                                      |
+| `YOUTUBE_API_KEY`          | Server-side YouTube Data API v3 key for the "Import from YouTube" feature. Free to create. Without it, that one feature shows a "not configured" message; everything else works. |
 
 See [.env.example](.env.example) for the full template.
 
