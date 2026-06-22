@@ -734,5 +734,27 @@
   "achievement_session_first_edited_name": "Revisor",
   "achievement_session_first_edited_desc": "Eine abgeschlossene Einheit bearbeitet",
   "achievement_session_first_imported_name": "KI-Pionier",
-  "achievement_session_first_imported_desc": "Eine Einheit per KI importiert"
+  "achievement_session_first_imported_desc": "Eine Einheit per KI importiert",
+
+  "youtube_import_open": "Aus YouTube importieren",
+  "youtube_import_title": "Aus YouTube importieren",
+  "youtube_import_subtitle": "Füge den Link eines Workout-Videos ein und die KI macht aus seiner Beschreibung einen Trainingstag.",
+  "youtube_url_label": "YouTube-Link",
+  "youtube_url_placeholder": "https://youtube.com/watch?v=...",
+  "youtube_url_invalid": "Das sieht nicht nach einem YouTube-Link aus.",
+  "youtube_fetch_button": "Workout laden",
+  "youtube_fetching": "Videobeschreibung wird gelesen...",
+  "youtube_parsing": "Dein Trainingstag wird erstellt...",
+  "youtube_destination_label": "Hinzufügen zu",
+  "youtube_destination_new": "Neuen Plan erstellen",
+  "youtube_new_plan_name_label": "Name des neuen Plans",
+  "youtube_new_plan_name_placeholder": "Planname",
+  "youtube_save_to_plan": "Tag zum Plan hinzufügen",
+  "youtube_save_new_plan": "Plan erstellen",
+  "youtube_validation_not_workout": "Dieses Video sieht nicht nach einem Workout aus. Versuche einen Link, dessen Beschreibung die Übungen auflistet.",
+  "youtube_error_invalid_url": "Das sieht nicht nach einem YouTube-Link aus.",
+  "youtube_error_not_found": "Dieses Video ist nicht verfügbar oder privat.",
+  "youtube_error_no_description": "Dieses Video hat keine Beschreibung, aus der sich das Workout lesen lässt.",
+  "youtube_error_fetch_failed": "Video konnte nicht gelesen werden. Prüfe den Link und versuche es erneut.",
+  "youtube_try_again": "Anderen Link versuchen"
 }

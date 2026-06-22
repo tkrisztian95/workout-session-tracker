@@ -738,5 +738,27 @@
   "achievement_session_first_edited_name": "Revisionist",
   "achievement_session_first_edited_desc": "Edited a completed session",
   "achievement_session_first_imported_name": "AI Pioneer",
-  "achievement_session_first_imported_desc": "Imported a session using AI"
+  "achievement_session_first_imported_desc": "Imported a session using AI",
+
+  "youtube_import_open": "Import from YouTube",
+  "youtube_import_title": "Import from YouTube",
+  "youtube_import_subtitle": "Paste a workout video link and AI will turn its description into a training day.",
+  "youtube_url_label": "YouTube link",
+  "youtube_url_placeholder": "https://youtube.com/watch?v=...",
+  "youtube_url_invalid": "That doesn't look like a YouTube link.",
+  "youtube_fetch_button": "Fetch workout",
+  "youtube_fetching": "Reading the video description...",
+  "youtube_parsing": "Building your workout day...",
+  "youtube_destination_label": "Add to",
+  "youtube_destination_new": "Create new plan",
+  "youtube_new_plan_name_label": "New plan name",
+  "youtube_new_plan_name_placeholder": "Plan name",
+  "youtube_save_to_plan": "Add day to plan",
+  "youtube_save_new_plan": "Create plan",
+  "youtube_validation_not_workout": "This video doesn't look like a workout. Try a link whose description lists the exercises.",
+  "youtube_error_invalid_url": "That doesn't look like a YouTube link.",
+  "youtube_error_not_found": "This video is unavailable or private.",
+  "youtube_error_no_description": "This video has no description to read the workout from.",
+  "youtube_error_fetch_failed": "Couldn't read the video. Check the link and try again.",
+  "youtube_try_again": "Try another link"
 }

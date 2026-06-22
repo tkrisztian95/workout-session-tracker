@@ -104,12 +104,12 @@ is type-valid (no field-shaping behavior needed yet).
 
 Mirror `AiPlanSuggestionModal`. View states:
 
-| View      | Content                                                              |
-| --------- | ------------------------------------------------------------------- |
+| View      | Content                                                                 |
+| --------- | ----------------------------------------------------------------------- |
 | `input`   | URL text field + "Fetch" action; inline validation via `parseYoutubeId` |
-| `loading` | spinner while fetching the description and parsing it                |
-| `review`  | `PlanDayEditor` pre-filled with the parsed day + a destination picker |
-| `error`   | fetch/parse/validation error with retry / edit-link affordance      |
+| `loading` | spinner while fetching the description and parsing it                   |
+| `review`  | `PlanDayEditor` pre-filled with the parsed day + a destination picker   |
+| `error`   | fetch/parse/validation error with retry / edit-link affordance          |
 
 The **destination picker** is a select of active plans (from `getPlans()`) plus
 a "Create new plan" option (with a name field defaulting to the video title).

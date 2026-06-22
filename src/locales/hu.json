@@ -699,5 +699,27 @@
   "achievement_session_first_edited_name": "Javítgató",
   "achievement_session_first_edited_desc": "Szerkesztettél egy befejezett edzést",
   "achievement_session_first_imported_name": "AI úttörő",
-  "achievement_session_first_imported_desc": "AI segítségével importáltál egy edzést"
+  "achievement_session_first_imported_desc": "AI segítségével importáltál egy edzést",
+
+  "youtube_import_open": "Importálás YouTube-ról",
+  "youtube_import_title": "Importálás YouTube-ról",
+  "youtube_import_subtitle": "Illessz be egy edzővideó linkjét, és az AI a leírásából edzésnapot készít.",
+  "youtube_url_label": "YouTube link",
+  "youtube_url_placeholder": "https://youtube.com/watch?v=...",
+  "youtube_url_invalid": "Ez nem tűnik YouTube linknek.",
+  "youtube_fetch_button": "Edzés betöltése",
+  "youtube_fetching": "A videó leírásának olvasása...",
+  "youtube_parsing": "Az edzésnap összeállítása...",
+  "youtube_destination_label": "Hozzáadás ehhez",
+  "youtube_destination_new": "Új terv létrehozása",
+  "youtube_new_plan_name_label": "Új terv neve",
+  "youtube_new_plan_name_placeholder": "Terv neve",
+  "youtube_save_to_plan": "Nap hozzáadása a tervhez",
+  "youtube_save_new_plan": "Terv létrehozása",
+  "youtube_validation_not_workout": "Ez a videó nem tűnik edzésnek. Próbálj olyan linket, amelynek leírása felsorolja a gyakorlatokat.",
+  "youtube_error_invalid_url": "Ez nem tűnik YouTube linknek.",
+  "youtube_error_not_found": "A videó nem elérhető vagy privát.",
+  "youtube_error_no_description": "Ennek a videónak nincs leírása, amiből az edzést ki lehetne olvasni.",
+  "youtube_error_fetch_failed": "Nem sikerült beolvasni a videót. Ellenőrizd a linket, és próbáld újra.",
+  "youtube_try_again": "Másik link kipróbálása"
 }
