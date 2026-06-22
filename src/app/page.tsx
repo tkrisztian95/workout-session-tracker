@@ -97,6 +97,7 @@ export default function HomePage() {
       type: Exercise['type'];
       sets?: number;
       reps?: number;
+      repsPerSet?: number[];
       duration?: number;
       weightKg?: number;
       scalingNote?: string;
@@ -107,6 +108,7 @@ export default function HomePage() {
       type: ex.type,
       sets: ex.sets,
       reps: ex.reps,
+      repsPerSet: ex.repsPerSet,
       duration: ex.duration,
       weightKg: ex.weightKg,
       scalingNote: ex.scalingNote,
