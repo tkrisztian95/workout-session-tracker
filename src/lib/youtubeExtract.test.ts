@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractVideoInfo } from './youtubeExtract';
+import { extractVideoInfo, infoFromPlayerObject } from './youtubeExtract';
 
 function pageWithPlayerResponse(details: object, playabilityStatus = 'OK'): string {
   const player = JSON.stringify({
@@ -52,5 +52,32 @@ describe('extractVideoInfo', () => {
 
   it('returns null when nothing usable is present', () => {
     expect(extractVideoInfo('<html><body>nothing here</body></html>')).toBeNull();
+  });
+});
+
+describe('infoFromPlayerObject', () => {
+  it('extracts title and description from an InnerTube player response', () => {
+    const player = {
+      playabilityStatus: { status: 'OK' },
+      videoDetails: { title: 'Leg Day', shortDescription: '5x5 Squats\n3x8 Lunges' },
+    };
+    const info = infoFromPlayerObject(player);
+    expect(info).toEqual({
+      title: 'Leg Day',
+      description: '5x5 Squats\n3x8 Lunges',
+      unavailable: false,
+    });
+  });
+
+  it('marks unavailable when status is not OK', () => {
+    const player = {
+      playabilityStatus: { status: 'LOGIN_REQUIRED' },
+      videoDetails: {},
+    };
+    expect(infoFromPlayerObject(player)?.unavailable).toBe(true);
+  });
+
+  it('returns null when there is no title, description, or status', () => {
+    expect(infoFromPlayerObject({})).toBeNull();
   });
 });

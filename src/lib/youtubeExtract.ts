@@ -89,6 +89,28 @@ function metaContent(html: string, attr: 'name' | 'property', key: string): stri
 }
 
 /**
+ * Pull title/description/availability out of a parsed YouTube *player response*
+ * object. The same `{ playabilityStatus, videoDetails }` shape is returned by
+ * both the InnerTube player API and the JSON embedded in the watch page, so this
+ * helper is shared by both fetch paths. Returns `null` when the object carries
+ * no usable title/description and no availability signal.
+ */
+export function infoFromPlayerObject(player: Record<string, unknown>): VideoInfo | null {
+  const playability = player.playabilityStatus as { status?: string } | undefined;
+  const status = playability?.status;
+  const unavailable = typeof status === 'string' && status !== 'OK';
+
+  const details = player.videoDetails as { title?: string; shortDescription?: string } | undefined;
+  const title = typeof details?.title === 'string' ? details.title : '';
+  const description = typeof details?.shortDescription === 'string' ? details.shortDescription : '';
+
+  if (title || description || unavailable) {
+    return { title, description, unavailable };
+  }
+  return null;
+}
+
+/**
  * Extract the video title + description from watch-page HTML.
  *
  * Strategy: prefer the embedded player-response JSON (full description); fall
@@ -97,22 +119,9 @@ function metaContent(html: string, attr: 'name' | 'property', key: string): stri
  */
 export function extractVideoInfo(html: string): VideoInfo | null {
   const player = parsePlayerResponse(html);
-
   if (player) {
-    const playability = player.playabilityStatus as { status?: string } | undefined;
-    const status = playability?.status;
-    const unavailable = typeof status === 'string' && status !== 'OK';
-
-    const details = player.videoDetails as
-      | { title?: string; shortDescription?: string }
-      | undefined;
-    const title = typeof details?.title === 'string' ? details.title : '';
-    const description =
-      typeof details?.shortDescription === 'string' ? details.shortDescription : '';
-
-    if (title || description || unavailable) {
-      return { title, description, unavailable };
-    }
+    const info = infoFromPlayerObject(player);
+    if (info) return info;
   }
 
   // Fallback to meta tags.
