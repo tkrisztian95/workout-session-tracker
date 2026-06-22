@@ -7,9 +7,6 @@ import type { YoutubeDescriptionErrorCode, YoutubeDescriptionSuccess } from '@/l
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 
-/** UA for the InnerTube ANDROID client request. */
-const ANDROID_UA = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip';
-
 /**
  * Public InnerTube API key for the web client. This is the same key shipped in
  * youtube.com's own page source — not a secret — and is what tools like yt-dlp
@@ -18,6 +15,36 @@ const ANDROID_UA = 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) g
 const INNERTUBE_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
 
 const FETCH_TIMEOUT_MS = 8000;
+
+/**
+ * InnerTube clients to try, in order. Different clients have different
+ * anti-bot behavior; the iOS/Android player clients reliably include
+ * `videoDetails.shortDescription` even when playback is otherwise restricted.
+ */
+const INNERTUBE_CLIENTS = [
+  {
+    name: 'IOS',
+    userAgent: 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X)',
+    context: {
+      clientName: 'IOS',
+      clientVersion: '19.45.4',
+      deviceModel: 'iPhone16,2',
+      hl: 'en',
+      gl: 'US',
+    },
+  },
+  {
+    name: 'ANDROID',
+    userAgent: 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
+    context: {
+      clientName: 'ANDROID',
+      clientVersion: '19.09.37',
+      androidSdkVersion: 30,
+      hl: 'en',
+      gl: 'US',
+    },
+  },
+] as const;
 
 const STATUS_BY_CODE: Record<YoutubeDescriptionErrorCode, number> = {
   invalid_url: 400,
@@ -36,39 +63,35 @@ function withTimeout(): { signal: AbortSignal; done: () => void } {
   return { signal: controller.signal, done: () => clearTimeout(timer) };
 }
 
-/**
- * Primary source: YouTube's InnerTube player API. The ANDROID client returns the
- * full `videoDetails.shortDescription` as JSON and sidesteps the consent wall and
- * bot checks that a plain watch-page fetch hits. Returns `null` on any failure so
- * the caller can fall back to HTML scraping.
- */
-async function fetchFromInnerTube(videoId: string): Promise<VideoInfo | null> {
+/** One InnerTube player request for the given client. */
+async function fetchFromInnerTube(
+  videoId: string,
+  client: (typeof INNERTUBE_CLIENTS)[number],
+): Promise<VideoInfo | null> {
   const { signal, done } = withTimeout();
   try {
     const res = await fetch(
       `https://www.youtube.com/youtubei/v1/player?key=${INNERTUBE_KEY}&prettyPrint=false`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'User-Agent': ANDROID_UA },
-        body: JSON.stringify({
-          videoId,
-          context: {
-            client: {
-              clientName: 'ANDROID',
-              clientVersion: '19.09.37',
-              androidSdkVersion: 30,
-              hl: 'en',
-              gl: 'US',
-            },
-          },
-        }),
+        headers: { 'Content-Type': 'application/json', 'User-Agent': client.userAgent },
+        body: JSON.stringify({ videoId, context: { client: client.context } }),
         signal,
       },
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[youtube-description] InnerTube ${client.name} HTTP ${res.status}`);
+      return null;
+    }
     const data = (await res.json()) as Record<string, unknown>;
-    return infoFromPlayerObject(data);
-  } catch {
+    const status = (data.playabilityStatus as { status?: string } | undefined)?.status;
+    const info = infoFromPlayerObject(data);
+    console.warn(
+      `[youtube-description] InnerTube ${client.name} status=${status} descLen=${info?.description.length ?? 0}`,
+    );
+    return info;
+  } catch (err) {
+    console.warn(`[youtube-description] InnerTube ${client.name} error:`, (err as Error).message);
     return null;
   } finally {
     done();
@@ -88,9 +111,15 @@ async function fetchFromHtml(videoId: string): Promise<VideoInfo | null> {
       },
       signal,
     });
-    if (!res.ok) return null;
-    return extractVideoInfo(await res.text());
-  } catch {
+    if (!res.ok) {
+      console.warn(`[youtube-description] HTML HTTP ${res.status}`);
+      return null;
+    }
+    const info = extractVideoInfo(await res.text());
+    console.warn(`[youtube-description] HTML descLen=${info?.description.length ?? 0}`);
+    return info;
+  } catch (err) {
+    console.warn(`[youtube-description] HTML error:`, (err as Error).message);
     return null;
   } finally {
     done();
@@ -101,9 +130,10 @@ async function fetchFromHtml(videoId: string): Promise<VideoInfo | null> {
  * Resolve a pasted YouTube URL (or `?v=` id) to the video's title + full
  * description, fetched server-side so the browser is never blocked by CORS.
  *
- * Tries the InnerTube player API first (most reliable), then falls back to
- * scraping the watch page. Among whatever sources respond, prefers one that
- * actually carries a description.
+ * Tries the InnerTube player API across a couple of clients, then falls back to
+ * scraping the watch page. A description is used whenever one is present — even
+ * if `playabilityStatus` is not `OK`, because YouTube still returns the public
+ * description for age/region-restricted videos.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -113,16 +143,20 @@ export async function GET(request: Request) {
 
   const candidates: VideoInfo[] = [];
 
-  const fromApi = await fetchFromInnerTube(videoId);
-  if (fromApi) candidates.push(fromApi);
+  for (const client of INNERTUBE_CLIENTS) {
+    const info = await fetchFromInnerTube(videoId, client);
+    if (info) candidates.push(info);
+    // Stop as soon as we have an actual description.
+    if (info?.description.trim()) break;
+  }
 
-  // Only spend a second request when the API gave us nothing usable.
-  if (!fromApi || !fromApi.description.trim()) {
+  if (!candidates.some((c) => c.description.trim())) {
     const fromHtml = await fetchFromHtml(videoId);
     if (fromHtml) candidates.push(fromHtml);
   }
 
-  const usable = candidates.find((c) => c.description.trim() && !c.unavailable);
+  // Use any description we found, regardless of playability status.
+  const usable = candidates.find((c) => c.description.trim());
   if (usable) {
     const payload: YoutubeDescriptionSuccess = {
       videoId,
