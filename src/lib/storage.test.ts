@@ -145,6 +145,103 @@ describe('getActiveSession migration', () => {
   });
 });
 
+describe('getActiveSession repsPerSet backfill', () => {
+  function activeFromPlan(exercises: unknown[]) {
+    return {
+      id: 'a1',
+      startedAt: '2026-01-01T08:00:00Z',
+      exercises,
+      planId: 'p1',
+      planDayId: 'd1',
+      totalPausedMs: 0,
+    };
+  }
+
+  it('re-derives repsPerSet from the plan day, matching by name', () => {
+    const plan = legacyPlan({
+      core: [
+        {
+          id: 'c1',
+          name: 'Pull-up',
+          type: 'sets-reps',
+          role: 'core',
+          sets: 4,
+          repsPerSet: [10, 9, 8, 7],
+        },
+      ],
+      shared: [
+        {
+          id: 's1',
+          name: 'Push-up',
+          type: 'sets-reps',
+          role: 'core',
+          sets: 3,
+          repsPerSet: [15, 12, 10],
+        },
+      ],
+    });
+    localStorage.setItem(KEYS.plans, JSON.stringify([plan]));
+    localStorage.setItem(
+      KEYS.activeSession,
+      JSON.stringify(
+        activeFromPlan([
+          { id: 'e1', name: 'Pull-up', type: 'sets-reps', sets: 4 },
+          { id: 'e2', name: 'Push-up', type: 'sets-reps', sets: 3 },
+        ]),
+      ),
+    );
+
+    const loaded = getActiveSession();
+    expect(loaded?.exercises[0].repsPerSet).toEqual([10, 9, 8, 7]);
+    expect(loaded?.exercises[1].repsPerSet).toEqual([15, 12, 10]);
+
+    const persisted = JSON.parse(localStorage.getItem(KEYS.activeSession)!);
+    expect(persisted.exercises[0].repsPerSet).toEqual([10, 9, 8, 7]);
+  });
+
+  it('does not touch exercises that already carry a scheme', () => {
+    const plan = legacyPlan({
+      core: [
+        {
+          id: 'c1',
+          name: 'Pull-up',
+          type: 'sets-reps',
+          role: 'core',
+          sets: 4,
+          repsPerSet: [10, 9, 8, 7],
+        },
+      ],
+    });
+    localStorage.setItem(KEYS.plans, JSON.stringify([plan]));
+    localStorage.setItem(
+      KEYS.activeSession,
+      JSON.stringify(
+        activeFromPlan([
+          { id: 'e1', name: 'Pull-up', type: 'sets-reps', sets: 4, repsPerSet: [5, 5, 5, 5] },
+        ]),
+      ),
+    );
+    const before = localStorage.getItem(KEYS.activeSession);
+    const loaded = getActiveSession();
+    expect(loaded?.exercises[0].repsPerSet).toEqual([5, 5, 5, 5]);
+    expect(localStorage.getItem(KEYS.activeSession)).toBe(before);
+  });
+
+  it('is a no-op for free sessions (no planId/planDayId)', () => {
+    const active = {
+      id: 'a1',
+      startedAt: '2026-01-01T08:00:00Z',
+      exercises: [{ id: 'e1', name: 'Pull-up', type: 'sets-reps', sets: 4 }],
+      totalPausedMs: 0,
+    };
+    localStorage.setItem(KEYS.activeSession, JSON.stringify(active));
+    const before = localStorage.getItem(KEYS.activeSession);
+    const loaded = getActiveSession();
+    expect(loaded?.exercises[0].repsPerSet).toBeUndefined();
+    expect(localStorage.getItem(KEYS.activeSession)).toBe(before);
+  });
+});
+
 describe('getHiddenExercises migration', () => {
   it('rewrites legacy category to muscle on hidden entries', () => {
     localStorage.setItem(

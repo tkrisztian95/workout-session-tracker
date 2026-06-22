@@ -162,13 +162,60 @@ export function togglePlanStatus(id: string): void {
 
 // ─── Active session ───────────────────────────────────────────────────────────
 
+/**
+ * Repairs an in-progress session whose sets-reps exercises are missing
+ * `repsPerSet`. Sessions started before per-set rep schemes were carried into
+ * the session exercise (the `toExercise` mapper in page.tsx) lost the scheme at
+ * creation time — it can't be recovered from the session alone, but the source
+ * plan still has it. When the session records its origin (`planId` +
+ * `planDayId`), we look up that plan day and backfill the scheme onto matching
+ * exercises by name, so a workout already underway shows the correct per-set
+ * targets without discarding logged progress. Returns true when anything was
+ * changed. No-ops for free sessions or sessions whose exercises already carry a
+ * scheme. Matched by name within the plan day (shared + core + optional).
+ */
+function backfillRepsPerSetFromPlan(session: ActiveSession): boolean {
+  if (!session.planId || !session.planDayId) return false;
+  const needsBackfill = session.exercises.some(
+    (ex) => ex.type === 'sets-reps' && !(ex.repsPerSet && ex.repsPerSet.length > 0),
+  );
+  if (!needsBackfill) return false;
+
+  const plan = getPlans().find((p) => p.id === session.planId);
+  const day = plan?.days.find((d) => d.id === session.planDayId);
+  if (!day) return false;
+
+  const schemeByName = new Map<string, number[]>();
+  for (const ex of [
+    ...(plan!.sharedExercises ?? []),
+    ...day.coreExercises,
+    ...day.optionalExercises,
+  ]) {
+    if (ex.repsPerSet && ex.repsPerSet.length > 0) schemeByName.set(ex.name, ex.repsPerSet);
+  }
+  if (schemeByName.size === 0) return false;
+
+  let mutated = false;
+  for (const ex of session.exercises) {
+    if (ex.type !== 'sets-reps' || (ex.repsPerSet && ex.repsPerSet.length > 0)) continue;
+    const scheme = schemeByName.get(ex.name);
+    if (scheme) {
+      ex.repsPerSet = [...scheme];
+      mutated = true;
+    }
+  }
+  return mutated;
+}
+
 export function getActiveSession(): ActiveSession | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(KEYS.activeSession);
     if (!raw) return null;
     const session = JSON.parse(raw) as ActiveSession;
-    if (migrateExerciseList(session.exercises as unknown as LegacyExercise[])) {
+    let mutated = migrateExerciseList(session.exercises as unknown as LegacyExercise[]);
+    if (backfillRepsPerSetFromPlan(session)) mutated = true;
+    if (mutated) {
       localStorage.setItem(KEYS.activeSession, JSON.stringify(session));
     }
     return session;

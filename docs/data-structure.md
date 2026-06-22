@@ -244,6 +244,12 @@ The legacy `'Legs'` category is lossy — it maps to `'quads'`. When this mappin
 
 Migration is idempotent: once `category` is gone, subsequent reads are no-ops.
 
+### Backfill `repsPerSet` onto an in-progress session
+
+`backfillRepsPerSetFromPlan` runs on every `getActiveSession` read. Sessions started before per-set rep schemes were carried into the session exercise lost the scheme at creation time (`sets` set, `reps`/`repsPerSet` absent). When the active session records its origin (`planId` + `planDayId`), the scheme is re-derived from that plan day and copied onto matching `sets-reps` exercises by name (shared + core + optional), so a workout already underway shows the correct per-set targets without discarding logged sets.
+
+The backfill is idempotent and a no-op for free sessions, sessions whose exercises already carry a scheme, or plans/days that no longer exist.
+
 ## Export payload
 
 `exportAllData()` produces a single JSON document for backup / portability:
