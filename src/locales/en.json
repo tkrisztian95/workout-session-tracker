@@ -757,6 +757,7 @@
   "youtube_save_new_plan": "Create plan",
   "youtube_validation_not_workout": "This video doesn't look like a workout. Try a link whose description lists the exercises.",
   "youtube_error_invalid_url": "That doesn't look like a YouTube link.",
+  "youtube_error_not_configured": "YouTube import isn't set up on the server yet (missing API key).",
   "youtube_error_not_found": "This video is unavailable or private.",
   "youtube_error_no_description": "This video has no description to read the workout from.",
   "youtube_error_fetch_failed": "Couldn't read the video. Check the link and try again.",

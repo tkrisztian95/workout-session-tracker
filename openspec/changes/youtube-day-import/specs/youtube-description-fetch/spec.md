@@ -3,8 +3,9 @@
 ### Requirement: Server route resolves a YouTube URL to its description
 
 The system SHALL expose a server-side route that accepts a YouTube URL or video
-id and returns the video's title and full description. The route SHALL run
-server-side so the browser is never subject to cross-origin restrictions.
+id and returns the video's title and full description via the YouTube Data API
+v3. The route SHALL run server-side and read the API key from a server-only
+environment variable so the key is never exposed to the browser.
 
 #### Scenario: Valid watch URL returns title and description
 
@@ -21,12 +22,11 @@ server-side so the browser is never subject to cross-origin restrictions.
 - **THEN** the system SHALL resolve the same video id as the canonical watch URL
 - **AND** SHALL return the same title and description
 
-#### Scenario: Full description is preferred over truncated metadata
+#### Scenario: API key is never exposed to the client
 
-- **WHEN** the fetched page contains both an embedded player-response description
-  and a truncated meta-tag description
-- **THEN** the system SHALL return the full player-response description rather
-  than the truncated meta description
+- **WHEN** the route calls the YouTube Data API
+- **THEN** it SHALL use a server-only environment variable for the key
+- **AND** the key SHALL NOT be included in any response or client bundle
 
 ### Requirement: The route returns structured errors for unusable input
 
@@ -39,21 +39,29 @@ client can show a localized message.
 - **WHEN** the route is called with input that contains no recognizable YouTube
   video id
 - **THEN** the system SHALL return an `invalid_url` error
-- **AND** SHALL NOT attempt to fetch any page
+- **AND** SHALL NOT attempt any upstream request
+
+#### Scenario: API key not configured
+
+- **WHEN** the server has no YouTube Data API key configured
+- **THEN** the system SHALL return a `not_configured` error
+- **AND** SHALL NOT affect any other part of the app
 
 #### Scenario: Video unavailable
 
-- **WHEN** the referenced video is private, deleted, or otherwise not retrievable
+- **WHEN** the Data API returns no item for the id (private, deleted, or
+  otherwise not retrievable)
 - **THEN** the system SHALL return a `not_found` error
 
 #### Scenario: Video has no usable description
 
-- **WHEN** the video is retrievable but exposes no description text
+- **WHEN** the video is retrievable but its description is empty
 - **THEN** the system SHALL return a `no_description` error
 
-#### Scenario: Upstream fetch fails
+#### Scenario: Upstream request fails
 
-- **WHEN** fetching the YouTube page fails (network error, timeout, or throttling)
+- **WHEN** the Data API request fails (network error, timeout, quota, or invalid
+  key)
 - **THEN** the system SHALL return a `fetch_failed` error that the client can
   surface as retryable
 

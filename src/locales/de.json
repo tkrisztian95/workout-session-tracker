@@ -753,6 +753,7 @@
   "youtube_save_new_plan": "Plan erstellen",
   "youtube_validation_not_workout": "Dieses Video sieht nicht nach einem Workout aus. Versuche einen Link, dessen Beschreibung die Übungen auflistet.",
   "youtube_error_invalid_url": "Das sieht nicht nach einem YouTube-Link aus.",
+  "youtube_error_not_configured": "Der YouTube-Import ist auf dem Server noch nicht eingerichtet (API-Schlüssel fehlt).",
   "youtube_error_not_found": "Dieses Video ist nicht verfügbar oder privat.",
   "youtube_error_no_description": "Dieses Video hat keine Beschreibung, aus der sich das Workout lesen lässt.",
   "youtube_error_fetch_failed": "Video konnte nicht gelesen werden. Prüfe den Link und versuche es erneut.",

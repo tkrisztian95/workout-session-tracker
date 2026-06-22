@@ -7,11 +7,12 @@ hand. Letting a user paste a YouTube link and have the app build the day for
 them removes that friction and reuses the AI parsing the app already has for
 notes import.
 
-The app is fully client-side and a browser cannot read a `youtube.com` page
-directly (no CORS), so the description must be fetched through a tiny
-server-side route. This is the first server route in the app; the rest of the
-flow reuses the existing provider-agnostic LLM client and the `PlanDay`
-data model, so no persisted schema changes are required.
+The app is fully client-side, so the description is fetched through a tiny
+server-side route that calls the official **YouTube Data API v3** with a
+server-only API key (kept off the client so it never leaks). This is the first
+server route in the app; the rest of the flow reuses the existing
+provider-agnostic LLM client and the `PlanDay` data model, so no persisted
+schema changes are required.
 
 No existing GitHub issue covers this (searched `tkrisztian95/workout-session-tracker`
 for "youtube", "video description", "import day" — 0 matches).
@@ -19,8 +20,8 @@ for "youtube", "video description", "import day" — 0 matches).
 ## What Changes
 
 - A new **server route** resolves a pasted YouTube URL (watch, `youtu.be`,
-  Shorts, or embed form) to the video's title and description, server-side, so
-  the browser is never blocked by CORS.
+  Shorts, or embed form) to the video's title and description by calling the
+  YouTube Data API v3 server-side, using a server-only `YOUTUBE_API_KEY`.
 - A new **"Import from YouTube"** entry on the Plans screen opens a modal where
   the user pastes a link. The app fetches the description, sends it through the
   existing LLM pipeline (the user's configured OpenAI/Gemini key), and parses it
@@ -39,8 +40,9 @@ for "youtube", "video description", "import day" — 0 matches).
 ### New Capabilities
 
 - `youtube-description-fetch`: A server route that accepts a YouTube URL or
-  video id, fetches the video page server-side, and returns the video's title
-  and description (with structured errors for invalid/unavailable videos).
+  video id and returns the video's title and description via the YouTube Data
+  API v3 (server-only key), with structured errors for invalid/unavailable
+  videos and a missing-key case.
 - `youtube-day-import`: Paste a YouTube link, AI-parse its description into a
   workout day, review/edit it, and add it to a chosen existing plan or a new
   plan.
@@ -48,7 +50,8 @@ for "youtube", "video description", "import day" — 0 matches).
 ## Impact
 
 - **New** `src/app/api/youtube-description/route.ts` — first server route in the
-  app; the project is no longer a pure static export.
+  app; the project is no longer a pure static export. Reads a server-only
+  `YOUTUBE_API_KEY` (documented in `.env.example` + README).
 - **New** AI module + prompt for parsing a description into a `PlanDay`; extends
   the `AiFeature` union with a `youtube-day-import` member.
 - **New** modal component for the paste → fetch → review → save flow; new entry

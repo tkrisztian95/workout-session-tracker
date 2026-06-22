@@ -718,6 +718,7 @@
   "youtube_save_new_plan": "Terv létrehozása",
   "youtube_validation_not_workout": "Ez a videó nem tűnik edzésnek. Próbálj olyan linket, amelynek leírása felsorolja a gyakorlatokat.",
   "youtube_error_invalid_url": "Ez nem tűnik YouTube linknek.",
+  "youtube_error_not_configured": "A YouTube-importálás még nincs beállítva a szerveren (hiányzó API-kulcs).",
   "youtube_error_not_found": "A videó nem elérhető vagy privát.",
   "youtube_error_no_description": "Ennek a videónak nincs leírása, amiből az edzést ki lehetne olvasni.",
   "youtube_error_fetch_failed": "Nem sikerült beolvasni a videót. Ellenőrizd a linket, és próbáld újra.",

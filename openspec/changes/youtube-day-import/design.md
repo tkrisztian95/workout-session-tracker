@@ -38,42 +38,47 @@ YouTube description, because the browser cannot read `youtube.com` cross-origin.
 **Non-Goals**
 
 - Parsing multiple days from one video (one video → one day).
-- Using the YouTube Data API or requiring a separate Google API key.
+- Scraping the YouTube watch page or using the unofficial InnerTube endpoints
+  (unreliable: consent walls + bot checks).
+- Exposing the API key to the browser — it stays a server-only env var.
 - Fetching captions/transcript or video frames — description text only.
 - Importing into an in-progress session (this is plan authoring, not logging).
 
 ## Decisions
 
-### 1. Fetch the description via a server route, not the browser
+### 1. Fetch the description via a server route calling the YouTube Data API v3
 
 Add `src/app/api/youtube-description/route.ts` (a `GET` handler taking
-`?url=` or `?v=`). It runs on the server, fetches the watch page with a desktop
-`User-Agent`, and extracts the description. This sidesteps CORS and keeps the
-user's flow to a single paste.
+`?url=` or `?v=`). It calls the official **YouTube Data API v3**
+(`videos.list?part=snippet`) server-side with a key read from the
+server-only `YOUTUBE_API_KEY` env var, and returns the snippet's title +
+description.
 
-**Why a route over the YouTube Data API**: no extra API key for the user, and no
-quota/billing surface. **Trade-off**: the app now requires a server runtime
-(e.g. Vercel) and is no longer a pure static export — accepted per product
-decision.
+**Why the route still exists** even though the Data API is CORS-enabled (so a
+browser _could_ call it): the API key must stay secret. Keeping the call
+server-side means the key is never inlined into the client bundle. **Trade-off**:
+the app requires a server runtime (e.g. Vercel) for this one route and is no
+longer a pure static export — accepted per product decision. Without the env var
+the route returns `not_configured` and the rest of the app is unaffected.
 
-### 2. Description extraction strategy (server-side)
+**Why the Data API over scraping**: the watch page / InnerTube endpoints return
+consent walls and bot checks to server requests, producing false
+"video unavailable" errors. The Data API is the supported, stable contract and
+is free at hobby scale (10,000 units/day; a snippet fetch is 1 unit).
 
-Extract in priority order, server-side, from the fetched HTML:
+### 2. Description extraction (Data API snippet)
 
-1. `ytInitialPlayerResponse` JSON embedded in the page →
-   `videoDetails.shortDescription` and `videoDetails.title`. This is the full,
-   untruncated description and the most reliable source.
-2. Fallback: `<meta name="description">` / `og:title` meta tags (truncated, but
-   better than nothing).
+The Data API returns clean JSON. A pure helper `pickVideoSnippet(data)` in
+`src/lib/youtubeData.ts` reads `items[0].snippet.title` /
+`.snippet.description` (the full, untruncated description), returning `null`
+when `items` is empty.
 
-Return a typed `{ videoId, title, description }`. If the video is unavailable,
-private, or the URL has no parseable id, return a structured error
-(`{ error: 'not_found' | 'invalid_url' | 'no_description' | 'fetch_failed' }`)
-with an appropriate HTTP status so the client can show a localized message.
-
-**Why parse `ytInitialPlayerResponse`**: the meta description is truncated to
-~160 chars and often omits the exercise list; the player-response JSON carries
-the complete description.
+Return a typed `{ videoId, title, description }`. Otherwise return a structured
+error (`{ error: 'invalid_url' | 'not_configured' | 'not_found' | 'no_description' | 'fetch_failed' }`)
+with an appropriate HTTP status so the client can show a localized message:
+empty `items` → `not_found`; blank description → `no_description`; non-OK HTTP
+(quota/key/network) → `fetch_failed`. The pure parser is unit-tested; the route
+logs the Data API error reason server-side for diagnosis.
 
 ### 3. URL parsing is shared and pure
 
@@ -139,16 +144,14 @@ flag on new plans.
 
 ## Risks / Trade-offs
 
-- **YouTube HTML drift**: YouTube can change its page markup, breaking
-  extraction. Mitigation: layered extraction (player-response JSON → meta tags),
-  structured errors, and the manual day editor always remains available as a
-  fallback. Extraction is isolated in one server function and unit-tested
-  against captured HTML fixtures.
-- **Rate limiting / bot detection**: YouTube may throttle the server IP.
-  Mitigation: a realistic `User-Agent`, short timeout, and a clear
-  `fetch_failed` error the user can retry.
-- **Server runtime requirement**: the app gains a backend dependency. Accepted;
-  documented in the proposal.
+- **API key required**: the feature needs a free `YOUTUBE_API_KEY`. Mitigation:
+  documented in `.env.example` + README; the route degrades to a clear
+  `not_configured` message rather than breaking the app.
+- **Daily quota**: the Data API allows 10,000 units/day (1 unit per snippet
+  fetch). Far beyond hobby scale; `fetch_failed` surfaces a `quotaExceeded`
+  reason in the server log if it ever trips.
+- **Server runtime requirement**: the app gains a backend dependency for this one
+  route. Accepted; documented in the proposal.
 - **Description quality varies**: some videos bury the workout in prose. The LLM
   guardrail + editable review step handle imperfect inputs without bad saves.
 

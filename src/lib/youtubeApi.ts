@@ -6,6 +6,7 @@ import { parseYoutubeId } from './youtube';
 
 export type YoutubeDescriptionErrorCode =
   | 'invalid_url'
+  | 'not_configured'
   | 'not_found'
   | 'no_description'
   | 'fetch_failed';

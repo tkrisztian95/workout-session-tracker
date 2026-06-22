@@ -46,6 +46,8 @@ export default function YoutubeDayImportModal({ onClose, onSaved }: Props) {
     switch (code) {
       case 'invalid_url':
         return t.youtube_error_invalid_url;
+      case 'not_configured':
+        return t.youtube_error_not_configured;
       case 'not_found':
         return t.youtube_error_not_found;
       case 'no_description':
