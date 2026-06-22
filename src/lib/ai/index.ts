@@ -4,6 +4,9 @@ export { buildPlanSuggestionPrompt, suggestPlan } from './plan';
 export type { AiImportResult } from './import';
 export { importSessions } from './import';
 
+export type { AiYoutubeDayResult, YoutubeVideoInput } from './youtubeDay';
+export { parseYoutubeDay, buildYoutubeDayPrompt } from './youtubeDay';
+
 export type { AiAdjustResult, AiSwapResult } from './adjust';
 export { adjustPlan, swapExercise } from './adjust';
 
