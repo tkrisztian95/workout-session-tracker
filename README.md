@@ -1,6 +1,8 @@
 # 🏋️ Workout Sessions Tracker
 
-> An **AI-augmented**, mobile-first, privacy-first workout tracker. Log sessions, follow plans, and visualize progress — then let AI use your **full training history, plans, and progression** to suggest the next plan, swap an exercise, or parse a free-form workout into structured sets. All data stays in your browser; AI runs through your own OpenAI key.
+> A **personal learning project** for building real, context-aware AI features into a product — wrapped in a mobile-first workout tracker I actually use. Log sessions, follow plans, and visualize progress, then let AI use your **full training history, plans, and progression** to suggest the next plan, swap an exercise, or parse a free-form workout into structured sets. Bring your own OpenAI or Gemini key; all data stays in your browser.
+
+I mainly use it to experiment with LLM features on real data — building context envelopes, prompt design, structured output, provider abstraction — on a domain I know well. It happens to be a workout tracker I use. MIT-licensed, no backend yet — everything runs client-side for now.
 
 [![CI](https://github.com/tkrisztian95/workout-session-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/tkrisztian95/workout-session-tracker/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tkrisztian95_workout-session-tracker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=tkrisztian95_workout-session-tracker)
@@ -28,18 +30,20 @@ See [public/screenshots/README.md](public/screenshots/README.md) for the full in
 
 ## ✨ Why this app
 
-- **Context-aware AI, not generic prompts.** Every AI feature receives your full training context — completed sessions, weight progression per exercise, active plans, profile, and preferences. Plan suggestions, exercise swaps, and free-form workout parsing are grounded in **what you actually did**, not a blank-slate prompt. You bring your own OpenAI key; the app works fully without one.
-- **Privacy-first.** No account, no backend, no database. Every plan, session, and stat lives in `localStorage`. The OpenAI key is stored in your browser, and AI requests go directly from your browser to `api.openai.com` — the app never proxies them.
+- **A playground for context-aware AI.** The whole point: every AI feature receives your full training context — completed sessions, weight progression per exercise, active plans, profile, and preferences. Plan suggestions, exercise swaps, and free-form workout parsing are grounded in **what you actually did**, not a blank-slate prompt. Bring your own key; the app works fully without one.
+- **Bring your own provider.** Use an OpenAI **or** Google Gemini key — pick the provider and model in settings. The key is stored in your browser and requests go straight from the browser to the provider, never through a server I run.
+- **Local-first for now.** No backend yet — every plan, session, and stat lives in `localStorage`. No account or database needed to use it.
 - **Mobile-first.** Built for the phone, not for a desktop with a phone view bolted on. Bottom nav, drum pickers, modal sheets, large tap targets.
-- **Open, hackable, forkable.** MIT-licensed Next.js app. Deploy your own copy or run it locally and never touch the network.
+- **Open and hackable.** MIT-licensed Next.js app. Fork it, run it locally, learn from it.
 
 ## 🎯 Features
 
 - 🏃 **Workout Sessions** — Start free-form or plan-based sessions with a real-time timer. Log sets, reps, weights, and durations per exercise. Pause and resume anytime. Rate the session on completion.
+- 📚 **Exercise Catalog** — A built-in starter list of common machines and movements, each with a muscle group and sensible default sets/reps, so you can drop an exercise into a plan or session without typing it from scratch.
 - 📋 **Workout Plans** — Multi-day plans with core and optional exercises per day, plus shared exercises that apply to every day. Schedule days by weekday. Search, filter, and sort across active and completed plans.
 - 📅 **Session History** — Browse completed sessions on a weekday strip and a date-range timeline. Drill into any session for sets, durations, plan-vs-actual comparison, and a per-exercise timeline. Manually log past sessions.
 - 📊 **Statistics** — Volume, frequency, average duration, plans completed. Exercise weight progression with trend indicators and line charts. Muscle-group distribution radar. Volume bar chart with time-range filters.
-- 🤖 **AI Plan Suggestions** — Personalized plans (`gpt-4o-mini` or `gpt-4o`) generated with the full corpus of your past sessions, weight progression, existing plans, and stated preferences sent as context. Each suggestion comes with a "why this plan" rationale you can read before importing.
+- 🤖 **AI Plan Suggestions** — Personalized plans (OpenAI `gpt-4o`/`gpt-4o-mini` or Gemini `2.5-flash`/`2.5-pro`) generated with the full corpus of your past sessions, weight progression, existing plans, and stated preferences sent as context. Each suggestion comes with a "why this plan" rationale you can read before importing.
 - 🔄 **AI Exercise Swap** — Replace any exercise in an active plan with an AI-suggested alternative that matches the muscle group, equipment, and your prior performance on similar movements.
 - 📝 **Import Workout from Notes** — Paste a free-form session description ("did 5×5 squats at 100, then 3 sets of pull-ups…") and have it parsed into structured exercises and sets, using your exercise history to disambiguate names.
 - 🏆 **Achievements** — Earned milestones (first session, weight PRs, streaks, plan completions) with a celebration overlay.
@@ -72,23 +76,14 @@ The app runs at [http://localhost:3000](http://localhost:3000). On first load in
 
 Every env var is optional — the app works fully offline without any of them.
 
-| Variable                   | Purpose                                                                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_POSTHOG_KEY`  | Enables PostHog analytics. Leave unset to disable PostHog entirely (no init, no script).                                                    |
-| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog ingest host (defaults to `https://eu.i.posthog.com`).                                                                               |
-| `OPENAI_API_KEY`           | Only used by `npm run eval`. The app reads the user's OpenAI key from `localStorage` at runtime — it never reads this file in browser code. |
+| Variable                                                    | Purpose                                                                                                                                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_POSTHOG_KEY`                                   | Enables PostHog analytics. Leave unset to disable PostHog entirely (no init, no script).                                                         |
+| `NEXT_PUBLIC_POSTHOG_HOST`                                  | PostHog ingest host (defaults to `https://eu.i.posthog.com`).                                                                                    |
+| `OPENAI_API_KEY`                                            | Only used by `npm run eval`. At runtime the app reads the user's key from `localStorage` — it never reads this file in browser code.             |
+| `NEXT_PUBLIC_GEMINI_API_KEY` / `NEXT_PUBLIC_OPENAI_API_KEY` | Dev/preview-only fallback so AI features work without entering a key in the UI. Never set these in production. See [.env.example](.env.example). |
 
 See [.env.example](.env.example) for the full template.
-
-## 📦 Self-hosting
-
-This is a fully static-friendly Next.js app — no database, no server-side state. You can host it anywhere:
-
-- **Fork & deploy to Vercel:** [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/tkrisztian95/workout-session-tracker) — clones the repo and provisions a new project. Set `NEXT_PUBLIC_POSTHOG_KEY` only if you want analytics; everything else is optional.
-- **Any Node host:** `npm run build && npm start`.
-- **Static export:** the app degrades gracefully — only `/history/[id]` and `/plans/[id]` are dynamic (they read from `localStorage` on the client).
-
-Your fork's PostHog will only ingest events if you set your own `NEXT_PUBLIC_POSTHOG_KEY`. The upstream key is never bundled.
 
 ## 🏗 Architecture at a glance
 
@@ -100,15 +95,6 @@ Your fork's PostHog will only ingest events if you set your own `NEXT_PUBLIC_POS
 - **`docs/data-structure.md`** — The persisted data shape: every `localStorage` key, every persisted type, every migration, and the export payload.
 
 The architecture is intentionally flat. There is no global state store, no service worker, no background sync. State reads from `localStorage` on mount and writes synchronously on user action. The `useEffect`/mount-gate pattern in [`HomePage`](src/app/page.tsx) and friends exists specifically to avoid hydration mismatches with `localStorage`-derived UI.
-
-## 🔒 Data & Privacy
-
-All user data (profile, plans, sessions, achievements, AI config) is stored exclusively in the browser's `localStorage` under `wst_*` keys. The app never sends this data to any server except:
-
-- **PostHog** — anonymous usage analytics. Only when `NEXT_PUBLIC_POSTHOG_KEY` is configured **and** the user accepts the consent prompt. Form values for `name`, `sex`, and the AI API key field are scrubbed before send.
-- **OpenAI** — only when you explicitly trigger an AI feature with your own API key. The key is stored in `localStorage`, the request goes directly from your browser to `api.openai.com`, and the app never proxies it.
-
-There is no telemetry beyond what's listed above. There is no third-party script loaded that you don't see in [`src/app/layout.tsx`](src/app/layout.tsx).
 
 ## 📜 Scripts
 
