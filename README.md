@@ -45,7 +45,7 @@ See [public/screenshots/README.md](public/screenshots/README.md) for the full in
 - 📊 **Statistics** — Volume, frequency, average duration, plans completed. Exercise weight progression with trend indicators and line charts. Muscle-group distribution radar. Volume bar chart with time-range filters.
 - 🤖 **AI Plan Suggestions** — Personalized plans (OpenAI `gpt-4o`/`gpt-4o-mini` or Gemini `2.5-flash`/`2.5-pro`) generated with the full corpus of your past sessions, weight progression, existing plans, and stated preferences sent as context. Each suggestion comes with a "why this plan" rationale you can read before importing.
 - 🔄 **AI Exercise Swap** — Replace any exercise in an active plan with an AI-suggested alternative that matches the muscle group, equipment, and your prior performance on similar movements.
-- 📝 **Import Workout from Notes** — Paste a free-form session description ("did 5×5 squats at 100, then 3 sets of pull-ups…") and have it parsed into structured exercises and sets, using your exercise history to disambiguate names.
+- 🤖 **AI Import Workout from Notes** — Paste a free-form session description ("did 5×5 squats at 100, then 3 sets of pull-ups…") and have AI parse it into structured exercises and sets, using your exercise history to disambiguate names.
 - 🏆 **Achievements** — Earned milestones (first session, weight PRs, streaks, plan completions) with a celebration overlay.
 - ⚙️ **Profile & Settings** — Name, sex, age, height, weight. Theme (light / dark / system). Language (English, Hungarian, German). Data export / import.
 
