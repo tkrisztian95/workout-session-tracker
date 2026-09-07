@@ -6,86 +6,12 @@ import MuscleBadge from '@/components/MuscleBadge';
 import { useTranslations } from '@/lib/locale-context';
 import { cn } from '@/lib/utils';
 import {
-  actualSetsForPlan,
+  compareSessionToPlan,
   formatExerciseDetail,
-  plannedSetsForPlan,
-  classifyPlannedExercise,
+  type ComparisonRow,
+  type ComparisonStatus,
 } from '@/lib/sessionUtils';
-import type { Exercise, PlanDay, PlanExercise, WorkoutSession } from '@/lib/types';
-
-type Status = 'overdone' | 'matched' | 'underperformed' | 'missed' | 'extra';
-
-interface ComparisonRow {
-  key: string;
-  name: string;
-  muscle?: PlanExercise['muscle'];
-  plannedSets: number;
-  actualSets: number;
-  status: Status;
-  planned?: PlanExercise;
-  actual?: Exercise;
-}
-
-function normName(s: string): string {
-  return s.toLowerCase().trim();
-}
-
-function buildRows(session: WorkoutSession, planDay: PlanDay | undefined): ComparisonRow[] {
-  const planned: PlanExercise[] = planDay
-    ? [...planDay.coreExercises, ...planDay.optionalExercises]
-    : [];
-
-  const actualByName = new Map<string, Exercise>();
-  for (const ex of session.exercises) {
-    actualByName.set(normName(ex.name), ex);
-  }
-  const plannedByName = new Map<string, PlanExercise>();
-  for (const p of planned) {
-    plannedByName.set(normName(p.name), p);
-  }
-
-  const rows: ComparisonRow[] = [];
-  const seen = new Set<string>();
-
-  for (const p of planned) {
-    const key = normName(p.name);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const a = actualByName.get(key);
-    const plannedSets = plannedSetsForPlan(p);
-    const actualSets = a ? actualSetsForPlan(a) : 0;
-    rows.push({
-      key: `planned-${p.id}`,
-      name: p.name,
-      muscle: p.muscle,
-      plannedSets,
-      actualSets,
-      status: classifyPlannedExercise(p, a),
-      planned: p,
-      actual: a,
-    });
-  }
-
-  for (const a of session.exercises) {
-    const key = normName(a.name);
-    if (seen.has(key)) continue;
-    if (a.dismissed) continue;
-    const actualSets = actualSetsForPlan(a);
-    if (actualSets === 0) continue;
-    seen.add(key);
-    rows.push({
-      key: `extra-${a.id}`,
-      name: a.name,
-      muscle: a.muscle,
-      plannedSets: 0,
-      actualSets,
-      status: 'extra',
-      actual: a,
-    });
-  }
-
-  return rows;
-}
+import type { Exercise, PlanDay, WorkoutSession } from '@/lib/types';
 
 interface SessionPlanComparisonProps {
   session: WorkoutSession;
@@ -97,7 +23,7 @@ export function SessionPlanComparison({ session, planDay, planName }: SessionPla
   const t = useTranslations();
 
   const rows = useMemo(() => {
-    const built = buildRows(session, planDay);
+    const built = compareSessionToPlan(session, planDay);
     return built.sort((a, b) => {
       const deltaA = a.actualSets - a.plannedSets;
       const deltaB = b.actualSets - b.plannedSets;
@@ -118,7 +44,7 @@ export function SessionPlanComparison({ session, planDay, planName }: SessionPla
     );
   }
 
-  const counts = rows.reduce<Record<Status, number>>(
+  const counts = rows.reduce<Record<ComparisonStatus, number>>(
     (acc, r) => {
       acc[r.status] += 1;
       return acc;

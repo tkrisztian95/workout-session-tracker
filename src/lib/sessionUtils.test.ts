@@ -4,14 +4,16 @@ import {
   buildSessionTimeline,
   classifyLoggedSets,
   classifyPlannedExercise,
+  compareSessionToPlan,
   countsTowardSetsGoal,
+  evaluateSession,
   formatExerciseDetail,
   formatMonthBucket,
   formatRepsTarget,
   getSessionBucket,
   parseRepScheme,
 } from './sessionUtils';
-import type { Exercise, LoggedSet, PlanExercise, WorkoutSession } from './types';
+import type { Exercise, LoggedSet, PlanDay, PlanExercise, WorkoutSession } from './types';
 
 describe('formatRepsTarget', () => {
   it('returns the uniform rep count as a string', () => {
@@ -451,5 +453,209 @@ describe('classifyPlannedExercise', () => {
         actual({ type: 'duration', completed: true, duration: 60 }),
       ),
     ).toBe('missed');
+  });
+});
+
+// ─── Shared plan-comparison + evaluation fixtures ─────────────────────────────
+
+const setAt = (weight: number, reps: number): LoggedSet => ({
+  weight,
+  reps,
+  loggedAt: '2026-06-07T10:00:00.000Z',
+});
+
+const planExercise = (over: Partial<PlanExercise> = {}): PlanExercise => ({
+  id: `p-${over.name ?? 'ex'}`,
+  name: 'Exercise',
+  type: 'sets-reps',
+  sets: 3,
+  reps: 8,
+  role: 'core',
+  ...over,
+});
+
+const sessionExercise = (over: Partial<Exercise> = {}): Exercise => ({
+  id: `a-${over.name ?? 'ex'}`,
+  name: 'Exercise',
+  type: 'sets-reps',
+  ...over,
+});
+
+const planDayOf = (core: PlanExercise[], optional: PlanExercise[] = []): PlanDay => ({
+  id: 'day-1',
+  name: 'Push',
+  weekdays: [1],
+  coreExercises: core,
+  optionalExercises: optional,
+});
+
+/**
+ * A session with one exercise of each comparison status:
+ * - Bench: 4 logged vs 3 planned → overdone
+ * - Squat: 3 logged vs 3 planned → matched
+ * - Row: 2 logged vs 3 planned → underperformed
+ * - Curl: planned, nothing performed → missed
+ * - Dips: performed, not in plan → extra
+ */
+function mixedFixture(): { session: WorkoutSession; planDay: PlanDay } {
+  const planDay = planDayOf([
+    planExercise({ name: 'Bench', sets: 3 }),
+    planExercise({ name: 'Squat', sets: 3 }),
+    planExercise({ name: 'Row', sets: 3 }),
+    planExercise({ name: 'Curl', sets: 3 }),
+  ]);
+  const session: WorkoutSession = {
+    id: 's-mixed',
+    startedAt: '2026-06-07T09:00:00.000Z',
+    completedAt: '2026-06-07T10:00:00.000Z',
+    planId: 'plan-1',
+    planDayId: 'day-1',
+    rating: 4,
+    exercises: [
+      sessionExercise({
+        name: 'Bench',
+        loggedSets: [setAt(60, 8), setAt(60, 8), setAt(60, 8), setAt(60, 8)],
+      }),
+      sessionExercise({ name: 'Squat', loggedSets: [setAt(80, 8), setAt(80, 8), setAt(80, 8)] }),
+      sessionExercise({ name: 'Row', loggedSets: [setAt(50, 8), setAt(50, 8)] }),
+      sessionExercise({ name: 'Dips', loggedSets: [setAt(0, 12), setAt(0, 12)] }),
+    ],
+  };
+  return { session, planDay };
+}
+
+describe('compareSessionToPlan', () => {
+  it('produces one row per planned exercise plus extras, with the right statuses', () => {
+    const { session, planDay } = mixedFixture();
+    const rows = compareSessionToPlan(session, planDay);
+    const byName = Object.fromEntries(rows.map((r) => [r.name, r.status]));
+    expect(byName).toEqual({
+      Bench: 'overdone',
+      Squat: 'matched',
+      Row: 'underperformed',
+      Curl: 'missed',
+      Dips: 'extra',
+    });
+  });
+
+  it('tallies to the expected per-status counts', () => {
+    const { session, planDay } = mixedFixture();
+    const rows = compareSessionToPlan(session, planDay);
+    const counts = rows.reduce((acc, r) => ({ ...acc, [r.status]: acc[r.status] + 1 }), {
+      overdone: 0,
+      matched: 0,
+      underperformed: 0,
+      missed: 0,
+      extra: 0,
+    } as Record<string, number>);
+    expect(counts).toEqual({ overdone: 1, matched: 1, underperformed: 1, missed: 1, extra: 1 });
+  });
+
+  it('returns all-extra rows when there is no plan day', () => {
+    const { session } = mixedFixture();
+    const rows = compareSessionToPlan(session, undefined);
+    expect(rows.every((r) => r.status === 'extra')).toBe(true);
+    expect(rows).toHaveLength(4);
+  });
+});
+
+describe('evaluateSession', () => {
+  it('counts match the vs-Plan comparison for all five statuses', () => {
+    const { session, planDay } = mixedFixture();
+    const rows = compareSessionToPlan(session, planDay);
+    const tabCounts = rows.reduce((acc, r) => ({ ...acc, [r.status]: acc[r.status] + 1 }), {
+      overdone: 0,
+      matched: 0,
+      underperformed: 0,
+      missed: 0,
+      extra: 0,
+    } as Record<string, number>);
+    expect(evaluateSession(session, planDay).counts).toEqual(tabCounts);
+  });
+
+  it('is stamped with schema version 1', () => {
+    const { session, planDay } = mixedFixture();
+    expect(evaluateSession(session, planDay).v).toBe(1);
+  });
+
+  it('is deterministic', () => {
+    const { session, planDay } = mixedFixture();
+    expect(evaluateSession(session, planDay)).toEqual(evaluateSession(session, planDay));
+  });
+
+  it('verdict is underperformed when misses + underperformed outweigh overdone', () => {
+    const { session, planDay } = mixedFixture();
+    // fixture: 1 overdone vs 1 underperformed + 1 missed → underperformed
+    expect(evaluateSession(session, planDay).overall).toBe('underperformed');
+  });
+
+  it('verdict is on-target when everything matches', () => {
+    const planDay = planDayOf([planExercise({ name: 'Bench', sets: 3 })]);
+    const session: WorkoutSession = {
+      id: 's-ok',
+      startedAt: '2026-06-07T09:00:00.000Z',
+      completedAt: '2026-06-07T10:00:00.000Z',
+      exercises: [
+        sessionExercise({ name: 'Bench', loggedSets: [setAt(60, 8), setAt(60, 8), setAt(60, 8)] }),
+      ],
+    };
+    const evaluation = evaluateSession(session, planDay);
+    expect(evaluation.overall).toBe('on-target');
+    expect(evaluation.counts.matched).toBe(1);
+  });
+
+  it('verdict is overdone when overdone outweighs the shortfalls', () => {
+    const planDay = planDayOf([
+      planExercise({ name: 'Bench', sets: 2 }),
+      planExercise({ name: 'Squat', sets: 2 }),
+    ]);
+    const session: WorkoutSession = {
+      id: 's-over',
+      startedAt: '2026-06-07T09:00:00.000Z',
+      completedAt: '2026-06-07T10:00:00.000Z',
+      exercises: [
+        sessionExercise({
+          name: 'Bench',
+          loggedSets: [setAt(60, 8), setAt(60, 8), setAt(60, 8), setAt(60, 8)],
+        }),
+        sessionExercise({
+          name: 'Squat',
+          loggedSets: [setAt(80, 8), setAt(80, 8), setAt(80, 8), setAt(80, 8)],
+        }),
+      ],
+    };
+    expect(evaluateSession(session, planDay).overall).toBe('overdone');
+  });
+
+  it('no-plan session still records counts.extra, volume and rating, and omits highlights', () => {
+    const session: WorkoutSession = {
+      id: 's-free',
+      startedAt: '2026-06-07T09:00:00.000Z',
+      completedAt: '2026-06-07T10:00:00.000Z',
+      rating: 4,
+      exercises: [
+        sessionExercise({ name: 'A', loggedSets: [setAt(50, 10), setAt(50, 10)] }),
+        sessionExercise({ name: 'B', loggedSets: [setAt(30, 12)] }),
+        sessionExercise({ name: 'C', loggedSets: [setAt(20, 15)] }),
+      ],
+    };
+    const evaluation = evaluateSession(session, undefined);
+    expect(evaluation.overall).toBe('no-plan');
+    expect(evaluation.counts.extra).toBe(3);
+    expect(evaluation.rating).toBe(4);
+    expect(evaluation.totalVolumeKg).toBe(50 * 10 + 50 * 10 + 30 * 12 + 20 * 15);
+    expect(evaluation.highlights).toBeUndefined();
+  });
+
+  it('ranks highlights by set deviation, numeric deviations before missed/extra, capped at 3', () => {
+    const { session, planDay } = mixedFixture();
+    const highlights = evaluateSession(session, planDay).highlights ?? [];
+    expect(highlights).toHaveLength(3);
+    expect(highlights.map((h) => h.status)).not.toContain('matched');
+    expect(highlights[0]).toMatchObject({
+      exerciseName: 'Bench',
+      status: 'overdone',
+      delta: '+1 set',
+    });
   });
 });

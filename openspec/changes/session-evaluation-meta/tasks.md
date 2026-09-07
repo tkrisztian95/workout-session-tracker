@@ -1,16 +1,16 @@
 ## 1. Types
 
-- [ ] 1.1 Add `SessionEvaluation` and `PlanDaySnapshot` interfaces plus `WorkoutSession.evaluation?` and `WorkoutSession.planDaySnapshot?` to `src/lib/types.ts`, per the spec shapes (`SessionEvaluation`: `overall`, `counts`, `highlights?`, `totalVolumeKg?`, `avgWeightKg?`, `setCount?`, `rating?`, `v: 1`; `PlanDaySnapshot`: `planName`, `day: PlanDay`, `capturedAt`). Verify `npx tsc --noEmit` passes.
+- [x] 1.1 Add `SessionEvaluation` and `PlanDaySnapshot` interfaces plus `WorkoutSession.evaluation?` and `WorkoutSession.planDaySnapshot?` to `src/lib/types.ts`, per the spec shapes (`SessionEvaluation`: `overall`, `counts`, `highlights?`, `totalVolumeKg?`, `avgWeightKg?`, `setCount?`, `rating?`, `v: 1`; `PlanDaySnapshot`: `planName`, `day: PlanDay`, `capturedAt`). Verify `npx tsc --noEmit` passes.
 
 ## 2. Shared comparison core
 
-- [ ] 2.1 Extract `buildRows` + `ComparisonRow` + the `counts` reducer from `src/components/SessionPlanComparison.tsx` into a pure `compareSessionToPlan(session, planDay?): ComparisonRow[]` in `src/lib/sessionUtils.ts`. Verify a new unit test asserts row status + counts for a mixed session (overdone + matched + underperformed + missed + extra).
-- [ ] 2.2 Rewire `SessionPlanComparison.tsx` onto `compareSessionToPlan`; delete its local `buildRows`. Verify the tab still renders the same legend counts (run the tests touching it, or a Playwright screenshot of a session's vs-Plan tab).
+- [x] 2.1 Extract `buildRows` + `ComparisonRow` + the `counts` reducer from `src/components/SessionPlanComparison.tsx` into a pure `compareSessionToPlan(session, planDay?): ComparisonRow[]` in `src/lib/sessionUtils.ts`. Verify a new unit test asserts row status + counts for a mixed session (overdone + matched + underperformed + missed + extra).
+- [x] 2.2 Rewire `SessionPlanComparison.tsx` onto `compareSessionToPlan`; delete its local `buildRows`. Verify the tab still renders the same legend counts (run the tests touching it, or a Playwright screenshot of a session's vs-Plan tab).
 
 ## 3. `evaluateSession`
 
-- [ ] 3.1 Implement `evaluateSession(session, planDay?): SessionEvaluation` in `src/lib/sessionUtils.ts` — `overall` rule from design §3, `counts` from `compareSessionToPlan`, numeric rollups from design §3, `highlights` top-3 from design §3. No `storage.ts` import. Verify unit tests: plan verdicts (overdone / on-target / underperformed), `no-plan` session (counts.extra + volume + rating), determinism (two calls deeply equal), `v === 1`.
-- [ ] 3.2 Add a unit test asserting the vs-Plan comparison counts for a fixture session equal `evaluateSession(session, planDay).counts` for all five statuses (spec: "vs-Plan tab and persisted meta agree").
+- [x] 3.1 Implement `evaluateSession(session, planDay?): SessionEvaluation` in `src/lib/sessionUtils.ts` — `overall` rule from design §3, `counts` from `compareSessionToPlan`, numeric rollups from design §3, `highlights` top-3 from design §3. No `storage.ts` import. Verify unit tests: plan verdicts (overdone / on-target / underperformed), `no-plan` session (counts.extra + volume + rating), determinism (two calls deeply equal), `v === 1`.
+- [x] 3.2 Add a unit test asserting the vs-Plan comparison counts for a fixture session equal `evaluateSession(session, planDay).counts` for all five statuses (spec: "vs-Plan tab and persisted meta agree").
 
 ## 4. Snapshot + centralized compute in the storage layer
 
