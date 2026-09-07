@@ -5,6 +5,7 @@ import { Check, ChevronDown, Sparkles } from 'lucide-react';
 import { getLlmConfig, saveLlmConfig } from '@/lib/storage';
 import type { LlmProvider } from '@/lib/types';
 import { Button, FieldLabel, Input, Select } from '@/components/ui';
+import { useTranslations } from '@/lib/locale-context';
 
 interface AiConfigCardProps {
   defaultOpen?: boolean;
@@ -12,14 +13,14 @@ interface AiConfigCardProps {
   onToggle?: () => void;
 }
 
+type ModelTier = 'faster' | 'capable';
+
 interface ProviderMeta {
   label: string;
   defaultModel: string;
-  models: { value: string; label: string }[];
-  keyLabel: string;
+  models: { value: string; name: string; tier: ModelTier }[];
   keyUrl: string;
   keyPlaceholder: string;
-  tagline: string;
 }
 
 const PROVIDERS: Record<LlmProvider, ProviderMeta> = {
@@ -27,25 +28,21 @@ const PROVIDERS: Record<LlmProvider, ProviderMeta> = {
     label: 'OpenAI',
     defaultModel: 'gpt-4o-mini',
     models: [
-      { value: 'gpt-4o-mini', label: 'GPT-4o Mini (faster, cheaper)' },
-      { value: 'gpt-4o', label: 'GPT-4o (more capable)' },
+      { value: 'gpt-4o-mini', name: 'GPT-4o Mini', tier: 'faster' },
+      { value: 'gpt-4o', name: 'GPT-4o', tier: 'capable' },
     ],
-    keyLabel: 'OpenAI API Key',
     keyUrl: 'https://platform.openai.com/api-keys',
     keyPlaceholder: 'sk-...',
-    tagline: 'Use your own OpenAI subscription',
   },
   gemini: {
     label: 'Gemini',
     defaultModel: 'gemini-2.5-flash',
     models: [
-      { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (faster, cheaper)' },
-      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (more capable)' },
+      { value: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', tier: 'faster' },
+      { value: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', tier: 'capable' },
     ],
-    keyLabel: 'Gemini API Key',
     keyUrl: 'https://aistudio.google.com/app/apikey',
     keyPlaceholder: 'AIza...',
-    tagline: 'Use your own Google Gemini key',
   },
 };
 
@@ -54,6 +51,7 @@ export default function AiConfigCard({
   open: openProp,
   onToggle,
 }: AiConfigCardProps) {
+  const t = useTranslations();
   const savedConfig = getLlmConfig();
   const [provider, setProvider] = useState<LlmProvider>(() => savedConfig?.provider ?? 'openai');
   const [apiKey, setApiKey] = useState(() => savedConfig?.apiKey ?? '');
@@ -66,6 +64,9 @@ export default function AiConfigCard({
   const toggle = controlled ? onToggle! : () => setInternalOpen((o) => !o);
 
   const meta = PROVIDERS[provider];
+
+  const tierLabel = (tier: ModelTier) =>
+    tier === 'faster' ? t.ai_config_model_faster : t.ai_config_model_capable;
 
   function handleProviderChange(next: LlmProvider) {
     setProvider(next);
@@ -92,7 +93,9 @@ export default function AiConfigCard({
         <div className="flex-1 text-left min-w-0">
           {apiKey ? (
             <>
-              <p className="text-foreground text-sm font-semibold leading-tight">AI Companion</p>
+              <p className="text-foreground text-sm font-semibold leading-tight">
+                {t.ai_config_connected_title}
+              </p>
               <p className="text-dim text-xs mt-0.5 truncate">
                 {meta.label} · {apiKey.slice(0, 5)}··· · {model}
               </p>
@@ -100,9 +103,9 @@ export default function AiConfigCard({
           ) : (
             <>
               <p className="text-foreground text-sm font-semibold leading-tight">
-                Connect your AI companion
+                {t.ai_config_connect_title}
               </p>
-              <p className="text-dim text-xs mt-0.5">Use your own OpenAI or Gemini key</p>
+              <p className="text-dim text-xs mt-0.5">{t.ai_config_connect_subtitle}</p>
             </>
           )}
         </div>
@@ -110,7 +113,7 @@ export default function AiConfigCard({
           {saved && (
             <span className="flex items-center gap-1 text-xs font-semibold text-success">
               <Check className="w-3 h-3" strokeWidth={3} />
-              Saved
+              {t.ai_config_saved}
             </span>
           )}
           <ChevronDown
@@ -121,7 +124,7 @@ export default function AiConfigCard({
       {open && (
         <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
           <div>
-            <FieldLabel htmlFor="ai-provider">Provider</FieldLabel>
+            <FieldLabel htmlFor="ai-provider">{t.ai_config_provider_label}</FieldLabel>
             <Select
               id="ai-provider"
               value={provider}
@@ -137,7 +140,7 @@ export default function AiConfigCard({
           <div>
             <div className="flex items-baseline justify-between mb-1.5">
               <FieldLabel htmlFor="ai-api-key" className="mb-0">
-                {meta.keyLabel}
+                {t.ai_config_key_label.replace('{provider}', meta.label)}
               </FieldLabel>
               <a
                 href={meta.keyUrl}
@@ -145,7 +148,7 @@ export default function AiConfigCard({
                 rel="noopener noreferrer"
                 className="text-brand text-xs font-medium"
               >
-                Get API key ↗
+                {t.ai_config_get_key}
               </a>
             </div>
             <Input
@@ -159,20 +162,18 @@ export default function AiConfigCard({
             />
           </div>
           <div>
-            <FieldLabel htmlFor="ai-model">Model</FieldLabel>
+            <FieldLabel htmlFor="ai-model">{t.ai_config_model_label}</FieldLabel>
             <Select id="ai-model" value={model} onChange={(e) => setModel(e.target.value)}>
               {meta.models.map((m) => (
                 <option key={m.value} value={m.value}>
-                  {m.label}
+                  {m.name} ({tierLabel(m.tier)})
                 </option>
               ))}
             </Select>
           </div>
-          <p className="text-dim text-xs leading-relaxed">
-            Your API key is stored locally on this device.
-          </p>
+          <p className="text-dim text-xs leading-relaxed">{t.ai_config_key_storage_note}</p>
           <Button onClick={handleSave} disabled={!apiKey.trim()} className="w-full">
-            Save
+            {t.ai_config_save}
           </Button>
         </div>
       )}
