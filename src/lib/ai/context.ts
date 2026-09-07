@@ -1,4 +1,4 @@
-import type { WorkoutPlan, WorkoutSession, LoggedSet, Sex } from '../types';
+import type { WorkoutPlan, WorkoutSession, LoggedSet, Sex, SessionEvaluation } from '../types';
 import type { Muscle } from '../muscles';
 import type { Locale } from '../i18n';
 import {
@@ -42,7 +42,8 @@ export type AiFeature =
   | 'exercise-swap'
   | 'exercise-suggest'
   | 'plan-adjust'
-  | 'notes-import';
+  | 'notes-import'
+  | 'session-debrief';
 
 export interface ContextProfile {
   name?: string;
@@ -68,6 +69,8 @@ export interface SessionSummary {
   totalVolumeKg?: number;
   exerciseCount: number;
   topExercises: SessionSummaryExercise[];
+  /** Persisted plan-adherence rollup (#54), carried through for the prompt strip. */
+  evaluation?: SessionEvaluation;
 }
 
 export interface SessionSummaryExercise {
@@ -84,11 +87,13 @@ export interface SessionSummaryExercise {
 // feeder issues will widen these as they ship.
 //
 // - `ContextPreferences` → issue #53 (onboarding)
-// - `SessionEvaluation`  → issue #54 (session evaluation meta)
 // - `ContextLikes`       → issue #52 (like / dislike exercises)
 export type ContextPreferences = Record<string, never>;
-export type SessionEvaluation = Record<string, never>;
 export type ContextLikes = Record<string, never>;
+
+// `SessionEvaluation` shipped with issue #54 — re-exported from the persisted
+// types so envelope consumers keep importing it from here.
+export type { SessionEvaluation } from '../types';
 
 export interface AiContext {
   /** Locale captured at envelope-build time. Drives response language. */
@@ -107,7 +112,11 @@ export interface AiContext {
   // ── Deferred (declared optional; populated by future feeder issues) ──────
   /** Onboarding-captured preferences. Populated by #53. */
   preferences?: ContextPreferences;
-  /** Per-session evaluation meta. Populated by #54. */
+  /**
+   * Per-session evaluation meta (#54), aligned to the same window as
+   * `recentSessions`. Sessions without a persisted evaluation are omitted.
+   * Always an array — `[]` when no recent session carries one.
+   */
   evaluation?: SessionEvaluation[];
   /** Liked / disliked exercise names. Populated by #52. */
   likes?: ContextLikes;
@@ -192,6 +201,7 @@ export function summariseSessionToSummary(
   if (typeof dur === 'number') summary.durationMin = dur;
   const vol = totalVolumeForSession(session);
   if (typeof vol === 'number') summary.totalVolumeKg = vol;
+  if (session.evaluation) summary.evaluation = session.evaluation;
   return summary;
 }
 
@@ -203,8 +213,9 @@ export function summariseSessionToSummary(
  *
  * The shape is intentional: ISO date first so the model can reason about
  * recency, then optional plan day / duration / volume / rating in
- * parentheses, then a list of top exercises. Avoids the per-set noise of
- * `WorkoutSession` while keeping every signal a prompt needs.
+ * parentheses, then a list of top exercises, then a compact plan-adherence
+ * strip when the session carries a persisted evaluation. Avoids the per-set
+ * noise of `WorkoutSession` while keeping every signal a prompt needs.
  */
 export function formatSessionSummaryLine(s: SessionSummary): string {
   const date = s.completedAt.slice(0, 10);
@@ -223,7 +234,23 @@ export function formatSessionSummaryLine(s: SessionSummary): string {
     s.exerciseCount > s.topExercises.length
       ? ` [+${s.exerciseCount - s.topExercises.length} more]`
       : '';
-  return `${head}${metaStr}: ${exParts.join(', ')}${exTail}`;
+  return `${head}${metaStr}: ${exParts.join(', ')}${exTail}${formatEvaluationStrip(s.evaluation)}`;
+}
+
+/**
+ * Compact plan-adherence strip appended to a session prompt line:
+ * ` · on-target · 1 overdone · 1 underperformed` for a plan session,
+ * ` · no-plan` for a free session, `''` when there's no evaluation.
+ */
+function formatEvaluationStrip(evaluation: SessionEvaluation | undefined): string {
+  if (!evaluation) return '';
+  if (evaluation.overall === 'no-plan') return ' · no-plan';
+  const parts: string[] = [evaluation.overall];
+  const { overdone, underperformed, missed } = evaluation.counts;
+  if (overdone > 0) parts.push(`${overdone} overdone`);
+  const short = underperformed + missed;
+  if (short > 0) parts.push(`${short} underperformed`);
+  return ` · ${parts.join(' · ')}`;
 }
 
 /**
@@ -304,6 +331,9 @@ export function buildAiContext(feature: AiFeature, options?: BuildOptions): AiCo
   );
   const recentRaw = sortedSessions.slice(0, RECENT_SESSIONS_LIMIT);
   const recentSessions = recentRaw.map((s) => summariseSessionToSummary(s, allPlans));
+  const evaluation = recentRaw
+    .map((s) => s.evaluation)
+    .filter((e): e is SessionEvaluation => e != null);
 
   const progression = getExerciseWeightProgression(recentRaw, completedSessions);
   const exerciseHistoryNames = getRecentExerciseNames().slice(0, EXERCISE_HISTORY_NAME_LIMIT);
@@ -327,5 +357,6 @@ export function buildAiContext(feature: AiFeature, options?: BuildOptions): AiCo
     recentSessions,
     progression,
     exerciseHistoryNames,
+    evaluation,
   };
 }

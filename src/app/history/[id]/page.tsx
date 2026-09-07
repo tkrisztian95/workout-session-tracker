@@ -8,6 +8,7 @@ import { SessionDetailHeader } from '@/components/SessionDetailHeader';
 import { SessionExerciseItem } from '@/components/SessionExerciseItem';
 import { SessionTimeline } from '@/components/SessionTimeline';
 import { SessionPlanComparison } from '@/components/SessionPlanComparison';
+import SessionDebriefCard from '@/components/SessionDebriefCard';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
@@ -135,9 +136,14 @@ export default function SessionDetailPage() {
   }
 
   const plan = session.planId ? planMap[session.planId] : undefined;
-  const planDay =
+  // Judge the session against the plan day as it was when the session was saved
+  // (frozen on `planDaySnapshot`), not the live plan — editing the plan later
+  // must not rewrite a past session's comparison. The live lookup is only a
+  // fallback for a session that predates the snapshot backfill.
+  const livePlanDay =
     plan && session.planDayId ? plan.days.find((d) => d.id === session.planDayId) : undefined;
-  const planName = plan?.name;
+  const planDay = session.planDaySnapshot?.day ?? livePlanDay;
+  const planName = session.planDaySnapshot?.planName ?? plan?.name;
   const dayName = planDay?.name;
 
   function handleDelete() {
@@ -262,6 +268,12 @@ export default function SessionDetailPage() {
           onDurationChange={handleDurationChange}
         />
       </PageHeader>
+
+      {!isEditing && session.debrief && (
+        <div className="px-6 pb-1 pt-3">
+          <SessionDebriefCard text={session.debrief.text} />
+        </div>
+      )}
 
       {isEditing ? (
         <div className="flex-1 px-6 pb-6 overflow-y-auto">

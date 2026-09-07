@@ -163,6 +163,11 @@
   "session_rate_cta": "Save Session",
   "session_rate_prompt": "How did it feel?",
   "session_rate_skip": "Save without rating",
+  "session_debrief_label": "AI debrief",
+  "session_debrief_loading": "Reading your session…",
+  "session_debrief_done": "Done",
+  "ai_debrief_toggle_label": "Post-workout debrief",
+  "ai_debrief_toggle_hint": "A short AI recap after you finish a session",
 
   "add_exercise_title": "Add Exercise",
   "exercise_name_label": "Exercise Name",

@@ -100,6 +100,65 @@ export interface AchievementRecord {
   seen: boolean;
 }
 
+/**
+ * Frozen copy of the plan day a session was run against, captured the first
+ * time the session is persisted. The session's plan-adherence evaluation and
+ * its vs-Plan comparison read this snapshot rather than the live plan, so
+ * editing or deleting the plan afterwards never rewrites historical verdicts.
+ * A shared plan-version log (issue #134) is the eventual replacement.
+ */
+export interface PlanDaySnapshot {
+  planName: string;
+  day: PlanDay; // deep copy of the origin plan day at capture time
+  capturedAt: string; // ISO timestamp
+}
+
+/**
+ * Deterministic plan-adherence rollup for a completed session. Computed once
+ * per session write against {@link PlanDaySnapshot}, backfilled onto legacy
+ * sessions, and read by the vs-Plan tab and AI prompt construction.
+ */
+export interface SessionEvaluation {
+  /** Session verdict relative to the plan-day snapshot, or `no-plan`. */
+  overall: 'overdone' | 'on-target' | 'underperformed' | 'no-plan';
+  /** Number of session exercises in each plan-comparison status. */
+  counts: {
+    overdone: number;
+    matched: number;
+    underperformed: number;
+    missed: number;
+    extra: number;
+  };
+  /** Top deviations, ranked, capped at 3. Omitted for no-plan sessions. */
+  highlights?: Array<{
+    exerciseName: string;
+    status: 'overdone' | 'underperformed' | 'missed' | 'extra';
+    /** Human-readable set delta, e.g. "+2 set" / "−1 set". Absent for `missed`. */
+    delta?: string;
+  }>;
+  /** Σ weight × reps across every logged set. Omitted when 0. */
+  totalVolumeKg?: number;
+  /** Mean logged set weight across sets that carried a weight. Omitted when none. */
+  avgWeightKg?: number;
+  /** Total logged sets across non-dismissed exercises. Omitted when 0. */
+  setCount?: number;
+  /** Copied from the session's own rating when present. */
+  rating?: 1 | 2 | 3 | 4 | 5;
+  /** Schema version for future migrations. */
+  v: 1;
+}
+
+/**
+ * One-paragraph AI debrief generated once when a session is finished (issue
+ * #64). Written on success and never regenerated — re-reading the session shows
+ * the same text. Absent when generation is disabled, unconfigured, or failed.
+ */
+export interface SessionDebrief {
+  text: string;
+  generatedAt: string; // ISO timestamp
+  model: string; // LLM model id that produced it
+}
+
 /** A completed session (stored in the wst_sessions array). */
 export interface WorkoutSession {
   id: string;
@@ -111,4 +170,7 @@ export interface WorkoutSession {
   rating?: 1 | 2 | 3 | 4 | 5;
   updatedAt?: string; // set when the session is edited after completion
   importedViaAi?: boolean; // set when the session was created via AI import
+  planDaySnapshot?: PlanDaySnapshot; // frozen plan-day baseline; captured on first save
+  evaluation?: SessionEvaluation; // plan-adherence rollup; refreshed on every write
+  debrief?: SessionDebrief; // AI debrief; written once on finish, never regenerated
 }

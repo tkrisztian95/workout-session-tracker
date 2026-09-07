@@ -1,5 +1,12 @@
 import type { Muscle } from './muscles';
-import type { Exercise, LoggedSet, PlanExercise, WorkoutSession } from './types';
+import type {
+  Exercise,
+  LoggedSet,
+  PlanDay,
+  PlanExercise,
+  SessionEvaluation,
+  WorkoutSession,
+} from './types';
 
 /** Emoji for each 1–5 session rating, in ascending order. Index 0 = rating 1. */
 export const RATING_EMOJI = ['😩', '😕', '😐', '💪', '🔥'] as const;
@@ -208,6 +215,173 @@ export function classifyPlannedExercise(
   if (actualSets > plannedSets) return 'overdone';
   if (actualSets < plannedSets) return 'underperformed';
   return 'matched';
+}
+
+/** Plan-comparison status including the `extra` (unplanned) case. */
+export type ComparisonStatus = PlanComparisonStatus | 'extra';
+
+/** One row of the session-vs-plan comparison: a planned exercise, an extra one, or both. */
+export interface ComparisonRow {
+  key: string;
+  name: string;
+  muscle?: PlanExercise['muscle'];
+  plannedSets: number;
+  actualSets: number;
+  status: ComparisonStatus;
+  planned?: PlanExercise;
+  actual?: Exercise;
+}
+
+function normName(s: string): string {
+  return s.toLowerCase().trim();
+}
+
+/**
+ * Pairs a session's performed exercises against a plan day by name, producing
+ * one row per planned exercise (`overdone | matched | underperformed | missed`)
+ * followed by one row per performed exercise that wasn't in the plan (`extra`).
+ * Rows are returned in that order — callers sort for presentation. Shared by
+ * `SessionPlanComparison` (rendering) and {@link evaluateSession} (rollup) so
+ * the vs-Plan tab and the persisted evaluation cannot drift. With no plan day
+ * the result is all `extra` rows.
+ */
+export function compareSessionToPlan(
+  session: Pick<WorkoutSession, 'exercises'>,
+  planDay: PlanDay | undefined,
+): ComparisonRow[] {
+  const planned: PlanExercise[] = planDay
+    ? [...planDay.coreExercises, ...planDay.optionalExercises]
+    : [];
+
+  const actualByName = new Map<string, Exercise>();
+  for (const ex of session.exercises) {
+    actualByName.set(normName(ex.name), ex);
+  }
+
+  const rows: ComparisonRow[] = [];
+  const seen = new Set<string>();
+
+  for (const p of planned) {
+    const key = normName(p.name);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const a = actualByName.get(key);
+    rows.push({
+      key: `planned-${p.id}`,
+      name: p.name,
+      muscle: p.muscle,
+      plannedSets: plannedSetsForPlan(p),
+      actualSets: a ? actualSetsForPlan(a) : 0,
+      status: classifyPlannedExercise(p, a),
+      planned: p,
+      actual: a,
+    });
+  }
+
+  for (const a of session.exercises) {
+    const key = normName(a.name);
+    if (seen.has(key)) continue;
+    if (a.dismissed) continue;
+    const actualSets = actualSetsForPlan(a);
+    if (actualSets === 0) continue;
+    seen.add(key);
+    rows.push({
+      key: `extra-${a.id}`,
+      name: a.name,
+      muscle: a.muscle,
+      plannedSets: 0,
+      actualSets,
+      status: 'extra',
+      actual: a,
+    });
+  }
+
+  return rows;
+}
+
+const SET_STATUS_ORDER: Record<'overdone' | 'underperformed' | 'missed' | 'extra', number> = {
+  overdone: 0,
+  underperformed: 0,
+  missed: 1,
+  extra: 1,
+};
+
+/**
+ * Computes the deterministic {@link SessionEvaluation} rollup for a completed
+ * session against its plan-day snapshot (`planDay`). Pure — no storage, no
+ * randomness, no AI. Per-exercise status comes from {@link compareSessionToPlan}
+ * so this and the vs-Plan tab cannot diverge. With no `planDay` the verdict is
+ * `no-plan` and `highlights` is omitted, but counts / volume / rating are still
+ * populated.
+ */
+export function evaluateSession(
+  session: Pick<WorkoutSession, 'exercises' | 'rating'>,
+  planDay: PlanDay | undefined,
+): SessionEvaluation {
+  const rows = compareSessionToPlan(session, planDay);
+
+  const counts = { overdone: 0, matched: 0, underperformed: 0, missed: 0, extra: 0 };
+  for (const row of rows) counts[row.status] += 1;
+
+  let overall: SessionEvaluation['overall'];
+  if (!planDay) {
+    overall = 'no-plan';
+  } else if (counts.overdone > counts.underperformed + counts.missed) {
+    overall = 'overdone';
+  } else if (counts.underperformed + counts.missed > counts.overdone) {
+    overall = 'underperformed';
+  } else {
+    overall = 'on-target';
+  }
+
+  let totalVolumeKg = 0;
+  let weightedSum = 0;
+  let weightedCount = 0;
+  let setCount = 0;
+  for (const ex of session.exercises) {
+    if (ex.dismissed) continue;
+    for (const s of ex.loggedSets ?? []) {
+      setCount += 1;
+      if (s.seconds != null) continue;
+      totalVolumeKg += s.weight * s.reps;
+      if (s.weight > 0) {
+        weightedSum += s.weight;
+        weightedCount += 1;
+      }
+    }
+  }
+
+  const evaluation: SessionEvaluation = { overall, counts, v: 1 };
+  if (totalVolumeKg > 0) evaluation.totalVolumeKg = Math.round(totalVolumeKg);
+  if (weightedCount > 0) evaluation.avgWeightKg = Math.round(weightedSum / weightedCount);
+  if (setCount > 0) evaluation.setCount = setCount;
+  if (session.rating) evaluation.rating = session.rating;
+
+  if (planDay) {
+    const highlights = rows
+      .filter((r) => r.status !== 'matched')
+      .sort((a, b) => {
+        const orderA = SET_STATUS_ORDER[a.status as keyof typeof SET_STATUS_ORDER];
+        const orderB = SET_STATUS_ORDER[b.status as keyof typeof SET_STATUS_ORDER];
+        if (orderA !== orderB) return orderA - orderB;
+        return Math.abs(b.actualSets - b.plannedSets) - Math.abs(a.actualSets - a.plannedSets);
+      })
+      .slice(0, 3)
+      .map((r) => {
+        const entry: NonNullable<SessionEvaluation['highlights']>[number] = {
+          exerciseName: r.name,
+          status: r.status as 'overdone' | 'underperformed' | 'missed' | 'extra',
+        };
+        if (r.status !== 'missed') {
+          const d = r.actualSets - r.plannedSets;
+          if (d !== 0) entry.delta = `${d > 0 ? '+' : '−'}${Math.abs(d)} set`;
+        }
+        return entry;
+      });
+    if (highlights.length > 0) evaluation.highlights = highlights;
+  }
+
+  return evaluation;
 }
 
 export function formatSessionDate(
