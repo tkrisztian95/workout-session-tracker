@@ -144,9 +144,12 @@ export default function HomePage() {
     setActive(session);
   };
 
-  const handleFinish = (rating?: 1 | 2 | 3 | 4 | 5) => {
-    if (!activeSession) return;
-    saveSession({
+  const handleFinish = (rating?: 1 | 2 | 3 | 4 | 5): WorkoutSession | null => {
+    if (!activeSession) return null;
+    // Persist now (so the debrief can run against the stored record + its
+    // evaluation), but defer teardown to handleFinishDone so the celebration
+    // screen — including the inline AI debrief — stays mounted.
+    return saveSession({
       id: activeSession.id,
       startedAt: activeSession.startedAt,
       completedAt: new Date().toISOString(),
@@ -155,6 +158,9 @@ export default function HomePage() {
       planDayId: activeSession.planDayId,
       rating,
     });
+  };
+
+  const handleFinishDone = () => {
     clearActiveSession();
     setActive(null);
     setSelectedPlan(null);
@@ -178,6 +184,7 @@ export default function HomePage() {
         session={activeSession}
         onUpdate={handleSessionUpdate}
         onFinish={handleFinish}
+        onFinishDone={handleFinishDone}
         onDiscard={handleDiscard}
       />
     );

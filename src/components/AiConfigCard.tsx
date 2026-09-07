@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { Check, ChevronDown, Sparkles } from 'lucide-react';
-import { getLlmConfig, saveLlmConfig } from '@/lib/storage';
+import {
+  getLlmConfig,
+  saveLlmConfig,
+  isAiDebriefEnabled,
+  setAiDebriefEnabled,
+} from '@/lib/storage';
 import type { LlmProvider } from '@/lib/types';
 import { Button, FieldLabel, Input, Select } from '@/components/ui';
 import { useTranslations } from '@/lib/locale-context';
@@ -58,6 +63,7 @@ export default function AiConfigCard({
   const [model, setModel] = useState(() => savedConfig?.model ?? PROVIDERS.openai.defaultModel);
   const [saved, setSaved] = useState(false);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const [debriefOn, setDebriefOn] = useState(() => isAiDebriefEnabled());
 
   const controlled = openProp !== undefined;
   const open = controlled ? openProp : internalOpen;
@@ -171,6 +177,35 @@ export default function AiConfigCard({
               ))}
             </Select>
           </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={debriefOn}
+            onClick={() => {
+              const next = !debriefOn;
+              setDebriefOn(next);
+              setAiDebriefEnabled(next);
+            }}
+            className="flex items-center justify-between gap-3 w-full text-left py-1"
+          >
+            <span className="min-w-0">
+              <span className="block text-sm text-foreground">{t.ai_debrief_toggle_label}</span>
+              <span className="block text-dim text-xs leading-relaxed">
+                {t.ai_debrief_toggle_hint}
+              </span>
+            </span>
+            <span
+              className={`flex-shrink-0 w-10 h-6 rounded-full p-0.5 transition-colors ${
+                debriefOn ? 'bg-brand' : 'bg-elevated'
+              }`}
+            >
+              <span
+                className={`block w-5 h-5 rounded-full bg-white transition-transform ${
+                  debriefOn ? 'translate-x-4' : ''
+                }`}
+              />
+            </span>
+          </button>
           <p className="text-dim text-xs leading-relaxed">{t.ai_config_key_storage_note}</p>
           <Button onClick={handleSave} disabled={!apiKey.trim()} className="w-full">
             {t.ai_config_save}

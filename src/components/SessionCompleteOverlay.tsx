@@ -2,32 +2,79 @@
 
 import { useState } from 'react';
 import { Dumbbell, Timer, Trophy } from 'lucide-react';
-import type { Exercise } from '@/lib/types';
+import type { Exercise, SessionDebrief, WorkoutSession } from '@/lib/types';
 import { RATING_EMOJI, calcSessionStats, formatDuration } from '@/lib/sessionUtils';
+import { getLlmConfig } from '@/lib/storage';
+import { buildAiContext, generateSessionDebrief } from '@/lib/ai';
 import { useTranslations } from '@/lib/locale-context';
 import { Button, Card, HeadingXL } from '@/components/ui';
+import SessionDebriefCard from '@/components/SessionDebriefCard';
 
 interface Props {
   exercises: Exercise[];
   startedAt: string;
   totalPausedMs?: number;
-  onDismiss: (rating?: 1 | 2 | 3 | 4 | 5) => void;
+  /** Persists the session with the chosen rating and returns the stored record. */
+  onRated: (rating?: 1 | 2 | 3 | 4 | 5) => WorkoutSession | null;
+  /** Persists a generated debrief onto the session. May be called after unmount. */
+  onDebriefGenerated: (session: WorkoutSession, debrief: SessionDebrief) => void;
+  /** Final teardown — achievement sync, navigation. */
+  onClose: () => void;
+  /** Whether to attempt debrief generation after rating (config present + toggle on). */
+  debriefEnabled: boolean;
 }
+
+type DebriefState = { status: 'loading' } | { status: 'done'; text: string | null };
 
 export default function SessionCompleteOverlay({
   exercises,
   startedAt,
   totalPausedMs = 0,
-  onDismiss,
+  onRated,
+  onDebriefGenerated,
+  onClose,
+  debriefEnabled,
 }: Props) {
   const t = useTranslations();
   const stats = calcSessionStats(exercises, startedAt, totalPausedMs);
-  const [view, setView] = useState<'summary' | 'rating'>('summary');
+  const [view, setView] = useState<'summary' | 'rating' | 'debrief'>('summary');
+  const [debrief, setDebrief] = useState<DebriefState>({ status: 'loading' });
+
+  function handleRating(rating?: 1 | 2 | 3 | 4 | 5) {
+    const saved = onRated(rating);
+    if (!saved || !debriefEnabled) {
+      onClose();
+      return;
+    }
+    setView('debrief');
+    void (async () => {
+      try {
+        const config = getLlmConfig();
+        if (!config?.apiKey) {
+          setDebrief({ status: 'done', text: null });
+          return;
+        }
+        const result = await generateSessionDebrief(
+          config,
+          buildAiContext('session-debrief'),
+          saved,
+        );
+        onDebriefGenerated(saved, {
+          text: result.text,
+          generatedAt: new Date().toISOString(),
+          model: result.model,
+        });
+        setDebrief({ status: 'done', text: result.text });
+      } catch {
+        setDebrief({ status: 'done', text: null });
+      }
+    })();
+  }
 
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm cursor-pointer"
-      onClick={() => onDismiss(undefined)}
+      onClick={() => (view === 'debrief' ? onClose() : undefined)}
     >
       <style>{`
         @keyframes sessionScaleFadeIn {
@@ -49,7 +96,7 @@ export default function SessionCompleteOverlay({
         .session-rating-view    { animation: sessionSlideInFromRight 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
       `}</style>
 
-      {view === 'summary' ? (
+      {view === 'summary' && (
         /* ── View 1: Celebration + stats ──────────────────────────────── */
         <div
           className="flex flex-col items-center px-8 text-center w-full cursor-default"
@@ -101,7 +148,9 @@ export default function SessionCompleteOverlay({
             </Button>
           </div>
         </div>
-      ) : (
+      )}
+
+      {view === 'rating' && (
         /* ── View 2: Optional rating ───────────────────────────────────── */
         <div
           className="session-rating-view flex flex-col items-center px-6 text-center w-full gap-8 cursor-default"
@@ -116,7 +165,7 @@ export default function SessionCompleteOverlay({
               return (
                 <button
                   key={value}
-                  onClick={() => onDismiss(value)}
+                  onClick={() => handleRating(value)}
                   aria-label={`Rate ${value} out of 5`}
                   className="text-3xl w-12 h-12 rounded-2xl bg-surface flex items-center justify-center transition-all duration-150 active:scale-90 active:bg-elevated cursor-pointer"
                 >
@@ -128,11 +177,33 @@ export default function SessionCompleteOverlay({
 
           {/* Skip — text style, but min-height 44px for easy tap */}
           <button
-            onClick={() => onDismiss(undefined)}
+            onClick={() => handleRating(undefined)}
             className="min-h-[44px] px-6 flex items-center text-dim text-sm cursor-pointer active:opacity-60"
           >
             {t.session_rate_skip}
           </button>
+        </div>
+      )}
+
+      {view === 'debrief' && (
+        /* ── View 3: Inline AI debrief ─────────────────────────────────── */
+        <div
+          className="session-rating-view flex flex-col items-center px-6 text-center w-full gap-6 cursor-default"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="w-20 h-20 rounded-full bg-brand/15 border-2 border-brand/40 flex items-center justify-center">
+            <Trophy className="w-10 h-10 text-brand" />
+          </div>
+          <HeadingXL>{t.session_complete_title}</HeadingXL>
+
+          {debrief.status === 'loading' && <SessionDebriefCard loading className="w-full" />}
+          {debrief.status === 'done' && debrief.text && (
+            <SessionDebriefCard text={debrief.text} className="w-full" />
+          )}
+
+          <Button onClick={onClose} className="w-full">
+            {t.session_debrief_done}
+          </Button>
         </div>
       )}
     </div>

@@ -163,6 +163,11 @@
   "session_rate_cta": "Training speichern",
   "session_rate_prompt": "Wie hat es sich angefühlt?",
   "session_rate_skip": "Ohne Bewertung speichern",
+  "session_debrief_label": "KI-Auswertung",
+  "session_debrief_loading": "Deine Session wird ausgewertet…",
+  "session_debrief_done": "Fertig",
+  "ai_debrief_toggle_label": "Auswertung nach dem Training",
+  "ai_debrief_toggle_hint": "Eine kurze KI-Zusammenfassung nach dem Beenden einer Session",
 
   "add_exercise_title": "Übung hinzufügen",
   "exercise_name_label": "Übungsname",

@@ -8,6 +8,7 @@ import { SessionDetailHeader } from '@/components/SessionDetailHeader';
 import { SessionExerciseItem } from '@/components/SessionExerciseItem';
 import { SessionTimeline } from '@/components/SessionTimeline';
 import { SessionPlanComparison } from '@/components/SessionPlanComparison';
+import SessionDebriefCard from '@/components/SessionDebriefCard';
 import { getSessions, getPlans, updateSession, deleteSession } from '@/lib/storage';
 import type { Exercise, WorkoutSession, WorkoutPlan } from '@/lib/types';
 import { useTranslations } from '@/lib/locale-context';
@@ -267,6 +268,12 @@ export default function SessionDetailPage() {
           onDurationChange={handleDurationChange}
         />
       </PageHeader>
+
+      {!isEditing && session.debrief && (
+        <div className="px-6 pb-1 pt-3">
+          <SessionDebriefCard text={session.debrief.text} />
+        </div>
+      )}
 
       {isEditing ? (
         <div className="flex-1 px-6 pb-6 overflow-y-auto">

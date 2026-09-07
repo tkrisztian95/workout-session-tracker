@@ -12,13 +12,23 @@ import PulsingButton from '@/components/PulsingButton';
 import FinishSessionConfirmSheet from '@/components/FinishSessionConfirmSheet';
 import DiscardSessionConfirmSheet from '@/components/DiscardSessionConfirmSheet';
 import { useLocale, useTranslations } from '@/lib/locale-context';
-import type { ActiveSession, AchievementRecord, Exercise, LoggedSet } from '@/lib/types';
+import type {
+  ActiveSession,
+  AchievementRecord,
+  Exercise,
+  LoggedSet,
+  SessionDebrief,
+  WorkoutSession,
+} from '@/lib/types';
 import {
   getSessions,
   getPlans,
   getProfileCreatedAt,
   getAchievements,
   saveAchievements,
+  getLlmConfig,
+  isAiDebriefEnabled,
+  updateSession,
 } from '@/lib/storage';
 import { syncAchievements } from '@/lib/achievementEngine';
 import AchievementCelebration from '@/components/AchievementCelebration';
@@ -38,11 +48,13 @@ export function SessionView({
   session,
   onUpdate,
   onFinish,
+  onFinishDone,
   onDiscard,
 }: {
   session: ActiveSession;
   onUpdate: (session: ActiveSession) => void;
-  onFinish: (rating?: 1 | 2 | 3 | 4 | 5) => void;
+  onFinish: (rating?: 1 | 2 | 3 | 4 | 5) => WorkoutSession | null;
+  onFinishDone: () => void;
   onDiscard: () => void;
 }) {
   const t = useTranslations();
@@ -329,10 +341,14 @@ export function SessionView({
           exercises={session.exercises}
           startedAt={session.startedAt}
           totalPausedMs={session.totalPausedMs ?? 0}
-          onDismiss={(rating) => {
+          debriefEnabled={!!getLlmConfig()?.apiKey && isAiDebriefEnabled()}
+          onRated={(rating) => onFinish(rating)}
+          onDebriefGenerated={(saved: WorkoutSession, debrief: SessionDebrief) => {
+            updateSession({ ...saved, debrief });
+          }}
+          onClose={() => {
             setShowCompleteOverlay(false);
-            onFinish(rating);
-            // Check for newly unlocked achievements after session is saved
+            // Achievement check after the session is saved.
             const updated = syncAchievements(
               {
                 sessions: getSessions(),
@@ -342,7 +358,11 @@ export function SessionView({
               false,
             );
             const newUnlocks = updated.filter((r) => !r.seen);
-            if (newUnlocks.length > 0) setCelebrationQueue(newUnlocks);
+            if (newUnlocks.length > 0) {
+              setCelebrationQueue(newUnlocks);
+            } else {
+              onFinishDone();
+            }
           }}
         />
       )}
@@ -354,7 +374,9 @@ export function SessionView({
               r.id === id ? { ...r, seen: true } : r,
             );
             saveAchievements(records);
-            setCelebrationQueue((q) => q.filter((r) => r.id !== id));
+            const next = celebrationQueue.filter((r) => r.id !== id);
+            setCelebrationQueue(next);
+            if (next.length === 0) onFinishDone();
           }}
         />
       )}
