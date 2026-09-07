@@ -135,9 +135,14 @@ export default function SessionDetailPage() {
   }
 
   const plan = session.planId ? planMap[session.planId] : undefined;
-  const planDay =
+  // Judge the session against the plan day as it was when the session was saved
+  // (frozen on `planDaySnapshot`), not the live plan — editing the plan later
+  // must not rewrite a past session's comparison. The live lookup is only a
+  // fallback for a session that predates the snapshot backfill.
+  const livePlanDay =
     plan && session.planDayId ? plan.days.find((d) => d.id === session.planDayId) : undefined;
-  const planName = plan?.name;
+  const planDay = session.planDaySnapshot?.day ?? livePlanDay;
+  const planName = session.planDaySnapshot?.planName ?? plan?.name;
   const dayName = planDay?.name;
 
   function handleDelete() {

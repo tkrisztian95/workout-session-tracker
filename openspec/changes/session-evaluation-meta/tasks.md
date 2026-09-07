@@ -26,13 +26,13 @@
 
 ## 6. vs-Plan tab reads the snapshot
 
-- [ ] 6.1 In `src/app/history/[id]/page.tsx`, source `planDay` from `session.planDaySnapshot?.day` (falling back to the live `getPlans()` lookup only when the snapshot is absent) and `planName` from `session.planDaySnapshot?.planName ?? plan?.name`. Verify: after finishing a session then editing its origin plan day, the session detail's vs-Plan tab is unchanged (Playwright, or a unit test on the resolution logic if extracted).
+- [x] 6.1 In `src/app/history/[id]/page.tsx`, source `planDay` from `session.planDaySnapshot?.day` (falling back to the live `getPlans()` lookup only when the snapshot is absent) and `planName` from `session.planDaySnapshot?.planName ?? plan?.name`. Verify: after finishing a session then editing its origin plan day, the session detail's vs-Plan tab is unchanged (Playwright, or a unit test on the resolution logic if extracted).
 
 ## 7. AI envelope wiring
 
-- [ ] 7.1 In `src/lib/ai/context.ts`, replace `export type SessionEvaluation = Record<string, never>` with a re-export of the `SessionEvaluation` type from `src/lib/types.ts`. Verify `npx tsc --noEmit` passes.
-- [ ] 7.2 Populate `AiContext.evaluation` in `buildAiContext` from the recent-session window (`recentRaw` sessions' `.evaluation`, `Boolean`-filtered, default `[]`). Verify the envelope unit test: user with evaluated recent sessions → non-empty `evaluation`; empty-state user → `evaluation === []`.
-- [ ] 7.3 Add optional `evaluation?: SessionEvaluation` to `SessionSummary`; copy it through in `summariseSessionToSummary`. Append the compact strip in `formatSessionSummaryLine` (plan: `· on-target · 1 overdone · 1 underperformed`; no-plan: `· no-plan`; missing: no strip). Verify unit tests for all three line variants.
+- [x] 7.1 In `src/lib/ai/context.ts`, replace `export type SessionEvaluation = Record<string, never>` with a re-export of the `SessionEvaluation` type from `src/lib/types.ts`. Verify `npx tsc --noEmit` passes.
+- [x] 7.2 Populate `AiContext.evaluation` in `buildAiContext` from the recent-session window (`recentRaw` sessions' `.evaluation`, `Boolean`-filtered, default `[]`). Verify the envelope unit test: user with evaluated recent sessions → non-empty `evaluation`; empty-state user → `evaluation === []`.
+- [x] 7.3 Add optional `evaluation?: SessionEvaluation` to `SessionSummary`; copy it through in `summariseSessionToSummary`. Append the compact strip in `formatSessionSummaryLine` (plan: `· on-target · 1 overdone · 1 underperformed`; no-plan: `· no-plan`; missing: no strip). Verify unit tests for all three line variants.
 
 ## 8. Docs + validation
 

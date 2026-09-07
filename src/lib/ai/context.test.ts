@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   buildAiContext,
+  formatSessionSummaryLine,
   summariseSessionToSummary,
   RECENT_SESSIONS_LIMIT,
   type SessionSummary,
 } from './context';
-import type { LoggedSet, WorkoutPlan, WorkoutSession } from '../types';
+import type { LoggedSet, SessionEvaluation, WorkoutPlan, WorkoutSession } from '../types';
 
 const KEYS = {
   plans: 'wst_plans',
@@ -62,12 +63,12 @@ describe('buildAiContext — empty state', () => {
     expect(ctx.exerciseHistoryNames).toEqual([]);
   });
 
-  it('leaves deferred fields undefined in Phase 1', () => {
+  it('leaves the still-deferred fields undefined and evaluation an empty array', () => {
     const ctx = buildAiContext('plan-suggest');
 
     expect(ctx.preferences).toBeUndefined();
-    expect(ctx.evaluation).toBeUndefined();
     expect(ctx.likes).toBeUndefined();
+    expect(ctx.evaluation).toEqual([]);
   });
 });
 
@@ -236,5 +237,88 @@ describe('summariseSessionToSummary', () => {
 
     expect(summary.durationMin).toBe(46);
     expect(summary.totalVolumeKg).toBe(1500);
+  });
+});
+
+// ─── #54: session evaluation in the envelope ──────────────────────────────────
+
+const evalMeta = (over: Partial<SessionEvaluation> = {}): SessionEvaluation => ({
+  overall: 'on-target',
+  counts: { overdone: 0, matched: 1, underperformed: 0, missed: 0, extra: 0 },
+  v: 1,
+  ...over,
+});
+
+describe('buildAiContext — evaluation', () => {
+  it('collects persisted evaluations from the recent-session window, newest-first', () => {
+    localStorage.setItem(
+      KEYS.sessions,
+      JSON.stringify([
+        makeSession({ id: 's1', completedAt: '2026-05-10T09:00:00.000Z', evaluation: evalMeta() }),
+        makeSession({
+          id: 's2',
+          completedAt: '2026-05-08T09:00:00.000Z',
+          evaluation: evalMeta({ overall: 'overdone' }),
+        }),
+      ]),
+    );
+
+    const ctx = buildAiContext('plan-suggest');
+
+    expect(ctx.evaluation).toHaveLength(2);
+    expect(ctx.evaluation?.map((e) => e.overall)).toEqual(['on-target', 'overdone']);
+    expect(ctx.evaluation?.every((e) => e.v === 1)).toBe(true);
+  });
+
+  it('drops entries only for sessions that genuinely carry no evaluation', () => {
+    // A session object reaching summariseSessionToSummary without an evaluation
+    // (e.g. constructed directly) contributes nothing to the envelope array.
+    const summary = summariseSessionToSummary(makeSession({ id: 'bare' }));
+    expect(summary.evaluation).toBeUndefined();
+  });
+});
+
+describe('summariseSessionToSummary — evaluation passthrough', () => {
+  it('carries the persisted evaluation onto the summary', () => {
+    const summary = summariseSessionToSummary(makeSession({ evaluation: evalMeta() }));
+    expect(summary.evaluation).toEqual(evalMeta());
+  });
+
+  it('omits evaluation when the session has none', () => {
+    const summary = summariseSessionToSummary(makeSession());
+    expect(summary.evaluation).toBeUndefined();
+  });
+});
+
+describe('formatSessionSummaryLine — evaluation strip', () => {
+  const base: SessionSummary = {
+    id: 's1',
+    completedAt: '2026-05-10T09:00:00.000Z',
+    exerciseCount: 1,
+    topExercises: [{ name: 'Bench', sets: 3 }],
+  };
+
+  it('appends a plan-adherence strip for a plan session', () => {
+    const line = formatSessionSummaryLine({
+      ...base,
+      evaluation: evalMeta({
+        overall: 'on-target',
+        counts: { overdone: 1, matched: 2, underperformed: 1, missed: 0, extra: 0 },
+      }),
+    });
+    expect(line).toContain('· on-target · 1 overdone · 1 underperformed');
+  });
+
+  it('appends · no-plan for a free session', () => {
+    const line = formatSessionSummaryLine({
+      ...base,
+      evaluation: evalMeta({ overall: 'no-plan' }),
+    });
+    expect(line.endsWith('· no-plan')).toBe(true);
+  });
+
+  it('adds no strip when the summary has no evaluation', () => {
+    const line = formatSessionSummaryLine(base);
+    expect(line).not.toContain('·');
   });
 });
