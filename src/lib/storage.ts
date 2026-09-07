@@ -5,10 +5,12 @@ import type {
   LlmConfig,
   Sex,
   AchievementRecord,
+  PlanDaySnapshot,
 } from './types';
 import type { Locale } from './i18n';
 import type { Muscle } from './muscles';
 import { migrateLegacyCategory } from './muscles';
+import { evaluateSession } from './sessionUtils';
 
 interface LegacyExercise {
   category?: string;
@@ -234,16 +236,67 @@ export function clearActiveSession(): void {
 
 // ─── Completed sessions ───────────────────────────────────────────────────────
 
+/**
+ * Builds a {@link PlanDaySnapshot} for a session from an already-loaded plan
+ * list. Returns `undefined` when the session has no plan origin or the origin
+ * plan / day no longer exists.
+ */
+function planDaySnapshotFrom(
+  session: Pick<WorkoutSession, 'planId' | 'planDayId'>,
+  plans: WorkoutPlan[],
+): PlanDaySnapshot | undefined {
+  if (!session.planId || !session.planDayId) return undefined;
+  const plan = plans.find((p) => p.id === session.planId);
+  const day = plan?.days.find((d) => d.id === session.planDayId);
+  if (!plan || !day) return undefined;
+  return {
+    planName: plan.name,
+    day: structuredClone(day),
+    capturedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Resolves the frozen plan-day snapshot a session should be evaluated against,
+ * looking the origin plan up in live storage. `undefined` for free sessions or
+ * a deleted origin plan.
+ */
+export function resolvePlanDaySnapshot(
+  session: Pick<WorkoutSession, 'planId' | 'planDayId'>,
+): PlanDaySnapshot | undefined {
+  if (!session.planId || !session.planDayId) return undefined;
+  return planDaySnapshotFrom(session, getPlans());
+}
+
+/**
+ * One-time backfill: gives any session missing a current `evaluation` a
+ * plan-day snapshot (captured once from the plan as it exists now) and a
+ * computed evaluation. Idempotent — a session already at the current schema
+ * version is skipped. Returns true when anything changed.
+ */
+function backfillSessionEvaluations(sessions: WorkoutSession[]): boolean {
+  const pending = sessions.filter((s) => !(s.evaluation != null && s.evaluation.v === 1));
+  if (pending.length === 0) return false;
+  const plans = getPlans();
+  for (const s of pending) {
+    const snapshot = s.planDaySnapshot ?? planDaySnapshotFrom(s, plans);
+    if (snapshot && !s.planDaySnapshot) s.planDaySnapshot = snapshot;
+    s.evaluation = evaluateSession(s, snapshot?.day);
+  }
+  return true;
+}
+
 export function getSessions(): WorkoutSession[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(KEYS.sessions);
     if (!raw) return [];
     const sessions = JSON.parse(raw) as WorkoutSession[];
-    const mutated = sessions.reduce(
+    let mutated = sessions.reduce(
       (acc, s) => migrateExerciseList(s.exercises as unknown as LegacyExercise[]) || acc,
       false,
     );
+    if (backfillSessionEvaluations(sessions)) mutated = true;
     if (mutated) localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
     return sessions;
   } catch {
@@ -385,7 +438,13 @@ export function saveLlmConfig(config: LlmConfig): void {
 
 export function saveSession(session: WorkoutSession): void {
   const sessions = getSessions();
-  sessions.push(session);
+  const snapshot = session.planDaySnapshot ?? resolvePlanDaySnapshot(session);
+  const record: WorkoutSession = {
+    ...session,
+    ...(snapshot ? { planDaySnapshot: snapshot } : {}),
+    evaluation: evaluateSession(session, snapshot?.day),
+  };
+  sessions.push(record);
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }
 
@@ -398,7 +457,11 @@ export function updateSession(session: WorkoutSession): void {
   const sessions = getSessions();
   const index = sessions.findIndex((s) => s.id === session.id);
   if (index >= 0) {
-    sessions[index] = { ...session, updatedAt: new Date().toISOString() };
+    sessions[index] = {
+      ...session,
+      updatedAt: new Date().toISOString(),
+      evaluation: evaluateSession(session, session.planDaySnapshot?.day),
+    };
   }
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
 }

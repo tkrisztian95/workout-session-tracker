@@ -14,15 +14,15 @@
 
 ## 4. Snapshot + centralized compute in the storage layer
 
-- [ ] 4.1 Add `resolvePlanDaySnapshot(session): PlanDaySnapshot | undefined` to `src/lib/storage.ts` — `planId` + `planDayId` → `getPlans()` lookup → deep-copied `day`, `planName`, `capturedAt: now`; `undefined` when no origin resolves. Verify a unit test covering resolved / no-planId / dangling-planId cases.
-- [ ] 4.2 In `saveSession`, capture `planDaySnapshot` (reuse `session.planDaySnapshot` if already present, else `resolvePlanDaySnapshot`) and attach `evaluation = evaluateSession(session, snapshot?.day)` before persisting. Verify unit tests: finishing a plan session persists `evaluation.v === 1` + a `planDaySnapshot` whose `day` deep-equals the plan day; a free session persists `overall: 'no-plan'` and no snapshot; a session created via the manual-record / AI-import paths (also `saveSession`) is evaluated.
-- [ ] 4.3 In `updateSession`, recompute `evaluation` against the **existing** `session.planDaySnapshot?.day` alongside the `updatedAt` stamp; do not re-capture the snapshot. Verify a unit test: editing a fixture session's logged sets matched→overdone updates `evaluation.counts` and leaves `planDaySnapshot` byte-for-byte unchanged.
-- [ ] 4.4 Verify no other module calls `evaluateSession` for a write — `grep -rn evaluateSession src --include='*.ts' --include='*.tsx'` shows only `sessionUtils`, `storage`, and tests.
+- [x] 4.1 Add `resolvePlanDaySnapshot(session): PlanDaySnapshot | undefined` to `src/lib/storage.ts` — `planId` + `planDayId` → `getPlans()` lookup → deep-copied `day`, `planName`, `capturedAt: now`; `undefined` when no origin resolves. Verify a unit test covering resolved / no-planId / dangling-planId cases.
+- [x] 4.2 In `saveSession`, capture `planDaySnapshot` (reuse `session.planDaySnapshot` if already present, else `resolvePlanDaySnapshot`) and attach `evaluation = evaluateSession(session, snapshot?.day)` before persisting. Verify unit tests: finishing a plan session persists `evaluation.v === 1` + a `planDaySnapshot` whose `day` deep-equals the plan day; a free session persists `overall: 'no-plan'` and no snapshot; a session created via the manual-record / AI-import paths (also `saveSession`) is evaluated.
+- [x] 4.3 In `updateSession`, recompute `evaluation` against the **existing** `session.planDaySnapshot?.day` alongside the `updatedAt` stamp; do not re-capture the snapshot. Verify a unit test: editing a fixture session's logged sets matched→overdone updates `evaluation.counts` and leaves `planDaySnapshot` byte-for-byte unchanged.
+- [x] 4.4 Verify no other module calls `evaluateSession` for a write — `grep -rn evaluateSession src --include='*.ts' --include='*.tsx'` shows only `sessionUtils`, `storage`, and tests.
 
 ## 5. Backfill migration
 
-- [ ] 5.1 Add a backfill pass in `getSessions` (`src/lib/storage.ts`): for each session where `evaluation == null || evaluation.v !== 1`, resolve the snapshot (`s.planDaySnapshot ?? resolvePlanDaySnapshot(s)`), capture it onto the session when newly resolved, set `s.evaluation = evaluateSession(s, snapshot?.day)`; persist once if anything changed. Verify unit tests: legacy session with a live plan origin gains `planDaySnapshot` + `evaluation` and is persisted; a second read does not rewrite storage; a session with a dangling `planId` gets `overall: 'no-plan'`, no snapshot, volume totals still present.
-- [ ] 5.2 Verify `npm run test` passes for the full `storage` + `sessionUtils` suites.
+- [x] 5.1 Add a backfill pass in `getSessions` (`src/lib/storage.ts`): for each session where `evaluation == null || evaluation.v !== 1`, resolve the snapshot (`s.planDaySnapshot ?? resolvePlanDaySnapshot(s)`), capture it onto the session when newly resolved, set `s.evaluation = evaluateSession(s, snapshot?.day)`; persist once if anything changed. Verify unit tests: legacy session with a live plan origin gains `planDaySnapshot` + `evaluation` and is persisted; a second read does not rewrite storage; a session with a dangling `planId` gets `overall: 'no-plan'`, no snapshot, volume totals still present.
+- [x] 5.2 Verify `npm run test` passes for the full `storage` + `sessionUtils` suites.
 
 ## 6. vs-Plan tab reads the snapshot
 
