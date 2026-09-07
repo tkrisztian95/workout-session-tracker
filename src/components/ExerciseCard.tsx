@@ -65,6 +65,8 @@ export default function ExerciseCard({
   // Elapsed seconds retained while the stopwatch overlay is closed, so reopening
   // resumes instead of restarting.
   const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
+  // Opening via "Resume" starts the timer immediately; a fresh "Time it" opens paused.
+  const [stopwatchAutoStart, setStopwatchAutoStart] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
@@ -127,6 +129,16 @@ export default function ExerciseCard({
   // dot. `mergedDetail` is the plain-text form for the collapsed card.
   const weightLabel = exercise.weightKg != null ? `${exercise.weightKg} kg` : null;
   const mergedDetail = weightLabel ? `${weightLabel} · ${detail}` : detail;
+
+  // While a timed run is paused short of its target, nudge the user back to the
+  // stopwatch: pulse "Resume" instead of "Done".
+  const stopwatchNeedsMoreTime =
+    stopwatchPaused && stopwatchTargetSec > 0 && !stopwatchReachedTarget;
+
+  const openStopwatch = (resume: boolean) => {
+    setStopwatchAutoStart(resume);
+    setShowStopwatch(true);
+  };
 
   const goalCheck = (
     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-success/20">
@@ -311,22 +323,30 @@ export default function ExerciseCard({
                   </button>
                 )}
                 {canTimeSets && (
-                  <button
-                    onClick={() => setShowStopwatch(true)}
-                    className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150 ${
-                      stopwatchPaused
-                        ? 'bg-brand/15 text-brand font-semibold'
-                        : 'bg-elevated text-secondary'
-                    }`}
-                  >
-                    <Timer className="w-3.5 h-3.5" strokeWidth={2.5} />
-                    {stopwatchPaused
-                      ? t.exercise_resume_time.replace('{time}', formatClock(stopwatchSeconds))
-                      : t.exercise_log_time}
-                  </button>
+                  <div className="relative flex-1">
+                    {stopwatchNeedsMoreTime && (
+                      <span
+                        className="absolute inset-0 rounded-xl bg-brand motion-safe:animate-ping-sm opacity-40"
+                        style={{ animationDelay: '2s', animationDuration: '2s' }}
+                      />
+                    )}
+                    <button
+                      onClick={() => openStopwatch(stopwatchPaused)}
+                      className={`relative flex w-full items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium active:bg-border/40 cursor-pointer transition-colors duration-150 ${
+                        stopwatchPaused
+                          ? 'bg-brand/15 text-brand font-semibold'
+                          : 'bg-elevated text-secondary'
+                      }`}
+                    >
+                      <Timer className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      {stopwatchPaused
+                        ? t.exercise_resume_time.replace('{time}', formatClock(stopwatchSeconds))
+                        : t.exercise_log_time}
+                    </button>
+                  </div>
                 )}
-                <div className={`relative flex-1${allTargetsAchieved ? '' : ''}`}>
-                  {allTargetsAchieved && (
+                <div className="relative flex-1">
+                  {allTargetsAchieved && !stopwatchNeedsMoreTime && (
                     <span
                       className="absolute inset-0 rounded-xl bg-success motion-safe:animate-ping-sm opacity-40"
                       style={{ animationDelay: '2s', animationDuration: '2s' }}
@@ -435,6 +455,7 @@ export default function ExerciseCard({
           exerciseName={exercise.name}
           targetSeconds={exercise.duration}
           initialSeconds={stopwatchSeconds}
+          autoStart={stopwatchAutoStart}
           onCancel={(seconds) => {
             setStopwatchSeconds(seconds);
             setShowStopwatch(false);
