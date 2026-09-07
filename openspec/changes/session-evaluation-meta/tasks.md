@@ -36,5 +36,5 @@
 
 ## 8. Docs + validation
 
-- [ ] 8.1 Update `docs/data-structure.md` in the same PR: add `SessionEvaluation` and `PlanDaySnapshot` to the Sessions type section; document the backfill migration under Migrations (incl. the "legacy sessions snapshot the current plan, not the plan at workout time" caveat and the link to #134); note both fields flow into the export payload with no `schemaVersion` bump. Verify every Sync-rule checklist item for this change is covered.
-- [ ] 8.2 Run `openspec validate session-evaluation-meta --strict`, `npm run lint`, `npx tsc --noEmit`, `npm run test` — all green.
+- [x] 8.1 Update `docs/data-structure.md` in the same PR: add `SessionEvaluation` and `PlanDaySnapshot` to the Sessions type section; document the backfill migration under Migrations (incl. the "legacy sessions snapshot the current plan, not the plan at workout time" caveat and the link to #134); note both fields flow into the export payload with no `schemaVersion` bump. Verify every Sync-rule checklist item for this change is covered.
+- [x] 8.2 Run `openspec validate session-evaluation-meta --strict`, `npm run lint`, `npx tsc --noEmit`, `npm run test` — all green.

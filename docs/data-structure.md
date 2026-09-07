@@ -204,10 +204,43 @@ interface WorkoutSession {
   rating?: 1 | 2 | 3 | 4 | 5;
   updatedAt?: string; // set when edited post-completion
   importedViaAi?: boolean; // set when created via AI import
+  planDaySnapshot?: PlanDaySnapshot; // frozen plan-day baseline; captured on first save
+  evaluation?: SessionEvaluation; // plan-adherence rollup; refreshed on every write
+}
+
+interface PlanDaySnapshot {
+  planName: string;
+  day: PlanDay; // deep copy of the origin plan day at capture time
+  capturedAt: string; // ISO
+}
+
+interface SessionEvaluation {
+  overall: 'overdone' | 'on-target' | 'underperformed' | 'no-plan';
+  counts: {
+    overdone: number;
+    matched: number;
+    underperformed: number;
+    missed: number;
+    extra: number;
+  };
+  highlights?: Array<{
+    exerciseName: string;
+    status: 'overdone' | 'underperformed' | 'missed' | 'extra';
+    delta?: string; // e.g. "+2 set" / "−1 set"; absent for `missed`
+  }>;
+  totalVolumeKg?: number; // Σ weight × reps; omitted when 0
+  avgWeightKg?: number; // mean weighted-set load; omitted when none
+  setCount?: number; // total logged sets; omitted when 0
+  rating?: 1 | 2 | 3 | 4 | 5; // copied from the session
+  v: 1; // schema version
 }
 ```
 
 At most one `ActiveSession` exists at a time (single value at `wst_active_session`). `WorkoutSession` is the immutable record produced when an active session is completed and pushed onto `wst_sessions`. `updateSession` stamps `updatedAt` on every post-completion edit.
+
+`evaluation` is a deterministic plan-adherence rollup, computed by `evaluateSession` in [src/lib/sessionUtils.ts](../src/lib/sessionUtils.ts) from `compareSessionToPlan` (the same classification the vs-Plan history tab renders). It is attached on **every** session write — `saveSession` (finish, manual record, AI import) and `updateSession` (post-completion edit) — plus a one-time backfill (see [Migrations](#migrations)). AI prompt construction reads it via `AiContext.evaluation`.
+
+`planDaySnapshot` freezes the plan day the session was run against, captured the first time the session is persisted. `evaluateSession` and the vs-Plan tab both read the snapshot rather than the live plan, so editing or deleting the plan afterwards never rewrites a past session's verdict. A shared plan-version log ([#134](https://github.com/tkrisztian95/workout-session-tracker/issues/134)) is the eventual replacement for the per-session copy. `updateSession` recomputes `evaluation` against the existing snapshot but does **not** re-capture it.
 
 ### Achievements
 
@@ -250,6 +283,17 @@ Migration is idempotent: once `category` is gone, subsequent reads are no-ops.
 
 The backfill is idempotent and a no-op for free sessions, sessions whose exercises already carry a scheme, or plans/days that no longer exist.
 
+### Backfill `evaluation` + `planDaySnapshot` onto completed sessions
+
+`backfillSessionEvaluations` runs on every `getSessions` read. Any session missing an `evaluation` (or carrying one below the current `v`) gets:
+
+1. a `planDaySnapshot` — resolved from the origin plan (`planId` + `planDayId`) **as it exists now**, then deep-copied and frozen. Skipped when the session has no plan origin or the plan/day no longer exists.
+2. an `evaluation` — computed by `evaluateSession` against that snapshot (or `overall: 'no-plan'` with volume/rating totals when there is no snapshot).
+
+Storage is rewritten once per read when anything changed. Idempotent: a session already at `evaluation.v === 1` is skipped, so a second read is a no-op.
+
+**Caveat:** for sessions completed before this shipped, the snapshot captures the plan _as it is at first read_, not as it was at workout time — the only plan reference stored historically is `planId` / `planDayId`. After the one-time capture the session is frozen like any new one. [#134](https://github.com/tkrisztian95/workout-session-tracker/issues/134) (plan version history) would let the backfill pick the correct historical version.
+
 ## Export payload
 
 `exportAllData()` produces a single JSON document for backup / portability:
@@ -272,7 +316,7 @@ interface ExportPayload {
 
 Notes:
 
-- `schemaVersion` must be bumped whenever the payload shape changes in a non-additive way.
+- `schemaVersion` must be bumped whenever the payload shape changes in a non-additive way. Adding `planDaySnapshot` / `evaluation` to `WorkoutSession` is additive and optional — exported sessions carry both when present, and `schemaVersion` stays `'1'`.
 - Profile fields are read from their individual `wst_user_*` keys at export time and bundled into the `profile` object.
 - The LLM config, theme, locale, achievements, hidden exercises, consent, and migration flags are intentionally **excluded** from the export.
 
