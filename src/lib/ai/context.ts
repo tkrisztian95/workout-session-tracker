@@ -36,6 +36,7 @@ const TOP_EXERCISES_PER_SESSION = 6;
  * MUST extend this union so future context-shaping logic (budget guards,
  * field selection) can match on the consumer exhaustively.
  */
+// prettier-ignore
 export type AiFeature =
   | 'plan-suggest'
   | 'exercise-swap'
