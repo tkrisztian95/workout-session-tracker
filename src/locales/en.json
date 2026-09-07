@@ -264,7 +264,9 @@
     "advanced": "Advanced"
   },
   "catalog_exercise_aliases": {
-    "stationary-bike": ["Exercise bike"],
+    "treadmill": ["Running", "Run", "Jogging"],
+    "stationary-bike": ["Exercise bike", "Cycling", "Biking"],
+    "rowing-machine": ["Rowing", "Row"],
     "romanian-deadlift": ["RDL"],
     "deadlift": ["Weightlifting"],
     "squat": ["Back squat"],
@@ -606,8 +608,9 @@
   "exercise_log_set": "Log set",
   "exercise_log_time": "Time it",
   "exercise_done": "Done",
-  "stopwatch_target": "Target: {seconds}s",
+  "stopwatch_target": "Target: {time}",
   "stopwatch_start_hint": "Tap to start",
+  "stopwatch_resume_hint": "Tap to resume",
   "stopwatch_stop_hint": "Tap to stop & save",
   "exercise_detail_sets_reps": "{sets} sets × {reps} reps",
   "exercise_detail_sets_duration": "{sets} sets · {duration}s",

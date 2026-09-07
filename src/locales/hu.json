@@ -252,7 +252,9 @@
     "advanced": "Haladó"
   },
   "catalog_exercise_aliases": {
-    "stationary-bike": ["Szobakerékpár"],
+    "treadmill": ["Futás", "Kocogás"],
+    "stationary-bike": ["Szobakerékpár", "Kerékpározás", "Biciklizés"],
+    "rowing-machine": ["Evezés"],
     "romanian-deadlift": ["RDL"],
     "deadlift": ["Súlyemelés"],
     "squat": ["Guggolás rúddal"],
@@ -578,8 +580,9 @@
   "exercise_log_set": "Sorozat rögzítése",
   "exercise_log_time": "Mérés",
   "exercise_done": "Kész",
-  "stopwatch_target": "Cél: {seconds} mp",
+  "stopwatch_target": "Cél: {time}",
   "stopwatch_start_hint": "Koppints az indításhoz",
+  "stopwatch_resume_hint": "Koppints a folytatáshoz",
   "stopwatch_stop_hint": "Koppints a leállításhoz és mentéshez",
   "exercise_detail_sets_reps": "{sets} sor × {reps} ism.",
   "exercise_detail_sets_duration": "{sets} sor · {duration}s",

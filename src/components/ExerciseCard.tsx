@@ -57,6 +57,9 @@ export default function ExerciseCard({
   const t = useTranslations();
   const [showSetForm, setShowSetForm] = useState(false);
   const [showStopwatch, setShowStopwatch] = useState(false);
+  // Elapsed seconds retained while the stopwatch overlay is closed, so reopening
+  // resumes instead of restarting.
+  const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(null);
@@ -400,9 +403,14 @@ export default function ExerciseCard({
         <ExerciseStopwatchOverlay
           exerciseName={exercise.name}
           targetSeconds={exercise.duration}
-          onCancel={() => setShowStopwatch(false)}
+          initialSeconds={stopwatchSeconds}
+          onCancel={(seconds) => {
+            setStopwatchSeconds(seconds);
+            setShowStopwatch(false);
+          }}
           onSave={(seconds) => {
             onLogSet?.({ weight: 0, reps: 0, seconds });
+            setStopwatchSeconds(0);
             setShowStopwatch(false);
           }}
         />
