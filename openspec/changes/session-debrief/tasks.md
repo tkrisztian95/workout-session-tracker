@@ -6,10 +6,10 @@
 
 ## 2. Prompt + generation module
 
-- [ ] 2.1 Add `src/lib/ai/prompts/session-debrief/v1.ts` (system prompt: strength-coach role, JSON `{"debrief": string}`, max 3 sentences, one observation + one concrete next-session change, ban generic praise, no-plan branch → volume/rating/progression) and `index.ts` exporting `SESSION_DEBRIEF_SYSTEM_PROMPT`. Verify `npx tsc --noEmit` passes.
-- [ ] 2.2 Add `'session-debrief'` to the `AiFeature` union in `src/lib/ai/context.ts`. Verify `npx tsc --noEmit` passes.
-- [ ] 2.3 Implement `generateSessionDebrief(ctx, finished): Promise<SessionDebriefResult>` in `src/lib/ai/debrief.ts` — read `getLlmConfig()` (throw typed skip when absent), build the user message from `formatProfilePreamble` + `formatRecentSessions` + a "This session:" block derived from `finished` + `finished.evaluation`, `callLlm`, `JSON.parse`, validate non-empty `debrief` string, trim to first 3 sentences, return `{ text, model: config.model }`. No direct `localStorage`/storage-getter reads beyond `getLlmConfig`. Export it + `SessionDebriefResult` from `src/lib/ai/index.ts`. Verify unit tests (mock `callLlm`): happy path returns trimmed text + model; a 5-sentence response is trimmed to 3; empty / non-JSON / missing-`debrief` responses reject; missing config rejects with the typed skip.
-- [ ] 2.4 Add a unit test that the generated prompt for a `no-plan` session includes the volume/rating framing and not plan-deviation counts.
+- [x] 2.1 Add `src/lib/ai/prompts/session-debrief/v1.ts` (system prompt: strength-coach role, JSON `{"debrief": string}`, max 3 sentences, one observation + one concrete next-session change, ban generic praise, no-plan branch → volume/rating/progression) and `index.ts` exporting `SESSION_DEBRIEF_SYSTEM_PROMPT`. Verify `npx tsc --noEmit` passes.
+- [x] 2.2 Add `'session-debrief'` to the `AiFeature` union in `src/lib/ai/context.ts`. Verify `npx tsc --noEmit` passes.
+- [x] 2.3 Implement `generateSessionDebrief(ctx, finished): Promise<SessionDebriefResult>` in `src/lib/ai/debrief.ts` — read `getLlmConfig()` (throw typed skip when absent), build the user message from `formatProfilePreamble` + `formatRecentSessions` + a "This session:" block derived from `finished` + `finished.evaluation`, `callLlm`, `JSON.parse`, validate non-empty `debrief` string, trim to first 3 sentences, return `{ text, model: config.model }`. No direct `localStorage`/storage-getter reads beyond `getLlmConfig`. Export it + `SessionDebriefResult` from `src/lib/ai/index.ts`. Verify unit tests (mock `callLlm`): happy path returns trimmed text + model; a 5-sentence response is trimmed to 3; empty / non-JSON / missing-`debrief` responses reject; missing config rejects with the typed skip.
+- [x] 2.4 Add a unit test that the generated prompt for a `no-plan` session includes the volume/rating framing and not plan-deviation counts.
 
 ## 3. Finish flow — inline debrief on the celebration screen
 

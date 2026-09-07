@@ -42,7 +42,8 @@ export type AiFeature =
   | 'exercise-swap'
   | 'exercise-suggest'
   | 'plan-adjust'
-  | 'notes-import';
+  | 'notes-import'
+  | 'session-debrief';
 
 export interface ContextProfile {
   name?: string;

@@ -10,6 +10,9 @@ export { adjustPlan, swapExercise } from './adjust';
 export type { AiSuggestResult, SessionExerciseRef } from './suggest';
 export { suggestExercise } from './suggest';
 
+export type { SessionDebriefResult } from './debrief';
+export { generateSessionDebrief } from './debrief';
+
 export type {
   AiContext,
   AiFeature,
