@@ -526,6 +526,10 @@
   "last_session_days_ago": "{n} days ago",
 
   "history_activity_label": "Activity",
+  "history_jump_today": "Today",
+  "history_week_planned_label": "Planned",
+  "history_week_completed_label": "Logged",
+  "history_week_nothing": "Nothing logged or planned",
   "history_title": "History",
   "history_no_sessions_title": "No sessions yet",
   "history_no_sessions_subtitle": "Complete a workout to see it here",

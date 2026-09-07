@@ -1,4 +1,4 @@
-import type { WorkoutPlan, WorkoutSession } from './types';
+import type { PlanDay, WorkoutPlan, WorkoutSession } from './types';
 import { ALL_MUSCLES, type Muscle } from './muscles';
 
 export type PlanSort = 'created' | 'followed' | 'mostFollowed' | 'updated' | 'name';
@@ -57,6 +57,28 @@ export function getPlanPlannedOccurrences(plan: WorkoutPlan): number | null {
   const weeklySessions = weekdaySlots > 0 ? weekdaySlots : plan.days.length;
   if (weeklySessions <= 0) return null;
   return plan.scheduledWeeks * weeklySessions;
+}
+
+/** A plan day scheduled on a given weekday, paired with its owning plan. */
+export interface ScheduledPlanDay {
+  plan: WorkoutPlan;
+  day: PlanDay;
+}
+
+/**
+ * Plan days scheduled on a given weekday (0 = Sunday … 6 = Saturday), across all
+ * active plans. Completed plans are excluded since they're no longer part of the
+ * routine. Used by the history week strip to surface what's planned for a day.
+ */
+export function getScheduledPlanDays(plans: WorkoutPlan[], weekday: number): ScheduledPlanDay[] {
+  const result: ScheduledPlanDay[] = [];
+  for (const plan of plans) {
+    if ((plan.status ?? 'active') === 'completed') continue;
+    for (const day of plan.days) {
+      if (day.weekdays.includes(weekday)) result.push({ plan, day });
+    }
+  }
+  return result;
 }
 
 /** Total number of exercises in a plan: shared plus every day's core and optional. */

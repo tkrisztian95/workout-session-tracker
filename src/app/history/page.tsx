@@ -72,14 +72,6 @@ function HistoryContent() {
     });
   }, [dateFilter]);
 
-  const sessionsByDate = sessions.reduce<Record<string, string[]>>((acc, s) => {
-    if (!s.completedAt) return acc;
-    const date = s.completedAt.slice(0, 10);
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(s.id);
-    return acc;
-  }, {});
-
   const grouped: { date: string; sessions: WorkoutSession[] }[] = [];
   for (const session of sessions) {
     const date = session.completedAt.slice(0, 10);
@@ -155,7 +147,7 @@ function HistoryContent() {
       </PageHeader>
 
       <div className="px-6 pb-4">
-        <ActivityTiles sessionsByDate={sessionsByDate} />
+        <ActivityTiles sessions={sessions} plans={Object.values(planMap)} />
       </div>
 
       <div className="flex-1 px-6 overflow-y-auto">

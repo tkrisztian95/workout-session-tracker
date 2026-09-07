@@ -521,6 +521,10 @@
   "last_session_days_ago": "Vor {n} Tagen",
 
   "history_activity_label": "Aktivität",
+  "history_jump_today": "Heute",
+  "history_week_planned_label": "Geplant",
+  "history_week_completed_label": "Erfasst",
+  "history_week_nothing": "Nichts erfasst oder geplant",
   "history_title": "Verlauf",
   "history_no_sessions_title": "Noch keine Trainings",
   "history_no_sessions_subtitle": "Beende ein Training, um es hier zu sehen",
