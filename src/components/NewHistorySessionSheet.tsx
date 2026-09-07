@@ -435,7 +435,7 @@ export default function NewHistorySessionSheet({
                 </div>
 
                 {/* Exercise list — only this section scrolls */}
-                <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pb-2">
+                <div className="flex-1 min-h-0 overflow-y-auto -mx-2 px-2 space-y-2 pb-2">
                   {exercises.length > 0 && (
                     <p className="text-xs font-medium text-secondary uppercase tracking-wide mb-1">
                       {t.new_history_exercises_label} ({exercises.length})
