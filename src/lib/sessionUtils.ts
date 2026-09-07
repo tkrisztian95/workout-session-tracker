@@ -14,6 +14,15 @@ export function formatLoggedSet(set: LoggedSet): string {
   return set.weight > 0 ? `${set.weight} kg × ${set.reps}` : `× ${set.reps}`;
 }
 
+/** Zero-padded `mm:ss` clock for a stopwatch / timed exercise. Minutes are not
+ *  capped, so a 90-minute run reads `90:00`. */
+export function formatClock(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const m = Math.floor(safe / 60);
+  const s = safe % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
 /** Rep portion of a target: "10" for uniform, "15/12/8/4" for a per-set scheme. */
 export function formatRepsTarget(ex: { reps?: number; repsPerSet?: number[] }): string {
   if (ex.repsPerSet && ex.repsPerSet.length > 0) return ex.repsPerSet.join('/');
