@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dumbbell, Timer, Trophy } from 'lucide-react';
 import type { Exercise, SessionDebrief, WorkoutSession } from '@/lib/types';
 import { RATING_EMOJI, calcSessionStats, formatDuration } from '@/lib/sessionUtils';
@@ -40,6 +40,17 @@ export default function SessionCompleteOverlay({
   const [view, setView] = useState<'summary' | 'rating' | 'debrief'>('summary');
   const [debrief, setDebrief] = useState<DebriefState>({ status: 'loading' });
 
+  // In the debrief view, Escape closes the celebration screen without waiting
+  // for the (possibly still in-flight) debrief request.
+  useEffect(() => {
+    if (view !== 'debrief') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [view, onClose]);
+
   function handleRating(rating?: 1 | 2 | 3 | 4 | 5) {
     const saved = onRated(rating);
     if (!saved || !debriefEnabled) {
@@ -72,10 +83,15 @@ export default function SessionCompleteOverlay({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm cursor-pointer"
-      onClick={() => (view === 'debrief' ? onClose() : undefined)}
-    >
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center max-w-md mx-auto bg-base/95 backdrop-blur-sm">
+      {view === 'debrief' && (
+        <button
+          type="button"
+          aria-label={t.session_debrief_done}
+          className="absolute inset-0 cursor-pointer"
+          onClick={onClose}
+        />
+      )}
       <style>{`
         @keyframes sessionScaleFadeIn {
           from { opacity: 0; transform: scale(0.7); }
@@ -98,10 +114,7 @@ export default function SessionCompleteOverlay({
 
       {view === 'summary' && (
         /* ── View 1: Celebration + stats ──────────────────────────────── */
-        <div
-          className="flex flex-col items-center px-8 text-center w-full cursor-default"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex flex-col items-center px-8 text-center w-full cursor-default">
           <div className="session-complete-icon w-28 h-28 rounded-full bg-brand/15 border-2 border-brand/40 flex items-center justify-center mb-6">
             <Trophy className="w-14 h-14 text-brand" />
           </div>
@@ -152,10 +165,7 @@ export default function SessionCompleteOverlay({
 
       {view === 'rating' && (
         /* ── View 2: Optional rating ───────────────────────────────────── */
-        <div
-          className="session-rating-view flex flex-col items-center px-6 text-center w-full gap-8 cursor-default"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="session-rating-view flex flex-col items-center px-6 text-center w-full gap-8 cursor-default">
           <HeadingXL>{t.session_rate_prompt}</HeadingXL>
 
           {/* Emoji row — w-12 (48px) × 5 + gap-3 × 4 = 288px, fits 375px screen */}
@@ -187,10 +197,7 @@ export default function SessionCompleteOverlay({
 
       {view === 'debrief' && (
         /* ── View 3: Inline AI debrief ─────────────────────────────────── */
-        <div
-          className="session-rating-view flex flex-col items-center px-6 text-center w-full gap-6 cursor-default"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="session-rating-view relative z-10 flex flex-col items-center px-6 text-center w-full gap-6 cursor-default">
           <div className="w-20 h-20 rounded-full bg-brand/15 border-2 border-brand/40 flex items-center justify-center">
             <Trophy className="w-10 h-10 text-brand" />
           </div>
