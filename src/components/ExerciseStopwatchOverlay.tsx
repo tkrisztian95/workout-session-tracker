@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play, Square, X } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
+import { formatClock } from '@/lib/sessionUtils';
 
 interface Props {
   exerciseName: string;
@@ -14,12 +15,6 @@ interface Props {
   /** Called when the overlay is dismissed without saving. Reports the elapsed
    *  seconds so the caller can resume from here next time it opens. */
   onCancel: (seconds: number) => void;
-}
-
-function formatClock(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 export default function ExerciseStopwatchOverlay({
@@ -73,12 +68,16 @@ export default function ExerciseStopwatchOverlay({
         <X className="w-5 h-5 text-secondary" />
       </button>
 
-      <p className="text-secondary text-sm font-medium text-center">{exerciseName}</p>
-      {targetSeconds != null && (
-        <p className="text-muted text-xs mt-1">
-          {t.stopwatch_target.replace('{time}', formatClock(targetSeconds))}
-        </p>
-      )}
+      <div className="flex flex-col items-center gap-1.5 px-4 text-center">
+        <h2 className="text-xl font-bold leading-snug text-foreground text-balance">
+          {exerciseName}
+        </h2>
+        {targetSeconds != null && (
+          <p className="text-secondary text-sm font-medium tabular-nums">
+            {t.stopwatch_target.replace('{time}', formatClock(targetSeconds))}
+          </p>
+        )}
+      </div>
 
       <div
         className={`font-mono font-bold tabular-nums my-10 text-7xl transition-colors duration-200 ${
