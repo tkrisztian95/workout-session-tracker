@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Play, Square, X } from 'lucide-react';
+import { Play, RotateCcw, Square, X } from 'lucide-react';
 import { useTranslations } from '@/lib/locale-context';
 import { formatClock } from '@/lib/sessionUtils';
 
@@ -56,6 +56,12 @@ export default function ExerciseStopwatchOverlay({
     }
   };
 
+  const handleReset = () => {
+    setRunning(false);
+    setElapsedMs(0);
+    originRef.current = 0;
+  };
+
   const startHint = resumable ? t.stopwatch_resume_hint : t.stopwatch_start_hint;
 
   return (
@@ -107,6 +113,16 @@ export default function ExerciseStopwatchOverlay({
       <p className="text-muted text-sm font-medium mt-4">
         {running ? t.stopwatch_stop_hint : startHint}
       </p>
+
+      {elapsedMs > 0 && (
+        <button
+          onClick={handleReset}
+          className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-secondary active:bg-elevated cursor-pointer"
+        >
+          <RotateCcw className="w-4 h-4" strokeWidth={2.5} />
+          {t.stopwatch_reset}
+        </button>
+      )}
     </div>
   );
 }

@@ -615,6 +615,7 @@
   "stopwatch_target": "Target: {time}",
   "stopwatch_start_hint": "Tap to start",
   "stopwatch_resume_hint": "Tap to resume",
+  "stopwatch_reset": "Reset",
   "stopwatch_stop_hint": "Tap to stop & save",
   "exercise_detail_sets_reps": "{sets} sets × {reps} reps",
   "exercise_detail_sets_duration": "{sets} sets · {duration}s",

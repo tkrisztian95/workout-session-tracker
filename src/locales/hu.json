@@ -587,6 +587,7 @@
   "stopwatch_target": "Cél: {time}",
   "stopwatch_start_hint": "Koppints az indításhoz",
   "stopwatch_resume_hint": "Koppints a folytatáshoz",
+  "stopwatch_reset": "Visszaállítás",
   "stopwatch_stop_hint": "Koppints a leállításhoz és mentéshez",
   "exercise_detail_sets_reps": "{sets} sor × {reps} ism.",
   "exercise_detail_sets_duration": "{sets} sor · {duration}s",
