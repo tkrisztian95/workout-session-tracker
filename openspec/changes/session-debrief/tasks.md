@@ -25,6 +25,6 @@
 
 ## 5. Docs + validation
 
-- [ ] 5.1 Update `docs/data-structure.md`: add `debrief?: SessionDebrief` to the `WorkoutSession` block and the Sessions prose; add `wst_ai_debrief_enabled` to the localStorage-keys table; note `debrief` rides the export payload additively (no `schemaVersion` bump) and the setting key is excluded like other client-only flags.
-- [ ] 5.2 Run `openspec validate session-debrief --strict`, `npm run lint`, `npx tsc --noEmit`, `npm run test`, `npm run build` — all green.
-- [ ] 5.3 Manual check with a real key (or documented as skipped): finish a plan session → debrief appears inline within a few seconds, persists, and shows the same text when reopened from history; finish with the toggle off → no call, normal teardown.
+- [x] 5.1 Update `docs/data-structure.md`: add `debrief?: SessionDebrief` to the `WorkoutSession` block and the Sessions prose; add `wst_ai_debrief_enabled` to the localStorage-keys table; note `debrief` rides the export payload additively (no `schemaVersion` bump) and the setting key is excluded like other client-only flags.
+- [x] 5.2 Run `openspec validate session-debrief --strict`, `npm run lint`, `npx tsc --noEmit`, `npm run test`, `npm run build` — all green.
+- [x] 5.3 Manual check with a real key (or documented as skipped): finish a plan session → debrief appears inline within a few seconds, persists, and shows the same text when reopened from history; finish with the toggle off → no call, normal teardown.
