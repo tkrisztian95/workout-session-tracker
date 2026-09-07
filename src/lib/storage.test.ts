@@ -489,3 +489,30 @@ describe('getSessions evaluation backfill', () => {
     expect(loaded.evaluation?.totalVolumeKg).toBe(60 * 8 * 3);
   });
 });
+
+// ─── #64: saveSession return value + AI debrief toggle ────────────────────────
+
+describe('saveSession return value', () => {
+  it('returns the stored record with id and evaluation', () => {
+    localStorage.setItem(KEYS.plans, JSON.stringify([pushDayPlan()]));
+    const stored = saveSession(planSession());
+    expect(stored.id).toBe('sess-1');
+    expect(stored.evaluation?.v).toBe(1);
+    expect(stored.planDaySnapshot?.day).toEqual(pushDayPlan().days[0]);
+  });
+});
+
+describe('AI debrief toggle', () => {
+  it('defaults to enabled when unset', async () => {
+    const { isAiDebriefEnabled } = await import('./storage');
+    expect(isAiDebriefEnabled()).toBe(true);
+  });
+
+  it('reflects an explicit disable then re-enable', async () => {
+    const { isAiDebriefEnabled, setAiDebriefEnabled } = await import('./storage');
+    setAiDebriefEnabled(false);
+    expect(isAiDebriefEnabled()).toBe(false);
+    setAiDebriefEnabled(true);
+    expect(isAiDebriefEnabled()).toBe(true);
+  });
+});

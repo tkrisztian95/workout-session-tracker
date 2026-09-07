@@ -79,6 +79,7 @@ const KEYS = {
   hiddenExercises: 'wst_hidden_exercises',
   muscleMigrationPending: 'wst_muscle_migration_pending',
   muscleMigrationSeen: 'wst_muscle_migration_seen',
+  aiDebriefEnabled: 'wst_ai_debrief_enabled',
 } as const;
 
 export interface HiddenExerciseKey {
@@ -436,7 +437,7 @@ export function saveLlmConfig(config: LlmConfig): void {
   localStorage.setItem(KEYS.llmConfig, JSON.stringify(config));
 }
 
-export function saveSession(session: WorkoutSession): void {
+export function saveSession(session: WorkoutSession): WorkoutSession {
   const sessions = getSessions();
   const snapshot = session.planDaySnapshot ?? resolvePlanDaySnapshot(session);
   const record: WorkoutSession = {
@@ -446,6 +447,7 @@ export function saveSession(session: WorkoutSession): void {
   };
   sessions.push(record);
   localStorage.setItem(KEYS.sessions, JSON.stringify(sessions));
+  return record;
 }
 
 export function deleteSession(id: string): void {
@@ -514,6 +516,18 @@ export function getHomeBackground(): HomeBackground {
 
 export function saveHomeBackground(value: HomeBackground): void {
   localStorage.setItem(KEYS.homeBackground, value);
+}
+
+// ─── AI session debrief toggle ────────────────────────────────────────────────
+
+/** Whether the post-workout AI debrief (#64) is generated on session finish. Default on. */
+export function isAiDebriefEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
+  return localStorage.getItem(KEYS.aiDebriefEnabled) !== 'false';
+}
+
+export function setAiDebriefEnabled(enabled: boolean): void {
+  localStorage.setItem(KEYS.aiDebriefEnabled, enabled ? 'true' : 'false');
 }
 
 // ─── Profile created at ───────────────────────────────────────────────────────

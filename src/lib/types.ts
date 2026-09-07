@@ -148,6 +148,17 @@ export interface SessionEvaluation {
   v: 1;
 }
 
+/**
+ * One-paragraph AI debrief generated once when a session is finished (issue
+ * #64). Written on success and never regenerated — re-reading the session shows
+ * the same text. Absent when generation is disabled, unconfigured, or failed.
+ */
+export interface SessionDebrief {
+  text: string;
+  generatedAt: string; // ISO timestamp
+  model: string; // LLM model id that produced it
+}
+
 /** A completed session (stored in the wst_sessions array). */
 export interface WorkoutSession {
   id: string;
@@ -161,4 +172,5 @@ export interface WorkoutSession {
   importedViaAi?: boolean; // set when the session was created via AI import
   planDaySnapshot?: PlanDaySnapshot; // frozen plan-day baseline; captured on first save
   evaluation?: SessionEvaluation; // plan-adherence rollup; refreshed on every write
+  debrief?: SessionDebrief; // AI debrief; written once on finish, never regenerated
 }

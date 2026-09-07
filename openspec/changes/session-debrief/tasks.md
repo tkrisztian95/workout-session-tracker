@@ -1,8 +1,8 @@
 ## 1. Types + storage plumbing
 
-- [ ] 1.1 Add `SessionDebrief` interface (`text`, `generatedAt`, `model`) and `WorkoutSession.debrief?: SessionDebrief` to `src/lib/types.ts`. Verify `npx tsc --noEmit` passes.
-- [ ] 1.2 Change `saveSession` in `src/lib/storage.ts` to return the stored `WorkoutSession` (the `record` it already builds). Verify existing callers still compile and a unit test asserts the returned object has an `id` and `evaluation`.
-- [ ] 1.3 Add `KEYS.aiDebriefEnabled = 'wst_ai_debrief_enabled'` plus `isAiDebriefEnabled(): boolean` (default `true`; `'false'` ⇒ off) and `setAiDebriefEnabled(on: boolean)` to `src/lib/storage.ts`. Verify unit tests: default true when unset, false after `setAiDebriefEnabled(false)`, true again after `(true)`.
+- [x] 1.1 Add `SessionDebrief` interface (`text`, `generatedAt`, `model`) and `WorkoutSession.debrief?: SessionDebrief` to `src/lib/types.ts`. Verify `npx tsc --noEmit` passes.
+- [x] 1.2 Change `saveSession` in `src/lib/storage.ts` to return the stored `WorkoutSession` (the `record` it already builds). Verify existing callers still compile and a unit test asserts the returned object has an `id` and `evaluation`.
+- [x] 1.3 Add `KEYS.aiDebriefEnabled = 'wst_ai_debrief_enabled'` plus `isAiDebriefEnabled(): boolean` (default `true`; `'false'` ⇒ off) and `setAiDebriefEnabled(on: boolean)` to `src/lib/storage.ts`. Verify unit tests: default true when unset, false after `setAiDebriefEnabled(false)`, true again after `(true)`.
 
 ## 2. Prompt + generation module
 
