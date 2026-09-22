@@ -18,8 +18,8 @@
 
 ## 4. AI debrief
 
-- [ ] 4.1 Extend `formatFinishedSession` in `src/lib/ai/debrief.ts` with the `- skipped:` line (design D5). Verify with `src/lib/ai/debrief.test.ts` cases: pain plus note, no reason, and no skips (no line).
-- [ ] 4.2 Add `src/lib/ai/prompts/session-debrief/v2.ts` with the pain-acknowledgement and no-medical-advice rule. Point `index.ts` at v2 and set `version = 2`. Verify the debrief tests pass and the exported `SESSION_DEBRIEF_SYSTEM_PROMPT` contains the new rule.
+- [x] 4.1 Extend `formatFinishedSession` in `src/lib/ai/debrief.ts` with the `- skipped:` line (design D5). Verify with `src/lib/ai/debrief.test.ts` cases: pain plus note, no reason, and no skips (no line).
+- [x] 4.2 Add `src/lib/ai/prompts/session-debrief/v2.ts` with the pain-acknowledgement and no-medical-advice rule. Point `index.ts` at v2 and set `version = 2`. Verify the debrief tests pass and the exported `SESSION_DEBRIEF_SYSTEM_PROMPT` contains the new rule.
 
 ## 5. Docs and verification
 

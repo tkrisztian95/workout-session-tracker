@@ -1,4 +1,4 @@
-import type { LlmConfig, SessionEvaluation, WorkoutSession } from '../types';
+import type { LlmConfig, SessionEvaluation, SkipReason, WorkoutSession } from '../types';
 import { callLlm } from './client';
 import { SESSION_DEBRIEF_SYSTEM_PROMPT } from './prompts/session-debrief';
 import {
@@ -20,6 +20,29 @@ function firstNSentences(text: string, n: number): string {
     .split(/(?<=[.!?])\s+/)
     .filter((s) => s.trim().length > 0);
   return sentences.slice(0, n).join(' ').trim();
+}
+
+/** Model-facing reason text; stable English so the prompt doesn't depend on UI language. */
+const SKIP_REASON_TEXT: Record<SkipReason, string> = {
+  pain: 'pain/injury',
+  'equipment-broken': 'equipment broken',
+  'equipment-busy': 'equipment busy',
+  fatigue: 'fatigue/low energy',
+  time: 'out of time',
+  other: 'other',
+};
+
+/** `- skipped: …` line listing each skipped exercise with its reason and note, or null. */
+function formatSkipped(finished: WorkoutSession): string | null {
+  const skipped = finished.exercises.filter((e) => e.dismissed);
+  if (skipped.length === 0) return null;
+  const items = skipped.map((e) => {
+    const parts: string[] = [];
+    if (e.skipReason) parts.push(SKIP_REASON_TEXT[e.skipReason]);
+    if (e.skipNote) parts.push(JSON.stringify(e.skipNote));
+    return `${e.name} (${parts.length > 0 ? parts.join(' — ') : 'no reason'})`;
+  });
+  return `- skipped: ${items.join(', ')}`;
 }
 
 /** Renders the just-finished session's evaluation as prompt-friendly lines. */
@@ -54,6 +77,9 @@ function formatFinishedSession(finished: WorkoutSession): string {
     lines.push(`- ${finished.exercises.length} exercises logged`);
     if (finished.rating) lines.push(`- session rating: ${finished.rating}/5`);
   }
+
+  const skipped = formatSkipped(finished);
+  if (skipped) lines.push(skipped);
 
   return lines.join('\n');
 }
