@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, X, RotateCcw, Plus, Info, Timer } from 'lucide-react';
+import { Check, X, RotateCcw, Plus, Info, Timer, TriangleAlert } from 'lucide-react';
 import type { Exercise, LoggedSet } from '@/lib/types';
 import { IconButton } from '@/components/ui';
 import LoggedSetBadge from '@/components/LoggedSetBadge';
 import ExerciseStopwatchOverlay from '@/components/ExerciseStopwatchOverlay';
+import SkipReasonLine from '@/components/SkipReasonLine';
 import { useTranslations } from '@/lib/locale-context';
 import type { Translations } from '@/lib/i18n';
 import {
@@ -20,6 +21,8 @@ interface Props {
   onComplete: () => void;
   onDismiss: () => void;
   isActive?: boolean;
+  /** Last two saved appearances of this exercise were skipped for pain. */
+  painStreak?: boolean;
   onSetActive?: () => void;
   onUndoDismiss?: () => void;
   onLogSet?: (set: Omit<LoggedSet, 'loggedAt'>) => void;
@@ -54,6 +57,7 @@ export default function ExerciseCard({
   onComplete,
   onDismiss,
   isActive = false,
+  painStreak = false,
   onSetActive,
   onUndoDismiss,
   onLogSet,
@@ -234,6 +238,15 @@ export default function ExerciseCard({
                 <p className="text-sm text-secondary leading-snug">{exercise.scalingNote}</p>
               </div>
             )}
+            {painStreak && (
+              <div
+                role="note"
+                className="mt-2 flex items-start gap-1.5 bg-warning/8 rounded-xl px-3 py-2 border border-warning/40"
+              >
+                <TriangleAlert className="w-3.5 h-3.5 text-warning mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-secondary leading-snug">{t.skip_pain_streak_hint}</p>
+              </div>
+            )}
           </div>
 
           {/* Set progress slots — shown for sets-reps and sets-duration exercises */}
@@ -385,6 +398,7 @@ export default function ExerciseCard({
             {exercise.scalingNote && !isDone && (
               <p className="mt-1 text-xs text-muted leading-snug">{exercise.scalingNote}</p>
             )}
+            <SkipReasonLine exercise={exercise} className="mt-1" />
             {/* Logged sets inline for completed */}
             {exercise.loggedSets && exercise.loggedSets.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">

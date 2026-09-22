@@ -1,10 +1,12 @@
 'use client';
 
-import { Check, Minus, Pencil, X } from 'lucide-react';
+import { Check, Minus, Pencil, Tag, X } from 'lucide-react';
 import MuscleBadge from '@/components/MuscleBadge';
+import SkipReasonLine from '@/components/SkipReasonLine';
 import { IconButton } from '@/components/ui';
 import { formatExerciseDetail, formatLoggedSet } from '@/lib/sessionUtils';
 import type { Exercise } from '@/lib/types';
+import { useTranslations } from '@/lib/locale-context';
 
 interface SessionExerciseItemProps {
   exercise: Exercise;
@@ -13,6 +15,8 @@ interface SessionExerciseItemProps {
   onToggleComplete?: () => void;
   onEdit?: () => void;
   onRemove?: () => void;
+  /** Edit mode only: opens the skip reason editor for a dismissed exercise. */
+  onEditSkipReason?: () => void;
 }
 
 export function SessionExerciseItem({
@@ -22,8 +26,11 @@ export function SessionExerciseItem({
   onToggleComplete,
   onEdit,
   onRemove,
+  onEditSkipReason,
 }: SessionExerciseItemProps) {
+  const t = useTranslations();
   if (dismissed) {
+    const hasSkipDetails = !!(exercise.skipReason || exercise.skipNote);
     return (
       <div className="flex items-center gap-3 rounded-xl bg-base border border-border px-3 py-3 opacity-50">
         <button
@@ -39,6 +46,23 @@ export function SessionExerciseItem({
             {exercise.muscle && <MuscleBadge muscle={exercise.muscle} />}
           </div>
           <p className="text-dim text-xs mt-0.5">{formatExerciseDetail(exercise)}</p>
+          {isEditing && onEditSkipReason ? (
+            <button
+              type="button"
+              onClick={onEditSkipReason}
+              aria-label={t.skip_reason_edit_aria.replace('{name}', exercise.name)}
+              className="mt-1 -ml-1 min-h-11 px-1 flex items-center gap-1.5 text-left rounded-lg cursor-pointer active:bg-elevated"
+            >
+              <Tag className="w-3.5 h-3.5 text-muted flex-shrink-0" />
+              {hasSkipDetails ? (
+                <SkipReasonLine exercise={exercise} />
+              ) : (
+                <span className="text-xs font-semibold text-brand">{t.skip_reason_add}</span>
+              )}
+            </button>
+          ) : (
+            <SkipReasonLine exercise={exercise} className="mt-1" />
+          )}
         </div>
         {isEditing && (
           <div className="flex items-center gap-1 flex-shrink-0">

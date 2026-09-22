@@ -11,6 +11,7 @@ import SessionPausedOverlay from '@/components/SessionPausedOverlay';
 import PulsingButton from '@/components/PulsingButton';
 import FinishSessionConfirmSheet from '@/components/FinishSessionConfirmSheet';
 import DiscardSessionConfirmSheet from '@/components/DiscardSessionConfirmSheet';
+import SkipExerciseSheet from '@/components/SkipExerciseSheet';
 import { useLocale, useTranslations } from '@/lib/locale-context';
 import type {
   ActiveSession,
@@ -31,6 +32,7 @@ import {
   updateSession,
 } from '@/lib/storage';
 import { syncAchievements } from '@/lib/achievementEngine';
+import { applySkip, clearSkip, hasPainStreak, type SkipDetails } from '@/lib/skipReasons';
 import AchievementCelebration from '@/components/AchievementCelebration';
 import {
   Button,
@@ -64,6 +66,10 @@ export function SessionView({
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
   const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
   const [celebrationQueue, setCelebrationQueue] = useState<AchievementRecord[]>([]);
+  // Exercise whose skip sheet is open; the skip is applied only on confirm.
+  const [skipTargetId, setSkipTargetId] = useState<string | null>(null);
+  // Saved history doesn't change mid-session; read it once for the pain streak check.
+  const [pastSessions] = useState(() => getSessions());
 
   const handleAdd = (exercise: Omit<Exercise, 'id'>) => {
     const updated: ActiveSession = {
@@ -107,10 +113,10 @@ export function SessionView({
     onUpdate(updated);
   };
 
-  const handleDismiss = (id: string) => {
+  const handleDismiss = (id: string, details?: SkipDetails) => {
     const updated: ActiveSession = {
       ...session,
-      exercises: session.exercises.map((e) => (e.id === id ? { ...e, dismissed: true } : e)),
+      exercises: session.exercises.map((e) => (e.id === id ? applySkip(e, details) : e)),
     };
     onUpdate(updated);
   };
@@ -118,7 +124,7 @@ export function SessionView({
   const handleUndoDismiss = (id: string) => {
     const updated: ActiveSession = {
       ...session,
-      exercises: session.exercises.map((e) => (e.id === id ? { ...e, dismissed: false } : e)),
+      exercises: session.exercises.map((e) => (e.id === id ? clearSkip(e) : e)),
     };
     onUpdate(updated);
   };
@@ -167,6 +173,12 @@ export function SessionView({
   const activeExercise = remaining[0] ?? null;
   const allDone = totalCount > 0 && remaining.length === 0;
   const queue = remaining.slice(1);
+  const activePainStreak = activeExercise
+    ? hasPainStreak(pastSessions, activeExercise.name)
+    : false;
+  const skipTarget = skipTargetId
+    ? (session.exercises.find((e) => e.id === skipTargetId) ?? null)
+    : null;
 
   return (
     <Page>
@@ -212,8 +224,9 @@ export function SessionView({
               key={activeExercise.id}
               exercise={activeExercise}
               isActive
+              painStreak={activePainStreak}
               onComplete={() => handleComplete(activeExercise.id)}
-              onDismiss={() => handleDismiss(activeExercise.id)}
+              onDismiss={() => setSkipTargetId(activeExercise.id)}
               onLogSet={(s) => handleLogSet(activeExercise.id, s)}
               onRemoveSet={(i) => handleRemoveSet(activeExercise.id, i)}
             />
@@ -247,7 +260,7 @@ export function SessionView({
                       key={exercise.id}
                       exercise={exercise}
                       onComplete={() => handleComplete(exercise.id)}
-                      onDismiss={() => handleDismiss(exercise.id)}
+                      onDismiss={() => setSkipTargetId(exercise.id)}
                       onSetActive={() => handleSetActive(exercise.id)}
                       onLogSet={(s) => handleLogSet(exercise.id, s)}
                     />
@@ -272,7 +285,7 @@ export function SessionView({
                       key={exercise.id}
                       exercise={exercise}
                       onComplete={() => handleComplete(exercise.id)}
-                      onDismiss={() => handleDismiss(exercise.id)}
+                      onDismiss={() => setSkipTargetId(exercise.id)}
                     />
                   ))}
                 </>
@@ -286,7 +299,7 @@ export function SessionView({
                       key={exercise.id}
                       exercise={exercise}
                       onComplete={() => handleComplete(exercise.id)}
-                      onDismiss={() => handleDismiss(exercise.id)}
+                      onDismiss={() => setSkipTargetId(exercise.id)}
                       onUndoDismiss={() => handleUndoDismiss(exercise.id)}
                     />
                   ))}
@@ -389,6 +402,22 @@ export function SessionView({
             setShowFinishConfirm(false);
             setShowCompleteOverlay(true);
           }}
+        />
+      )}
+
+      {skipTarget && (
+        <SkipExerciseSheet
+          mode="skip"
+          exerciseName={skipTarget.name}
+          onConfirm={(details) => {
+            handleDismiss(skipTarget.id, details);
+            setSkipTargetId(null);
+          }}
+          onSkipWithoutReason={() => {
+            handleDismiss(skipTarget.id);
+            setSkipTargetId(null);
+          }}
+          onCancel={() => setSkipTargetId(null)}
         />
       )}
 

@@ -103,7 +103,7 @@ type Muscle =
 
 ### Exercise (in-session and historical)
 
-`Exercise` is used inside both `ActiveSession` and `WorkoutSession`. It includes in-session tracking fields (`completed`, `dismissed`, `completedAt`, `loggedSets`) that `PlanExercise` does not have.
+`Exercise` is used inside both `ActiveSession` and `WorkoutSession`. It includes in-session tracking fields (`completed`, `dismissed`, `skipReason`, `skipNote`, `completedAt`, `loggedSets`) that `PlanExercise` does not have.
 
 ```ts
 interface LoggedSet {
@@ -112,6 +112,8 @@ interface LoggedSet {
   seconds?: number; // present for time-based sets (e.g. plank); weight/reps are 0
   loggedAt: string; // ISO timestamp
 }
+
+type SkipReason = 'pain' | 'equipment-broken' | 'equipment-busy' | 'fatigue' | 'time' | 'other';
 
 interface Exercise {
   id: string;
@@ -126,6 +128,8 @@ interface Exercise {
   muscle?: Muscle;
   completed?: boolean;
   dismissed?: boolean;
+  skipReason?: SkipReason; // why the exercise was skipped; only meaningful when dismissed
+  skipNote?: string; // user note on the skip, trimmed, 1–200 chars; only meaningful when dismissed
   completedAt?: string;
   loggedSets?: LoggedSet[];
 }
@@ -138,6 +142,7 @@ interface Exercise {
 - `type === 'sets-duration'` ⇒ both `sets` and `duration` present.
 - `type === 'sets-reps'` ⇒ `sets` plus either `reps` or `repsPerSet`.
 - `loggedSets[].seconds` is only set for time-based sets where `weight === 0 && reps === 0`.
+- `skipReason` and `skipNote` are only meaningful when `dismissed === true`. Un-skipping an exercise (live undo or history edit mode) removes both keys rather than setting them to `undefined`. Both are optional; a skip may carry a reason, a note, both, or neither. Reasons are stable ids — localized labels live in the `skip_reason_*` locale keys.
 
 ### Plan models
 
@@ -326,7 +331,7 @@ interface ExportPayload {
 
 Notes:
 
-- `schemaVersion` must be bumped whenever the payload shape changes in a non-additive way. Adding `planDaySnapshot` / `evaluation` / `debrief` to `WorkoutSession` is additive and optional — exported sessions carry them when present, and `schemaVersion` stays `'1'`.
+- `schemaVersion` must be bumped whenever the payload shape changes in a non-additive way. Adding `planDaySnapshot` / `evaluation` / `debrief` to `WorkoutSession`, and `skipReason` / `skipNote` to `Exercise`, is additive and optional — exported sessions carry them when present, and `schemaVersion` stays `'1'`. No migration is needed for the skip fields: older sessions simply lack them.
 - Profile fields are read from their individual `wst_user_*` keys at export time and bundled into the `profile` object.
 - The LLM config, theme, locale, achievements, hidden exercises, consent, the AI-debrief toggle (`wst_ai_debrief_enabled`), and migration flags are intentionally **excluded** from the export.
 

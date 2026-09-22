@@ -23,6 +23,10 @@ export interface LoggedSet {
   loggedAt: string; // ISO timestamp
 }
 
+/** Why an exercise was skipped mid-session. Stable ids; labels live in the locales. */
+export type SkipReason =
+  'pain' | 'equipment-broken' | 'equipment-busy' | 'fatigue' | 'time' | 'other';
+
 export interface Exercise {
   id: string;
   name: string;
@@ -36,6 +40,8 @@ export interface Exercise {
   muscle?: Muscle;
   completed?: boolean; // in-session tracking
   dismissed?: boolean; // in-session tracking
+  skipReason?: SkipReason; // only meaningful when dismissed === true
+  skipNote?: string; // trimmed, 1–200 chars; only meaningful when dismissed === true
   completedAt?: string; // ISO timestamp set when exercise is marked complete
   loggedSets?: LoggedSet[]; // per-set log for sets-reps exercises
 }

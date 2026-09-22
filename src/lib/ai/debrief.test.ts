@@ -4,8 +4,9 @@ const callLlm = vi.fn();
 vi.mock('./client', () => ({ callLlm: (...args: unknown[]) => callLlm(...args) }));
 
 import { generateSessionDebrief } from './debrief';
+import { SESSION_DEBRIEF_SYSTEM_PROMPT } from './prompts/session-debrief';
 import type { AiContext } from './context';
-import type { LlmConfig, WorkoutSession } from '../types';
+import type { Exercise, LlmConfig, WorkoutSession } from '../types';
 
 const config: LlmConfig = { provider: 'openai', apiKey: 'sk-test', model: 'gpt-4o-mini' };
 
@@ -113,5 +114,54 @@ describe('generateSessionDebrief', () => {
     expect(userMessage).toContain('overall: no-plan');
     expect(userMessage).toContain('total volume: 5000 kg');
     expect(userMessage).toContain('session rating: 4/5');
+  });
+
+  describe('skipped exercises', () => {
+    const ex = (over: Partial<Exercise>): Exercise => ({
+      id: over.name ?? 'x',
+      name: 'x',
+      type: 'sets-reps',
+      sets: 3,
+      reps: 8,
+      ...over,
+    });
+
+    async function userMessageFor(exercises: Exercise[]): Promise<string> {
+      callLlm.mockResolvedValue(JSON.stringify({ debrief: 'ok.' }));
+      await generateSessionDebrief(config, ctx(), finished({ exercises }));
+      return callLlm.mock.calls[0][2] as string;
+    }
+
+    it('lists a pain skip with its reason and note', async () => {
+      const msg = await userMessageFor([
+        ex({
+          name: 'Overhead Press',
+          dismissed: true,
+          skipReason: 'pain',
+          skipNote: 'right shoulder',
+        }),
+        ex({ name: 'Bench Press', completed: true }),
+      ]);
+      expect(msg).toContain('- skipped: Overhead Press (pain/injury — "right shoulder")');
+      expect(msg).not.toContain('Bench Press (');
+    });
+
+    it('lists a skip without a reason', async () => {
+      const msg = await userMessageFor([
+        ex({ name: 'Lunges', dismissed: true }),
+        ex({ name: 'Cable Row', dismissed: true, skipReason: 'equipment-broken' }),
+      ]);
+      expect(msg).toContain('- skipped: Lunges (no reason), Cable Row (equipment broken)');
+    });
+
+    it('omits the skipped line when nothing was skipped', async () => {
+      const msg = await userMessageFor([ex({ name: 'Squat', completed: true })]);
+      expect(msg).not.toContain('skipped:');
+    });
+
+    it('uses a system prompt that forbids medical advice', () => {
+      expect(SESSION_DEBRIEF_SYSTEM_PROMPT).toMatch(/pain or injury/);
+      expect(SESSION_DEBRIEF_SYSTEM_PROMPT).toMatch(/Do NOT diagnose/);
+    });
   });
 });
