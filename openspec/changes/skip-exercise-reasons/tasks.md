@@ -1,8 +1,8 @@
 ## 1. Types, helpers, and locales
 
-- [ ] 1.1 Add the `SkipReason` union and the optional `Exercise.skipReason` / `Exercise.skipNote` fields to `src/lib/types.ts` (design D1). Verify `npx tsc --noEmit` passes.
-- [ ] 1.2 Create `src/lib/skipReasons.ts` with `SKIP_REASONS`, `skipReasonLabel`, `normalizeSkipNote`, and `hasPainStreak` (design D4). Verify with unit tests in `src/lib/skipReasons.test.ts`. The tests cover: note trim, empty, and 200-char cap; a pain streak of 2; a streak broken by a completed appearance; a mixed-reason pair; a single appearance; a case-insensitive name match; and newest-first ordering by `completedAt`.
-- [ ] 1.3 Add locale keys to `src/locales/en.json`, `de.json`, and `hu.json`. Add `skip_reason_<id>` for each reason, plus the sheet title, note placeholder, Skip, Skip without reason, Save, Cancel, Add reason, and pain streak hint text. Verify the locale parity test passes (`npm run test`) and `npx tsc --noEmit` passes.
+- [x] 1.1 Add the `SkipReason` union and the optional `Exercise.skipReason` / `Exercise.skipNote` fields to `src/lib/types.ts` (design D1). Verify `npx tsc --noEmit` passes.
+- [x] 1.2 Create `src/lib/skipReasons.ts` with `SKIP_REASONS`, `skipReasonLabel`, `normalizeSkipNote`, and `hasPainStreak` (design D4). Verify with unit tests in `src/lib/skipReasons.test.ts`. The tests cover: note trim, empty, and 200-char cap; a pain streak of 2; a streak broken by a completed appearance; a mixed-reason pair; a single appearance; a case-insensitive name match; and newest-first ordering by `completedAt`.
+- [x] 1.3 Add locale keys to `src/locales/en.json`, `de.json`, and `hu.json`. Add `skip_reason_<id>` for each reason, plus the sheet title, note placeholder, Skip, Skip without reason, Save, Cancel, Add reason, and pain streak hint text. Verify `npx tsc --noEmit` passes. `translations: Record<Locale, Translations>` enforces key parity, and `skipReasons.test.ts` checks that every reason has a label.
 
 ## 2. Skip sheet and live session flow
 
