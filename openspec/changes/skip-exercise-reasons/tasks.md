@@ -23,6 +23,6 @@
 
 ## 5. Docs and verification
 
-- [ ] 5.1 Update `docs/data-structure.md` with `SkipReason`, `Exercise.skipReason`, `Exercise.skipNote`, the "only meaningful when `dismissed`" invariant, and a note that no migration or `schemaVersion` bump is needed. Verify the doc lists both fields next to `dismissed`.
-- [ ] 5.2 Run `npm run lint`, `npx tsc --noEmit`, and `npm run test`. All must pass. Then run a Playwright end-to-end check: start a session, skip one exercise with a reason and one without, finish, open history, and confirm both render correctly and the debrief request includes the skipped line.
-- [ ] 5.3 Fix the structure of `openspec/specs/session-history-editing/spec.md` before archiving: add a `## Purpose` section and wrap the existing requirements under `## Requirements`. Without this, archive refuses the delta. Verify `openspec validate --strict` shows no "Archive would refuse" info for `session-history-editing`.
+- [x] 5.1 Update `docs/data-structure.md` with `SkipReason`, `Exercise.skipReason`, `Exercise.skipNote`, the "only meaningful when `dismissed`" invariant, and a note that no migration or `schemaVersion` bump is needed. Verify the doc lists both fields next to `dismissed`.
+- [x] 5.2 Run `npm run lint`, `npx tsc --noEmit`, and `npm run test`. All must pass. Then run a Playwright end-to-end check: start a session, skip one exercise with a reason and one without, finish, open history, and confirm both render correctly and the debrief request includes the skipped line.
+- [x] 5.3 Fix the structure of `openspec/specs/session-history-editing/spec.md` before archiving: add a `## Purpose` section and wrap the existing requirements under `## Requirements`. Without this, archive refuses the delta. Verify `openspec validate --strict` shows no "Archive would refuse" info for `session-history-editing`.

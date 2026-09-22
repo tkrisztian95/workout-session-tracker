@@ -1,3 +1,11 @@
+# session-history-editing Specification
+
+## Purpose
+
+Lets users correct a completed session after the fact — toggle exercises between completed and skipped, adjust logged execution, add or remove exercises, and change duration — through an explicit edit mode whose changes are saved or discarded as a whole.
+
+## Requirements
+
 ### Requirement: Session detail provides an edit mode toggle
 
 The system SHALL display an edit button on the session detail view that enters edit mode, and provide Save and Cancel actions to exit edit mode.
