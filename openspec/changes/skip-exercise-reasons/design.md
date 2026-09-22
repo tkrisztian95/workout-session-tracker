@@ -57,7 +57,7 @@ Props: `exerciseName`, `initialReason?`, `initialNote?`, `mode: 'skip' | 'edit'`
 - `skip` mode (live session): primary button **Skip**, secondary **Skip without reason**. Backdrop tap and Escape cancel.
 - `edit` mode (history): primary **Save**, secondary **Cancel**. No "without reason" action; clearing is done by deselecting the chip and emptying the note.
 
-The chips use `role="radiogroup"` / `role="radio"` with `aria-checked`, since a second tap on the selected chip clears it. Tap targets are at least 44px. The note is a `<textarea maxLength={200}>` with a character counter near the limit. Run `/ui-ux-pro-max` for the chip and sheet styling before building it.
+The chips are a labelled `role="group"` of toggle buttons with `aria-pressed`. A radio group was rejected: a second tap on the selected chip clears it, which radio semantics don't allow, and toggle buttons need no roving-tabindex arrow-key handling. Tap targets are at least 44px. The note is a `<textarea maxLength={200}>` with a character counter near the limit. Run `/ui-ux-pro-max` for the chip and sheet styling before building it.
 
 ### D4. Pure helpers in `src/lib/skipReasons.ts`
 
@@ -66,7 +66,7 @@ The chips use `role="radiogroup"` / `role="radio"` with `aria-checked`, since a 
 - `normalizeSkipNote(raw): string | undefined`: trim, cap at 200, empty becomes `undefined`.
 - `hasPainStreak(sessions, exerciseName, streak = 2): boolean`: walks sessions newest-first by `completedAt`. It takes the first `streak` appearances of an exercise whose `name.trim().toLowerCase()` matches, and returns `true` only if there are exactly `streak` appearances and each has `dismissed && skipReason === 'pain'`. If one session has the same exercise twice, the first match in that session counts once.
 
-`SessionView` computes the hint for the active exercise with `useMemo` over `getSessions()` and the active exercise name, and passes `painStreak` to `ExerciseCard`. The card renders it in the same info-box style as `scalingNote`, using a warning tone.
+`SessionView` reads `getSessions()` once into state (saved history doesn't change mid-session; the React Compiler rejects a `useMemo` over an impure read), computes the hint for the active exercise, and passes `painStreak` to `ExerciseCard`. The card renders it in the same info-box style as `scalingNote`, using a warning tone.
 
 _Alternative:_ store a per-exercise pain counter. Rejected: that is derived state that can drift when the user edits history. Scanning history is cheap for localStorage-sized data and always stays correct.
 
