@@ -25,6 +25,8 @@ import {
 } from '@/components/ui';
 import AddExerciseModal from '@/components/AddExerciseModal';
 import HistoryExerciseEditor from '@/components/HistoryExerciseEditor';
+import SkipExerciseSheet from '@/components/SkipExerciseSheet';
+import { applySkip, clearSkip } from '@/lib/skipReasons';
 
 type DetailTab = 'exercises' | 'timeline' | 'comparison';
 
@@ -35,6 +37,8 @@ interface ExercisesTabContentProps {
   displaySkipped: Exercise[];
   isEditing: boolean;
   updateDraftExercise: (id: string, patch: Partial<Exercise>) => void;
+  replaceDraftExercise: (id: string, update: (ex: Exercise) => Exercise) => void;
+  setSkipReasonExercise: (ex: Exercise) => void;
   removeDraftExercise: (id: string) => void;
   setEditingExercise: (ex: Exercise) => void;
   setIsAddModalOpen: (open: boolean) => void;
@@ -47,6 +51,8 @@ function ExercisesTabContent({
   displaySkipped,
   isEditing,
   updateDraftExercise,
+  replaceDraftExercise,
+  setSkipReasonExercise,
   removeDraftExercise,
   setEditingExercise,
   setIsAddModalOpen,
@@ -83,8 +89,9 @@ function ExercisesTabContent({
               isEditing={isEditing}
               dismissed
               onToggleComplete={() =>
-                updateDraftExercise(exercise.id, { dismissed: false, completed: false })
+                replaceDraftExercise(exercise.id, (ex) => ({ ...clearSkip(ex), completed: false }))
               }
+              onEditSkipReason={() => setSkipReasonExercise(exercise)}
               onEdit={() => setEditingExercise(exercise)}
               onRemove={() => removeDraftExercise(exercise.id)}
             />
@@ -128,6 +135,7 @@ export default function SessionDetailPage() {
   const [draft, setDraft] = useState<WorkoutSession | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [skipReasonExercise, setSkipReasonExercise] = useState<Exercise | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<DetailTab>('exercises');
 
@@ -212,6 +220,14 @@ export default function SessionDetailPage() {
     });
   }
 
+  function replaceDraftExercise(exerciseId: string, update: (ex: Exercise) => Exercise) {
+    if (!draft) return;
+    setDraft({
+      ...draft,
+      exercises: draft.exercises.map((ex) => (ex.id === exerciseId ? update(ex) : ex)),
+    });
+  }
+
   const displaySession = isEditing && draft ? draft : session;
   const mins = durationMinutes(displaySession.startedAt, displaySession.completedAt);
   const displayCompleted = displaySession.exercises.filter((e) => e.completed && !e.dismissed);
@@ -230,6 +246,8 @@ export default function SessionDetailPage() {
           displaySkipped={displaySkipped}
           isEditing={false}
           updateDraftExercise={updateDraftExercise}
+          replaceDraftExercise={replaceDraftExercise}
+          setSkipReasonExercise={setSkipReasonExercise}
           removeDraftExercise={removeDraftExercise}
           setEditingExercise={setEditingExercise}
           setIsAddModalOpen={setIsAddModalOpen}
@@ -284,6 +302,8 @@ export default function SessionDetailPage() {
             displaySkipped={displaySkipped}
             isEditing={isEditing}
             updateDraftExercise={updateDraftExercise}
+            replaceDraftExercise={replaceDraftExercise}
+            setSkipReasonExercise={setSkipReasonExercise}
             removeDraftExercise={removeDraftExercise}
             setEditingExercise={setEditingExercise}
             setIsAddModalOpen={setIsAddModalOpen}
@@ -328,6 +348,20 @@ export default function SessionDetailPage() {
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExercise}
       />
+
+      {skipReasonExercise && (
+        <SkipExerciseSheet
+          mode="edit"
+          exerciseName={skipReasonExercise.name}
+          initialReason={skipReasonExercise.skipReason}
+          initialNote={skipReasonExercise.skipNote}
+          onConfirm={(details) => {
+            replaceDraftExercise(skipReasonExercise.id, (ex) => applySkip(ex, details));
+            setSkipReasonExercise(null);
+          }}
+          onCancel={() => setSkipReasonExercise(null)}
+        />
+      )}
 
       {editingExercise && (
         <HistoryExerciseEditor

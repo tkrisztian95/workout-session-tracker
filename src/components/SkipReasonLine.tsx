@@ -16,12 +16,12 @@ export default function SkipReasonLine({
   if (!exercise.dismissed || (!exercise.skipReason && !exercise.skipNote)) return null;
 
   return (
-    <p className={`text-xs leading-snug text-secondary ${className}`}>
+    <span className={`block text-xs leading-snug text-secondary ${className}`}>
       {exercise.skipReason && (
         <span className="font-semibold">{skipReasonLabel(exercise.skipReason, t)}</span>
       )}
       {exercise.skipReason && exercise.skipNote && <span className="text-muted"> · </span>}
       {exercise.skipNote && <span className="italic break-words">{exercise.skipNote}</span>}
-    </p>
+    </span>
   );
 }

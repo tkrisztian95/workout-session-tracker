@@ -13,8 +13,8 @@
 
 ## 3. History detail and edit mode
 
-- [ ] 3.1 Show the reason label and note under skipped exercises in read mode of `src/app/history/[id]/page.tsx`. Verify with Playwright on a finished session that has a reasoned skip.
-- [ ] 3.2 In edit mode, add the reason affordance on skipped exercises. It opens `SkipExerciseSheet` in `edit` mode and patches the draft through `updateDraftExercise`. The skipped-to-completed toggle also drops `skipReason` / `skipNote` (design D6). Verify with Playwright: add a reason to a legacy skip and save, it shows in read mode; change a reason then Cancel, the original is kept; toggle to completed and save, the reason is gone.
+- [x] 3.1 Show the reason label and note under skipped exercises in read mode of `src/app/history/[id]/page.tsx`. Verify with Playwright on a finished session that has a reasoned skip.
+- [x] 3.2 In edit mode, add the reason affordance on skipped exercises. It opens `SkipExerciseSheet` in `edit` mode and patches the draft through `updateDraftExercise`. The un-skip toggle also drops `skipReason` / `skipNote` (design D6). In the current code it moves the exercise to not-completed, not completed. Verify with Playwright: add a reason to a legacy skip and save, it shows in read mode; change a reason then Cancel, the original is kept; un-skip and save, the reason is gone.
 
 ## 4. AI debrief
 

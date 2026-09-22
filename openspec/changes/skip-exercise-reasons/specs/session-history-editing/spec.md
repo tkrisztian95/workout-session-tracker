@@ -2,7 +2,7 @@
 
 ### Requirement: Users can toggle exercise completion state in edit mode
 
-The system SHALL allow users to toggle each exercise between completed and dismissed states while in edit mode. Toggling a dismissed exercise to completed SHALL clear its skip reason and skip note in the draft.
+The system SHALL allow users to toggle each exercise between completed and dismissed states while in edit mode. Toggling a dismissed exercise out of the skipped state SHALL clear its skip reason and skip note in the draft.
 
 #### Scenario: Toggling a completed exercise to dismissed
 
@@ -14,9 +14,9 @@ The system SHALL allow users to toggle each exercise between completed and dismi
 - **WHEN** the user is in edit mode and taps a dismissed exercise's state indicator
 - **THEN** the exercise is marked as completed in the draft
 
-#### Scenario: Toggling to completed clears the skip reason
+#### Scenario: Un-skipping clears the skip reason
 
-- **WHEN** the user is in edit mode and toggles a dismissed exercise with a skip reason and note to completed
+- **WHEN** the user is in edit mode and toggles a dismissed exercise with a skip reason and note out of the skipped state
 - **THEN** the draft exercise has no skip reason and no skip note
 
 ## ADDED Requirements

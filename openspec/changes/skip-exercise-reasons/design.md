@@ -82,7 +82,7 @@ Reasons use the stable English id text, not the UI locale, so the model input do
 
 ### D6. History edit mode
 
-In edit mode, each skipped exercise gets a small "reason" affordance (a pencil or tag icon next to the reason line, or "Add reason" when none is set). It opens `SkipExerciseSheet` in `edit` mode and writes `updateDraftExercise(id, { skipReason, skipNote })`. The existing skipped-to-completed toggle patch also removes both fields. Save and Cancel follow the existing draft flow, so no new persistence path is needed.
+In edit mode, each skipped exercise gets a small "reason" affordance (a pencil or tag icon next to the reason line, or "Add reason" when none is set). It opens `SkipExerciseSheet` in `edit` mode and writes `updateDraftExercise(id, { skipReason, skipNote })`. The existing un-skip toggle (which sets `dismissed: false, completed: false`) also removes both fields via `clearSkip`. Save and Cancel follow the existing draft flow, so no new persistence path is needed.
 
 ## Risks / Trade-offs
 
