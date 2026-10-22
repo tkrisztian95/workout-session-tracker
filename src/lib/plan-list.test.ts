@@ -9,6 +9,7 @@ import {
   getPlanLastFollowedAt,
   getPlanPlannedOccurrences,
   getPlanUniqueExerciseCount,
+  getScheduledPlanDays,
   organizePlans,
   type PlanFilters,
   type PlanQuery,
@@ -373,5 +374,44 @@ describe('countActiveFilters', () => {
         trainingDays: null,
       }),
     ).toBe(3);
+  });
+});
+
+describe('getScheduledPlanDays', () => {
+  function dayOn(id: string, name: string, weekdays: number[]): PlanDay {
+    return { id, name, weekdays, coreExercises: [], optionalExercises: [] };
+  }
+
+  it('returns plan days scheduled on the given weekday', () => {
+    const p = plan({
+      id: 'p1',
+      name: 'PPL',
+      days: [dayOn('d1', 'Push', [1, 4]), dayOn('d2', 'Pull', [2, 5])],
+    });
+    const monday = getScheduledPlanDays([p], 1);
+    expect(monday).toHaveLength(1);
+    expect(monday[0].day.id).toBe('d1');
+    expect(monday[0].plan.id).toBe('p1');
+
+    expect(getScheduledPlanDays([p], 3)).toHaveLength(0);
+  });
+
+  it('excludes completed plans', () => {
+    const active = plan({ id: 'a', name: 'A', days: [dayOn('d1', 'Day', [1])] });
+    const done = plan({
+      id: 'b',
+      name: 'B',
+      status: 'completed',
+      days: [dayOn('d2', 'Day', [1])],
+    });
+    const result = getScheduledPlanDays([active, done], 1);
+    expect(result).toHaveLength(1);
+    expect(result[0].plan.id).toBe('a');
+  });
+
+  it('aggregates scheduled days across multiple plans', () => {
+    const p1 = plan({ id: 'p1', name: 'One', days: [dayOn('d1', 'Legs', [6])] });
+    const p2 = plan({ id: 'p2', name: 'Two', days: [dayOn('d2', 'Cardio', [6])] });
+    expect(getScheduledPlanDays([p1, p2], 6)).toHaveLength(2);
   });
 });
