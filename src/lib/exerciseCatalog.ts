@@ -112,6 +112,47 @@ export function catalogSearchText(id: string): string {
 }
 
 /**
+ * Reverse index from a normalized exercise name (across every locale, including
+ * aliases) to its catalog id. Stored exercise names are captured as a localized
+ * string at creation time, so this lets such a name be matched back to its
+ * catalog entry and re-localized into the active locale. First-seen wins.
+ */
+const NAME_TO_CATALOG_ID: Map<string, string> = (() => {
+  const map = new Map<string, string>();
+  for (const t of Object.values(translations)) {
+    const names = t.catalog_exercise_names as Record<string, string>;
+    const aliases = t.catalog_exercise_aliases as Record<string, string[]>;
+    for (const entry of EXERCISE_CATALOG) {
+      const localized = names[entry.id];
+      if (localized) {
+        const key = localized.trim().toLowerCase();
+        if (key && !map.has(key)) map.set(key, entry.id);
+      }
+      for (const alias of aliases[entry.id] ?? []) {
+        const key = alias.trim().toLowerCase();
+        if (key && !map.has(key)) map.set(key, entry.id);
+      }
+    }
+  }
+  return map;
+})();
+
+/** Catalog id for a stored exercise name, or undefined when it isn't a catalog entry. */
+export function catalogIdForName(name: string): string | undefined {
+  return NAME_TO_CATALOG_ID.get(name.trim().toLowerCase());
+}
+
+/**
+ * Re-localize a stored exercise name into the active locale. If the name matches
+ * a catalog entry in any locale (by name or alias), returns the active-locale
+ * catalog name; otherwise returns the original custom name unchanged.
+ */
+export function localizeExerciseName(t: Translations, name: string): string {
+  const id = catalogIdForName(name);
+  return id ? catalogName(t, id) : name;
+}
+
+/**
  * Group the catalog by muscle group in canonical `ALL_MUSCLE_GROUPS` order,
  * preserving catalog order within each group. Groups with no entries are
  * omitted. Used by the browse screen.

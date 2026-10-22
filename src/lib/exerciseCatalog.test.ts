@@ -7,8 +7,10 @@ import type { MuscleGroup } from './muscles';
 import {
   EXERCISE_CATALOG,
   catalogByGroup,
+  catalogIdForName,
   catalogSearchText,
   filterCatalogByGroup,
+  localizeExerciseName,
   type Difficulty,
 } from './exerciseCatalog';
 
@@ -153,5 +155,33 @@ describe('filterCatalogByGroup', () => {
     const entries = result.flatMap((g) => g.entries);
     expect(entries.every((e) => e.difficulty === 'beginner')).toBe(true);
     expect(entries.some((e) => e.id === 'chest-press-machine')).toBe(true);
+  });
+});
+
+describe('catalogIdForName', () => {
+  it('resolves a stored name from any locale back to its catalog id', () => {
+    expect(catalogIdForName('Elliptical')).toBe('elliptical'); // en
+    expect(catalogIdForName('Crosstrainer')).toBe('elliptical'); // de
+    expect(catalogIdForName('Elliptikus')).toBe('elliptical'); // hu
+  });
+
+  it('is case- and whitespace-insensitive', () => {
+    expect(catalogIdForName('  treadmill  ')).toBe('treadmill');
+  });
+
+  it('returns undefined for custom (non-catalog) names', () => {
+    expect(catalogIdForName('My homemade contraption')).toBeUndefined();
+  });
+});
+
+describe('localizeExerciseName', () => {
+  it('re-localizes a catalog name into the active locale', () => {
+    expect(localizeExerciseName(de, 'Treadmill')).toBe('Laufband'); // en stored → de UI
+    expect(localizeExerciseName(en, 'Laufband')).toBe('Treadmill'); // de stored → en UI
+    expect(localizeExerciseName(hu, 'Treadmill')).toBe('Futópad');
+  });
+
+  it('leaves custom names unchanged', () => {
+    expect(localizeExerciseName(de, 'My homemade contraption')).toBe('My homemade contraption');
   });
 });
